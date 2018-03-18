@@ -1,20 +1,22 @@
 type Query {
-  author(firstName: String, lastName: String): Author
-  allAuthors: [Author]
-  getFortuneCookie: String # we'll use this later
+  getFortuneCookie: String
+  light(name: String): Light
+  allLights: [Light]
+  identify: Light
 }
 
-type Author {
-  id: Int
-  firstName: String
-  lastName: String
-  posts: [Post]
-}
+# type Mutation { # Need to fix this
+#   setPower: 
+#   setBrightness:
+#   setSaturation:
+#   setHue:
+# }
 
-type Post {
+type Light {
   id: Int
-  title: String
-  text: String
-  views: Int
-  author: Author
+  name: String # name of accessory
+  power: Boolean, # curent power status
+  brightness: Int, # current brightness
+  hue: Int, # current hue
+  saturation: Int, # current saturation
 }

@@ -1,17 +1,15 @@
 import casual from "casual";
 
 const mocks = {
-  String: () => "It works!",
+  String: () => "Its a light!",
   Query: () => ({
-    author: (root, args) => {
-      return { firstName: args.firstName, lastName: args.lastName };
+    light: (root, args) => {
+      return { name: args.name };
     }
   }),
-  Author: () => ({
-    firstName: () => casual.first_name,
-    lastName: () => casual.last_name
-  }),
-  Post: () => ({ title: casual.title, text: casual.sentences(3) })
+  Light: () => ({
+    name: () => casual.first_name,
+  })
 };
 
 export default mocks;

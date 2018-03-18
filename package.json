@@ -21,17 +21,23 @@
     "babel-preset-env": "^1.6.1",
     "husky": "^0.14.3",
     "lint-staged": "^7.0.0",
-    "nodemon": "^1.12.1"
+    "nodemon": "^1.12.1",
+    "prettier": "^1.11.1"
   },
   "lint-staged": {
-    "src/**/*.{js,json,graphql}": ["prettier --single-quote --write", "git add"]
+    "src/**/*.{js,json,graphql}": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "scripts": {
     "precommit": "lint-staged",
     "start": "nodemon ./server.js --exec babel-node"
   },
   "babel": {
-    "presets": ["env"]
+    "presets": [
+      "env"
+    ]
   },
   "main": "server.js"
 }

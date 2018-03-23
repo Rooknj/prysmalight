@@ -1,22 +1,35 @@
+# This schema allows the following queries:
 type Query {
   getFortuneCookie: String
-  light(name: String): Light
-  allLights: [Light]
-  identify: Light
+  #identify: Light
+  light(lightId: Int!): Light
+  lights: [Light]
+}
+# This schema allows the following mutations:
+
+type Mutation {
+  setName(lightId: Int!, name: String!): Light 
+  setPower(lightId: Int!, power: Boolean!): Light 
+  setBrightness(lightId: Int!, brightness: Int!): Light 
+  setHue(lightId: Int!, hue: Int!): Light 
+  setSaturation(lightId: Int!, saturation: Int!): Light 
+  addLight(newLight: LightInput!): Light
 }
 
-# type Mutation { # Need to fix this
-#   setPower: 
-#   setBrightness:
-#   setSaturation:
-#   setHue:
-# }
-
 type Light {
-  id: Int
+  id: Int!
   name: String # name of accessory
   power: Boolean, # curent power status
   brightness: Int, # current brightness
   hue: Int, # current hue
   saturation: Int, # current saturation
+}
+
+input LightInput {
+  id: Int!
+  name: String! # name of accessory
+  power: Boolean!, # curent power status
+  brightness: Int!, # current brightness
+  hue: Int!, # current hue
+  saturation: Int!, # current saturation
 }

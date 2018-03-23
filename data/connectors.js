@@ -1,5 +1,5 @@
 import fetch from "node-fetch"; // for fetching from rest APIs
-import mqtt from "mqtt"; // for connecting to mqtt
+import mqtt from "async-mqtt"; // for connecting to mqtt
 
 // Call to remote REST API
 const FortuneCookie = {
@@ -12,17 +12,22 @@ const FortuneCookie = {
   }
 };
 
-// Call to MQTT servers
-// let client = mqtt.connect("tcp://localhost:1883");
+//Call to MQTT servers
+let client = mqtt.connect("tcp://localhost:1883");
 
-// client.on("connect", () => {
-//   client.subscribe("presence");
-//   client.publish("presence", "Hello mqtt");
-// });
-
-// client.on("message", (topic, message) => {
-//   console.log(message.toString());
-//   client.end();
-// });
+client.on("connect", async () => {
+  console.log("Starting");
+  try {
+    await client.publish("wow/so/cool", "It works!");
+    // This line doesn't run until the server responds to the publish
+    await client.end();
+    // This line doesn't run until the client has disconnected without error
+    console.log("Done");
+  } catch (e) {
+    // Do something about it!
+    console.log(e.stack);
+    process.exit();
+  }
+});
 
 export { FortuneCookie };

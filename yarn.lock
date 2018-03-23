@@ -233,6 +233,13 @@ async-limiter@~1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.intuit.net/a/async-limiter/_attachments/async-limiter-1.0.0.tgz#78faed8c3d074ab81f22b4e985d79e8738f720f8"
 
+async-mqtt@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.npmjs.intuit.net/a/async-mqtt/_attachments/async-mqtt-1.0.1.tgz#b199348776e20009dd8af803c1347a3069cd8c58"
+  dependencies:
+    in-array "^0.1.2"
+    mqtt "^2.3.1"
+
 asynckit@^0.4.0:
   version "0.4.0"
   resolved "https://registry.npmjs.intuit.net/a/asynckit/_attachments/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
@@ -1977,6 +1984,10 @@ imurmurhash@^0.1.4:
   version "0.1.4"
   resolved "https://registry.npmjs.intuit.net/i/imurmurhash/_attachments/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
 
+in-array@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.npmjs.intuit.net/i/in-array/_attachments/in-array-0.1.2.tgz#1a2683009177ab914ade0620a35c5039851f3715"
+
 indent-string@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.intuit.net/i/indent-string/_attachments/indent-string-2.1.0.tgz#8e2d48348742121b4a8218b7a137e9a52049dc80"
@@ -2808,7 +2819,7 @@ mqtt-packet@^5.5.0:
     process-nextick-args "^2.0.0"
     safe-buffer "^5.1.0"
 
-mqtt@^2.16.0:
+mqtt@^2.3.1:
   version "2.16.0"
   resolved "https://registry.npmjs.intuit.net/m/mqtt/_attachments/mqtt-2.16.0.tgz#dfccb08c933d845d1f23c61168527076dc609265"
   dependencies:

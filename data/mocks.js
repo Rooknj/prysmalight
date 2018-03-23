@@ -1,14 +1,14 @@
 import casual from "casual";
 
 const mocks = {
-  String: () => "Its a light!",
-  Query: () => ({
-    light: (root, args) => {
-      return { name: args.name };
-    }
-  }),
+  String: () => "Fortune Cookie",
   Light: () => ({
+    id: () => casual.integer(0, 10),
     name: () => casual.first_name,
+    power: () => casual.boolean,
+    brightness: () => casual.integer(0, 100),
+    hue: () => casual.integer(0, 255),
+    saturation: () => casual.integer(0, 255)
   })
 };
 

@@ -1,5 +1,7 @@
 import fetch from "node-fetch"; // for fetching from rest APIs
-import mqtt from "async-mqtt"; // for connecting to mqtt
+import { connect } from 'mqtt';
+import { MQTTPubSub } from 'graphql-mqtt-subscriptions'; // for connecting to mqtt
+import { PubSub } from 'graphql-subscriptions';
 
 // Call to remote REST API
 const FortuneCookie = {
@@ -13,21 +15,18 @@ const FortuneCookie = {
 };
 
 //Call to MQTT servers
-let client = mqtt.connect("tcp://localhost:1883");
-
-client.on("connect", async () => {
-  console.log("Starting");
-  try {
-    await client.publish("wow/so/cool", "It works!");
-    // This line doesn't run until the server responds to the publish
-    await client.end();
-    // This line doesn't run until the client has disconnected without error
-    console.log("Done");
-  } catch (e) {
-    // Do something about it!
-    console.log(e.stack);
-    process.exit();
-  }
+const client = connect("tcp://localhost:1883", {
+  reconnectPeriod: 1000,
 });
 
-export { FortuneCookie };
+const onMQTTSubscribe = (subId, granted) => {
+  console.log(`Subscription with id ${subId} was given QoS of ${granted.qos}`);
+}
+const pubsub = new MQTTPubSub({client, onMQTTSubscribe});
+
+//test pubsub
+const pubsub2 = new PubSub();
+
+// ... Later in your code, when you want to publish data over subscription, run:
+
+export { FortuneCookie, pubsub, pubsub2 };

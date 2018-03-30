@@ -8,14 +8,18 @@
     "async-mqtt": "^1.0.1",
     "body-parser": "^1.18.2",
     "casual": "^1.5.19",
+    "cors": "^2.8.4",
     "express": "^4.16.2",
     "graphql": "^0.11.7",
     "graphql-import": "^0.4.5",
+    "graphql-mqtt-subscriptions": "^1.1.0",
+    "graphql-subscriptions": "^0.5.8",
     "graphql-tools": "^2.13.0",
     "lodash": "^4.17.5",
     "node-fetch": "^1.7.3",
     "sequelize": "^4.37.1",
-    "sqlite": "^2.9.1"
+    "sqlite": "^2.9.1",
+    "subscriptions-transport-ws": "^0.9.7"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

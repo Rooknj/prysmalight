@@ -5,15 +5,26 @@ type Query {
   light(lightId: Int!): Light
   lights: [Light]
 }
-# This schema allows the following mutations:
 
+# This schema allows the following mutations:
 type Mutation {
   setName(lightId: Int!, name: String!): Light 
   setPower(lightId: Int!, power: Boolean!): Light 
   setBrightness(lightId: Int!, brightness: Int!): Light 
   setHue(lightId: Int!, hue: Int!): Light 
   setSaturation(lightId: Int!, saturation: Int!): Light 
+  setLight(light: LightInput!): Light
   addLight(newLight: LightInput!): Light
+}
+
+type Subscription {
+  lightAdded: Light
+  lightChanged(lightId: Int!): Light
+}
+
+type Comment {
+    id: String
+    content: String
 }
 
 type Light {
@@ -27,9 +38,9 @@ type Light {
 
 input LightInput {
   id: Int!
-  name: String! # name of accessory
-  power: Boolean!, # curent power status
-  brightness: Int!, # current brightness
-  hue: Int!, # current hue
-  saturation: Int!, # current saturation
+  name: String # name of accessory
+  power: Boolean, # curent power status
+  brightness: Int, # current brightness
+  hue: Int, # current hue
+  saturation: Int, # current saturation
 }

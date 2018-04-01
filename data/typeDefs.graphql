@@ -13,8 +13,8 @@ type Mutation {
   setBrightness(lightId: Int!, brightness: Int!): Light 
   setHue(lightId: Int!, hue: Int!): Light 
   setSaturation(lightId: Int!, saturation: Int!): Light 
-  setLight(light: LightInput!): Light
-  addLight(newLight: LightInput!): Light
+  setLight(lightId: Int!, light: LightInput!): Light
+  addLight(newLight: newLightInput!): Light
 }
 
 type Subscription {
@@ -37,6 +37,14 @@ type Light {
 }
 
 input LightInput {
+  name: String # name of accessory
+  power: Boolean, # curent power status
+  brightness: Int, # current brightness
+  hue: Int, # current hue
+  saturation: Int, # current saturation
+}
+
+input newLightInput {
   id: Int!
   name: String # name of accessory
   power: Boolean, # curent power status

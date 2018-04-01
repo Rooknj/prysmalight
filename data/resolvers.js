@@ -1,4 +1,4 @@
-import { FortuneCookie, pubsub, pubsub2 } from "./connectors";
+import { FortuneCookie, pubsub } from "./connectors";
 import { withFilter } from "graphql-subscriptions";
 
 //example data
@@ -107,25 +107,25 @@ const resolvers = {
       light = Object.assign(light, { saturation });
       return light;
     },
-    setLight: (_, { light }) => {
-      let oldlight = lights.find(({ id }) => id === light.id);
-      oldlight = light;
-      pubsub2.publish("lightChanged", { lightChanged: light, lightId: light.id }); //push data to subscription
-      return lights.find(({ id }) => id === light.id);
+    setLight: (_, { lightId, light }) => {
+      let oldlight = lights.find(({ id }) => id === lightId);
+      oldlight = Object.assign(oldlight, light);
+      pubsub.publish("lightChanged", { lightChanged: oldlight, lightId: lightId }); //push data to subscription
+      return lights.find(({ id }) => id === lightId);
     },
     addLight: (_, { newLight }) => {
       lights.push(newLight);
-      pubsub2.publish("lightAdded", { lightAdded: newLight }); //push data to subscription
+      pubsub.publish("lightAdded", { lightAdded: newLight }); //push data to subscription
       return lights.find(({ id }) => id === newLight.id);
     }
   },
   Subscription: {
     lightAdded: {
-      subscribe: () => pubsub2.asyncIterator("lightAdded")
+      subscribe: () => pubsub.asyncIterator("lightAdded")
     },
     lightChanged: {
       subscribe: withFilter(
-        () => pubsub2.asyncIterator("lightChanged"),
+        () => pubsub.asyncIterator("lightChanged"),
         (payload, variables) => {
           console.log(payload.lightId, variables.lightId)
           return payload.lightId === variables.lightId;

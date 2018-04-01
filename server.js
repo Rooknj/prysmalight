@@ -24,13 +24,6 @@ const ws = createServer(graphQLServer);
 ws.listen(GRAPHQL_PORT, () => {
   console.log(`GraphiQL is now running on http://localhost:${GRAPHQL_PORT}/graphiql`);
   console.log(`GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}`);
-  new SubscriptionServer({
-    execute,
-    subscribe,
-    schema
-  }, {
-    server: ws,
-    path: '/subscriptions',
-  });
+  new SubscriptionServer({ execute, subscribe, schema }, { server: ws, path: '/subscriptions' });
   console.log(`GraphQL Subscription Server is now running on http://localhost:${GRAPHQL_PORT}/subscriptions`);
 });

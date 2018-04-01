@@ -1,8 +1,8 @@
 import fetch from "node-fetch"; // for fetching from rest APIs
 import { connect } from 'mqtt';
-import { MQTTPubSub } from 'graphql-mqtt-subscriptions'; // for connecting to mqtt
+import { MQTTPubSub, SubscriptionManager } from 'graphql-mqtt-subscriptions'; // for connecting to mqtt
 import { PubSub } from 'graphql-subscriptions';
-
+import schema from './schema';
 // Call to remote REST API
 const FortuneCookie = {
   getOne() {
@@ -22,11 +22,14 @@ const client = connect("tcp://localhost:1883", {
 const onMQTTSubscribe = (subId, granted) => {
   console.log(`Subscription with id ${subId} was given QoS of ${granted.qos}`);
 }
+
 const pubsub = new MQTTPubSub({client, onMQTTSubscribe});
+/*
+const subscriptionManager = new SubscriptionManager({
+  schema,
+  pubsub,
+  setupFunctions: {},
+});
+*/
 
-//test pubsub
-const pubsub2 = new PubSub();
-
-// ... Later in your code, when you want to publish data over subscription, run:
-
-export { FortuneCookie, pubsub, pubsub2 };
+export { FortuneCookie, pubsub };

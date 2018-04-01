@@ -3,9 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "apollo-boost": "^0.1.4",
+    "apollo-cache-inmemory": "^1.1.12",
+    "apollo-client": "^2.2.8",
+    "apollo-link-batch-http": "^1.2.1",
+    "apollo-link-http": "^1.5.3",
+    "apollo-link-ws": "^1.0.7",
+    "graphql": "^0.13.2",
+    "graphql-tag": "^2.8.0",
     "react": "^16.2.0",
+    "react-apollo": "^2.1.1",
     "react-dom": "^16.2.0",
-    "react-scripts": "1.1.1"
+    "react-scripts": "1.1.1",
+    "subscriptions-transport-ws": "^0.9.7"
   },
   "devDependencies": {
     "husky": "^0.14.3",

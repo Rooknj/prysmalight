@@ -18,32 +18,10 @@ const lights = [
     brightness: 100,
     hue: 23,
     saturation: 51
-  },
-  {
-    id: 3,
-    name: "Light 3",
-    power: true,
-    brightness: 50,
-    hue: 23,
-    saturation: 51
-  },
-  {
-    id: 4,
-    name: "Light 4",
-    power: true,
-    brightness: 100,
-    hue: 255,
-    saturation: 51
-  },
-  {
-    id: 5,
-    name: "Light 5",
-    power: true,
-    brightness: 100,
-    hue: 23,
-    saturation: 0
   }
 ];
+
+let currId = 3;
 
 const resolvers = {
   Query: {
@@ -114,9 +92,11 @@ const resolvers = {
       return lights.find(({ id }) => id === lightId);
     },
     addLight: (_, { newLight }) => {
-      lights.push(newLight);
-      pubsub.publish("lightAdded", { lightAdded: newLight }); //push data to subscription
-      return lights.find(({ id }) => id === newLight.id);
+      let lightToAdd = Object.assign(newLight, {id: currId})
+      currId += 1;
+      lights.push(lightToAdd);
+      pubsub.publish("lightAdded", { lightAdded: lightToAdd }); //push data to subscription
+      return lights.find(({ id }) => id === lightToAdd.id);
     }
   },
   Subscription: {

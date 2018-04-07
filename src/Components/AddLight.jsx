@@ -9,8 +9,7 @@ const LIGHTS_QUERY = gql`
             name
             power
             brightness
-            hue
-            saturation
+            color
         }
     }
 `;
@@ -22,8 +21,7 @@ const ADD_LIGHT_MUTATION = gql`
             name
             power
             brightness
-            hue
-            saturation
+            color
         }
     }
 `;
@@ -94,6 +92,7 @@ class AddLight extends React.Component {
     render() {
         return (
             <div>
+                <p>Add Light: </p>
                 <label htmlFor="addLight-name-input">Light Name: </label>
                 <input
                     name="name"

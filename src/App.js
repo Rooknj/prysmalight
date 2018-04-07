@@ -9,10 +9,11 @@ class App extends Component {
             <div className="App">
                 <header className="App-header">
                     <img src={logo} className="App-logo" alt="logo" />
-                    <h1 className="App-title">Welcome to React</h1>
+                    <h1 className="App-title">Welcome to Light App 2.0!</h1>
                 </header>
-                <p className="App-intro">Test</p>
-                <LightTool />
+                <div>
+                    <LightTool />
+                </div>
             </div>
         );
     }

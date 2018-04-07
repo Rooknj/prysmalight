@@ -10,9 +10,6 @@ class LightTool extends React.Component {
     render() {
         return (
             <div>
-                <AddLight />
-                <br />
-                <br />
                 <LightList />
             </div>
         );

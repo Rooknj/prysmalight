@@ -8,20 +8,15 @@ const lights = [
     name: "Light 1",
     power: true,
     brightness: 100,
-    hue: 23,
-    saturation: 51
-  },
-  {
-    id: 2,
-    name: "Light 2",
-    power: false,
-    brightness: 100,
-    hue: 23,
-    saturation: 51
+    color: {
+      hue: 120, //ranges 0-360
+      saturation: 1, //ranges 0-100%
+      lightness: 0.5 //ranges 0-100%
+    }
   }
 ];
 
-let currId = 3;
+let currId = lights.length + 1;
 
 const resolvers = {
   Query: {
@@ -30,61 +25,6 @@ const resolvers = {
     lights: () => lights
   },
   Mutation: {
-    setName: (_, { lightId, name }) => {
-      //Find the light in the array of lights
-      let light = lights.find(({ id }) => id === lightId);
-      //if the light wasnt found
-      if (!light) {
-        throw new Error(`Couldn't find light with id ${lightId}`);
-      }
-      //replace old light with new light
-      light = Object.assign(light, { name });
-      return light;
-    },
-    setPower: (_, { lightId, power }) => {
-      //Find the light in the array of lights
-      let light = lights.find(({ id }) => id === lightId);
-      //if the light wasnt found
-      if (!light) {
-        throw new Error(`Couldn't find light with id ${lightId}`);
-      }
-      //replace old light with new light
-      light = Object.assign(light, { power });
-      return light;
-    },
-    setBrightness: (_, { lightId, brightness }) => {
-      //Find the light in the array of lights
-      let light = lights.find(({ id }) => id === lightId);
-      //if the light wasnt found
-      if (!light) {
-        throw new Error(`Couldn't find light with id ${lightId}`);
-      }
-      //replace old light with new light
-      light = Object.assign(light, { brightness });
-      return light;
-    },
-    setHue: (_, { lightId, hue }) => {
-      //Find the light in the array of lights
-      let light = lights.find(({ id }) => id === lightId);
-      //if the light wasnt found
-      if (!light) {
-        throw new Error(`Couldn't find light with id ${lightId}`);
-      }
-      //replace old light with new light
-      light = Object.assign(light, { hue });
-      return light;
-    },
-    setSaturation: (_, { lightId, saturation }) => {
-      //Find the light in the array of lights
-      let light = lights.find(({ id }) => id === lightId);
-      //if the light wasnt found
-      if (!light) {
-        throw new Error(`Couldn't find light with id ${lightId}`);
-      }
-      //replace old light with new light
-      light = Object.assign(light, { saturation });
-      return light;
-    },
     setLight: (_, { lightId, light }) => {
       let oldlight = lights.find(({ id }) => id === lightId);
       oldlight = Object.assign(oldlight, light);

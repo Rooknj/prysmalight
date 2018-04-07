@@ -24,12 +24,5 @@ const onMQTTSubscribe = (subId, granted) => {
 }
 
 const pubsub = new MQTTPubSub({client, onMQTTSubscribe});
-/*
-const subscriptionManager = new SubscriptionManager({
-  schema,
-  pubsub,
-  setupFunctions: {},
-});
-*/
 
 export { FortuneCookie, pubsub };

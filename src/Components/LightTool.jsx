@@ -6,6 +6,7 @@ const LightTool = props => {
     return (
         <div>
             <LightList />
+            <AddLight />
         </div>
     );
 };

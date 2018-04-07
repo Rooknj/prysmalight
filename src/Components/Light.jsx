@@ -1,10 +1,10 @@
 import React from "react";
-import { graphql } from "react-apollo";
+import { Mutation } from "react-apollo";
 import gql from "graphql-tag";
 import { ChromePicker } from "react-color";
 
-const LIGHTS_QUERY = gql`
-    query Lights {
+const GET_LIGHTS = gql`
+    query getLights {
         lights {
             id
             name
@@ -19,7 +19,7 @@ const LIGHTS_QUERY = gql`
     }
 `;
 
-const SET_LIGHT_MUTATION = gql`
+const SET_LIGHT = gql`
     mutation setLight($lightId: Int!, $light: LightInput!) {
         setLight(lightId: $lightId, light: $light) {
             id
@@ -61,88 +61,76 @@ class Light extends React.Component {
         this.setState({ color: color.hsl });
     };
 
-    handleClick = () => {
-        // mutations give this component a mutate prop
-        // the mutate prop is a promise that sends the mutation and returns
-        // the data or an error
-        this.props
-            .mutate({
-                variables: {
-                    lightId: this.props.light.id,
-                    light: {
-                        name: this.state.name,
-                        power: this.state.power,
-                        brightness: this.state.brightness,
-                        color: {
-                            hue: this.state.color.h,
-                            saturation: this.state.color.s,
-                            lightness: this.state.color.l
-                        }
-                    }
-                }, // This is the set of variables you send with the mutation query
-                update: (proxy, { data: { setLight } }) => {
-                    // How to update your UI automatically
-                    // Read the data from our cache for this query.
-                    const data = proxy.readQuery({ query: LIGHTS_QUERY });
-                    console.log("light data", data);
-                    // edit our todo from the mutation to the end.
-                    let light = data.lights.find(
-                        ({ id }) => id === setLight.id
-                    );
-                    light = setLight;
-                    console.log("light", light);
-                    // Write our data back to the cache.
-                    proxy.writeQuery({ query: LIGHTS_QUERY, data });
-                }
-            })
-            .then(({ data }) => {
-                console.log("got data", data);
-            })
-            .catch(error => {
-                console.log("there was an error sending the query", error);
-                this.setState({
-                    name: error
-                });
-            });
+    handleMutationCompleted = ({ data }) => {
+        console.log("Light Updated Successfully!");
+    };
+
+    handleMutationError = error => {
+        console.error("Error Setting Light:", error);
     };
 
     render() {
+        const variables = {
+            lightId: this.props.light.id,
+            light: {
+                name: this.state.name,
+                power: this.state.power,
+                brightness: this.state.brightness,
+                color: {
+                    hue: this.state.color.h,
+                    saturation: this.state.color.s,
+                    lightness: this.state.color.l
+                }
+            }
+        };
+
         return (
-            <li>
-                <label htmlFor="editLight-name-input">Light Name: </label>
-                <input
-                    name="name"
-                    type="text"
-                    id="editLight-name-input"
-                    value={this.state.name}
-                    onChange={this.handleChange}
-                />
-                <br />
-                <label htmlFor="editLight-brightness-input">
-                    Brightness: {this.state.brightness}
-                </label>
-                <input
-                    name="brightness"
-                    type="range"
-                    id="editLight-name-input"
-                    min={0}
-                    max={100}
-                    value={this.state.brightness}
-                    onChange={this.handleChange}
-                />
-                <br />
-                <label htmlFor="editLight-color-input">Color:</label>
-                <ChromePicker
-                    id="editLight-color-input"
-                    disableAlpha={true}
-                    color={this.state.color}
-                    onChangeComplete={this.handleColorChange}
-                />
-                <br />
-                <button onClick={this.handleClick}>Edit Light</button>
-            </li>
+            <Mutation
+                mutation={SET_LIGHT}
+                variables={variables}
+                onCompleted={this.handleMutationCompleted}
+                onError={this.handleMutationError}
+            >
+                {(setLight, { data }) => (
+                    <li>
+                        <label htmlFor="editLight-name-input">
+                            Light Name:{" "}
+                        </label>
+                        <input
+                            name="name"
+                            type="text"
+                            id="editLight-name-input"
+                            value={this.state.name}
+                            onChange={this.handleChange}
+                        />
+                        <br />
+                        <label htmlFor="editLight-brightness-input">
+                            Brightness: {this.state.brightness}
+                        </label>
+                        <input
+                            name="brightness"
+                            type="range"
+                            id="editLight-name-input"
+                            min={0}
+                            max={100}
+                            value={this.state.brightness}
+                            onChange={this.handleChange}
+                        />
+                        <br />
+                        <label htmlFor="editLight-color-input">Color:</label>
+                        <ChromePicker
+                            id="editLight-color-input"
+                            disableAlpha={true}
+                            color={this.state.color}
+                            onChangeComplete={this.handleColorChange}
+                        />
+                        <br />
+                        <button onClick={setLight}>Edit Light</button>
+                    </li>
+                )}
+            </Mutation>
         );
     }
 }
 
-export default graphql(SET_LIGHT_MUTATION)(Light);
+export default Light;

@@ -4,7 +4,7 @@ import gql from "graphql-tag";
 import Light from "./Light.jsx";
 
 const GET_LIGHTS = gql`
-    query Lights {
+    query getLights {
         lights {
             id
             name

@@ -1,23 +1,7 @@
 import React from "react";
-import { Mutation } from "react-apollo";
+import { graphql } from "react-apollo";
 import gql from "graphql-tag";
 import { ChromePicker } from "react-color";
-
-const GET_LIGHTS = gql`
-    query getLights {
-        lights {
-            id
-            name
-            power
-            brightness
-            color {
-                hue
-                saturation
-                lightness
-            }
-        }
-    }
-`;
 
 const SET_LIGHT = gql`
     mutation setLight($lightId: Int!, $light: LightInput!) {
@@ -50,26 +34,16 @@ class Light extends React.Component {
         };
     }
 
-    handleChange = evt => {
-        this.setState({
-            [evt.target.name]: evt.target.value
-        });
-    };
-
-    handleColorChange = color => {
-        console.log(color.hsl);
-        this.setState({ color: color.hsl });
-    };
-
     handleMutationCompleted = ({ data }) => {
         console.log("Light Updated Successfully!");
+        console.log("Data Received: ", data);
     };
 
     handleMutationError = error => {
         console.error("Error Setting Light:", error);
     };
 
-    render() {
+    setLight = () => {
         const variables = {
             lightId: this.props.light.id,
             light: {
@@ -84,53 +58,60 @@ class Light extends React.Component {
             }
         };
 
+        this.props
+            .mutate({ variables })
+            .then(this.handleMutationCompleted)
+            .catch(this.handleMutationError);
+    };
+
+    handleChange = evt => {
+        this.setState({
+            [evt.target.name]: evt.target.value
+        });
+    };
+
+    handleColorChange = color => {
+        console.log(color.hsl);
+        this.setState({ color: color.hsl });
+    };
+
+    render() {
         return (
-            <Mutation
-                mutation={SET_LIGHT}
-                variables={variables}
-                onCompleted={this.handleMutationCompleted}
-                onError={this.handleMutationError}
-            >
-                {(setLight, { data }) => (
-                    <li>
-                        <label htmlFor="editLight-name-input">
-                            Light Name:{" "}
-                        </label>
-                        <input
-                            name="name"
-                            type="text"
-                            id="editLight-name-input"
-                            value={this.state.name}
-                            onChange={this.handleChange}
-                        />
-                        <br />
-                        <label htmlFor="editLight-brightness-input">
-                            Brightness: {this.state.brightness}
-                        </label>
-                        <input
-                            name="brightness"
-                            type="range"
-                            id="editLight-name-input"
-                            min={0}
-                            max={100}
-                            value={this.state.brightness}
-                            onChange={this.handleChange}
-                        />
-                        <br />
-                        <label htmlFor="editLight-color-input">Color:</label>
-                        <ChromePicker
-                            id="editLight-color-input"
-                            disableAlpha={true}
-                            color={this.state.color}
-                            onChangeComplete={this.handleColorChange}
-                        />
-                        <br />
-                        <button onClick={setLight}>Edit Light</button>
-                    </li>
-                )}
-            </Mutation>
+            <li>
+                <label htmlFor="editLight-name-input">Light Name: </label>
+                <input
+                    name="name"
+                    type="text"
+                    id="editLight-name-input"
+                    value={this.state.name}
+                    onChange={this.handleChange}
+                />
+                <br />
+                <label htmlFor="editLight-brightness-input">
+                    Brightness: {this.state.brightness}
+                </label>
+                <input
+                    name="brightness"
+                    type="range"
+                    id="editLight-name-input"
+                    min={0}
+                    max={100}
+                    value={this.state.brightness}
+                    onChange={this.handleChange}
+                />
+                <br />
+                <label htmlFor="editLight-color-input">Color:</label>
+                <ChromePicker
+                    id="editLight-color-input"
+                    disableAlpha={true}
+                    color={this.state.color}
+                    onChangeComplete={this.handleColorChange}
+                />
+                <br />
+                <button onClick={this.setLight}>Edit Light</button>
+            </li>
         );
     }
 }
 
-export default Light;
+export default graphql(SET_LIGHT)(Light);

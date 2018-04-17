@@ -71,10 +71,11 @@ class Light extends React.Component {
     };
 
     handleColorChange = color => {
-        console.log(color.hsl);
         this.setState({ color: color.hsl });
+        this.setLight();
     };
 
+    //TODO: Break brightness bar and name display/editor into seperate components
     render() {
         return (
             <li>

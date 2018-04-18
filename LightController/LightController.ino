@@ -15,9 +15,11 @@
 #include <ESP8266WebServer.h>     // Local WebServer used to serve the configuration portal
 #include <ArduinoOTA.h>
 #include <WiFiManager.h>          // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
-
 #include <PubSubClient.h>
 
+
+
+/************ MQTT Setup Variables ******************/
 const char* mqtt_server = "test.mosquitto.org";
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -25,32 +27,10 @@ long lastMsg = 0;
 char msg[50];
 int value = 0;
 
-void onMessage(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
 
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is acive low on the ESP-01)
-  } else {
-    digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-  }
 
-}
-  
-void setup() {
-  // Set Serial Communication rate
-  Serial.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, HIGH);
-
+/************ WIFI Setup ******************/
+void setupWifi() {
   // Autoconnect to Wifi
   WiFiManager wifiManager;
   if (!wifiManager.autoConnect("Nick's Lightapp-ESP8266", "991f76a6ab")) {
@@ -61,8 +41,12 @@ void setup() {
     delay(5000);
   }
   Serial.println("Connected to Wifi :)");
+}
 
-  // OTA Setup
+
+/************ OTA Setup ******************/
+void setupOTA() {
+    // OTA Setup
   ArduinoOTA.onStart([]() {
     Serial.println("Start OTA");
     digitalWrite(LED_BUILTIN, LOW);
@@ -88,15 +72,55 @@ void setup() {
 
   ArduinoOTA.begin();
   Serial.println("OTA Ready");
-
-
-  //Pubsub setup
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(onMessage);
 }
 
-long lastReconnectAttempt = 0;
 
+
+/************ Arduino Setup ******************/
+void setup() {
+  // Set Serial Communication rate
+  Serial.begin(115200);
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, HIGH);
+  
+  // Setup Wifi
+  setupWifi();
+
+  // Setup OTA
+  setupOTA();
+
+  // Setup MQTT
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(handleMessage);
+}
+
+
+
+/************ MQTT onMessage Callback Setup ******************/
+void handleMessage(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+
+  // Switch on the LED if an 1 was received as first character
+  if ((char)payload[0] == '1') {
+    digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
+    // but actually the LED is on; this is because
+    // it is acive low on the ESP-01)
+  } else {
+    digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
+  }
+
+}
+
+
+
+/************ MQTT reconnect function ******************/
+long lastReconnectAttempt = 0;
 boolean reconnect() {
   if (client.connect("arduinoClient")) {
     Serial.println("Connected");
@@ -108,13 +132,18 @@ boolean reconnect() {
   return client.connected();
 }
 
+
+
+/************ Main Loop ******************/
 void loop() {
+  // Handle OTA requests
   ArduinoOTA.handle();
 
+  // Handle MQTT connection
   if (!client.connected()) {
-    Serial.println("Lost Connection");
     long now = millis();
     if (now - lastReconnectAttempt > 5000) {
+      Serial.println("Attempting to Connect to MQTT Broker");
       lastReconnectAttempt = now;
       // Attempt to reconnect
       if (reconnect()) {
@@ -122,13 +151,12 @@ void loop() {
       }
     }
   } else {
-    // Client connected
-
     client.loop();
   }
 
+  // publish hello world every 10 seconds
   long now = millis();
-  if (now - lastMsg > 2000) {
+  if (now - lastMsg > 10000) {
     lastMsg = now;
     ++value;
     snprintf (msg, 75, "hello world #%ld", value);

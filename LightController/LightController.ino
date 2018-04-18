@@ -18,6 +18,33 @@
 
 #include <PubSubClient.h>
 
+const char* mqtt_server = "test.mosquitto.org";
+WiFiClient espClient;
+PubSubClient client(espClient);
+long lastMsg = 0;
+char msg[50];
+int value = 0;
+
+void onMessage(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+
+  // Switch on the LED if an 1 was received as first character
+  if ((char)payload[0] == '1') {
+    digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
+    // but actually the LED is on; this is because
+    // it is acive low on the ESP-01)
+  } else {
+    digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
+  }
+
+}
+  
 void setup() {
   // Set Serial Communication rate
   Serial.begin(115200);
@@ -61,13 +88,52 @@ void setup() {
 
   ArduinoOTA.begin();
   Serial.println("OTA Ready");
- 
+
+
+  //Pubsub setup
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(onMessage);
+}
+
+long lastReconnectAttempt = 0;
+
+boolean reconnect() {
+  if (client.connect("arduinoClient")) {
+    Serial.println("Connected");
+    // Once connected, publish an announcement...
+    client.publish("outTopic","hello world");
+    // ... and resubscribe
+    client.subscribe("inTopic");
+  }
+  return client.connected();
 }
 
 void loop() {
   ArduinoOTA.handle();
-  //digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on by making the voltage LOW
-  //delay(1000);                      // Wait for a second
-  //digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
-  //delay(2000);                      // Wait for two seconds
+
+  if (!client.connected()) {
+    Serial.println("Lost Connection");
+    long now = millis();
+    if (now - lastReconnectAttempt > 5000) {
+      lastReconnectAttempt = now;
+      // Attempt to reconnect
+      if (reconnect()) {
+        lastReconnectAttempt = 0;
+      }
+    }
+  } else {
+    // Client connected
+
+    client.loop();
+  }
+
+  long now = millis();
+  if (now - lastMsg > 2000) {
+    lastMsg = now;
+    ++value;
+    snprintf (msg, 75, "hello world #%ld", value);
+    Serial.print("Publish message: ");
+    Serial.println(msg);
+    client.publish("test", msg);
+  }
 }

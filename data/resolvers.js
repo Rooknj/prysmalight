@@ -9,9 +9,9 @@ const lights = [
     power: true,
     brightness: 100,
     color: {
-      hue: 120, //ranges 0-360
-      saturation: 1, //ranges 0-100%
-      lightness: 0.5 //ranges 0-100%
+      r: 120, //ranges 0-360
+      g: 1, //ranges 0-100%
+      b: 255 //ranges 0-100%
     }
   }
 ];
@@ -26,9 +26,11 @@ const resolvers = {
   },
   Mutation: {
     setLight: (_, { lightId, light }) => {
-      let oldlight = lights.find(({ id }) => id === lightId);
-      oldlight = Object.assign(oldlight, light);
-      pubsub.publish("lightChanged", { lightChanged: oldlight, lightId: lightId }); //push data to subscription
+      let lightToChange = lights.find(({ id }) => id === lightId);
+      lightToChange = Object.assign(lightToChange, light);
+      console.log("light: ", light);
+      pubsub.publish("CHANGE_LIGHT_TOPIC", light); //send MQTT message to ESP8266
+      //pubsub.publish("LIGHT_CHANGED_TOPIC", lightToChange); //Mock response from ESP8266
       return lights.find(({ id }) => id === lightId);
     },
     addLight: (_, { newLight }) => {
@@ -44,11 +46,14 @@ const resolvers = {
       subscribe: () => pubsub.asyncIterator("lightAdded")
     },
     lightChanged: {
+      resolve: (payload, args, context, info) => {
+        // Manipulate and return the new value
+        return payload;
+      },
       subscribe: withFilter(
-        () => pubsub.asyncIterator("lightChanged"),
+        () => pubsub.asyncIterator("LIGHT_CHANGED_TOPIC"),
         (payload, variables) => {
-          console.log(payload.lightId, variables.lightId)
-          return payload.lightId === variables.lightId;
+          return payload.id === variables.lightId;
         }
       )
     }

@@ -15,7 +15,13 @@ const FortuneCookie = {
 };
 
 //Call to MQTT servers
+/*
 const client = connect("tcp://localhost:1883", {
+  reconnectPeriod: 1000,
+});
+*/
+
+const client = connect("tcp://broker.hivemq.com:1883", {
   reconnectPeriod: 1000,
 });
 

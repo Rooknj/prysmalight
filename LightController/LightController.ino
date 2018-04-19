@@ -16,8 +16,17 @@
 #include <ArduinoOTA.h>
 #include <WiFiManager.h>          // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <PubSubClient.h>
+#include <ArduinoJson.h>
 
 
+
+/************ Data Global Variables ******************/
+bool power = false;
+int brightness = 0;
+int r = 0;
+int g = 0;
+int b = 0;
+const char* name = "";
 
 /************ MQTT Setup Variables ******************/
 const char* mqtt_server = "test.mosquitto.org";
@@ -100,20 +109,55 @@ void setup() {
 void handleMessage(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
+  Serial.println("] ");
 
-  // Switch on the LED if an 1 was received as first character
-  if ((char)payload[0] == '1') {
-    digitalWrite(LED_BUILTIN, LOW);   // Turn the LED on (Note that LOW is the voltage level
-    // but actually the LED is on; this is because
-    // it is acive low on the ESP-01)
-  } else {
-    digitalWrite(LED_BUILTIN, HIGH);  // Turn the LED off by making the voltage HIGH
+  // decode the JSON payload
+  StaticJsonBuffer<128> jsonInBuffer;
+  JsonObject& data = jsonInBuffer.parseObject(payload);
+
+  // Test if parsing succeeds.
+  if (!data.success()) {
+    Serial.println("parseObject() failed");
+    return;
   }
+
+  // led resource is a boolean read it accordingly
+  if (data.containsKey("name")) {
+    name = data["name"];
+    Serial.print("name: ");
+    Serial.println(name);
+  }
+  
+  if (data.containsKey("power")) {
+    power = data["power"];
+    Serial.print("Power: ");
+    Serial.println(power);
+    digitalWrite(LED_BUILTIN, power ? LOW : HIGH);
+  }
+
+  if (data.containsKey("brightness")) {
+    brightness = data["brightness"];
+    Serial.print("Brightness: ");
+    Serial.println(brightness);
+  }
+
+  if (data.containsKey("color")) {
+    r = data["color"]["r"];
+    g = data["color"]["g"];
+    b = data["color"]["b"];
+    Serial.print("Red: ");
+    Serial.println(r);
+    Serial.print("Green: ");
+    Serial.println(g);
+    Serial.print("Blue: ");
+    Serial.println(b);
+  }
+
+  // Print the received value to serial monitor for debugging
+  Serial.print("Received message of length ");
+  Serial.print(length);
+  Serial.println();
+  data.prettyPrintTo(Serial);
 
 }
 
@@ -152,16 +196,5 @@ void loop() {
     }
   } else {
     client.loop();
-  }
-
-  // publish hello world every 10 seconds
-  long now = millis();
-  if (now - lastMsg > 10000) {
-    lastMsg = now;
-    ++value;
-    snprintf (msg, 75, "hello world #%ld", value);
-    Serial.print("Publish message: ");
-    Serial.println(msg);
-    client.publish("test", msg);
   }
 }

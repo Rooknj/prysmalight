@@ -22,11 +22,14 @@ const SET_LIGHT = gql`
 class Light extends React.Component {
     constructor(props) {
         super(props);
+
+        //Bring state out to Apollo Inmemory Cache
         this.state = {
             name: this.props.light.name,
             power: this.props.light.power,
             brightness: this.props.light.brightness,
             color: {
+                //This might be better stored as hex value depending on fastled impl and data size
                 h: this.props.light.color.hue,
                 s: this.props.light.color.saturation,
                 l: this.props.light.color.lightness

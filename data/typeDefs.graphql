@@ -18,15 +18,15 @@ type Subscription {
 }
 
 type Color {
-    hue: Float
-    saturation: Float
-    lightness: Float
+    r: Int
+    g: Int
+    b: Int
 }
 
 input ColorInput {
-    hue: Float
-    saturation: Float
-    lightness: Float
+    r: Int
+    g: Int
+    b: Int
 }
 
 type Light {

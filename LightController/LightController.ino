@@ -26,16 +26,13 @@ int brightness = 0;
 int r = 0;
 int g = 0;
 int b = 0;
-const char* name = "";
 
 /************ MQTT Setup Variables ******************/
 const char* mqtt_server = "test.mosquitto.org";
 WiFiClient espClient;
 PubSubClient client(espClient);
-long lastMsg = 0;
-char msg[50];
-int value = 0;
-
+const char* inTopic = "CHANGE_LIGHT_TOPIC";
+const char* outTopic = "LIGHT_CHANGED_TOPIC";
 
 
 /************ WIFI Setup ******************/
@@ -107,57 +104,77 @@ void setup() {
 
 /************ MQTT onMessage Callback Setup ******************/
 void handleMessage(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.println("] ");
-
+  
   // decode the JSON payload
   StaticJsonBuffer<128> jsonInBuffer;
   JsonObject& data = jsonInBuffer.parseObject(payload);
-
+  
+  // Print the received value to serial monitor for debugging
+  /*
+  Serial.print("Message of length ");
+  Serial.print(length);
+  Serial.print(" arrived on topic: [");
+  Serial.print(topic);
+  Serial.println("] ");
+  data.prettyPrintTo(Serial);
+  Serial.println("\n");
+  */
+  
   // Test if parsing succeeds.
   if (!data.success()) {
-    Serial.println("parseObject() failed");
+    Serial.println("ERROR: Unable to parse message");
     return;
   }
 
-  // led resource is a boolean read it accordingly
-  if (data.containsKey("name")) {
-    name = data["name"];
-    Serial.print("name: ");
-    Serial.println(name);
-  }
+  // Set up JSON response objects
+  StaticJsonBuffer<128> jsonOutBuffer;
+  JsonObject& responsePayload = jsonOutBuffer.createObject();
   
   if (data.containsKey("power")) {
     power = data["power"];
-    Serial.print("Power: ");
-    Serial.println(power);
+    //Serial.print("Setting power to: ");
+    //Serial.println(power);
     digitalWrite(LED_BUILTIN, power ? LOW : HIGH);
+    responsePayload["power"] = power;
   }
 
   if (data.containsKey("brightness")) {
     brightness = data["brightness"];
-    Serial.print("Brightness: ");
-    Serial.println(brightness);
+    //Serial.print("Setting brightness to: ");
+    //Serial.println(brightness);
+    responsePayload["brightness"] = brightness;
   }
 
   if (data.containsKey("color")) {
     r = data["color"]["r"];
     g = data["color"]["g"];
     b = data["color"]["b"];
-    Serial.print("Red: ");
-    Serial.println(r);
-    Serial.print("Green: ");
-    Serial.println(g);
-    Serial.print("Blue: ");
-    Serial.println(b);
+//    Serial.print("Setting color to: ");
+//    Serial.print("r = ");
+//    Serial.print(r);
+//    Serial.print(", g = ");
+//    Serial.print(g);
+//    Serial.print(", b = ");
+//    Serial.println(b);
+    JsonObject& color = responsePayload.createNestedObject("color");
+    color["r"] = r;
+    color["g"] = g;
+    color["b"] = b;
+    responsePayload["color"] = color;
   }
-
-  // Print the received value to serial monitor for debugging
-  Serial.print("Received message of length ");
-  Serial.print(length);
+  
+//  Serial.print("payload Size: ");
+//  Serial.println(responsePayload.size());
+  Serial.println("payload: ");
+  responsePayload.prettyPrintTo(Serial);
   Serial.println();
-  data.prettyPrintTo(Serial);
+  
+  if(responsePayload.size() > 0) {
+    char responseChar[100];
+    responsePayload.printTo((char*)responseChar, responsePayload.measureLength() + 1);
+    //Serial.println(responseChar);
+    client.publish(outTopic, responseChar);
+  }
 
 }
 
@@ -171,7 +188,7 @@ boolean reconnect() {
     // Once connected, publish an announcement...
     client.publish("outTopic","hello world");
     // ... and resubscribe
-    client.subscribe("inTopic");
+    client.subscribe(inTopic);
   }
   return client.connected();
 }

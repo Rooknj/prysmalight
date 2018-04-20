@@ -1,14 +1,20 @@
 import React from "react";
+//import PropTypes from "prop-types";
 import LightList from "./LightList";
-import AddLight from "./AddLight";
+
+const propTypes = {};
+
+const defaultProps = {};
 
 const LightTool = props => {
     return (
         <div>
             <LightList />
-            <AddLight />
         </div>
     );
 };
+
+LightTool.propTypes = propTypes;
+LightTool.defaultProps = defaultProps;
 
 export default LightTool;

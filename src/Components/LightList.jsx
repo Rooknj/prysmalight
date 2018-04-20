@@ -1,7 +1,27 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { graphql } from "react-apollo";
 import gql from "graphql-tag";
 import Light from "./Light.jsx";
+
+const propTypes = {
+    data: PropTypes.shape({
+        loading: PropTypes.bool,
+        error: PropTypes.object,
+        lights: PropTypes.arrayOf(
+            PropTypes.shape({
+                id: PropTypes.number,
+                name: PropTypes.string
+            })
+        )
+    }).isRequired
+};
+
+const defaultProps = {
+    data: {
+        lights: []
+    }
+};
 
 const GET_LIGHTS = gql`
     query getLights {
@@ -11,9 +31,9 @@ const GET_LIGHTS = gql`
             power
             brightness
             color {
-                hue
-                saturation
-                lightness
+                r
+                g
+                b
             }
         }
     }
@@ -32,5 +52,8 @@ const LightList = ({ data: { loading, error, lights } }) => {
         </div>
     );
 };
+
+LightList.propTypes = propTypes;
+LightList.defaultProps = defaultProps;
 
 export default graphql(GET_LIGHTS)(LightList);

@@ -11,11 +11,15 @@
     "apollo-link-ws": "^1.0.7",
     "graphql": "^0.13.2",
     "graphql-tag": "^2.8.0",
+    "lodash": "^4.17.5",
+    "prop-types": "^15.6.1",
+    "rc-slider": "^8.6.1",
     "react": "^16.2.0",
     "react-apollo": "^2.1.1",
     "react-color": "^2.14.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.1",
+    "react-toggle": "^4.0.2",
     "subscriptions-transport-ws": "^0.9.7"
   },
   "devDependencies": {

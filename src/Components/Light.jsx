@@ -1,7 +1,44 @@
 import React from "react";
+import PropTypes from "prop-types";
+
 import { graphql } from "react-apollo";
 import gql from "graphql-tag";
+
 import { ChromePicker } from "react-color";
+//import Slider from "./Slider";
+import Slider, { createSliderWithTooltip } from "rc-slider";
+import "rc-slider/assets/index.css";
+
+import Toggle from "react-toggle";
+import "react-toggle/style.css"; // for ES6 modules
+
+const propTypes = {
+    light: PropTypes.shape({
+        id: PropTypes.number,
+        name: PropTypes.string,
+        power: PropTypes.bool,
+        brightness: PropTypes.number,
+        color: PropTypes.shape({
+            r: PropTypes.number,
+            g: PropTypes.number,
+            b: PropTypes.number
+        })
+    }).isRequired
+};
+
+const defaultProps = {
+    light: {
+        id: 0,
+        name: "",
+        power: false,
+        brightness: 0,
+        color: {
+            r: 0,
+            g: 0,
+            b: 0
+        }
+    }
+};
 
 const SET_LIGHT = gql`
     mutation setLight($lightId: Int!, $light: LightInput!) {
@@ -11,13 +48,15 @@ const SET_LIGHT = gql`
             power
             brightness
             color {
-                hue
-                saturation
-                lightness
+                r
+                g
+                b
             }
         }
     }
 `;
+
+const SliderWithTooltip = createSliderWithTooltip(Slider);
 
 class Light extends React.Component {
     constructor(props) {
@@ -25,17 +64,12 @@ class Light extends React.Component {
 
         //Bring state out to Apollo Inmemory Cache
         this.state = {
-            name: this.props.light.name,
-            power: this.props.light.power,
-            brightness: this.props.light.brightness,
-            color: {
-                //This might be better stored as hex value depending on fastled impl and data size
-                h: this.props.light.color.hue,
-                s: this.props.light.color.saturation,
-                l: this.props.light.color.lightness
-            }
+            name: this.props.light.name
         };
     }
+
+    static propTypes = propTypes;
+    static defaultProps = defaultProps;
 
     handleMutationCompleted = ({ data }) => {
         console.log("Light Updated Successfully!");
@@ -46,73 +80,95 @@ class Light extends React.Component {
         console.error("Error Setting Light:", error);
     };
 
-    setLight = () => {
-        const variables = {
-            lightId: this.props.light.id,
-            light: {
-                name: this.state.name,
-                power: this.state.power,
-                brightness: this.state.brightness,
-                color: {
-                    hue: this.state.color.h,
-                    saturation: this.state.color.s,
-                    lightness: this.state.color.l
-                }
-            }
-        };
-
+    setLight = variables => {
         this.props
             .mutate({ variables })
             .then(this.handleMutationCompleted)
             .catch(this.handleMutationError);
     };
 
-    handleChange = evt => {
-        this.setState({
-            [evt.target.name]: evt.target.value
-        });
+    handleNameChange = evt => {
+        this.setState({ name: evt.target.value });
     };
 
-    handleColorChange = color => {
-        this.setState({ color: color.hsl });
-        this.setLight();
+    handlePowerChange = evt => {
+        const variables = {
+            lightId: this.props.light.id,
+            light: {
+                power: evt.target.checked
+            }
+        };
+        this.setLight(variables);
     };
 
+    handleBrightnessChange = brightness => {
+        const variables = {
+            lightId: this.props.light.id,
+            light: {
+                brightness
+            }
+        };
+        this.setLight(variables);
+    };
+
+    handleColorChange = ({ rgb: { r, g, b } }) => {
+        const variables = {
+            lightId: this.props.light.id,
+            light: {
+                color: {
+                    r,
+                    g,
+                    b
+                }
+            }
+        };
+        this.setLight(variables);
+    };
+
+    percentFormatter(v) {
+        return `${v} %`;
+    }
     //TODO: Break brightness bar and name display/editor into seperate components
     render() {
         return (
             <li>
-                <label htmlFor="editLight-name-input">Light Name: </label>
+                <label>
+                    <span>Light Name: </span>
+                </label>
                 <input
                     name="name"
                     type="text"
-                    id="editLight-name-input"
                     value={this.state.name}
-                    onChange={this.handleChange}
+                    onChange={this.handleNameChange}
                 />
                 <br />
-                <label htmlFor="editLight-brightness-input">
-                    Brightness: {this.state.brightness}
+                <label>
+                    <span>Power: </span>
                 </label>
-                <input
-                    name="brightness"
-                    type="range"
-                    id="editLight-name-input"
-                    min={0}
-                    max={100}
-                    value={this.state.brightness}
-                    onChange={this.handleChange}
+                <Toggle
+                    defaultChecked={this.props.power}
+                    onChange={this.handlePowerChange}
                 />
                 <br />
-                <label htmlFor="editLight-color-input">Color:</label>
+                <label>
+                    <span>Brightness: </span>
+                </label>
+                <div style={{ width: 600, margin: 50 }}>
+                    <Slider
+                        defaultValue={50}
+                        min={0}
+                        max={100}
+                        onChange={this.handleBrightnessChange}
+                    />
+                </div>
+                <br />
+                <label> Color: </label>
                 <ChromePicker
-                    id="editLight-color-input"
                     disableAlpha={true}
-                    color={this.state.color}
+                    color={this.props.light.color}
                     onChangeComplete={this.handleColorChange}
                 />
                 <br />
-                <button onClick={this.setLight}>Edit Light</button>
             </li>
         );
     }

@@ -28,11 +28,13 @@ int g = 0;
 int b = 0;
 
 /************ MQTT Setup Variables ******************/
-const char* mqtt_server = "test.mosquitto.org";
+const char* mqtt_server = "broker.hivemq.com";
 WiFiClient espClient;
 PubSubClient client(espClient);
 const char* inTopic = "CHANGE_LIGHT_TOPIC";
 const char* outTopic = "LIGHT_CHANGED_TOPIC";
+const char* getStateTopic = "GET_LIGHT_STATE_TOPIC";
+const char* sendStateTopic = "LIGHT_STATE_TOPIC";
 
 
 /************ WIFI Setup ******************/
@@ -101,31 +103,8 @@ void setup() {
 }
 
 
-
-/************ MQTT onMessage Callback Setup ******************/
-void handleMessage(char* topic, byte* payload, unsigned int length) {
-  
-  // decode the JSON payload
-  StaticJsonBuffer<128> jsonInBuffer;
-  JsonObject& data = jsonInBuffer.parseObject(payload);
-  
-  // Print the received value to serial monitor for debugging
-  /*
-  Serial.print("Message of length ");
-  Serial.print(length);
-  Serial.print(" arrived on topic: [");
-  Serial.print(topic);
-  Serial.println("] ");
-  data.prettyPrintTo(Serial);
-  Serial.println("\n");
-  */
-  
-  // Test if parsing succeeds.
-  if (!data.success()) {
-    Serial.println("ERROR: Unable to parse message");
-    return;
-  }
-
+/************ Publish change in state ******************/
+void publishChange(JsonObject& data) {
   // Set up JSON response objects
   StaticJsonBuffer<128> jsonOutBuffer;
   JsonObject& responsePayload = jsonOutBuffer.createObject();
@@ -175,20 +154,87 @@ void handleMessage(char* topic, byte* payload, unsigned int length) {
     //Serial.println(responseChar);
     client.publish(outTopic, responseChar);
   }
+}
+
+
+
+/************ Publish Current State ******************/
+void publishState(JsonObject& data) {
+  if (!data.containsKey("sendState") || !data["sendState"]) {
+    Serial.println("No Send State");
+    return;
+  }
+  
+  // Set up JSON response objects
+  StaticJsonBuffer<128> jsonOutBuffer;
+  JsonObject& responsePayload = jsonOutBuffer.createObject();
+  JsonObject& color = responsePayload.createNestedObject("color");
+
+  // Assign data to JSON response objects
+  responsePayload["power"] = power;
+  responsePayload["brightness"] = brightness;
+  color["r"] = r;
+  color["g"] = g;
+  color["b"] = b;
+  responsePayload["color"] = color;
+  Serial.println("payload: ");
+  responsePayload.prettyPrintTo(Serial);
+  Serial.println();
+
+  // Send status
+  char responseChar[100];
+  responsePayload.printTo((char*)responseChar, responsePayload.measureLength() + 1);
+  //Serial.println(responseChar);
+  client.publish(sendStateTopic, responseChar);
+  
+}
+
+
+
+/************ MQTT onMessage Callback Setup ******************/
+void handleMessage(char* topic, byte* payload, unsigned int length) {
+  
+  // decode the JSON payload
+  StaticJsonBuffer<128> jsonInBuffer;
+  JsonObject& data = jsonInBuffer.parseObject(payload);
+  
+  // Test if parsing succeeds.
+  if (!data.success()) {
+    Serial.println("ERROR: Unable to parse message");
+    return;
+  }
+  // Print the received value to serial monitor for debugging
+  /*
+  Serial.print("Message of length ");
+  Serial.print(length);
+  Serial.print(" arrived on topic: [");
+  Serial.print(topic);
+  Serial.println("] ");
+  data.prettyPrintTo(Serial);
+  Serial.println("\n");
+  */
+
+  if(strcmp(topic, inTopic) == 0){
+    publishChange(data);
+  } else if(strcmp(topic, getStateTopic) == 0) {
+    publishState(data);
+  }
+
 
 }
 
 
 
-/************ MQTT reconnect function ******************/
+/************ MQTT connect/reconnect function ******************/
 long lastReconnectAttempt = 0;
 boolean reconnect() {
   if (client.connect("arduinoClient")) {
     Serial.println("Connected");
     // Once connected, publish an announcement...
-    client.publish("outTopic","hello world");
+    //client.publish("outTopic","hello world");
     // ... and resubscribe
-    client.subscribe(inTopic);
+    client.subscribe(inTopic); // For changes
+    client.subscribe(getStateTopic); // For status updates
   }
   return client.connected();
 }

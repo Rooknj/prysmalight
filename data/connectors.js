@@ -20,8 +20,9 @@ const client = connect("tcp://localhost:1883", {
   reconnectPeriod: 1000,
 });
 */
+const MQTT_CLIENT = "tcp://test.mosquitto.org:1883";
 
-const client = connect("tcp://broker.hivemq.com:1883", {
+const client = connect(MQTT_CLIENT, {
   reconnectPeriod: 1000,
 });
 
@@ -29,6 +30,15 @@ const onMQTTSubscribe = (subId, granted) => {
   console.log(`Subscription with id ${subId} was given QoS of ${granted.qos}`);
 }
 
-const pubsub = new MQTTPubSub({client, onMQTTSubscribe});
+const connectionListener = (connection) => {
+  if (connection) {
+    console.log("Connected to", MQTT_CLIENT);
+    console.log(connection);
+  } else {
+    console.log("Failed to connect to", MQTT_CLIENT);
+  }
+}
+
+const pubsub = new MQTTPubSub({client, connectionListener, onMQTTSubscribe});
 
 export { FortuneCookie, pubsub };

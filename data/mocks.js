@@ -1,7 +1,6 @@
 import casual from "casual";
 
 const mocks = {
-  String: () => "Fortune Cookie",
   Light: () => ({
     id: () => casual.integer(0, 10),
     name: () => casual.first_name,

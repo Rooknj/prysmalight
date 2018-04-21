@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-preset-env": "^1.6.1",
     "husky": "^0.14.3",
     "lint-staged": "^7.0.0",
@@ -42,6 +43,9 @@
   "babel": {
     "presets": [
       "env"
+    ],
+    "plugins": [
+      "transform-class-properties"
     ]
   },
   "main": "server.js"

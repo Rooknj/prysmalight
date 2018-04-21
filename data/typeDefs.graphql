@@ -1,20 +1,16 @@
 # This schema allows the following queries:
 type Query {
-  getFortuneCookie: String
-  #identify: Light
-  light(lightId: Int!): Light
+  light(lightId: String!): Light
   lights: [Light]
 }
 
 # This schema allows the following mutations:
 type Mutation {
-  setLight(lightId: Int!, light: LightInput!): Light
-  addLight(newLight: LightInput!): Light
+  setLight(light: LightInput!): Light
 }
 
 type Subscription {
-  lightAdded: Light
-  lightChanged(lightId: Int!): Light
+  lightChanged(lightId: String!): Light
 }
 
 type Color {
@@ -30,15 +26,14 @@ input ColorInput {
 }
 
 type Light {
-  id: Int!
-  name: String # name of accessory
-  power: Boolean, # curent power status
-  brightness: Int, # current brightness
+  id: String! # uique name of accessory
+  power: Boolean # curent power status
+  brightness: Int # current brightness
   color: Color # current color
 }
 
 input LightInput {
-  name: String # name of accessory
+  id: String! # name of accessory
   power: Boolean, # curent power status
   brightness: Int, # current brightness
   color: ColorInput # current color

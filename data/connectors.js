@@ -17,7 +17,7 @@ const client = connect(MQTT_CLIENT, {
 const connectionListener = connection => {
   if (connection) {
     console.log("Connected to", MQTT_CLIENT);
-    console.log(connection);
+    //console.log(connection);
   } else {
     console.log("Failed to connect to", MQTT_CLIENT);
   }
@@ -51,8 +51,7 @@ class LightConnector {
     const subTopic = "LIGHT_STATE_TOPIC";
     const pubTopic = "GET_LIGHT_STATE_TOPIC";
     let unsubscribeId;
-
-    return this.lights[1];
+    console.log("Getting light");
 
     return new Promise((resolve, reject) => {
       // Resolve the promise when we receive an MQTT response
@@ -102,8 +101,8 @@ class LightConnector {
   };
 
   getLights = () => {
-    console.log(this.lights);
-    return this.lights;
+    console.log("Getting lights");
+    return [this.getLight("Light 1")];
   };
 }
 

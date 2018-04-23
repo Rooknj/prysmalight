@@ -4,10 +4,7 @@ const lightConnector = new LightConnector()
 
 const resolvers = {
   Query: {
-    light: (_, { lightId }) => {
-      console.log("_", _);
-      lightConnector.getLight(lightId)
-    },
+    light: (_, { lightId }) => lightConnector.getLight(lightId),
     lights: () => lightConnector.getLights()
   },
   Mutation: {

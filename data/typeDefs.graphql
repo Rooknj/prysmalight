@@ -27,6 +27,7 @@ input ColorInput {
 
 type Light {
   id: String! # uique name of accessory
+  connected: Boolean
   power: Boolean # curent power status
   brightness: Int # current brightness
   color: Color # current color

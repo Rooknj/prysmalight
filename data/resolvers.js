@@ -12,8 +12,13 @@ const resolvers = {
   },
   Subscription: {
     lightChanged: {
-      resolve: (payload) => payload,
-      subscribe: () => lightConnector.subscribeLight("LIGHT_CHANGED_TOPIC")
+      resolve: (payload, args, context, info) => {
+        console.log(payload)
+        console.log(args)
+        console.log(context)
+        return {id: "Light 1"}
+      },
+      subscribe: () => lightConnector.subscribeLight()
     }
   }
 };

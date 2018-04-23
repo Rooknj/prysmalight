@@ -1,108 +1,134 @@
 import { connect } from "mqtt";
-import { MQTTPubSub, SubscriptionManager } from "graphql-mqtt-subscriptions"; // for connecting to mqtt
+import { MQTTPubSub } from "graphql-mqtt-subscriptions"; // for connecting to mqtt
 import { PubSub } from "graphql-subscriptions";
 
-//Call to MQTT servers
-/*
-const client = connect("tcp://localhost:1883", {
-  reconnectPeriod: 1000,
-});
-*/
+// MQTT: client
 const MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
 
+// MQTT: topics
+// connection
+const MQTT_LIGHT_CONNECTED_TOPIC = "office/rgb1/connected";
+
+// state
+const MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/status";
+const MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/switch";
+
+// brightness
+const MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC = "office/rgb1/brightness/status";
+const MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC = "office/rgb1/brightness/set";
+
+// colors (rgb)
+const MQTT_LIGHT_RGB_STATE_TOPIC = "office/rgb1/rgb/status";
+const MQTT_LIGHT_RGB_COMMAND_TOPIC = "office/rgb1/rgb/set";
+
+// MQTT: payloads by default (on/off)
+const LIGHT_ON = "ON";
+const LIGHT_OFF = "OFF";
+const LIGHT_CONNECTED = 2;
+const LIGHT_DISCONNECTED = 0;
+
+// Connect to MQTT server
 const client = connect(MQTT_CLIENT, {
   reconnectPeriod: 1000
 });
 
+// Fires on connect to MQTT server
 const connectionListener = connection => {
   if (connection) {
-    console.log("Connected to", MQTT_CLIENT);
+    console.log("INFO: Connected to", MQTT_CLIENT);
     //console.log(connection);
   } else {
-    console.log("Failed to connect to", MQTT_CLIENT);
+    console.log("ERROR: Failed to connect to", MQTT_CLIENT);
   }
 };
 
-const onMQTTSubscribe = (subId, granted) => {
-  console.log(`Subscription with id ${subId} was given QoS of ${granted.qos}`);
-};
+// Initialize MQTTPubSub
+const pubsub = new MQTTPubSub({ client, connectionListener });
 
-const pubsub = new MQTTPubSub({ client, connectionListener, onMQTTSubscribe });
+// Subscribe to the response topic
+const subscribeTo = (topic, onMessage) => {
+  pubsub
+    .subscribe(topic, onMessage)
+    .then(subId =>
+      console.log(`INFO: Subscribed to ${topic} with an id of: ${subId}`)
+    )
+    .catch(error =>
+      console.log(`ERROR: Error subscribing to ${topic} Error: ${error}`)
+    );
+};
 
 class LightConnector {
   constructor() {
-    this.lights = [
-      {
-        id: "Light 1",
-        power: false,
-        brightness: 100,
-        color: { r: 0, g: 1, b: 2 }
-      },
-      {
-        id: "Light 2",
-        power: false,
-        brightness: 100,
-        color: { r: 0, g: 1, b: 2 }
+    this.lights = [{id: "Light 1"}];
+    const onConnectedMessage = data => {
+      console.log("INFO: onConnected", data);
+      let connected;
+      if (Number(data) === LIGHT_DISCONNECTED) {
+        connected = false;
+      } else if (Number(data) === LIGHT_CONNECTED) {
+        connected = true;
+      } else {
+        return;
       }
-    ];
+      Object.assign(this.lights[0], { connected });
+      console.log("Lights 1:", this.lights[0])
+    };
+    const onPowerMessage = data => {
+      console.log("INFO: onPower", data);
+      let power;
+      if (data === "ON") {
+        power = true;
+      } else if (data === "OFF") {
+        power = false;
+      } else {
+        return;
+      }
+      Object.assign(this.lights[0], { power });
+      console.log("Lights 1:", this.lights[0])
+    };
+    const onBrightnessMessage = data => {
+      console.log("INFO: onBrightness", data);
+      if (Number(data) >= 0 && Number(data) <= 100) {
+        Object.assign(this.lights[0], { brightness: data });
+        console.log("Lights 1:", this.lights[0])
+      }
+    };
+    const onColorMessage = data => {
+      console.log("INFO: onColor", data);
+      const color = data.split(',').map(value => Number(value));
+      if (color.length !== 3 || color[0] > 255 || color[0] < 0 || color[1] > 255 || color[1] < 0 || color[2] > 255 || color[2] < 0) {
+        return;
+      }
+      Object.assign(this.lights[0], { color: {r: color[0], g: color[0], b: color[0]}});
+      console.log("Lights 1:", this.lights[0])
+    };
+    subscribeTo(MQTT_LIGHT_CONNECTED_TOPIC, onConnectedMessage);
+    subscribeTo(MQTT_LIGHT_STATE_TOPIC, onPowerMessage);
+    subscribeTo(MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC, onBrightnessMessage);
+    subscribeTo(MQTT_LIGHT_RGB_STATE_TOPIC, onColorMessage);
   }
 
   getLight = lightId => {
-    const subTopic = "LIGHT_STATE_TOPIC";
-    const pubTopic = "GET_LIGHT_STATE_TOPIC";
-    let unsubscribeId;
-    console.log("Getting light");
-
-    return new Promise((resolve, reject) => {
-      // Resolve the promise when we receive an MQTT response
-      const onMessage = data => {
-        pubsub.unsubscribe(unsubscribeId);
-        //console.log("Unsubscribed subscription", unsubscribeId, "from", subTopic)
-        resolve(Object.assign(data, {id: "Light 1"}))
-      };
-      // Only send an MQTT message to the ESP8266 once we are subscribed to the response topic
-      const onSubscribe = subId => {
-        unsubscribeId = subId;
-        pubsub.publish(pubTopic, {sendState: true})
-      };
-      // If the subscribe function errors, do something
-      const onError = error => console.log(error);
-      // Subscribe to the response topic
-      pubsub.subscribe(subTopic, onMessage).then(onSubscribe).catch(onError);
-    });
+    return this.lights[0];
   };
 
   setLight = light => {
-    const subTopic = "LIGHT_CHANGED_TOPIC";
-    const pubTopic = "CHANGE_LIGHT_TOPIC";
-    let unsubscribeId;
-
-    return new Promise((resolve, reject) => {
-      // Resolve the promise when we receive an MQTT response
-      const onMessage = data => {
-        pubsub.unsubscribe(unsubscribeId);
-        //console.log("Unsubscribed subscription", unsubscribeId, "from", subTopic)
-        resolve(Object.assign(data, {id: "Light 1"}))
-      };
-      // Only send an MQTT message to the ESP8266 once we are subscribed to the response topic
-      const onSubscribe = subId => {
-        unsubscribeId = subId;
-        pubsub.publish(pubTopic, light)
-      };
-      // If the subscribe function errors, do something
-      const onError = error => console.log(error);
-      // Subscribe to the response topic
-      pubsub.subscribe(subTopic, onMessage).then(onSubscribe).catch(onError);
-    });
+    //TODO: call publish to all relevant topics then respond once the responses are in
+    return this.lights[0];
   };
 
-  subscribeLight = topic => {
-    return pubsub.asyncIterator(topic);
+  subscribeLight = () => {
+    return pubsub.asyncIterator([
+      MQTT_LIGHT_CONNECTED_TOPIC,
+      MQTT_LIGHT_STATE_TOPIC,
+      MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC,
+      MQTT_LIGHT_RGB_STATE_TOPIC
+    ]);
   };
 
   getLights = () => {
-    console.log("Getting lights");
-    return [this.getLight("Light 1")];
+    console.log("INFO: Getting lights");
+    return this.lights;
   };
 }
 

@@ -30,6 +30,9 @@ const PROGMEM uint16_t MQTT_SERVER_PORT = 1883;
 //const PROGMEM char* MQTT_PASSWORD = "[Redacted]";
 
 // MQTT: topics
+// connection
+const PROGMEM char* MQTT_LIGHT_CONNECTED_TOPIC = "office/rgb1/connected";
+
 // state
 const PROGMEM char* MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/status";
 const PROGMEM char* MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/switch";
@@ -45,6 +48,8 @@ const PROGMEM char* MQTT_LIGHT_RGB_COMMAND_TOPIC = "office/rgb1/rgb/set";
 // payloads by default (on/off)
 const PROGMEM char* LIGHT_ON = "ON";
 const PROGMEM char* LIGHT_OFF = "OFF";
+const PROGMEM char* LIGHT_CONNECTED = "2";
+const PROGMEM char* LIGHT_DISCONNECTED = "0";
 
 // buffer used to send/receive data with MQTT
 const uint8_t MSG_BUFFER_SIZE = 20;
@@ -168,10 +173,13 @@ void callback(char* p_topic, byte* p_payload, unsigned int p_length) {
 
 // MQTT connect/reconnect function
 boolean reconnect() {
-  if (client.connect(MQTT_CLIENT_ID)) {
+  if (client.connect(MQTT_CLIENT_ID, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, LIGHT_DISCONNECTED)) {
     Serial.println("INFO: connected");
     
     // Once connected, publish an announcement...
+    // publish that the ESP is connected
+    client.publish(MQTT_LIGHT_CONNECTED_TOPIC, LIGHT_CONNECTED, true);
+    
     // publish the initial values
     publishRGBState();
     publishRGBBrightness();

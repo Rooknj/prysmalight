@@ -14,15 +14,15 @@ type Subscription {
 }
 
 type Color {
-    r: Int
-    g: Int
-    b: Int
+    r: Int!
+    g: Int!
+    b: Int!
 }
 
 input ColorInput {
-    r: Int
-    g: Int
-    b: Int
+    r: Int!
+    g: Int!
+    b: Int!
 }
 
 type Light {

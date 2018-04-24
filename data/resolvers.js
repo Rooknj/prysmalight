@@ -1,6 +1,6 @@
 import { LightConnector } from "./connectors";
 
-const lightConnector = new LightConnector()
+const lightConnector = new LightConnector();
 
 const resolvers = {
   Query: {
@@ -13,7 +13,7 @@ const resolvers = {
   Subscription: {
     lightChanged: {
       resolve: (payload, args, context, info) => {
-        return {id: "Light 1"}
+        return { id: "Light 1" };
       },
       subscribe: () => lightConnector.subscribeLight()
     }

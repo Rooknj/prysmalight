@@ -85,6 +85,7 @@ class LightConnector {
       }
       Object.assign(this.lights[0], { connected });
     };
+
     const onPowerMessage = data => {
       let power;
       if (data === "ON") {
@@ -96,11 +97,13 @@ class LightConnector {
       }
       Object.assign(this.lights[0], { power });
     };
+
     const onBrightnessMessage = data => {
       if (Number(data) >= 0 && Number(data) <= 100) {
         Object.assign(this.lights[0], { brightness: data });
       }
     };
+
     const onColorMessage = data => {
       const color = data.split(",").map(value => Number(value));
       if (
@@ -143,26 +146,29 @@ class LightConnector {
 
   setLight = light => {
     //TODO: call publish to all relevant topics then respond once the responses are in
-
+    let optimisticResponse = {};
     if ("power" in light) {
-      mqttClient.publish(
-        MQTT_LIGHT_COMMAND_TOPIC,
-        Buffer.from(light.power ? String(LIGHT_ON) : String(LIGHT_OFF))
-      );
+      const power = light.power ? String(LIGHT_ON) : String(LIGHT_OFF);
+      mqttClient.publish(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(power));
+      Object.assign(optimisticResponse, { power: light.power });
     }
     if ("brightness" in light) {
+      const brightness = String(light.brightness);
       mqttClient.publish(
         MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC,
-        Buffer.from(String(light.brightness))
+        Buffer.from(brightness)
       );
+      Object.assign(optimisticResponse, { brightness: light.brightness });
     }
     if ("color" in light) {
+      const color = `${light.color.r},${light.color.g},${light.color.b}`
       mqttClient.publish(
         MQTT_LIGHT_RGB_COMMAND_TOPIC,
-        Buffer.from(`${light.color.r},${light.color.g},${light.color.b}`)
+        Buffer.from(color)
       );
+      Object.assign(optimisticResponse, { color: light.color });
     }
-    return this.lights[0];
+    return Object.assign(this.lights[0], optimisticResponse);
   };
 
   subscribeLight = () => {
@@ -175,7 +181,6 @@ class LightConnector {
   };
 
   getLights = () => {
-    console.log("INFO: Getting lights");
     return this.lights;
   };
 }

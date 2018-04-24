@@ -93,6 +93,7 @@ class LightConnector {
       } else if (Number(data) === LIGHT_CONNECTED) {
         connected = true;
       } else {
+        ChalkConsole.error(`Received messsage on connected topic that was not in the correct format\nMessage: ${data}`);
         return;
       }
       Object.assign(this.lights[0], { connected });
@@ -105,6 +106,9 @@ class LightConnector {
       } else if (data === "OFF") {
         power = false;
       } else {
+        ChalkConsole.error(
+          `Received messsage on power topic that was not in the correct format\nMessage: ${data}`
+        );
         return;
       }
       Object.assign(this.lights[0], { power });
@@ -113,6 +117,10 @@ class LightConnector {
     const onBrightnessMessage = data => {
       if (Number(data) >= 0 && Number(data) <= 100) {
         Object.assign(this.lights[0], { brightness: data });
+      } else {
+        ChalkConsole.error(
+          `Received messsage on brightness topic that was not in the correct format\nMessage: ${data}`
+        );
       }
     };
 
@@ -127,6 +135,9 @@ class LightConnector {
         color[2] > 255 ||
         color[2] < 0
       ) {
+        ChalkConsole.error(
+          `Received messsage on rgb color topic that was not in the correct format\nMessage: ${data}`
+        );
         return;
       }
       Object.assign(this.lights[0], {
@@ -149,10 +160,12 @@ class LightConnector {
       } else if (topic === MQTT_LIGHT_STATE_TOPIC) {
         onPowerMessage(data);
       } else {
+        ChalkConsole.error(
+          `Received messsage that belonged to a topic we are not supposed to be subscribed to`
+        );
         return;
       }
-      console.log("Publishing", this.lights[0])
-      pubsub.publish('lightChanged', {lightChanged: this.lights[0]})
+      pubsub.publish("lightChanged", { lightChanged: this.lights[0] });
     });
   }
 
@@ -170,10 +183,7 @@ class LightConnector {
     }
     if ("brightness" in light) {
       const brightness = String(light.brightness);
-      publishTo(
-        MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC,
-        Buffer.from(brightness)
-      );
+      publishTo(MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC, Buffer.from(brightness));
       Object.assign(optimisticResponse, { brightness: light.brightness });
     }
     if ("color" in light) {

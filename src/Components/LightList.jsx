@@ -41,7 +41,6 @@ const GET_LIGHTS = gql`
 const LightList = ({ data: { loading, error, lights } }) => {
     if (loading) return "Loading...";
     if (error) return `Error! ${error.message}`;
-    //console.log("got Data", lights);
     return (
         <div>
             <p>Lights:</p>

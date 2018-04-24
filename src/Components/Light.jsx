@@ -57,6 +57,40 @@ const SET_LIGHT = gql`
     }
 `;
 
+/*
+const LIGHT_CHANGED = gql`
+    subscription lightChanged($lightId: Int!) {
+        lightChanged(lightId: $lightId) {
+            id
+            connected
+            power
+            brightness
+            color {
+                r
+                g
+                b
+            }
+        }
+    }
+`;
+*/
+
+const LIGHT_CHANGED = gql`
+    subscription lightChanged {
+        lightChanged(lightId: "Light 1") {
+            id
+            connected
+            power
+            brightness
+            color {
+                r
+                g
+                b
+            }
+        }
+    }
+`;
+
 class Light extends React.Component {
     constructor(props) {
         super(props);
@@ -71,6 +105,17 @@ class Light extends React.Component {
 
     static propTypes = propTypes;
     static defaultProps = defaultProps;
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        console.log(nextProps);
+        return {
+            id: nextProps.light.id,
+            connected: nextProps.light.connected,
+            power: nextProps.light.power,
+            brightness: nextProps.light.brightness,
+            color: nextProps.light.color
+        };
+    }
 
     handleMutationCompleted = ({ data }) => {
         //console.log("Light Updated Successfully!");
@@ -167,4 +212,4 @@ class Light extends React.Component {
     }
 }
 
-export default graphql(SET_LIGHT)(Light);
+export default graphql(LIGHT_CHANGED)(graphql(SET_LIGHT)(Light));

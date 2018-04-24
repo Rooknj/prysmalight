@@ -10,8 +10,7 @@ const propTypes = {
         error: PropTypes.object,
         lights: PropTypes.arrayOf(
             PropTypes.shape({
-                id: PropTypes.number,
-                name: PropTypes.string
+                id: PropTypes.string
             })
         )
     }).isRequired
@@ -27,7 +26,7 @@ const GET_LIGHTS = gql`
     query getLights {
         lights {
             id
-            name
+            connected
             power
             brightness
             color {
@@ -42,7 +41,7 @@ const GET_LIGHTS = gql`
 const LightList = ({ data: { loading, error, lights } }) => {
     if (loading) return "Loading...";
     if (error) return `Error! ${error.message}`;
-
+    //console.log("got Data", lights);
     return (
         <div>
             <p>Lights:</p>

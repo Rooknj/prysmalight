@@ -6,16 +6,18 @@ import gql from "graphql-tag";
 
 import { ChromePicker } from "react-color";
 //import Slider from "./Slider";
-import Slider, { createSliderWithTooltip } from "rc-slider";
+import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 
 import Toggle from "react-toggle";
 import "react-toggle/style.css"; // for ES6 modules
 
+import throttle from "lodash.throttle";
+
 const propTypes = {
     light: PropTypes.shape({
-        id: PropTypes.number,
-        name: PropTypes.string,
+        id: PropTypes.string,
+        connected: PropTypes.bool,
         power: PropTypes.bool,
         brightness: PropTypes.number,
         color: PropTypes.shape({
@@ -28,8 +30,8 @@ const propTypes = {
 
 const defaultProps = {
     light: {
-        id: 0,
-        name: "",
+        id: "",
+        connected: false,
         power: false,
         brightness: 0,
         color: {
@@ -41,10 +43,9 @@ const defaultProps = {
 };
 
 const SET_LIGHT = gql`
-    mutation setLight($lightId: Int!, $light: LightInput!) {
-        setLight(lightId: $lightId, light: $light) {
+    mutation setLight($light: LightInput!) {
+        setLight(light: $light) {
             id
-            name
             power
             brightness
             color {
@@ -56,15 +57,15 @@ const SET_LIGHT = gql`
     }
 `;
 
-const SliderWithTooltip = createSliderWithTooltip(Slider);
-
 class Light extends React.Component {
     constructor(props) {
         super(props);
-
-        //Bring state out to Apollo Inmemory Cache
         this.state = {
-            name: this.props.light.name
+            id: this.props.light.id,
+            connected: this.props.light.connected,
+            power: this.props.light.power,
+            brightness: this.props.light.brightness,
+            color: this.props.light.color
         };
     }
 
@@ -72,8 +73,8 @@ class Light extends React.Component {
     static defaultProps = defaultProps;
 
     handleMutationCompleted = ({ data }) => {
-        console.log("Light Updated Successfully!");
-        console.log("Data Received: ", data);
+        //console.log("Light Updated Successfully!");
+        //console.log("Data Received: ", data);
     };
 
     handleMutationError = error => {
@@ -87,34 +88,33 @@ class Light extends React.Component {
             .catch(this.handleMutationError);
     };
 
-    handleNameChange = evt => {
-        this.setState({ name: evt.target.value });
-    };
-
     handlePowerChange = evt => {
+        this.setState({ power: evt.target.checked });
         const variables = {
-            lightId: this.props.light.id,
             light: {
+                id: this.props.light.id,
                 power: evt.target.checked
             }
         };
         this.setLight(variables);
     };
 
-    handleBrightnessChange = brightness => {
+    handleBrightnessChange = throttle(brightness => {
+        this.setState({ brightness });
         const variables = {
-            lightId: this.props.light.id,
             light: {
+                id: this.props.light.id,
                 brightness
             }
         };
         this.setLight(variables);
-    };
+    }, 100);
 
-    handleColorChange = ({ rgb: { r, g, b } }) => {
+    handleColorChange = throttle(({ rgb: { r, g, b } }) => {
+        this.setState({ color: { r, g, b } });
         const variables = {
-            lightId: this.props.light.id,
             light: {
+                id: this.props.light.id,
                 color: {
                     r,
                     g,
@@ -123,30 +123,23 @@ class Light extends React.Component {
             }
         };
         this.setLight(variables);
-    };
+    }, 100);
 
-    percentFormatter(v) {
-        return `${v} %`;
-    }
-    //TODO: Break brightness bar and name display/editor into seperate components
     render() {
+        if (!this.state.connected) {
+            return <li>Light Not Connected</li>;
+        }
         return (
             <li>
                 <label>
-                    <span>Light Name: </span>
+                    <span>Light Name: {this.state.id}</span>
                 </label>
-                <input
-                    name="name"
-                    type="text"
-                    value={this.state.name}
-                    onChange={this.handleNameChange}
-                />
                 <br />
                 <label>
                     <span>Power: </span>
                 </label>
                 <Toggle
-                    defaultChecked={this.props.power}
+                    checked={this.state.power}
                     onChange={this.handlePowerChange}
                 />
                 <br />
@@ -155,7 +148,7 @@ class Light extends React.Component {
                 </label>
                 <div style={{ width: 600, margin: 50 }}>
                     <Slider
-                        defaultValue={50}
+                        defaultValue={this.state.brightness}
                         min={0}
                         max={100}
                         onChange={this.handleBrightnessChange}
@@ -165,8 +158,8 @@ class Light extends React.Component {
                 <label> Color: </label>
                 <ChromePicker
                     disableAlpha={true}
-                    color={this.props.light.color}
-                    onChangeComplete={this.handleColorChange}
+                    color={this.state.color}
+                    onChange={this.handleColorChange}
                 />
                 <br />
             </li>

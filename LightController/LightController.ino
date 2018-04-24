@@ -165,7 +165,11 @@ void callback(char* p_topic, byte* p_payload, unsigned int p_length) {
     } else {
       m_rgb_blue = rgb_blue;
     }
-    
+
+    if (!m_rgb_state) {
+      m_rgb_state = true;
+      publishRGBState();
+    }
     setColor(m_rgb_red, m_rgb_green, m_rgb_blue);
     publishRGBColor();
   }

@@ -29,33 +29,44 @@ const LIGHT_DISCONNECTED = 0;
 
 // Connect to MQTT server
 const mqttClient = MQTT.connect(MQTT_CLIENT, {
-  reconnectPeriod: 1000
+  reconnectPeriod: 5000 // Amount of time between reconnection attempts
 });
 
-// Fires on connect to MQTT server
-const connectionListener = connection => {
-  if (connection) {
-    ChalkConsole.info(`Connected to ${MQTT_CLIENT}`);
-    //console.log(connection);
-  } else {
-    ChalkConsole.error(`Failed to connect to ${MQTT_CLIENT}`);
-  }
-};
-
-// Initialize MQTTPubSub
-const pubsub = new PubSub();
-
-// Subscribe to the response topic
-const subscribeTo = (topic, onMessage) => {
+// Subscribe method with logging
+const subscribeTo = topic => {
   mqttClient
-    .subscribe(topic, onMessage)
-    .then(subId =>
-      ChalkConsole.info(`Subscribed to ${topic} with an id of: ${subId}`)
+    .subscribe(topic)
+    .then(granted =>
+      ChalkConsole.info(
+        `Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`
+      )
     )
     .catch(error =>
       ChalkConsole.error(`Error subscribing to ${topic} Error: ${error}`)
     );
 };
+
+// On connect
+mqttClient.on("connect", () => {
+  ChalkConsole.info(`Connected to MQTT broker`);
+  subscribeTo(MQTT_LIGHT_CONNECTED_TOPIC);
+  subscribeTo(MQTT_LIGHT_STATE_TOPIC);
+  subscribeTo(MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC);
+  subscribeTo(MQTT_LIGHT_RGB_STATE_TOPIC);
+});
+
+// On reconnect attempt
+mqttClient.on("reconnect", () => {
+  ChalkConsole.debug(`Attempting reconnection to MQTT broker`);
+});
+
+// On connection or parsing error
+mqttClient.on("error", error => {
+  ChalkConsole.error(`Error connecting to MQTT broker. Error: ${error}`);
+});
+
+// Initialize PubSub
+const pubsub = new PubSub();
 
 class LightConnector {
   constructor() {
@@ -64,7 +75,6 @@ class LightConnector {
 
     // MQTT Message Handlers
     const onConnectedMessage = data => {
-      console.log(`onConnected ${data}`);
       let connected;
       if (Number(data) === LIGHT_DISCONNECTED) {
         connected = false;
@@ -74,10 +84,8 @@ class LightConnector {
         return;
       }
       Object.assign(this.lights[0], { connected });
-      console.log("Lights 1:", this.lights[0]);
     };
     const onPowerMessage = data => {
-      console.log("onPower", data);
       let power;
       if (data === "ON") {
         power = true;
@@ -87,17 +95,13 @@ class LightConnector {
         return;
       }
       Object.assign(this.lights[0], { power });
-      console.log("Lights 1:", this.lights[0]);
     };
     const onBrightnessMessage = data => {
-      console.log("onBrightness", data);
       if (Number(data) >= 0 && Number(data) <= 100) {
         Object.assign(this.lights[0], { brightness: data });
-        console.log("Lights 1:", this.lights[0]);
       }
     };
     const onColorMessage = data => {
-      console.log("onColor", data);
       const color = data.split(",").map(value => Number(value));
       if (
         color.length !== 3 ||
@@ -113,27 +117,24 @@ class LightConnector {
       Object.assign(this.lights[0], {
         color: { r: color[0], g: color[0], b: color[0] }
       });
-      console.log("Lights 1:", this.lights[0]);
     };
 
     // Route each MQTT topic to it's respective message handler
-    mqttClient.on('message', (topic, message) => {
+    mqttClient.on("message", (topic, message) => {
+      const data = message.toString();
+      ChalkConsole.info(
+        `Received message on topic ${topic} with a payload of ${data}`
+      );
       if (topic === MQTT_LIGHT_CONNECTED_TOPIC) {
-        onConnectedMessage(message.toString())
+        onConnectedMessage(data);
       } else if (topic === MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC) {
-        onBrightnessMessage(message.toString())
+        onBrightnessMessage(data);
       } else if (topic === MQTT_LIGHT_RGB_STATE_TOPIC) {
-        onColorMessage(message.toString())
+        onColorMessage(data);
       } else if (topic === MQTT_LIGHT_STATE_TOPIC) {
-        onPowerMessage(message.toString())
+        onPowerMessage(data);
       }
     });
-
-    // Subscribe to all relevant topics
-    subscribeTo(MQTT_LIGHT_CONNECTED_TOPIC, onConnectedMessage);
-    subscribeTo(MQTT_LIGHT_STATE_TOPIC, onPowerMessage);
-    subscribeTo(MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC, onBrightnessMessage);
-    subscribeTo(MQTT_LIGHT_RGB_STATE_TOPIC, onColorMessage);
   }
 
   getLight = lightId => {
@@ -142,16 +143,24 @@ class LightConnector {
 
   setLight = light => {
     //TODO: call publish to all relevant topics then respond once the responses are in
-    
+
     if ("power" in light) {
-      mqttClient.publish(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(light.power ? String(LIGHT_ON) : String(LIGHT_OFF)));
-      console.log("POWER");
+      mqttClient.publish(
+        MQTT_LIGHT_COMMAND_TOPIC,
+        Buffer.from(light.power ? String(LIGHT_ON) : String(LIGHT_OFF))
+      );
     }
     if ("brightness" in light) {
-      mqttClient.publish(MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC, Buffer.from(String(light.brightness)));
+      mqttClient.publish(
+        MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC,
+        Buffer.from(String(light.brightness))
+      );
     }
     if ("color" in light) {
-      mqttClient.publish(MQTT_LIGHT_RGB_COMMAND_TOPIC, Buffer.from(`${light.color.r},${light.color.g},${light.color.b}`));
+      mqttClient.publish(
+        MQTT_LIGHT_RGB_COMMAND_TOPIC,
+        Buffer.from(`${light.color.r},${light.color.g},${light.color.b}`)
+      );
     }
     return this.lights[0];
   };

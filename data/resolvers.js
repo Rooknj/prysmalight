@@ -12,9 +12,6 @@ const resolvers = {
   },
   Subscription: {
     lightChanged: {
-      resolve: (payload, args, context, info) => {
-        return { id: "Light 1" };
-      },
       subscribe: () => lightConnector.subscribeLight()
     }
   }

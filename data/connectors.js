@@ -27,6 +27,9 @@ const LIGHT_OFF = "OFF";
 const LIGHT_CONNECTED = 2;
 const LIGHT_DISCONNECTED = 0;
 
+// Initialize PubSub
+const pubsub = new PubSub();
+
 // Connect to MQTT server
 const mqttClient = MQTT.connect(MQTT_CLIENT, {
   reconnectPeriod: 5000 // Amount of time between reconnection attempts
@@ -43,6 +46,18 @@ const subscribeTo = topic => {
     )
     .catch(error =>
       ChalkConsole.error(`Error subscribing to ${topic} Error: ${error}`)
+    );
+};
+
+// Subscribe method with logging
+const publishTo = (topic, payload) => {
+  mqttClient
+    .publish(topic, payload)
+    .then(() =>
+      ChalkConsole.info(`Published payload of ${payload} to ${topic}`)
+    )
+    .catch(error =>
+      ChalkConsole.error(`Error publishing to ${topic} Error: ${error}`)
     );
 };
 
@@ -64,9 +79,6 @@ mqttClient.on("reconnect", () => {
 mqttClient.on("error", error => {
   ChalkConsole.error(`Error connecting to MQTT broker. Error: ${error}`);
 });
-
-// Initialize PubSub
-const pubsub = new PubSub();
 
 class LightConnector {
   constructor() {
@@ -136,7 +148,11 @@ class LightConnector {
         onColorMessage(data);
       } else if (topic === MQTT_LIGHT_STATE_TOPIC) {
         onPowerMessage(data);
+      } else {
+        return;
       }
+      console.log("Publishing", this.lights[0])
+      pubsub.publish('lightChanged', {lightChanged: this.lights[0]})
     });
   }
 
@@ -149,35 +165,27 @@ class LightConnector {
     let optimisticResponse = {};
     if ("power" in light) {
       const power = light.power ? String(LIGHT_ON) : String(LIGHT_OFF);
-      mqttClient.publish(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(power));
+      publishTo(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(power));
       Object.assign(optimisticResponse, { power: light.power });
     }
     if ("brightness" in light) {
       const brightness = String(light.brightness);
-      mqttClient.publish(
+      publishTo(
         MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC,
         Buffer.from(brightness)
       );
       Object.assign(optimisticResponse, { brightness: light.brightness });
     }
     if ("color" in light) {
-      const color = `${light.color.r},${light.color.g},${light.color.b}`
-      mqttClient.publish(
-        MQTT_LIGHT_RGB_COMMAND_TOPIC,
-        Buffer.from(color)
-      );
+      const color = `${light.color.r},${light.color.g},${light.color.b}`;
+      publishTo(MQTT_LIGHT_RGB_COMMAND_TOPIC, Buffer.from(color));
       Object.assign(optimisticResponse, { color: light.color });
     }
     return Object.assign(this.lights[0], optimisticResponse);
   };
 
   subscribeLight = () => {
-    return pubsub.asyncIterator([
-      MQTT_LIGHT_CONNECTED_TOPIC,
-      MQTT_LIGHT_STATE_TOPIC,
-      MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC,
-      MQTT_LIGHT_RGB_STATE_TOPIC
-    ]);
+    return pubsub.asyncIterator("lightChanged");
   };
 
   getLights = () => {

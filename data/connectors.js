@@ -1,4 +1,4 @@
-import ChalkConsole from '../ChalkConsole.js'
+import ChalkConsole from "../ChalkConsole.js";
 import { connect } from "mqtt";
 import { MQTTPubSub } from "graphql-mqtt-subscriptions"; // for connecting to mqtt
 import { PubSub } from "graphql-subscriptions";
@@ -60,7 +60,7 @@ const subscribeTo = (topic, onMessage) => {
 
 class LightConnector {
   constructor() {
-    this.lights = [{id: "Light 1"}];
+    this.lights = [{ id: "Light 1" }];
     const onConnectedMessage = data => {
       console.log(`onConnected ${data}`);
       let connected;
@@ -72,7 +72,7 @@ class LightConnector {
         return;
       }
       Object.assign(this.lights[0], { connected });
-      console.log("Lights 1:", this.lights[0])
+      console.log("Lights 1:", this.lights[0]);
     };
     const onPowerMessage = data => {
       console.log("onPower", data);
@@ -85,23 +85,33 @@ class LightConnector {
         return;
       }
       Object.assign(this.lights[0], { power });
-      console.log("Lights 1:", this.lights[0])
+      console.log("Lights 1:", this.lights[0]);
     };
     const onBrightnessMessage = data => {
       console.log("onBrightness", data);
       if (Number(data) >= 0 && Number(data) <= 100) {
         Object.assign(this.lights[0], { brightness: data });
-        console.log("Lights 1:", this.lights[0])
+        console.log("Lights 1:", this.lights[0]);
       }
     };
     const onColorMessage = data => {
       console.log("onColor", data);
-      const color = data.split(',').map(value => Number(value));
-      if (color.length !== 3 || color[0] > 255 || color[0] < 0 || color[1] > 255 || color[1] < 0 || color[2] > 255 || color[2] < 0) {
+      const color = data.split(",").map(value => Number(value));
+      if (
+        color.length !== 3 ||
+        color[0] > 255 ||
+        color[0] < 0 ||
+        color[1] > 255 ||
+        color[1] < 0 ||
+        color[2] > 255 ||
+        color[2] < 0
+      ) {
         return;
       }
-      Object.assign(this.lights[0], { color: {r: color[0], g: color[0], b: color[0]}});
-      console.log("Lights 1:", this.lights[0])
+      Object.assign(this.lights[0], {
+        color: { r: color[0], g: color[0], b: color[0] }
+      });
+      console.log("Lights 1:", this.lights[0]);
     };
     subscribeTo(MQTT_LIGHT_CONNECTED_TOPIC, onConnectedMessage);
     subscribeTo(MQTT_LIGHT_STATE_TOPIC, onPowerMessage);
@@ -115,6 +125,16 @@ class LightConnector {
 
   setLight = light => {
     //TODO: call publish to all relevant topics then respond once the responses are in
+    
+    if ("power" in light) {
+      pubsub.publish(MQTT_LIGHT_COMMAND_TOPIC, light.power ? "ON" : "OFF");
+    }
+    if ("brightness" in light) {
+      pubsub.publish(MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC, light.brightness);
+    }
+    if ("color" in light) {
+      pubsub.publish(MQTT_LIGHT_RGB_COMMAND_TOPIC, `${light.color.r},${light.color.g},${light.color.b}`)
+    }
     return this.lights[0];
   };
 

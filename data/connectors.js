@@ -1,3 +1,4 @@
+import ChalkConsole from '../ChalkConsole.js'
 import { connect } from "mqtt";
 import { MQTTPubSub } from "graphql-mqtt-subscriptions"; // for connecting to mqtt
 import { PubSub } from "graphql-subscriptions";
@@ -35,10 +36,10 @@ const client = connect(MQTT_CLIENT, {
 // Fires on connect to MQTT server
 const connectionListener = connection => {
   if (connection) {
-    console.log("INFO: Connected to", MQTT_CLIENT);
+    ChalkConsole.info(`Connected to ${MQTT_CLIENT}`);
     //console.log(connection);
   } else {
-    console.log("ERROR: Failed to connect to", MQTT_CLIENT);
+    ChalkConsole.error(`Failed to connect to ${MQTT_CLIENT}`);
   }
 };
 
@@ -50,10 +51,10 @@ const subscribeTo = (topic, onMessage) => {
   pubsub
     .subscribe(topic, onMessage)
     .then(subId =>
-      console.log(`INFO: Subscribed to ${topic} with an id of: ${subId}`)
+      ChalkConsole.info(`Subscribed to ${topic} with an id of: ${subId}`)
     )
     .catch(error =>
-      console.log(`ERROR: Error subscribing to ${topic} Error: ${error}`)
+      ChalkConsole.error(`Error subscribing to ${topic} Error: ${error}`)
     );
 };
 
@@ -61,7 +62,7 @@ class LightConnector {
   constructor() {
     this.lights = [{id: "Light 1"}];
     const onConnectedMessage = data => {
-      console.log("INFO: onConnected", data);
+      console.log(`onConnected ${data}`);
       let connected;
       if (Number(data) === LIGHT_DISCONNECTED) {
         connected = false;
@@ -74,7 +75,7 @@ class LightConnector {
       console.log("Lights 1:", this.lights[0])
     };
     const onPowerMessage = data => {
-      console.log("INFO: onPower", data);
+      console.log("onPower", data);
       let power;
       if (data === "ON") {
         power = true;
@@ -87,14 +88,14 @@ class LightConnector {
       console.log("Lights 1:", this.lights[0])
     };
     const onBrightnessMessage = data => {
-      console.log("INFO: onBrightness", data);
+      console.log("onBrightness", data);
       if (Number(data) >= 0 && Number(data) <= 100) {
         Object.assign(this.lights[0], { brightness: data });
         console.log("Lights 1:", this.lights[0])
       }
     };
     const onColorMessage = data => {
-      console.log("INFO: onColor", data);
+      console.log("onColor", data);
       const color = data.split(',').map(value => Number(value));
       if (color.length !== 3 || color[0] > 255 || color[0] < 0 || color[1] > 255 || color[1] < 0 || color[2] > 255 || color[2] < 0) {
         return;

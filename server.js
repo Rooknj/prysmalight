@@ -1,3 +1,4 @@
+import ChalkConsole from './ChalkConsole.js'
 import express from 'express';
 import { createServer } from 'http';
 import cors from 'cors';
@@ -6,7 +7,6 @@ import bodyParser from 'body-parser';
 import schema from './data/schema';
 import { execute, subscribe } from 'graphql';
 import { SubscriptionServer } from 'subscriptions-transport-ws';
-
 
 const GRAPHQL_PORT = 4001;
 
@@ -22,8 +22,8 @@ graphQLServer.use('/graphiql', graphiqlExpress({
 const ws = createServer(graphQLServer);
 
 ws.listen(GRAPHQL_PORT, () => {
-  console.log(`GraphiQL is now running on http://localhost:${GRAPHQL_PORT}/graphiql`);
-  console.log(`GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}`);
+  ChalkConsole.info(`GraphiQL is now running on http://localhost:${GRAPHQL_PORT}/graphiql`);
+  ChalkConsole.info(`GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}`);
   new SubscriptionServer({ execute, subscribe, schema }, { server: ws, path: '/subscriptions' });
-  console.log(`GraphQL Subscription Server is now running on ws://localhost:${GRAPHQL_PORT}/subscriptions`);
+  ChalkConsole.info(`GraphQL Subscription Server is now running on ws://localhost:${GRAPHQL_PORT}/subscriptions`);
 });

@@ -17,8 +17,8 @@ import throttle from "lodash.throttle";
 const propTypes = {
     light: PropTypes.shape({
         id: PropTypes.string,
-        connected: PropTypes.bool,
-        power: PropTypes.bool,
+        connected: PropTypes.number,
+        power: PropTypes.string,
         brightness: PropTypes.number,
         color: PropTypes.shape({
             r: PropTypes.number,
@@ -31,8 +31,8 @@ const propTypes = {
 const defaultProps = {
     light: {
         id: "",
-        connected: false,
-        power: false,
+        connected: 0,
+        power: "OFF",
         brightness: 0,
         color: {
             r: 0,
@@ -44,36 +44,9 @@ const defaultProps = {
 
 const SET_LIGHT = gql`
     mutation setLight($light: LightInput!) {
-        setLight(light: $light) {
-            id
-            power
-            brightness
-            color {
-                r
-                g
-                b
-            }
-        }
+        setLight(light: $light)
     }
 `;
-
-/*
-const LIGHT_CHANGED = gql`
-    subscription lightChanged($lightId: Int!) {
-        lightChanged(lightId: $lightId) {
-            id
-            connected
-            power
-            brightness
-            color {
-                r
-                g
-                b
-            }
-        }
-    }
-`;
-*/
 
 const LIGHT_CHANGED = gql`
     subscription lightChanged {
@@ -106,15 +79,36 @@ class Light extends React.Component {
     static propTypes = propTypes;
     static defaultProps = defaultProps;
 
-    static getDerivedStateFromProps(nextProps, prevState) {
-        console.log(nextProps);
-        return {
-            id: nextProps.light.id,
-            connected: nextProps.light.connected,
-            power: nextProps.light.power,
-            brightness: nextProps.light.brightness,
-            color: nextProps.light.color
-        };
+    static getDerivedStateFromProps(
+        {
+            data: { loading, lightChanged }
+        },
+        prevState
+    ) {
+        if (loading) {
+            return prevState;
+        }
+        const { connected, power, brightness, color } = lightChanged;
+        let nextState = {};
+        if (power && power !== prevState.power) {
+            nextState = { ...nextState, ...{ power } };
+        }
+        if (brightness && brightness !== prevState.brightness) {
+            nextState = { ...nextState, ...{ brightness } };
+        }
+        if (connected && connected !== prevState.connected) {
+            nextState = { ...nextState, ...{ connected } };
+        }
+        if (
+            color &&
+            (color.r !== prevState.color.r ||
+                color.g !== prevState.color.g ||
+                color.b !== prevState.color.b)
+        ) {
+            nextState = { ...nextState, ...{ color } };
+        }
+        console.log(nextState);
+        return Object.keys(nextState).length > 0 ? nextState : prevState;
     }
 
     handleMutationCompleted = ({ data }) => {
@@ -134,11 +128,11 @@ class Light extends React.Component {
     };
 
     handlePowerChange = evt => {
-        this.setState({ power: evt.target.checked });
+        this.setState({ power: evt.target.checked ? "ON" : "OFF" });
         const variables = {
             light: {
                 id: this.props.light.id,
-                power: evt.target.checked
+                power: evt.target.checked ? "ON" : "OFF"
             }
         };
         this.setLight(variables);
@@ -156,6 +150,13 @@ class Light extends React.Component {
     }, 100);
 
     handleColorChange = throttle(({ rgb: { r, g, b } }) => {
+        if (
+            r === this.state.color.r &&
+            g === this.state.color.g &&
+            b === this.state.color.b
+        ) {
+            return;
+        }
         this.setState({ color: { r, g, b } });
         const variables = {
             light: {
@@ -171,7 +172,7 @@ class Light extends React.Component {
     }, 100);
 
     render() {
-        if (!this.state.connected) {
+        if (this.state.connected !== 2) {
             return <li>Light Not Connected</li>;
         }
         return (
@@ -184,7 +185,7 @@ class Light extends React.Component {
                     <span>Power: </span>
                 </label>
                 <Toggle
-                    checked={this.state.power}
+                    checked={this.state.power === "ON" ? true : false}
                     onChange={this.handlePowerChange}
                 />
                 <br />
@@ -193,7 +194,7 @@ class Light extends React.Component {
                 </label>
                 <div style={{ width: 600, margin: 50 }}>
                     <Slider
-                        defaultValue={this.state.brightness}
+                        value={this.state.brightness}
                         min={0}
                         max={100}
                         onChange={this.handleBrightnessChange}

@@ -89,22 +89,26 @@ class LightConnector {
     const onConnectedMessage = data => {
       let connected;
       if (Number(data) === LIGHT_DISCONNECTED) {
-        connected = false;
+        connected = LIGHT_DISCONNECTED;
       } else if (Number(data) === LIGHT_CONNECTED) {
-        connected = true;
+        connected = LIGHT_CONNECTED;
       } else {
-        ChalkConsole.error(`Received messsage on connected topic that was not in the correct format\nMessage: ${data}`);
+        ChalkConsole.error(
+          `Received messsage on connected topic that was not in the correct format\nMessage: ${data}`
+        );
         return;
       }
       Object.assign(this.lights[0], { connected });
+      console.log("Publishing connected", { lightChanged: { connected } });
+      pubsub.publish("lightChanged", { lightChanged: { connected } });
     };
 
     const onPowerMessage = data => {
       let power;
-      if (data === "ON") {
-        power = true;
-      } else if (data === "OFF") {
-        power = false;
+      if (data === LIGHT_ON) {
+        power = LIGHT_ON;
+      } else if (data === LIGHT_OFF) {
+        power = LIGHT_OFF;
       } else {
         ChalkConsole.error(
           `Received messsage on power topic that was not in the correct format\nMessage: ${data}`
@@ -112,11 +116,13 @@ class LightConnector {
         return;
       }
       Object.assign(this.lights[0], { power });
+      pubsub.publish("lightChanged", { lightChanged: { power } });
     };
 
     const onBrightnessMessage = data => {
       if (Number(data) >= 0 && Number(data) <= 100) {
         Object.assign(this.lights[0], { brightness: data });
+        pubsub.publish("lightChanged", { lightChanged: { brightness: data } });
       } else {
         ChalkConsole.error(
           `Received messsage on brightness topic that was not in the correct format\nMessage: ${data}`
@@ -141,7 +147,10 @@ class LightConnector {
         return;
       }
       Object.assign(this.lights[0], {
-        color: { r: color[0], g: color[0], b: color[0] }
+        color: { r: color[0], g: color[1], b: color[2] }
+      });
+      pubsub.publish("lightChanged", {
+        lightChanged: { color: { r: color[0], g: color[1], b: color[2] } }
       });
     };
 
@@ -165,7 +174,6 @@ class LightConnector {
         );
         return;
       }
-      pubsub.publish("lightChanged", { lightChanged: this.lights[0] });
     });
   }
 
@@ -177,21 +185,18 @@ class LightConnector {
     //TODO: call publish to all relevant topics then respond once the responses are in
     let optimisticResponse = {};
     if ("power" in light) {
-      const power = light.power ? String(LIGHT_ON) : String(LIGHT_OFF);
+      const power = String(light.power);
       publishTo(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(power));
-      Object.assign(optimisticResponse, { power: light.power });
     }
     if ("brightness" in light) {
       const brightness = String(light.brightness);
       publishTo(MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC, Buffer.from(brightness));
-      Object.assign(optimisticResponse, { brightness: light.brightness });
     }
     if ("color" in light) {
       const color = `${light.color.r},${light.color.g},${light.color.b}`;
       publishTo(MQTT_LIGHT_RGB_COMMAND_TOPIC, Buffer.from(color));
-      Object.assign(optimisticResponse, { color: light.color });
     }
-    return Object.assign(this.lights[0], optimisticResponse);
+    return true;
   };
 
   subscribeLight = () => {

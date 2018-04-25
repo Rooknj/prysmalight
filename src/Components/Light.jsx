@@ -96,7 +96,10 @@ class Light extends React.Component {
         if (brightness && brightness !== prevState.brightness) {
             nextState = { ...nextState, ...{ brightness } };
         }
-        if (connected && connected !== prevState.connected) {
+        if (
+            typeof connected === "number" &&
+            connected !== prevState.connected
+        ) {
             nextState = { ...nextState, ...{ connected } };
         }
         if (

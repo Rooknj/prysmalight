@@ -2689,6 +2689,10 @@ lodash.assign@^4.2.0:
   version "4.2.0"
   resolved "https://registry.npmjs.intuit.net/l/lodash.assign/_attachments/lodash.assign-4.2.0.tgz#0d99f3ccd7a6d261d19bdaeb9245005d285808e7"
 
+lodash.debounce@^4.0.8:
+  version "4.0.8"
+  resolved "https://registry.npmjs.intuit.net/l/lodash.debounce/_attachments/lodash.debounce-4.0.8.tgz#82d79bff30a67c4005ffd5e2515300ad9ca4d7af"
+
 lodash.isobject@^3.0.2:
   version "3.0.2"
   resolved "https://registry.npmjs.intuit.net/l/lodash.isobject/_attachments/lodash.isobject-3.0.2.tgz#3c8fb8d5b5bf4bf90ae06e14f2a530a4ed935e1d"

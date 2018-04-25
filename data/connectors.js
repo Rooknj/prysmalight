@@ -1,6 +1,7 @@
 import ChalkConsole from "../ChalkConsole.js";
 import MQTT from "async-mqtt";
 import { PubSub } from "graphql-subscriptions";
+import debounce from "lodash.debounce";
 
 // MQTT: client
 const MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
@@ -80,6 +81,18 @@ mqttClient.on("error", error => {
   ChalkConsole.error(`Error connecting to MQTT broker. Error: ${error}`);
 });
 
+const debouncePublishPower = debounce((topic, payload) => {
+  pubsub.publish(topic, payload);
+}, 500);
+
+const debouncePublishBrightness = debounce((topic, payload) => {
+  pubsub.publish(topic, payload);
+}, 500);
+
+const debouncePublishColor = debounce((topic, payload) => {
+  pubsub.publish(topic, payload);
+}, 500);
+
 class LightConnector {
   constructor() {
     // Light Data Store
@@ -99,7 +112,6 @@ class LightConnector {
         return;
       }
       Object.assign(this.lights[0], { connected });
-      console.log("Publishing connected", { lightChanged: { connected } });
       pubsub.publish("lightChanged", { lightChanged: { connected } });
     };
 
@@ -116,13 +128,15 @@ class LightConnector {
         return;
       }
       Object.assign(this.lights[0], { power });
-      pubsub.publish("lightChanged", { lightChanged: { power } });
+      debouncePublishPower("lightChanged", { lightChanged: { power } });
     };
 
     const onBrightnessMessage = data => {
       if (Number(data) >= 0 && Number(data) <= 100) {
         Object.assign(this.lights[0], { brightness: data });
-        pubsub.publish("lightChanged", { lightChanged: { brightness: data } });
+        debouncePublishBrightness("lightChanged", {
+          lightChanged: { brightness: data }
+        });
       } else {
         ChalkConsole.error(
           `Received messsage on brightness topic that was not in the correct format\nMessage: ${data}`
@@ -149,7 +163,7 @@ class LightConnector {
       Object.assign(this.lights[0], {
         color: { r: color[0], g: color[1], b: color[2] }
       });
-      pubsub.publish("lightChanged", {
+      debouncePublishColor("lightChanged", {
         lightChanged: { color: { r: color[0], g: color[1], b: color[2] } }
       });
     };

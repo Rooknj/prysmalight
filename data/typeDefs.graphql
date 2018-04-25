@@ -6,7 +6,7 @@ type Query {
 
 # This schema allows the following mutations:
 type Mutation {
-  setLight(light: LightInput!): Light
+  setLight(light: LightInput!): Boolean
 }
 
 type Subscription {
@@ -26,16 +26,16 @@ input ColorInput {
 }
 
 type Light {
-  id: String! # uique name of accessory
-  connected: Boolean
-  power: Boolean # curent power status
+  id: String # uique name of accessory
+  connected: Int
+  power: String # curent power status
   brightness: Int # current brightness
   color: Color # current color
 }
 
 input LightInput {
   id: String! # name of accessory
-  power: Boolean, # curent power status
+  power: String, # curent power status
   brightness: Int, # current brightness
   color: ColorInput # current color
 }

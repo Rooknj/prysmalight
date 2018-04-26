@@ -138,6 +138,13 @@ void callback(char* p_topic, byte* p_payload, unsigned int p_length) {
     } else {
       m_rgb_brightness = brightness;
       setColor(m_rgb_red, m_rgb_green, m_rgb_blue);
+      if (!m_rgb_state && brightness > 0) {
+        m_rgb_state = true;
+        publishRGBState();
+      } else if (m_rgb_state && brightness == 0) {
+        m_rgb_state = false;
+        publishRGBState();
+      }
       publishRGBBrightness();
     }
   } else if (String(MQTT_LIGHT_RGB_COMMAND_TOPIC).equals(p_topic)) {

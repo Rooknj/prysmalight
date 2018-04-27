@@ -71,8 +71,10 @@ mqttClient.on("error", error => {
   ChalkConsole.error(`Error connecting to MQTT broker. Error: ${error}`);
 });
 
-const debouncePublishState = debounce((topic, payload) => {
-  pubsub.publish(topic, payload);
+let subscriptionStatePayload = {};
+const debouncePublishState = debounce(topic => {
+  pubsub.publish(topic, { lightChanged: subscriptionStatePayload });
+  subscriptionStatePayload = {};
 }, 500);
 
 class LightConnector {
@@ -100,9 +102,8 @@ class LightConnector {
     const onStateMessage = data => {
       const message = JSON.parse(data);
       Object.assign(this.lights[0], message);
-      debouncePublishState("lightChanged", {
-        lightChanged: message  
-      });
+      Object.assign(subscriptionStatePayload, message);
+      debouncePublishState("lightChanged");
     };
 
     // Route each MQTT topic to it's respective message handler
@@ -129,11 +130,11 @@ class LightConnector {
   };
 
   setLight = light => {
-    const {state, brightness, color} = light;
+    const { state, brightness, color } = light;
     let payload = {};
-    if (state) payload = {...payload, state};
-    if (brightness) payload = {...payload, brightness};
-    if (color) payload = {...payload, color};
+    if (state) payload = { ...payload, state };
+    if (brightness) payload = { ...payload, brightness };
+    if (color) payload = { ...payload, color };
     publishTo(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(JSON.stringify(payload)));
     return true;
   };

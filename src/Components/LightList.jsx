@@ -27,7 +27,7 @@ const GET_LIGHTS = gql`
         lights {
             id
             connected
-            power
+            state
             brightness
             color {
                 r

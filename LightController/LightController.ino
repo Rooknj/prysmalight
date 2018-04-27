@@ -28,11 +28,6 @@ const uint8_t MAX_BRIGHTNESS = 63;
 #define DATA_PIN 3
 // how many leds in your strip?
 #define NUM_LEDS 150
-// Default number of flashes if no value was given
-#define DEFAULT_FLASH_LENGTH 2
-// Number of seconds for one transition in colorfade mode
-#define COLORFADE_TIME_SLOW 10
-#define COLORFADE_TIME_FAST 3
 // Enables Serial and print statements
 #define DEBUG false
 
@@ -51,16 +46,8 @@ const PROGMEM uint16_t MQTT_SERVER_PORT = 1883;
 const PROGMEM char* MQTT_LIGHT_CONNECTED_TOPIC = "office/rgb1/connected";
 
 // state
-const PROGMEM char* MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/status";
-const PROGMEM char* MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/switch";
-
-// brightness
-const PROGMEM char* MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC = "office/rgb1/brightness/status";
-const PROGMEM char* MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC = "office/rgb1/brightness/set";
-
-// colors (rgb)
-const PROGMEM char* MQTT_LIGHT_RGB_STATE_TOPIC = "office/rgb1/rgb/status";
-const PROGMEM char* MQTT_LIGHT_RGB_COMMAND_TOPIC = "office/rgb1/rgb/set";
+const PROGMEM char* MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/state";
+const PROGMEM char* MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/set";
 
 // payloads by default (on/off)
 const PROGMEM char* LIGHT_ON = "ON";
@@ -81,13 +68,19 @@ const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 
 /************ Data Global Variables ******************/
 // variables used to store the state, the brightness and the color of the light
-boolean m_rgb_state = false;
-uint8_t m_rgb_brightness = 100;
-uint8_t m_rgb_red = 0;
-uint8_t m_rgb_green = 255;
-uint8_t m_rgb_blue = 0;
+boolean stateOn = false;
+uint8_t brightness = 100;
+uint8_t red = 0;
+uint8_t green = 255;
+uint8_t blue = 0;
 // define the array of leds
 CRGB leds[NUM_LEDS];
+
+
+// Real values to write to the LEDs (ex. including brightness and state)
+byte realRed = 0;
+byte realGreen = 0;
+byte realBlue = 0;
 
 // Globals for fade/transitions
 bool startFade = false;
@@ -98,30 +91,7 @@ int loopCount = 0;
 int stepR, stepG, stepB;
 int redVal, grnVal, bluVal;
 
-// Globals for flash
-bool flash = false;
-bool startFlash = false;
-int flashLength = 0;
-unsigned long flashStartTime = 0;
-byte flashRed = m_rgb_red;
-byte flashGreen = m_rgb_green;
-byte flashBlue = m_rgb_blue;
-byte flashBrightness = m_rgb_brightness;
 
-// Globals for colorfade
-bool colorfade = false;
-int currentColor = 0;
-// {red, grn, blu}
-const byte colors[][3] = {
-  {255, 0, 0},
-  {0, 255, 0},
-  {0, 0, 255},
-  {255, 80, 0},
-  {163, 0, 255},
-  {0, 255, 255},
-  {255, 255, 0}
-};
-const int numColors = 7;
 
 /************ Functions ******************/
 // function called to fill the LED strip a solid color
@@ -130,103 +100,118 @@ void setColor(uint8_t p_red, uint8_t p_green, uint8_t p_blue) {
   FastLED.show();
 }
 
-// function called to publish the state of the led (on/off)
-void publishRGBState() {
-  if (m_rgb_state) {
-    client.publish(MQTT_LIGHT_STATE_TOPIC, LIGHT_ON, true);
-  } else {
-    client.publish(MQTT_LIGHT_STATE_TOPIC, LIGHT_OFF, true);
-  }
-}
 
-// function called to publish the brightness of the led (0-100)
-void publishRGBBrightness() {
-  snprintf(m_msg_buffer, MSG_BUFFER_SIZE, "%d", m_rgb_brightness);
-  client.publish(MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC, m_msg_buffer, true);
-}
-
-// function called to publish the colors of the led (xx(x),xx(x),xx(x))
-void publishRGBColor() {
-  snprintf(m_msg_buffer, MSG_BUFFER_SIZE, "%d,%d,%d", m_rgb_red, m_rgb_green, m_rgb_blue);
-  client.publish(MQTT_LIGHT_RGB_STATE_TOPIC, m_msg_buffer, true);
-}
 
 // function called when a MQTT message arrived
-void callback(char* p_topic, byte* p_payload, unsigned int p_length) {
-  // concat the payload into a string
-  String payload;
-  for (uint8_t i = 0; i < p_length; i++) {
-    payload.concat((char)p_payload[i]);
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("INFO: Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+
+  char message[length + 1];
+  for (int i = 0; i < length; i++) {
+    message[i] = (char)payload[i];
   }
-  // handle message topic
-  if (String(MQTT_LIGHT_COMMAND_TOPIC).equals(p_topic)) {
-    // test if the payload is equal to "ON" or "OFF"
-    if (payload.equals(String(LIGHT_ON))) {
-      // turn light on if it isn't alrady
-      if (m_rgb_state != true) {
-        m_rgb_state = true;
-        setColor(m_rgb_red, m_rgb_green, m_rgb_blue);
-        publishRGBState();
-      }
-    } else if (payload.equals(String(LIGHT_OFF))) {
-      // turn light off if it is currently on
-      if (m_rgb_state != false) {
-        m_rgb_state = false;
-        setColor(0, 0, 0);
-        publishRGBState();
-      }
-    }
-  } else if (String(MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC).equals(p_topic)) {
-    uint8_t brightness = payload.toInt();
-    if (brightness < 0 || brightness > 100) {
-      // do nothing...
-      return;
-    } else {
-      // set brightness
-      m_rgb_brightness = brightness;
-      // Setting the maximum brightness at only 50% max brightness
-      FastLED.setBrightness(map(m_rgb_brightness, 0, 100, 0, MAX_BRIGHTNESS));
-      FastLED.show();
-      publishRGBBrightness();
-    }
-  } else if (String(MQTT_LIGHT_RGB_COMMAND_TOPIC).equals(p_topic)) {
-    // get the position of the first and second commas
-    uint8_t firstIndex = payload.indexOf(',');
-    uint8_t lastIndex = payload.lastIndexOf(',');
+  message[length] = '\0';
+  Serial.println(message);
 
-    // set red
-    uint8_t rgb_red = payload.substring(0, firstIndex).toInt();
-    if (rgb_red < 0 || rgb_red > 255) {
-      return;
-    } else {
-      m_rgb_red = rgb_red;
-    }
-
-    // set green
-    uint8_t rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
-    if (rgb_green < 0 || rgb_green > 255) {
-      return;
-    } else {
-      m_rgb_green = rgb_green;
-    }
-
-    // set blue
-    uint8_t rgb_blue = payload.substring(lastIndex + 1).toInt();
-    if (rgb_blue < 0 || rgb_blue > 255) {
-      return;
-    } else {
-      m_rgb_blue = rgb_blue;
-    }
-
-    // turn light on if it isn't already
-    if (!m_rgb_state) {
-      m_rgb_state = true;
-      publishRGBState();
-    }
-    setColor(m_rgb_red, m_rgb_green, m_rgb_blue);
-    publishRGBColor();
+  if (!processJson(message)) {
+    return;
   }
+
+  if (stateOn) {
+    // Update lights
+    realRed = red;
+    realGreen = green;
+    realBlue = blue;
+  }
+  else {
+    realRed = 0;
+    realGreen = 0;
+    realBlue = 0;
+  }
+
+  startFade = true;
+  inFade = false; // Kill the current fade
+
+  sendState();
 }
+
+
+// Take JSON message and parse it
+bool processJson(char* message) {
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.parseObject(message);
+
+  if (!root.success()) {
+    Serial.println("ERROR: parseObject() failed");
+    return false;
+  }
+
+  if (root.containsKey("state")) {
+    if (strcmp(root["state"], LIGHT_ON) == 0) {
+      stateOn = true;
+      setColor(red, green, blue);
+    }
+    else if (strcmp(root["state"], LIGHT_OFF) == 0) {
+      stateOn = false;
+      setColor(0, 0, 0);
+    }
+  }
+
+  if (root.containsKey("color")) {
+    if(!stateOn){
+      stateOn = true;
+    }
+    red = root["color"]["r"];
+    green = root["color"]["g"];
+    blue = root["color"]["b"];
+    setColor(red, green, blue);
+  }
+
+  if (root.containsKey("brightness")) {
+    brightness = root["brightness"];
+    FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
+    FastLED.show();
+  }
+
+  if (root.containsKey("transition")) {
+    transitionTime = root["transition"];
+  }
+  else {
+    transitionTime = 0;
+  }
+  
+  return true;
+}
+
+
+
+// send light state over MQTT
+void sendState() {
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  // populate payload with state
+  root["state"] = (stateOn) ? LIGHT_ON : LIGHT_OFF;
+
+  // populate payload with color
+  JsonObject& color = root.createNestedObject("color");
+  color["r"] = red;
+  color["g"] = green;
+  color["b"] = blue;
+  
+  // populate payload with brightness
+  root["brightness"] = brightness;
+
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+
+  client.publish(MQTT_LIGHT_STATE_TOPIC, buffer, true);
+}
+
 
 // MQTT connect/reconnect function
 boolean reconnect() {
@@ -238,14 +223,10 @@ boolean reconnect() {
     client.publish(MQTT_LIGHT_CONNECTED_TOPIC, LIGHT_CONNECTED, true);
     
     // publish the initial values
-    publishRGBState();
-    publishRGBBrightness();
-    publishRGBColor();
+    sendState();
 
     // ... and resubscribe
     client.subscribe(MQTT_LIGHT_COMMAND_TOPIC);
-    client.subscribe(MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC);
-    client.subscribe(MQTT_LIGHT_RGB_COMMAND_TOPIC);
   }
   return client.connected();
 }
@@ -309,7 +290,7 @@ void setup() {
 
   // init FastLED and the LED strip
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
-  FastLED.setBrightness(map(m_rgb_brightness, 0, 100, 0, MAX_BRIGHTNESS));
+  FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
   setColor(0, 0, 0);
 
   // init the builtin led on the ESP8266

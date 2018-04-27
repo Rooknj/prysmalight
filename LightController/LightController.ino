@@ -13,9 +13,10 @@
 #include <ESP8266mDNS.h>
 #include <DNSServer.h>            // Local DNS Server used for redirecting all requests to the configuration portal
 #include <ESP8266WebServer.h>     // Local WebServer used to serve the configuration portal
-#include <ArduinoOTA.h>
+#include <ArduinoOTA.h>           // Update ESP8266 over wifi
 #include <WiFiManager.h>          // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
-#include <PubSubClient.h>
+#include <PubSubClient.h>         // MQTT client library
+#include "FastLED.h"              // LED strip control library
 
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 
@@ -64,26 +65,25 @@ PubSubClient client(wifiClient);
 // variables used to store the state, the brightness and the color of the light
 boolean m_rgb_state = false;
 uint8_t m_rgb_brightness = 100;
-uint8_t m_rgb_red = 255;
+uint8_t m_rgb_red = 0;
 uint8_t m_rgb_green = 255;
-uint8_t m_rgb_blue = 255;
-
-// pins used for the rgb led (PWM)
-const PROGMEM uint8_t RGB_LIGHT_RED_PIN = 5;
-const PROGMEM uint8_t RGB_LIGHT_GREEN_PIN = 0;
-const PROGMEM uint8_t RGB_LIGHT_BLUE_PIN = 4;
+uint8_t m_rgb_blue = 0;
+// the maximum value you can set brightness to out of 255 
+const uint8_t MAX_BRIGHTNESS = 63;
+// pin used for the rgb led strip (PWM)
+#define DATA_PIN 3
+// how many leds in your strip?
+#define NUM_LEDS 150
+// define the array of leds
+CRGB leds[NUM_LEDS];
 
 
 
 /************ Functions ******************/
-// function called to adapt the brightness and the color of the led
+// function called to fill the LED strip a solid color
 void setColor(uint8_t p_red, uint8_t p_green, uint8_t p_blue) {
-  // convert the brightness in % (0-100%) into a digital value (0-255)
-  uint8_t brightness = map(m_rgb_brightness, 0, 100, 0, 255);
-
-  analogWrite(RGB_LIGHT_RED_PIN, map(p_red, 0, 255, 0, brightness));
-  analogWrite(RGB_LIGHT_GREEN_PIN, map(p_green, 0, 255, 0, brightness));
-  analogWrite(RGB_LIGHT_BLUE_PIN, map(p_blue, 0, 255, 0, brightness));
+  fill_solid(leds, NUM_LEDS, CRGB(p_red, p_green, p_blue));
+  FastLED.show();
 }
 
 // function called to publish the state of the led (on/off)
@@ -118,12 +118,14 @@ void callback(char* p_topic, byte* p_payload, unsigned int p_length) {
   if (String(MQTT_LIGHT_COMMAND_TOPIC).equals(p_topic)) {
     // test if the payload is equal to "ON" or "OFF"
     if (payload.equals(String(LIGHT_ON))) {
+      // turn light on if it isn't alrady
       if (m_rgb_state != true) {
         m_rgb_state = true;
         setColor(m_rgb_red, m_rgb_green, m_rgb_blue);
         publishRGBState();
       }
     } else if (payload.equals(String(LIGHT_OFF))) {
+      // turn light off if it is currently on
       if (m_rgb_state != false) {
         m_rgb_state = false;
         setColor(0, 0, 0);
@@ -136,36 +138,35 @@ void callback(char* p_topic, byte* p_payload, unsigned int p_length) {
       // do nothing...
       return;
     } else {
+      // set brightness
       m_rgb_brightness = brightness;
-      setColor(m_rgb_red, m_rgb_green, m_rgb_blue);
-      if (!m_rgb_state && brightness > 0) {
-        m_rgb_state = true;
-        publishRGBState();
-      } else if (m_rgb_state && brightness == 0) {
-        m_rgb_state = false;
-        publishRGBState();
-      }
+      // Setting the maximum brightness at only 50% max brightness
+      FastLED.setBrightness(map(m_rgb_brightness, 0, 100, 0, MAX_BRIGHTNESS));
+      FastLED.show();
       publishRGBBrightness();
     }
   } else if (String(MQTT_LIGHT_RGB_COMMAND_TOPIC).equals(p_topic)) {
     // get the position of the first and second commas
     uint8_t firstIndex = payload.indexOf(',');
     uint8_t lastIndex = payload.lastIndexOf(',');
-    
+
+    // set red
     uint8_t rgb_red = payload.substring(0, firstIndex).toInt();
     if (rgb_red < 0 || rgb_red > 255) {
       return;
     } else {
       m_rgb_red = rgb_red;
     }
-    
+
+    // set green
     uint8_t rgb_green = payload.substring(firstIndex + 1, lastIndex).toInt();
     if (rgb_green < 0 || rgb_green > 255) {
       return;
     } else {
       m_rgb_green = rgb_green;
     }
-    
+
+    // set blue
     uint8_t rgb_blue = payload.substring(lastIndex + 1).toInt();
     if (rgb_blue < 0 || rgb_blue > 255) {
       return;
@@ -173,6 +174,7 @@ void callback(char* p_topic, byte* p_payload, unsigned int p_length) {
       m_rgb_blue = rgb_blue;
     }
 
+    // turn light on if it isn't already
     if (!m_rgb_state) {
       m_rgb_state = true;
       publishRGBState();
@@ -259,14 +261,12 @@ void setup() {
   // Set Serial Communication rate
   Serial.begin(115200);
 
-  // init the RGB led
-  pinMode(RGB_LIGHT_BLUE_PIN, OUTPUT);
-  pinMode(RGB_LIGHT_RED_PIN, OUTPUT);
-  pinMode(RGB_LIGHT_GREEN_PIN, OUTPUT);
-  analogWriteRange(255);
+  // init FastLED and the LED strip
+  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.setBrightness(map(m_rgb_brightness, 0, 100, 0, MAX_BRIGHTNESS));
   setColor(0, 0, 0);
 
-  // init the builtin led
+  // init the builtin led on the ESP8266
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, HIGH);
   

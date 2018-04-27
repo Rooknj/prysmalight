@@ -17,8 +17,24 @@
 #include <WiFiManager.h>          // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <PubSubClient.h>         // MQTT client library
 #include "FastLED.h"              // LED strip control library
+#include <ArduinoJson.h>          // Parse JSON
 
+
+/************ Configuration Variables ******************/
 #define MQTT_VERSION MQTT_VERSION_3_1_1
+// the maximum value you can set brightness to out of 255 
+const uint8_t MAX_BRIGHTNESS = 63;
+// pin used for the rgb led strip (PWM)
+#define DATA_PIN 3
+// how many leds in your strip?
+#define NUM_LEDS 150
+// Default number of flashes if no value was given
+#define DEFAULT_FLASH_LENGTH 2
+// Number of seconds for one transition in colorfade mode
+#define COLORFADE_TIME_SLOW 10
+#define COLORFADE_TIME_FAST 3
+// Enables Serial and print statements
+#define DEBUG false
 
 
 
@@ -59,6 +75,8 @@ char m_msg_buffer[MSG_BUFFER_SIZE];
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
+const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
+
 
 
 /************ Data Global Variables ******************/
@@ -68,16 +86,42 @@ uint8_t m_rgb_brightness = 100;
 uint8_t m_rgb_red = 0;
 uint8_t m_rgb_green = 255;
 uint8_t m_rgb_blue = 0;
-// the maximum value you can set brightness to out of 255 
-const uint8_t MAX_BRIGHTNESS = 63;
-// pin used for the rgb led strip (PWM)
-#define DATA_PIN 3
-// how many leds in your strip?
-#define NUM_LEDS 150
 // define the array of leds
 CRGB leds[NUM_LEDS];
 
+// Globals for fade/transitions
+bool startFade = false;
+unsigned long lastLoop = 0;
+int transitionTime = 0;
+bool inFade = false;
+int loopCount = 0;
+int stepR, stepG, stepB;
+int redVal, grnVal, bluVal;
 
+// Globals for flash
+bool flash = false;
+bool startFlash = false;
+int flashLength = 0;
+unsigned long flashStartTime = 0;
+byte flashRed = red;
+byte flashGreen = green;
+byte flashBlue = blue;
+byte flashBrightness = brightness;
+
+// Globals for colorfade
+bool colorfade = false;
+int currentColor = 0;
+// {red, grn, blu, wht}
+const byte colors[][3] = {
+  {255, 0, 0},
+  {0, 255, 0},
+  {0, 0, 255},
+  {255, 80, 0},
+  {163, 0, 255},
+  {0, 255, 255},
+  {255, 255, 0}
+};
+const int numColors = 7;
 
 /************ Functions ******************/
 // function called to fill the LED strip a solid color

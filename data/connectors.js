@@ -11,16 +11,8 @@ const MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
 const MQTT_LIGHT_CONNECTED_TOPIC = "office/rgb1/connected";
 
 // state
-const MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/status";
-const MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/switch";
-
-// brightness
-const MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC = "office/rgb1/brightness/status";
-const MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC = "office/rgb1/brightness/set";
-
-// colors (rgb)
-const MQTT_LIGHT_RGB_STATE_TOPIC = "office/rgb1/rgb/status";
-const MQTT_LIGHT_RGB_COMMAND_TOPIC = "office/rgb1/rgb/set";
+const MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/state";
+const MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/set";
 
 // MQTT: payloads by default (on/off)
 const LIGHT_ON = "ON";
@@ -67,8 +59,6 @@ mqttClient.on("connect", () => {
   ChalkConsole.info(`Connected to MQTT broker`);
   subscribeTo(MQTT_LIGHT_CONNECTED_TOPIC);
   subscribeTo(MQTT_LIGHT_STATE_TOPIC);
-  subscribeTo(MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC);
-  subscribeTo(MQTT_LIGHT_RGB_STATE_TOPIC);
 });
 
 // On reconnect attempt
@@ -81,15 +71,7 @@ mqttClient.on("error", error => {
   ChalkConsole.error(`Error connecting to MQTT broker. Error: ${error}`);
 });
 
-const debouncePublishPower = debounce((topic, payload) => {
-  pubsub.publish(topic, payload);
-}, 500);
-
-const debouncePublishBrightness = debounce((topic, payload) => {
-  pubsub.publish(topic, payload);
-}, 500);
-
-const debouncePublishColor = debounce((topic, payload) => {
+const debouncePublishState = debounce((topic, payload) => {
   pubsub.publish(topic, payload);
 }, 500);
 
@@ -115,56 +97,11 @@ class LightConnector {
       pubsub.publish("lightChanged", { lightChanged: { connected } });
     };
 
-    const onPowerMessage = data => {
-      let power;
-      if (data === LIGHT_ON) {
-        power = LIGHT_ON;
-      } else if (data === LIGHT_OFF) {
-        power = LIGHT_OFF;
-      } else {
-        ChalkConsole.error(
-          `Received messsage on power topic that was not in the correct format\nMessage: ${data}`
-        );
-        return;
-      }
-      Object.assign(this.lights[0], { power });
-      debouncePublishPower("lightChanged", { lightChanged: { power } });
-    };
-
-    const onBrightnessMessage = data => {
-      if (Number(data) >= 0 && Number(data) <= 100) {
-        Object.assign(this.lights[0], { brightness: data });
-        debouncePublishBrightness("lightChanged", {
-          lightChanged: { brightness: data }
-        });
-      } else {
-        ChalkConsole.error(
-          `Received messsage on brightness topic that was not in the correct format\nMessage: ${data}`
-        );
-      }
-    };
-
-    const onColorMessage = data => {
-      const color = data.split(",").map(value => Number(value));
-      if (
-        color.length !== 3 ||
-        color[0] > 255 ||
-        color[0] < 0 ||
-        color[1] > 255 ||
-        color[1] < 0 ||
-        color[2] > 255 ||
-        color[2] < 0
-      ) {
-        ChalkConsole.error(
-          `Received messsage on rgb color topic that was not in the correct format\nMessage: ${data}`
-        );
-        return;
-      }
-      Object.assign(this.lights[0], {
-        color: { r: color[0], g: color[1], b: color[2] }
-      });
-      debouncePublishColor("lightChanged", {
-        lightChanged: { color: { r: color[0], g: color[1], b: color[2] } }
+    const onStateMessage = data => {
+      const message = JSON.parse(data);
+      Object.assign(this.lights[0], message);
+      debouncePublishState("lightChanged", {
+        lightChanged: message  
       });
     };
 
@@ -176,12 +113,8 @@ class LightConnector {
       );
       if (topic === MQTT_LIGHT_CONNECTED_TOPIC) {
         onConnectedMessage(data);
-      } else if (topic === MQTT_LIGHT_BRIGHTNESS_STATE_TOPIC) {
-        onBrightnessMessage(data);
-      } else if (topic === MQTT_LIGHT_RGB_STATE_TOPIC) {
-        onColorMessage(data);
       } else if (topic === MQTT_LIGHT_STATE_TOPIC) {
-        onPowerMessage(data);
+        onStateMessage(data);
       } else {
         ChalkConsole.error(
           `Received messsage that belonged to a topic we are not supposed to be subscribed to`
@@ -196,20 +129,12 @@ class LightConnector {
   };
 
   setLight = light => {
-    //TODO: call publish to all relevant topics then respond once the responses are in
-    let optimisticResponse = {};
-    if ("power" in light) {
-      const power = String(light.power);
-      publishTo(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(power));
-    }
-    if ("brightness" in light) {
-      const brightness = String(light.brightness);
-      publishTo(MQTT_LIGHT_BRIGHTNESS_COMMAND_TOPIC, Buffer.from(brightness));
-    }
-    if ("color" in light) {
-      const color = `${light.color.r},${light.color.g},${light.color.b}`;
-      publishTo(MQTT_LIGHT_RGB_COMMAND_TOPIC, Buffer.from(color));
-    }
+    const {state, brightness, color} = light;
+    let payload = {};
+    if (state) payload = {...payload, state};
+    if (brightness) payload = {...payload, brightness};
+    if (color) payload = {...payload, color};
+    publishTo(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(JSON.stringify(payload)));
     return true;
   };
 

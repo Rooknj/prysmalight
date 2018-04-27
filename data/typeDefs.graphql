@@ -28,14 +28,14 @@ input ColorInput {
 type Light {
   id: String # uique name of accessory
   connected: Int
-  power: String # curent power status
+  state: String # curent power status
   brightness: Int # current brightness
   color: Color # current color
 }
 
 input LightInput {
   id: String! # name of accessory
-  power: String, # curent power status
+  state: String, # curent power status
   brightness: Int, # current brightness
   color: ColorInput # current color
 }

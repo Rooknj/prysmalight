@@ -103,15 +103,15 @@ bool flash = false;
 bool startFlash = false;
 int flashLength = 0;
 unsigned long flashStartTime = 0;
-byte flashRed = red;
-byte flashGreen = green;
-byte flashBlue = blue;
-byte flashBrightness = brightness;
+byte flashRed = m_rgb_red;
+byte flashGreen = m_rgb_green;
+byte flashBlue = m_rgb_blue;
+byte flashBrightness = m_rgb_brightness;
 
 // Globals for colorfade
 bool colorfade = false;
 int currentColor = 0;
-// {red, grn, blu, wht}
+// {red, grn, blu}
 const byte colors[][3] = {
   {255, 0, 0},
   {0, 255, 0},
@@ -303,7 +303,9 @@ void setupOTA() {
 /************ Arduino Setup ******************/
 void setup() {
   // Set Serial Communication rate
-  Serial.begin(115200);
+  if (DEBUG) {
+    Serial.begin(115200);
+  }
 
   // init FastLED and the LED strip
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);

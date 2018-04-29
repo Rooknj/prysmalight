@@ -41,6 +41,8 @@ const GET_LIGHTS = gql`
 const LightList = ({ data: { loading, error, lights } }) => {
     if (loading) return "Loading...";
     if (error) return `Error! ${error.message}`;
+    //TODO find more elegant way to do this
+    if (!lights[0].state) return "Error: No lights are connected to the server";
     return (
         <ul>{lights.map(light => <Light key={light.id} light={light} />)}</ul>
     );

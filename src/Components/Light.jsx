@@ -124,12 +124,12 @@ class Light extends React.Component {
         console.error("Error Setting Light:", error);
     };
 
-    setLight = variables => {
+    setLight = throttle(variables => {
         this.props
             .mutate({ variables })
             .then(this.handleMutationCompleted)
             .catch(this.handleMutationError);
-    };
+    }, 500);
 
     handlestateChange = evt => {
         this.setState({ state: evt.target.checked ? "ON" : "OFF" });
@@ -142,7 +142,7 @@ class Light extends React.Component {
         this.setLight(variables);
     };
 
-    handleBrightnessChange = throttle(brightness => {
+    handleBrightnessChange = brightness => {
         this.setState({ brightness });
         const variables = {
             light: {
@@ -151,9 +151,9 @@ class Light extends React.Component {
             }
         };
         this.setLight(variables);
-    }, 100);
+    };
 
-    handleColorChange = throttle(({ rgb: { r, g, b } }) => {
+    handleColorChange = ({ rgb: { r, g, b } }) => {
         if (
             r === this.state.color.r &&
             g === this.state.color.g &&
@@ -173,7 +173,7 @@ class Light extends React.Component {
             }
         };
         this.setLight(variables);
-    }, 100);
+    };
 
     displayDisconnected = () => {
         if (this.state.connected !== 2)

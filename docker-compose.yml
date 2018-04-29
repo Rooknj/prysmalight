@@ -1,0 +1,9 @@
+version: "3"
+services:
+  web:
+    build: .
+    command: "yarn devServer"
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "4001:4001"

@@ -1,0 +1,16 @@
+# Dependency directory
+node_modules
+
+# Source control files
+.git
+.gitignore
+README.md
+
+# Docker compose
+docker-compose.yml
+
+# Compiled folder
+lib
+
+# Etc.
+Sample Files

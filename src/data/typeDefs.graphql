@@ -14,15 +14,15 @@ type Subscription {
 }
 
 type Color {
-    r: Int!
-    g: Int!
-    b: Int!
+  r: Int!
+  g: Int!
+  b: Int!
 }
 
 input ColorInput {
-    r: Int!
-    g: Int!
-    b: Int!
+  r: Int!
+  g: Int!
+  b: Int!
 }
 
 type Light {
@@ -35,7 +35,7 @@ type Light {
 
 input LightInput {
   id: String! # name of accessory
-  state: String, # curent power status
-  brightness: Int, # current brightness
+  state: String # curent power status
+  brightness: Int # current brightness
   color: ColorInput # current color
 }

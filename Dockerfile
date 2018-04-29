@@ -29,5 +29,7 @@ CMD ["yarn", "start"]
 # docker run -it -p 4001:4001 lightapp2-server
 
 # Development run command
-# docker run -it -p 4001:4001 -d --mount type=bind,source="$(pwd)",target=/usr/src/app lightapp2-server yarn devServer --ports "4001:4001"
+# docker run -it -p 4001:4001 --mount source="$(pwd)",target=/usr/src/app lightapp2-server yarn devServer
 
+# Run Mosquitto
+# docker run -it -p 1883:1883 -p 9001:9001 -v mosquitto.conf:/mosquitto/config/mosquitto.conf -v /mosquitto/data -v /mosquitto/log eclipse-mosquitto

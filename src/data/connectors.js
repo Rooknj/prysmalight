@@ -75,7 +75,7 @@ let subscriptionStatePayload = {};
 const debouncePublishState = debounce(topic => {
   pubsub.publish(topic, { lightChanged: subscriptionStatePayload });
   subscriptionStatePayload = {};
-}, 500);
+}, 750);
 
 class LightConnector {
   constructor() {

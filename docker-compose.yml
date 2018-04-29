@@ -2,7 +2,7 @@ version: "3"
 services:
   server:
     build: .
-    command: "yarn devServer"
+    image: lightapp2-server-develop
     volumes:
       - .:/usr/src/app
     ports:

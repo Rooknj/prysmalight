@@ -16,13 +16,13 @@
     "graphql-subscriptions": "^0.5.8",
     "graphql-tools": "^2.13.0",
     "lodash.debounce": "^4.0.8",
-    "subscriptions-transport-ws": "^0.9.7"
-  },
-  "devDependencies": {
+    "subscriptions-transport-ws": "^0.9.7",
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-env": "^1.6.1"
+  },
+  "devDependencies": {
     "husky": "^0.14.3",
     "lint-staged": "^7.0.0",
     "prettier": "^1.11.1"
@@ -36,8 +36,8 @@
   "scripts": {
     "precommit": "lint-staged",
     "build": "babel src --out-dir lib --copy-files",
-    "start": "node lib/server.js",
-    "devServer": "nodemon src/server.js --exec babel-node"
+    "start": "nodemon src/server.js --exec babel-node",
+    "prodServer": "node lib/server.js"
   },
   "babel": {
     "presets": [

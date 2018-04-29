@@ -42,12 +42,7 @@ const LightList = ({ data: { loading, error, lights } }) => {
     if (loading) return "Loading...";
     if (error) return `Error! ${error.message}`;
     return (
-        <div>
-            <p>Lights:</p>
-            <ul>
-                {lights.map(light => <Light key={light.id} light={light} />)}
-            </ul>
-        </div>
+        <ul>{lights.map(light => <Light key={light.id} light={light} />)}</ul>
     );
 };
 

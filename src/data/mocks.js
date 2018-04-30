@@ -2,12 +2,17 @@ import casual from "casual";
 
 const mocks = {
   Light: () => ({
-    id: () => casual.integer(0, 10),
-    name: () => casual.first_name,
-    power: () => casual.boolean,
+    id: () => casual.title,
+    connected: () => 2,
+    state: () => false,
     brightness: () => casual.integer(0, 100),
-    hue: () => casual.integer(0, 255),
-    saturation: () => casual.integer(0, 255)
+    color: () => {
+      return {
+        r: casual.integer(0, 255),
+        g: casual.integer(0, 255),
+        b: casual.integer(0, 255)
+      };
+    }
   })
 };
 

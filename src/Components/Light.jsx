@@ -72,7 +72,8 @@ class Light extends React.Component {
             connected: this.props.light.connected,
             state: this.props.light.state,
             brightness: this.props.light.brightness,
-            color: this.props.light.color
+            color: this.props.light.color,
+            ignoreUpdates: false
         };
     }
 
@@ -85,10 +86,9 @@ class Light extends React.Component {
         },
         prevState
     ) {
-        if (loading) {
+        if (loading || prevState.ignoreUpdates) {
             return prevState;
         }
-        console.log(lightChanged);
         const { connected, state, brightness, color } = lightChanged;
         let nextState = {};
         if (state && state !== prevState.state) {
@@ -129,10 +129,14 @@ class Light extends React.Component {
             .mutate({ variables })
             .then(this.handleMutationCompleted)
             .catch(this.handleMutationError);
+        this.setState({ ignoreUpdates: false });
     }, 500);
 
     handlestateChange = evt => {
-        this.setState({ state: evt.target.checked ? "ON" : "OFF" });
+        this.setState({
+            state: evt.target.checked ? "ON" : "OFF",
+            ignoreUpdates: true
+        });
         const variables = {
             light: {
                 id: this.props.light.id,
@@ -143,7 +147,10 @@ class Light extends React.Component {
     };
 
     handleBrightnessChange = brightness => {
-        this.setState({ brightness });
+        this.setState({
+            brightness,
+            ignoreUpdates: true
+        });
         const variables = {
             light: {
                 id: this.props.light.id,
@@ -161,7 +168,11 @@ class Light extends React.Component {
         ) {
             return;
         }
-        this.setState({ color: { r, g, b }, state: "ON" });
+        this.setState({
+            color: { r, g, b },
+            state: "ON",
+            ignoreUpdates: true
+        });
         const variables = {
             light: {
                 id: this.props.light.id,

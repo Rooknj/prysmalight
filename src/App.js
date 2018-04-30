@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import logo from "./logo.svg";
 import "./App.css";
+import MuiThemeProvider from "material-ui/styles/MuiThemeProvider";
 import LightTool from "./Components/LightTool";
 
 class App extends Component {
@@ -12,7 +13,9 @@ class App extends Component {
                     <h1 className="App-title">Welcome to Light App 2.0!</h1>
                 </header>
                 <div>
-                    <LightTool />
+                    <MuiThemeProvider>
+                        <LightTool />
+                    </MuiThemeProvider>
                 </div>
             </div>
         );

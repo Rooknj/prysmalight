@@ -1,10 +1,5 @@
 import React from "react";
-//import PropTypes from "prop-types";
 import LightList from "./LightList";
-
-const propTypes = {};
-
-const defaultProps = {};
 
 const LightTool = props => {
     return (
@@ -13,8 +8,5 @@ const LightTool = props => {
         </div>
     );
 };
-
-LightTool.propTypes = propTypes;
-LightTool.defaultProps = defaultProps;
 
 export default LightTool;

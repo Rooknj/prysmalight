@@ -1,7 +1,6 @@
 import ChalkConsole from "../ChalkConsole.js";
 import MQTT from "async-mqtt";
 import { PubSub } from "graphql-subscriptions";
-import debounce from "lodash.debounce";
 
 // MQTT: client
 const MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
@@ -71,12 +70,6 @@ mqttClient.on("error", error => {
   ChalkConsole.error(`Error connecting to MQTT broker. Error: ${error}`);
 });
 
-let subscriptionStatePayload = {};
-const debouncePublishState = debounce(topic => {
-  pubsub.publish(topic, { lightChanged: subscriptionStatePayload });
-  subscriptionStatePayload = {};
-}, 750);
-
 class LightConnector {
   constructor() {
     // Light Data Store
@@ -102,8 +95,7 @@ class LightConnector {
     const onStateMessage = data => {
       const message = JSON.parse(data);
       Object.assign(this.lights[0], message);
-      Object.assign(subscriptionStatePayload, message);
-      debouncePublishState("lightChanged");
+      pubsub.publish("lightChanged", { lightChanged: message });
     };
 
     // Route each MQTT topic to it's respective message handler

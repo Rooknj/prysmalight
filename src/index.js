@@ -21,17 +21,14 @@ import { getMainDefinition } from "apollo-utilities"; // Aids with splitting lin
 import { HttpLink } from "apollo-link-http"; // Use Apollo Over HTTP (Queries, Mutations)
 import { WebSocketLink } from "apollo-link-ws"; // Use Apollo Over Websockets (Subscriptions)
 
-const domainName = "raspberrypi.local";
-const port = 4001;
-
 // Create an http link:
 const httpLink = new HttpLink({
-    uri: `http://${domainName}:${port}/graphql`
+    uri: "http://localhost:4001/graphql"
 });
 
 // Create a WebSocket link:
 const wsLink = new WebSocketLink({
-    uri: `ws://${domainName}:${port}/subscriptions`,
+    uri: `ws://localhost:4001/subscriptions`,
     options: {
         reconnect: true
     }

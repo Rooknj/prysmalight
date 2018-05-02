@@ -35,9 +35,10 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "build": "babel src --out-dir lib --copy-files",
-    "start": "nodemon src/server.js --exec babel-node",
-    "prodServer": "node lib/server.js"
+    "build": "NODE_ENV=production BABEL_ENV=production babel src --out-dir lib --copy-files",
+    "start": "NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
+    "prodServer": "NODE_ENV=production BABEL_ENV=production node lib/server.js",
+    "mockServer": "NODE_ENV=development BABEL_ENV=development MOCK=true nodemon src/server.js --exec babel-node"
   },
   "babel": {
     "presets": [

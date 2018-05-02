@@ -1,5 +1,5 @@
 # The latest LTS version of node
-FROM node:9.6.1
+FROM node:alpine
 
 # Create app directory
 WORKDIR /usr/src/app

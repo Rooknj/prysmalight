@@ -1,0 +1,9 @@
+version: "3"
+services:
+  server:
+    build: .
+    image: lightapp2-server-develop
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "4001:4001"

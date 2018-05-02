@@ -1,0 +1,12 @@
+version: "3"
+services:
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile-prod
+    image: lightapp2-client-prod
+    ports:
+      - "80:80"
+
+# Run prod
+# docker-compose -f docker-compose.prod.yml up -d

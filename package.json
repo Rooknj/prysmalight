@@ -34,7 +34,7 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "build": "babel src --out-dir lib --copy-files",
+    "build": "babel src --out-dir lib --copy-files && pkg . --targets node8-linux-armv7",
     "start": "nodemon src/server.js --exec babel-node",
     "prodServer": "node lib/server.js"
   },
@@ -47,5 +47,11 @@
       "transform-object-rest-spread"
     ]
   },
-  "main": "server.js"
+  "bin": {
+    "prod-server": "lib/server.js"
+  },
+  "pkg": {
+    "assets": "lib/data/typeDefs.graphql"
+  },
+  "main": "lib/server.js"
 }

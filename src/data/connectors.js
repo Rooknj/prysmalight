@@ -3,14 +3,8 @@ import MQTT from "async-mqtt";
 import { PubSub } from "graphql-subscriptions";
 
 // MQTT: client
-let MQTT_CLIENT = "";
-if (process.env.NODE_ENV == "development") {
-  console.log("Hive Broker");
-  MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
-} else {
-  console.log("Localhost Broker");
-  MQTT_CLIENT = "tcp://raspberrypi.local:1883";
-}
+let MQTT_CLIENT = "tcp://raspberrypi.local:1883";
+
 // MQTT: topics
 // connection
 const MQTT_LIGHT_CONNECTED_TOPIC = "office/rgb1/connected";

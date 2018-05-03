@@ -16,9 +16,6 @@ RUN yarn global add nodemon --dev
 # Install app dependencies
 RUN yarn install
 
-# Build app
-RUN yarn build
-
 # Make port 4001 available to the world outside this container
 EXPOSE 4001
 

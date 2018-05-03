@@ -10,7 +10,7 @@
 */
 
 #include <ESP8266WiFi.h>          // ESP8266 Core WiFi Library
-#include <ESP8266mDNS.h>
+#include <ESP8266mDNS.h>          // Enables finding addresses in the .local domain
 #include <DNSServer.h>            // Local DNS Server used for redirecting all requests to the configuration portal
 #include <ESP8266WebServer.h>     // Local WebServer used to serve the configuration portal
 #include <ArduinoOTA.h>           // Update ESP8266 over wifi
@@ -29,14 +29,14 @@ const uint8_t MAX_BRIGHTNESS = 63;
 // how many leds in your strip?
 #define NUM_LEDS 150
 // Enables Serial and print statements
-#define DEBUG false
+#define DEBUG true
 
 
 
 /************ MQTT Setup Variables ******************/
 // MQTT: ID, server IP, port, username and password
 const PROGMEM char* MQTT_CLIENT_ID = "office_rgb_light";
-const PROGMEM char* MQTT_SERVER_IP = "broker.hivemq.com";
+char MQTT_SERVER_IP[16];
 const PROGMEM uint16_t MQTT_SERVER_PORT = 1883;
 //const PROGMEM char* MQTT_USER = "[Redacted]";
 //const PROGMEM char* MQTT_PASSWORD = "[Redacted]";
@@ -246,6 +246,31 @@ void setupWifi() {
     delay(5000);
   }
   Serial.println("INFO: connected to Wifi :)");
+
+  char hostString[16] = {0};
+  if (!MDNS.begin(hostString)) {
+    Serial.println("Error setting up MDNS responder!");
+  }
+  int n = MDNS.queryService("mqtt", "tcp");
+  if (n == 0) {
+    Serial.println("no services found");
+  }
+  else {
+    for (int i = 0; i < n; ++i) {
+      // Going through every available service,
+      // we're searching for the one whose hostname 
+      // matches what we want, and then get its IP
+      if (MDNS.hostname(i) == "raspberrypi") {
+        String JENKINS_HOST = String(MDNS.IP(i)[0]) + String(".") +\
+          String(MDNS.IP(i)[1]) + String(".") +\
+          String(MDNS.IP(i)[2]) + String(".") +\
+          String(MDNS.IP(i)[3]);
+          JENKINS_HOST.toCharArray(MQTT_SERVER_IP, 16);
+          Serial.println(JENKINS_HOST);
+          Serial.println(MQTT_SERVER_IP);
+      }
+    }
+  }
 }
 
 

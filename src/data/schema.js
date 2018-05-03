@@ -9,7 +9,6 @@ const schema = makeExecutableSchema({ typeDefs, resolvers });
 if (process.env.MOCK) {
   console.log("adding mocks");
   const mocks = require("./mocks");
-  console.log(mocks);
   addMockFunctionsToSchema({ schema, mocks: mocks.default });
 } else {
   console.log("Not adding mocks");

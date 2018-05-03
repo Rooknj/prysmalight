@@ -9,7 +9,7 @@ if [ "$CONFIRM" = "Y" ] ; then
     docker-compose -f docker-compose.prod.yml build
 
     echo "Tagging docker image with \"$TAG\""
-    docker tag lightapp2-server-prod rooknj/lightapp2:$TAG
+    docker tag lightapp2-client-prod rooknj/lightapp2:$TAG
 
     echo "Pushing docker image"
     docker push rooknj/lightapp2:$TAG

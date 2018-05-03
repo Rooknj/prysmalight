@@ -23,12 +23,12 @@ import { WebSocketLink } from "apollo-link-ws"; // Use Apollo Over Websockets (S
 
 // Create an http link:
 const httpLink = new HttpLink({
-    uri: "http://localhost:4001/graphql"
+    uri: "http://raspberrypi.local:4001/graphql"
 });
 
 // Create a WebSocket link:
 const wsLink = new WebSocketLink({
-    uri: `ws://localhost:4001/subscriptions`,
+    uri: `ws://raspberrypi.local:4001/subscriptions`,
     options: {
         reconnect: true
     }

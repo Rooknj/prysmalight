@@ -3,7 +3,12 @@ import MQTT from "async-mqtt";
 import { PubSub } from "graphql-subscriptions";
 
 // MQTT: client
-let MQTT_CLIENT = "tcp://raspberrypi.local:1883";
+let MQTT_CLIENT;
+if (process.env.MOCK) {
+  MQTT_CLIENT = "tcp://localhost:1883";
+} else {
+  MQTT_CLIENT = "tcp://raspberrypi.local:1883";
+}
 
 // MQTT: topics
 // connection

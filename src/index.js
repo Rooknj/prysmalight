@@ -22,6 +22,7 @@ import { HttpLink } from "apollo-link-http"; // Use Apollo Over HTTP (Queries, M
 import { WebSocketLink } from "apollo-link-ws"; // Use Apollo Over Websockets (Subscriptions)
 
 const serverName = "localhost";
+//const serverName = "raspberrypi.local";
 
 // Create an http link:
 const httpLink = new HttpLink({

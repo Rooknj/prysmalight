@@ -4,11 +4,6 @@ import Hue from "./Hue.jsx";
 import { CustomPicker } from "react-color";
 
 class ColorPicker extends React.Component {
-    constructor(props) {
-        super(props);
-        console.log(props);
-    }
-
     handleHueChange = hue => {
         this.props.onChange({ h: hue, s: 1, l: 0.5 });
     };

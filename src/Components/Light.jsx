@@ -1,18 +1,12 @@
 import React from "react";
 import PropTypes from "prop-types";
-
 import { graphql } from "react-apollo";
 import gql from "graphql-tag";
-
 import { ChromePicker } from "react-color";
-//import Slider from "./Slider";
-import Slider from "rc-slider";
-import "rc-slider/assets/index.css";
-
-import Toggle from "react-toggle";
-import "react-toggle/style.css"; // for ES6 modules
-
 import throttle from "lodash.throttle";
+import { Card, CardHeader, CardText } from "material-ui/Card";
+import Toggle from "material-ui/Toggle";
+import Slider from "material-ui/Slider";
 
 const propTypes = {
     light: PropTypes.shape({
@@ -132,11 +126,12 @@ class Light extends React.Component {
         this.setState({ ignoreUpdates: false });
     }, 500);
 
-    handlestateChange = evt => {
+    handleStateChange = evt => {
         this.setState({
             state: evt.target.checked ? "ON" : "OFF",
             ignoreUpdates: true
         });
+        console.log(evt.target.checked);
         const variables = {
             light: {
                 id: this.props.light.id,
@@ -146,11 +141,12 @@ class Light extends React.Component {
         this.setLight(variables);
     };
 
-    handleBrightnessChange = brightness => {
+    handleBrightnessChange = (evt, brightness) => {
         this.setState({
             brightness,
             ignoreUpdates: true
         });
+        console.log(brightness);
         const variables = {
             light: {
                 id: this.props.light.id,
@@ -187,55 +183,49 @@ class Light extends React.Component {
     };
 
     displayDisconnected = () => {
-        if (this.state.connected !== 2)
-            return (
-                <div>
-                    <label>Light Not Connected</label>
-                </div>
-            );
+        if (this.state.connected !== 2) return "Light not Connected";
     };
 
     render() {
         return (
-            <li>
-                {this.displayDisconnected()}
-                <label>
-                    <span>Light Name: {this.state.id}</span>
-                </label>
-                <br />
-                <label>
-                    <span>state: </span>
-                </label>
-                <Toggle
-                    checked={this.state.state === "ON" ? true : false}
-                    onChange={this.handlestateChange}
-                    disabled={this.state.connected !== 2}
-                />
-                <br />
-                <label>
-                    <span>Brightness: </span>
-                </label>
-                <div style={{ width: 600, margin: 50 }}>
+            <Card>
+                <CardHeader
+                    title={`Light Name: ${this.displayDisconnected() ||
+                        this.state.id}`}
+                    subtitle="Subtitle"
+                    avatar="images/ok-128.jpg"
+                >
+                    <Toggle
+                        toggled={this.state.state === "ON" ? true : false}
+                        onToggle={this.handleStateChange}
+                        disabled={this.state.connected !== 2}
+                        label={"State:"}
+                    />
+                </CardHeader>
+                <CardText>
+                    <label>
+                        <span>Brightness: </span>
+                    </label>
                     <Slider
-                        value={this.state.brightness}
                         min={0}
                         max={100}
+                        step={1}
+                        value={this.state.brightness}
                         onChange={this.handleBrightnessChange}
                         disabled={this.state.connected !== 2}
                     />
-                </div>
-                <br />
-                <label> Color: </label>
-                <ChromePicker
-                    disableAlpha={true}
-                    color={this.state.color}
-                    onChange={this.handleColorChange}
-                    className={
-                        this.state.connected !== 2 ? "disabled" : "enabled"
-                    }
-                />
-                <br />
-            </li>
+                    <br />
+                    <label> Color: </label>
+                    <ChromePicker
+                        disableAlpha={true}
+                        color={this.state.color}
+                        onChange={this.handleColorChange}
+                        className={
+                            this.state.connected !== 2 ? "disabled" : "enabled"
+                        }
+                    />
+                </CardText>
+            </Card>
         );
     }
 }

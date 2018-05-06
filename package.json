@@ -14,13 +14,11 @@
     "lodash.throttle": "^4.1.1",
     "material-ui": "^0.20.0",
     "prop-types": "^15.6.1",
-    "rc-slider": "^8.6.1",
     "react": "^16.2.0",
     "react-apollo": "^2.1.1",
     "react-color": "^2.14.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.1",
-    "react-toggle": "^4.0.2",
     "subscriptions-transport-ws": "^0.9.7"
   },
   "devDependencies": {

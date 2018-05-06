@@ -179,17 +179,16 @@ class Light extends React.Component {
         this.setLight(variables);
     };
 
-    displayDisconnected = () => {
-        if (this.state.connected !== 2) return "Light not Connected";
+    displayConnection = () => {
+        return this.state.connected === 2 ? "Connected" : "Disonnected";
     };
 
     render() {
         return (
             <Card>
                 <CardHeader
-                    title={`Light Name: ${this.displayDisconnected() ||
-                        this.state.id}`}
-                    subtitle="Subtitle"
+                    title={this.state.id}
+                    subtitle={this.displayConnection()}
                     avatar="images/ok-128.jpg"
                 />
                 <CardText>

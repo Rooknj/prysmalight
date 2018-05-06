@@ -104,12 +104,16 @@ class Hue extends React.Component {
         });
     }
 
+    getHslString = () => {
+        return `hsl(${this.props.hue}, ${this.props.saturation}%, ${
+            this.props.lightness
+        }%)`;
+    };
+
     render() {
         return (
             <svg
-                ref={canvas => {
-                    this.canvas = canvas;
-                }}
+                ref={canvas => (this.canvas = canvas)}
                 width={this.outterSize}
                 height={this.outterSize}
                 viewBox={`0 0 ${this.outterSize} ${this.outterSize}`}
@@ -130,19 +134,13 @@ class Hue extends React.Component {
                             marker={false}
                         />
                     ))}
-                    <g
-                        ref={selector => {
-                            this.selector = selector;
-                        }}
-                    >
+                    <g ref={selector => (this.selector = selector)}>
                         <HueSlice
                             degree={this.props.hue}
                             radius={this.radius}
                             color={
                                 this.state.dragging
-                                    ? `hsl(${this.props.hue}, ${
-                                          this.props.saturation
-                                      }%, ${this.props.lightness}%)`
+                                    ? this.getHslString()
                                     : "black"
                             }
                             marker={true}
@@ -152,12 +150,8 @@ class Hue extends React.Component {
                         x="10"
                         y="30"
                         textAnchor="middle"
-                        fill={`hsl(${this.props.hue}, ${
-                            this.props.saturation
-                        }%, ${this.props.lightness}%)`}
-                        stroke={`hsl(${this.props.hue}, ${
-                            this.props.saturation
-                        }%, ${this.props.lightness}%)`}
+                        fill={this.getHslString()}
+                        stroke={this.getHslString()}
                     >
                         {this.props.hue}°
                     </text>
@@ -166,12 +160,8 @@ class Hue extends React.Component {
                         x="0"
                         y="60"
                         textAnchor="middle"
-                        fill={`hsl(${this.props.hue}, ${
-                            this.props.saturation
-                        }%, ${this.props.lightness}%)`}
-                        stroke={`hsl(${this.props.hue}, ${
-                            this.props.saturation
-                        }%, ${this.props.lightness}%)`}
+                        fill={this.getHslString()}
+                        stroke={this.getHslString()}
                     >
                         Hue
                     </text>

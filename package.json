@@ -19,6 +19,8 @@
     "react-color": "^2.14.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.1",
+    "rxjs": "^6.1.0",
+    "rxjs-compat": "^6.1.0",
     "subscriptions-transport-ws": "^0.9.7"
   },
   "devDependencies": {

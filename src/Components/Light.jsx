@@ -7,6 +7,7 @@ import throttle from "lodash.throttle";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import Toggle from "material-ui/Toggle";
 import Slider from "material-ui/Slider";
+import ColorPicker from "./ColorPicker/ColorPicker.jsx";
 
 const propTypes = {
     light: PropTypes.shape({
@@ -105,12 +106,10 @@ class Light extends React.Component {
         ) {
             nextState = { ...nextState, ...{ color } };
         }
-        //console.log(nextState);
         return Object.keys(nextState).length > 0 ? nextState : prevState;
     }
 
     handleMutationCompleted = ({ data }) => {
-        //console.log("Light Updated Successfully!");
         //console.log("Data Received: ", data);
     };
 
@@ -131,7 +130,6 @@ class Light extends React.Component {
             state: evt.target.checked ? "ON" : "OFF",
             ignoreUpdates: true
         });
-        console.log(evt.target.checked);
         const variables = {
             light: {
                 id: this.props.light.id,
@@ -146,7 +144,6 @@ class Light extends React.Component {
             brightness,
             ignoreUpdates: true
         });
-        console.log(brightness);
         const variables = {
             light: {
                 id: this.props.light.id,
@@ -194,15 +191,14 @@ class Light extends React.Component {
                         this.state.id}`}
                     subtitle="Subtitle"
                     avatar="images/ok-128.jpg"
-                >
+                />
+                <CardText>
                     <Toggle
                         toggled={this.state.state === "ON" ? true : false}
                         onToggle={this.handleStateChange}
                         disabled={this.state.connected !== 2}
                         label={"State:"}
                     />
-                </CardHeader>
-                <CardText>
                     <label>
                         <span>Brightness: </span>
                     </label>
@@ -214,15 +210,12 @@ class Light extends React.Component {
                         onChange={this.handleBrightnessChange}
                         disabled={this.state.connected !== 2}
                     />
-                    <br />
-                    <label> Color: </label>
-                    <ChromePicker
-                        disableAlpha={true}
+                    <label>
+                        <span>Color: </span>
+                    </label>
+                    <ColorPicker
                         color={this.state.color}
                         onChange={this.handleColorChange}
-                        className={
-                            this.state.connected !== 2 ? "disabled" : "enabled"
-                        }
                     />
                 </CardText>
             </Card>

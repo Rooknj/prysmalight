@@ -44,10 +44,7 @@ const LightList = ({ data: { loading, error, lights } }) => {
     //TODO find more elegant way to do this
     if (!lights[0].state) return "Error: No lights are connected to the server";
     return (
-        <div>
-            <br />
-            {lights.map(light => <Light key={light.id} light={light} />)}
-        </div>
+        <div>{lights.map(light => <Light key={light.id} light={light} />)}</div>
     );
 };
 

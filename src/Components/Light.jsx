@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 import { graphql } from "react-apollo";
 import gql from "graphql-tag";
-import { ChromePicker } from "react-color";
 import throttle from "lodash.throttle";
 import { Card, CardHeader, CardText } from "material-ui/Card";
 import Toggle from "material-ui/Toggle";

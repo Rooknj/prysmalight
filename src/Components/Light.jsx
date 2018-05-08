@@ -3,10 +3,25 @@ import PropTypes from "prop-types";
 import { graphql } from "react-apollo";
 import gql from "graphql-tag";
 import throttle from "lodash.throttle";
-import { Card, CardHeader, CardText } from "material-ui/Card";
-import Toggle from "material-ui/Toggle";
-import Slider from "material-ui/Slider";
+
+import Card, { CardHeader, CardContent } from "material-ui/Card";
+import Avatar from "material-ui/Avatar";
+import red from "material-ui/colors/red";
+import { withStyles } from "material-ui/styles";
+
+import Switch from "material-ui/Switch";
+import { FormGroup, FormLabel } from "material-ui/Form";
+
 import ColorPicker from "./ColorPicker/ColorPicker.jsx";
+import Slider from "rc-slider";
+import "rc-slider/assets/index.css";
+
+const styles = theme => ({
+    card: {},
+    avatar: {
+        backgroundColor: red[500]
+    }
+});
 
 const propTypes = {
     light: PropTypes.shape({
@@ -138,7 +153,7 @@ class Light extends React.Component {
         this.setLight(variables);
     };
 
-    handleBrightnessChange = (evt, brightness) => {
+    handleBrightnessChange = brightness => {
         this.setState({
             brightness,
             ignoreUpdates: true
@@ -183,42 +198,55 @@ class Light extends React.Component {
     };
 
     render() {
+        const { classes } = this.props;
         return (
-            <Card>
+            <Card className={classes.card}>
                 <CardHeader
                     title={this.state.id}
                     subtitle={this.displayConnection()}
-                    avatar="images/ok-128.jpg"
+                    avatar={
+                        <Avatar aria-label="Light" className={classes.avatar}>
+                            R
+                        </Avatar>
+                    }
                 />
-                <CardText>
-                    <Toggle
-                        toggled={this.state.state === "ON" ? true : false}
-                        onToggle={this.handleStateChange}
-                        disabled={this.state.connected !== 2}
-                        label={"State:"}
-                    />
-                    <label>
-                        <span>Brightness: </span>
-                    </label>
-                    <Slider
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={this.state.brightness}
-                        onChange={this.handleBrightnessChange}
-                        disabled={this.state.connected !== 2}
-                    />
-                    <label>
-                        <span>Color: </span>
-                    </label>
-                    <ColorPicker
-                        color={this.state.color}
-                        onChange={this.handleColorChange}
-                    />
-                </CardText>
+                <CardContent>
+                    <FormGroup row>
+                        <FormLabel>Power</FormLabel>
+                        <Switch
+                            checked={this.state.state === "ON" ? true : false}
+                            onChange={this.handleStateChange}
+                            disabled={this.state.connected !== 2}
+                            color="primary"
+                        />
+                    </FormGroup>
+                    <br />
+                    <FormGroup>
+                        <FormLabel>Brightness</FormLabel>
+                        <br />
+                        <Slider
+                            min={0}
+                            max={100}
+                            step={1}
+                            value={this.state.brightness}
+                            onChange={this.handleBrightnessChange}
+                            disabled={this.state.connected !== 2}
+                        />
+                    </FormGroup>
+                    <br />
+                    <FormGroup row>
+                        <FormLabel>Color</FormLabel>
+                        <ColorPicker
+                            color={this.state.color}
+                            onChange={this.handleColorChange}
+                        />
+                    </FormGroup>
+                </CardContent>
             </Card>
         );
     }
 }
 
-export default graphql(LIGHT_CHANGED)(graphql(SET_LIGHT)(Light));
+export default withStyles(styles)(
+    graphql(LIGHT_CHANGED)(graphql(SET_LIGHT)(Light))
+);

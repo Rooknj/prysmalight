@@ -1,21 +1,28 @@
 import React from "react";
 import "./ColorPicker.css";
-import Hue from "./Hue.jsx";
+//import Hue from "./Hue.jsx";
 import { CustomPicker } from "react-color";
+import CircularColor from "react-circular-color";
 
 class ColorPicker extends React.Component {
-    handleHueChange = hue => {
-        this.props.onChange({ h: hue, s: 1, l: 0.5 });
+    handleColorChange = color => {
+        this.props.onChange(color);
+    };
+
+    renderRect = ({ color, x, y }) => {
+        return <circle cx={x + 14} cy={y + 14} r="34" fill={color} />;
     };
 
     render() {
         return (
             <div id="container">
-                <Hue
-                    hue={Math.round(this.props.hsl.h)}
-                    saturation={100}
-                    lightness={50}
-                    setHue={this.handleHueChange}
+                <CircularColor
+                    size={300}
+                    onChange={this.handleColorChange}
+                    color={this.props.hex}
+                    centerRect={true}
+                    renderRect={this.renderRect}
+                    numberOfSectors={360}
                 />
             </div>
         );

@@ -3,7 +3,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 // Local Imports
-import "./index.css";
 import App from "./App";
 
 // Service Worker Import

@@ -3,6 +3,15 @@ import PropTypes from "prop-types";
 import { graphql } from "react-apollo";
 import gql from "graphql-tag";
 import Light from "./Light.jsx";
+import Grid from "material-ui/Grid";
+import { withStyles } from "material-ui/styles";
+
+const styles = theme => ({
+    root: {
+        flexGrow: 1,
+        height: "100%"
+    }
+});
 
 const propTypes = {
     data: PropTypes.shape({
@@ -38,17 +47,25 @@ const GET_LIGHTS = gql`
     }
 `;
 
-const LightList = ({ data: { loading, error, lights } }) => {
+const LightList = ({ data: { loading, error, lights }, classes }) => {
     if (loading) return "Loading...";
     if (error) return `Error! ${error.message}`;
     //TODO find more elegant way to do this
     if (!lights[0].state) return "Error: No lights are connected to the server";
     return (
-        <div>{lights.map(light => <Light key={light.id} light={light} />)}</div>
+        <div className={classes.root}>
+            <Grid container spacing={24} justify="center" alignItems="center">
+                {lights.map(light => (
+                    <Grid key={light.id} item xs={12} md={5} lg={4}>
+                        <Light light={light} />
+                    </Grid>
+                ))}
+            </Grid>
+        </div>
     );
 };
 
 LightList.propTypes = propTypes;
 LightList.defaultProps = defaultProps;
 
-export default graphql(GET_LIGHTS)(LightList);
+export default withStyles(styles)(graphql(GET_LIGHTS)(LightList));

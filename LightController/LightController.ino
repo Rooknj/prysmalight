@@ -213,6 +213,7 @@ void sendState() {
 
 // MQTT connect/reconnect function
 boolean reconnect() {
+  setMqttIpWithMDNS();
   if (client.connect(MQTT_CLIENT_ID, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, LIGHT_DISCONNECTED)) {
     Serial.println("INFO: connected");
     
@@ -244,7 +245,12 @@ void setupWifi() {
     delay(5000);
   }
   Serial.println("INFO: connected to Wifi :)");
+}
 
+
+
+/************ Find MDNS name of MQTT server ******************/
+void setMqttIpWithMDNS() {
   char hostString[16] = {0};
   if (!MDNS.begin(hostString)) {
     Serial.println("Error setting up MDNS responder!");
@@ -259,17 +265,19 @@ void setupWifi() {
       // we're searching for the one whose hostname 
       // matches what we want, and then get its IP
       if (MDNS.hostname(i) == "raspberrypi") {
-        String JENKINS_HOST = String(MDNS.IP(i)[0]) + String(".") +\
-          String(MDNS.IP(i)[1]) + String(".") +\
-          String(MDNS.IP(i)[2]) + String(".") +\
-          String(MDNS.IP(i)[3]);
-          JENKINS_HOST.toCharArray(MQTT_SERVER_IP, 16);
-          Serial.println(JENKINS_HOST);
-          Serial.println(MQTT_SERVER_IP);
+        String MQTT_HOST = String(MDNS.IP(i)[0]) + String(".") +\
+        String(MDNS.IP(i)[1]) + String(".") +\
+        String(MDNS.IP(i)[2]) + String(".") +\
+        String(MDNS.IP(i)[3]);
+        Serial.print("MQTT Host IP: ");
+        Serial.println(MQTT_HOST);
+        // Set MQTT_SERVER_IP to MQTT_HOST
+        MQTT_HOST.toCharArray(MQTT_SERVER_IP, 16); 
       }
     }
   }
 }
+
 
 
 /************ OTA Setup ******************/

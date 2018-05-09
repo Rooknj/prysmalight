@@ -25,7 +25,7 @@
 // the maximum value you can set brightness to out of 255 
 const uint8_t MAX_BRIGHTNESS = 63;
 // pin used for the rgb led strip (PWM)
-#define DATA_PIN 3
+#define DATA_PIN 3 // This is pin D3 on the NodeMCU ESP8266
 // how many leds in your strip?
 #define NUM_LEDS 150
 // Enables Serial and print statements

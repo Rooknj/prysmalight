@@ -29,7 +29,7 @@ const uint8_t MAX_BRIGHTNESS = 63;
 // how many leds in your strip?
 #define NUM_LEDS 150
 // Enables Serial and print statements
-#define DEBUG true
+#define DEBUG false
 
 
 
@@ -253,11 +253,11 @@ void setupWifi() {
 void setMqttIpWithMDNS() {
   char hostString[16] = {0};
   if (!MDNS.begin(hostString)) {
-    Serial.println("Error setting up MDNS responder!");
+    Serial.println("ERROR: Error setting up MDNS responder!");
   }
   int n = MDNS.queryService("mqtt", "tcp");
   if (n == 0) {
-    Serial.println("no services found");
+    Serial.println("INFO: no services found");
   }
   else {
     for (int i = 0; i < n; ++i) {
@@ -269,7 +269,7 @@ void setMqttIpWithMDNS() {
         String(MDNS.IP(i)[1]) + String(".") +\
         String(MDNS.IP(i)[2]) + String(".") +\
         String(MDNS.IP(i)[3]);
-        Serial.print("MQTT Host IP: ");
+        Serial.print("INFO: MQTT Host IP: ");
         Serial.println(MQTT_HOST);
         // Set MQTT_SERVER_IP to MQTT_HOST
         MQTT_HOST.toCharArray(MQTT_SERVER_IP, 16); 

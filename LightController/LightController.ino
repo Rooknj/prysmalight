@@ -85,7 +85,7 @@ byte realBlue = 0;
 // Globals for fade/transitions
 bool startFade = false;
 unsigned long lastLoop = 0;
-int transitionTime = 0; // The amount of time the transition takes in seconds
+int transitionTime = 5; // Set to 0 for instant color changes
 bool inFade = false;
 int loopCount = 0;
 int stepR, stepG, stepB;
@@ -156,7 +156,6 @@ bool processJson(char* message) {
     }
     else if (strcmp(root["state"], LIGHT_OFF) == 0) {
       stateOn = false;
-      //setColor(0, 0, 0);
     }
   }
 
@@ -167,7 +166,6 @@ bool processJson(char* message) {
     red = root["color"]["r"];
     green = root["color"]["g"];
     blue = root["color"]["b"];
-    //setColor(red, green, blue);
   }
 
   if (root.containsKey("brightness")) {
@@ -362,7 +360,7 @@ void handleCrossfade() {
     startFade = false;
     unsigned long now = millis();
     if (now - lastLoop > transitionTime) {
-      if (loopCount <= 1020) {
+      if (loopCount <= 255) {
         lastLoop = now;
 
         redVal = calculateVal(stepR, redVal, loopCount);
@@ -409,6 +407,7 @@ void loop() {
     client.loop();
   }
 
+  // Handles crossfading between colors/setting the color through the colorpicker
   handleCrossfade();
 }
 
@@ -435,18 +434,18 @@ void loop() {
 * 0-5 in 5 steps, and the blue falls from 10 to 7 in three steps.
 *
 * In the real program, the color percentages are converted to
-* 0-255 values, and there are 1020 steps (255*4).
+* 0-255 values, and there are 255 steps (255*4).
 *
 * To figure out how big a step there should be between one up- or
 * down-tick of one of the LED values, we call calculateStep(),
 * which calculates the absolute gap between the start and end values,
-* and then divides that gap by 1020 to determine the size of the step
+* and then divides that gap by 255 to determine the size of the step
 * between adjustments in the value.
 */
 int calculateStep(int prevValue, int endValue) {
     int step = endValue - prevValue; // What's the overall gap?
     if (step) {                      // If its non-zero,
-        step = 1020/step;            //   divide by 1020
+        step = 255/step;            //   divide by 255
     }
 
     return step;

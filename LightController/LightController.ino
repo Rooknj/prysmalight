@@ -23,13 +23,17 @@
 /************ Configuration Variables ******************/
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 // the maximum value you can set brightness to out of 255 
-const uint8_t MAX_BRIGHTNESS = 63;
+#define MAX_BRIGHTNESS = 63;
 // pin used for the rgb led strip (PWM)
 #define DATA_PIN 3 // This is pin D3 on the NodeMCU ESP8266
 // how many leds in your strip?
 #define NUM_LEDS 150
 // Enables Serial and print statements
 #define DEBUG false
+// Which LED strip are you using?
+#define CHIPSET WS2812B
+// What is the color order of your LED strip?
+#define COLOR_ORDER GRB
 
 
 
@@ -320,7 +324,7 @@ void setup() {
   }
 
   // init FastLED and the LED strip
-  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.addLeds<CHIPSET, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
   FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
   setColor(0, 0, 0);
 

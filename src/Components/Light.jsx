@@ -13,7 +13,7 @@ import Switch from "material-ui/Switch";
 
 import { MaterialPicker, CirclePicker, HuePicker } from "react-color";
 import Slider from "rc-slider";
-import "rc-slider/assets/index.css";
+import "./slider.css";
 
 import Grid from "material-ui/Grid";
 import Typography from "material-ui/Typography";

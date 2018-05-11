@@ -20,8 +20,8 @@ import { getMainDefinition } from "apollo-utilities"; // Aids with splitting lin
 import { HttpLink } from "apollo-link-http"; // Use Apollo Over HTTP (Queries, Mutations)
 import { WebSocketLink } from "apollo-link-ws"; // Use Apollo Over Websockets (Subscriptions)
 
-//const serverName = "localhost";
-const serverName = "raspberrypi.local";
+const serverName = "localhost";
+//const serverName = "raspberrypi.local";
 
 // Create an http link:
 const httpLink = new HttpLink({

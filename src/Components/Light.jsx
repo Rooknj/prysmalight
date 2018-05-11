@@ -12,7 +12,7 @@ import { withStyles } from "material-ui/styles";
 import Switch from "material-ui/Switch";
 import { FormGroup, FormLabel } from "material-ui/Form";
 
-import ColorPicker from "./ColorPicker/ColorPicker.jsx";
+import { MaterialPicker, CirclePicker, HuePicker } from "react-color";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 
@@ -20,6 +20,11 @@ const styles = theme => ({
     card: {},
     avatar: {
         backgroundColor: red[500]
+    },
+    huePicker: {},
+    circlePicker: {},
+    materialPicker: {
+        boxSizing: "content-box"
     }
 });
 
@@ -236,9 +241,18 @@ class Light extends React.Component {
                     <br />
                     <FormGroup row>
                         <FormLabel>Color</FormLabel>
-                        <ColorPicker
+                        <HuePicker
                             color={this.state.color}
                             onChange={this.handleColorChange}
+                        />
+                        <CirclePicker
+                            color={this.state.color}
+                            onChange={this.handleColorChange}
+                        />
+                        <MaterialPicker
+                            color={this.state.color}
+                            onChange={this.handleColorChange}
+                            className={classes.materialPicker}
                         />
                     </FormGroup>
                 </CardContent>

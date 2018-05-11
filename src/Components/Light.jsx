@@ -10,13 +10,13 @@ import red from "material-ui/colors/red";
 import { withStyles } from "material-ui/styles";
 
 import Switch from "material-ui/Switch";
-import { FormGroup, FormLabel } from "material-ui/Form";
 
 import { MaterialPicker, CirclePicker, HuePicker } from "react-color";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 
 import Grid from "material-ui/Grid";
+import Typography from "material-ui/Typography";
 
 const styles = theme => ({
     card: {},
@@ -243,12 +243,12 @@ class Light extends React.Component {
                         container
                         direction="row"
                         spacing={16}
-                        justify="flex-start"
+                        justify="center"
                         alignItems="center"
-                        alignContent="center"
                     >
-                        <FormLabel>Brightness</FormLabel>
-                        <br />
+                        <Grid item xs={12}>
+                            <Typography variant="body2">Brightness</Typography>
+                        </Grid>
                         <Grid item xs={12}>
                             <Slider
                                 min={0}
@@ -259,8 +259,9 @@ class Light extends React.Component {
                                 disabled={this.state.connected !== 2}
                             />
                         </Grid>
-                        <br />
-                        <FormLabel>Color</FormLabel>
+                        <Grid item xs={12}>
+                            <Typography variant="body2">Color</Typography>
+                        </Grid>
                         <Grid item xs={12}>
                             <HuePicker
                                 color={this.state.color}

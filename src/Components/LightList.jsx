@@ -7,10 +7,7 @@ import Grid from "material-ui/Grid";
 import { withStyles } from "material-ui/styles";
 
 const styles = theme => ({
-    root: {
-        flexGrow: 1,
-        height: "100%"
-    }
+    root: {}
 });
 
 const propTypes = {
@@ -54,7 +51,7 @@ const LightList = ({ data: { loading, error, lights }, classes }) => {
     if (!lights[0].state) return "Error: No lights are connected to the server";
     return (
         <div className={classes.root}>
-            <Grid container spacing={24} justify="center" alignItems="center">
+            <Grid container spacing={0} justify="center" alignItems="center">
                 {lights.map(light => (
                     <Grid key={light.id} item xs={11} sm={6} md={5} lg={4}>
                         <Light light={light} />

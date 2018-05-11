@@ -23,7 +23,10 @@ const styles = theme => ({
     avatar: {
         backgroundColor: red[500]
     },
-    huePicker: {},
+    huePicker: {
+        // This disables scrolling when using the slider
+        touchAction: "none"
+    },
     circlePicker: {},
     materialPicker: {
         boxSizing: "content-box"
@@ -266,6 +269,7 @@ class Light extends React.Component {
                             <HuePicker
                                 color={this.state.color}
                                 onChange={this.handleColorChange}
+                                className={classes.huePicker}
                             />
                         </Grid>
                         <Grid item xs={12}>

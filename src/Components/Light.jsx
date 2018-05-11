@@ -27,11 +27,24 @@ const styles = theme => ({
         // This disables scrolling when using the slider
         touchAction: "none"
     },
-    circlePicker: {},
+    circlePicker: {
+        justifyContent: "center"
+    },
     materialPicker: {
         boxSizing: "content-box"
     }
 });
+
+const colors = [
+    "#FF0000",
+    "#FFA500",
+    "#FFFF00",
+    "#00FF00",
+    "#00FFFF",
+    "#0000FF",
+    "#A500FF",
+    "#FF00FF"
+];
 
 const propTypes = {
     light: PropTypes.shape({
@@ -92,7 +105,8 @@ class Light extends React.Component {
             state: this.props.light.state,
             brightness: this.props.light.brightness,
             color: this.props.light.color,
-            ignoreUpdates: false
+            ignoreUpdates: false,
+            colors: colors
         };
     }
 
@@ -269,6 +283,7 @@ class Light extends React.Component {
                             <HuePicker
                                 color={this.state.color}
                                 onChange={this.handleColorChange}
+                                width={"100%"}
                                 className={classes.huePicker}
                             />
                         </Grid>
@@ -276,9 +291,19 @@ class Light extends React.Component {
                             <CirclePicker
                                 color={this.state.color}
                                 onChange={this.handleColorChange}
+                                width={"100%"}
+                                style={{ display: "block", justify: "center" }}
+                                colors={this.state.colors}
+                                className={classes.circlePicker}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid
+                            item
+                            xs={12}
+                            justify="center"
+                            alignItems="center"
+                            style={{ display: "flex" }}
+                        >
                             <MaterialPicker
                                 color={this.state.color}
                                 onChange={this.handleColorChange}

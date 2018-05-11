@@ -16,6 +16,8 @@ import { MaterialPicker, CirclePicker, HuePicker } from "react-color";
 import Slider from "rc-slider";
 import "rc-slider/assets/index.css";
 
+import Grid from "material-ui/Grid";
+
 const styles = theme => ({
     card: {},
     avatar: {
@@ -206,55 +208,79 @@ class Light extends React.Component {
         const { classes } = this.props;
         return (
             <Card className={classes.card}>
-                <CardHeader
-                    title={this.state.id}
-                    subtitle={this.displayConnection()}
-                    avatar={
-                        <Avatar aria-label="Light" className={classes.avatar}>
-                            R
-                        </Avatar>
-                    }
-                />
-                <CardContent>
-                    <FormGroup row>
-                        <FormLabel>Power</FormLabel>
+                <Grid container>
+                    <Grid item xs={9}>
+                        <CardHeader
+                            title={this.state.id}
+                            subheader={this.displayConnection()}
+                            avatar={
+                                <Avatar
+                                    aria-label="Light"
+                                    className={classes.avatar}
+                                >
+                                    R
+                                </Avatar>
+                            }
+                        />
+                    </Grid>
+                    <Grid
+                        item
+                        xs={3}
+                        justify="flex-end"
+                        alignItems="center"
+                        style={{ display: "flex" }}
+                    >
                         <Switch
                             checked={this.state.state === "ON" ? true : false}
                             onChange={this.handleStateChange}
                             disabled={this.state.connected !== 2}
                             color="primary"
                         />
-                    </FormGroup>
-                    <br />
-                    <FormGroup>
+                    </Grid>
+                </Grid>
+                <CardContent>
+                    <Grid
+                        container
+                        direction="row"
+                        spacing={16}
+                        justify="flex-start"
+                        alignItems="center"
+                        alignContent="center"
+                    >
                         <FormLabel>Brightness</FormLabel>
                         <br />
-                        <Slider
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={this.state.brightness}
-                            onChange={this.handleBrightnessChange}
-                            disabled={this.state.connected !== 2}
-                        />
-                    </FormGroup>
-                    <br />
-                    <FormGroup row>
+                        <Grid item xs={12}>
+                            <Slider
+                                min={0}
+                                max={100}
+                                step={1}
+                                value={this.state.brightness}
+                                onChange={this.handleBrightnessChange}
+                                disabled={this.state.connected !== 2}
+                            />
+                        </Grid>
+                        <br />
                         <FormLabel>Color</FormLabel>
-                        <HuePicker
-                            color={this.state.color}
-                            onChange={this.handleColorChange}
-                        />
-                        <CirclePicker
-                            color={this.state.color}
-                            onChange={this.handleColorChange}
-                        />
-                        <MaterialPicker
-                            color={this.state.color}
-                            onChange={this.handleColorChange}
-                            className={classes.materialPicker}
-                        />
-                    </FormGroup>
+                        <Grid item xs={12}>
+                            <HuePicker
+                                color={this.state.color}
+                                onChange={this.handleColorChange}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <CirclePicker
+                                color={this.state.color}
+                                onChange={this.handleColorChange}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <MaterialPicker
+                                color={this.state.color}
+                                onChange={this.handleColorChange}
+                                className={classes.materialPicker}
+                            />
+                        </Grid>
+                    </Grid>
                 </CardContent>
             </Card>
         );

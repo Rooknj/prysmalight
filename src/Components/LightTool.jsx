@@ -4,6 +4,7 @@ import LightList from "./LightList";
 const LightTool = props => {
     return (
         <div>
+            <br />
             <LightList />
         </div>
     );

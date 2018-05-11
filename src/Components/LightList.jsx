@@ -56,7 +56,7 @@ const LightList = ({ data: { loading, error, lights }, classes }) => {
         <div className={classes.root}>
             <Grid container spacing={24} justify="center" alignItems="center">
                 {lights.map(light => (
-                    <Grid key={light.id} item xs={12} md={5} lg={4}>
+                    <Grid key={light.id} item xs={11} sm={6} md={5} lg={4}>
                         <Light light={light} />
                     </Grid>
                 ))}

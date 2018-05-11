@@ -5,9 +5,11 @@ import { PubSub } from "graphql-subscriptions";
 // MQTT: client
 let MQTT_CLIENT;
 if (process.env.MOCK) {
-  MQTT_CLIENT = "tcp://localhost:1883";
-} else {
+  MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
+} else if (process.env.NODE_ENV == "development") {
   MQTT_CLIENT = "tcp://raspberrypi.local:1883";
+} else {
+  MQTT_CLIENT = "tcp://localhost:1883";
 }
 
 // MQTT: topics

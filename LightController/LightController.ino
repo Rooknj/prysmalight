@@ -490,10 +490,44 @@ void loop() {
 
 
 /************ Animations ******************/
+int getFlashSpeed(){
+  switch (animationSpeed) {
+    case 1:
+      return 2000;
+      break;
+    case 2:
+      return 1000;
+      break;
+    case 3:
+      return 750;
+      break;
+    case 4:
+      return 500;
+      break;
+    case 5:
+      return 400;
+      break;
+    case 6:
+      return 300;
+      break;
+    case 7:
+      return 200;
+      break;
+    default:
+      return 1000;
+  }
+}
+
 long lastUpdate = 0;
 bool shouldUpdate() {
+  long updateThreshold;
+  if (currentEffect == "Flash") {
+    updateThreshold = getFlashSpeed();
+  } else {
+    updateThreshold = 33;
+  }
   long now = millis();
-  long updateThreshold = 1000;
+  
   if (now - lastUpdate > updateThreshold) {
     lastUpdate = now;
     return true;

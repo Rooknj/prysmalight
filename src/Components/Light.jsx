@@ -28,7 +28,7 @@ const styles = theme => ({
         touchAction: "none"
     },
     circlePicker: {
-        justifyContent: "center"
+        justifyContent: "flex-left"
     },
     materialPicker: {
         boxSizing: "content-box"
@@ -36,14 +36,14 @@ const styles = theme => ({
 });
 
 const colors = [
-    "#FF0000",
-    "#FFA500",
-    "#FFFF00",
-    "#00FF00",
-    "#00FFFF",
-    "#0000FF",
-    "#A500FF",
-    "#FF00FF"
+    "#FF0000", //red
+    "#FFA500", //orange
+    "#FFFF00", //yellow
+    "#00FF00", //green
+    "#00FFFF", //cyan
+    "#0000FF", //blue
+    "#A500FF", //purple
+    "#FF00FF" //pink
 ];
 
 const propTypes = {
@@ -287,20 +287,19 @@ class Light extends React.Component {
                                 className={classes.huePicker}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        <Grid item xs={6}>
                             <CirclePicker
                                 color={this.state.color}
                                 onChange={this.handleColorChange}
                                 width={"100%"}
-                                style={{ display: "block", justify: "center" }}
                                 colors={this.state.colors}
                                 className={classes.circlePicker}
                             />
                         </Grid>
                         <Grid
                             item
-                            xs={12}
-                            justify="center"
+                            xs={6}
+                            justify="flex-end"
                             alignItems="center"
                             style={{ display: "flex" }}
                         >

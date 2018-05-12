@@ -80,6 +80,11 @@ uint8_t brightness = 100;
 uint8_t red = 0;
 uint8_t green = 255;
 uint8_t blue = 0;
+int animationSpeed = 4;
+#define NO_EFFECT "None"
+String currentEffect = NO_EFFECT;
+char* effects[] = {"Flash", "Fade"};
+int numEffects = 2;
 // define the array of leds
 CRGB leds[NUM_LEDS];
 
@@ -99,11 +104,6 @@ int stepR, stepG, stepB;
 int redVal, grnVal, bluVal;
 
 // Globals for animations
-#define NO_EFFECT "None"
-char* effects[] = {"Flash", "Fade"};
-int numEffects = 2;
-String currentEffect = NO_EFFECT;
-int animationSpeed = 4;
 bool wasInEffect = false;
 
 // Flash
@@ -222,6 +222,11 @@ bool processJson(char* message) {
       }
     }
   }
+
+  if (root.containsKey("speed")) {
+    animationSpeed = root["speed"];
+  }
+  
   return true;
 }
 
@@ -505,19 +510,19 @@ int getFlashSpeed(){
       return 1000;
       break;
     case 3:
-      return 750;
-      break;
-    case 4:
       return 500;
       break;
-    case 5:
-      return 400;
-      break;
-    case 6:
+    case 4:
       return 300;
       break;
-    case 7:
+    case 5:
       return 200;
+      break;
+    case 6:
+      return 100;
+      break;
+    case 7:
+      return 50;
       break;
     default:
       return 1000;
@@ -558,7 +563,7 @@ int getCycleSpeed(){
       return 100;
       break;
     case 2:
-      return 67;
+      return 50;
       break;
     case 3:
       return 33;
@@ -567,13 +572,13 @@ int getCycleSpeed(){
       return 17;
       break;
     case 5:
-      return 14;
+      return 8;
       break;
     case 6:
-      return 12;
+      return 5;
       break;
     case 7:
-      return 10;
+      return 3;
       break;
     default:
       return 33;

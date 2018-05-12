@@ -106,14 +106,21 @@ String currentEffect = NO_EFFECT;
 int animationSpeed = 4;
 bool wasInEffect = false;
 
-//Flash
-int flash_index = 0;
+// Flash
+byte flash_index = 0;
 
+// Fade
+byte gHue = 0;
 
 /************ Functions ******************/
 // function called to fill the LED strip a solid color
-void setColor(uint8_t p_red, uint8_t p_green, uint8_t p_blue) {
+void setRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue) {
   fill_solid(leds, NUM_LEDS, CRGB(p_red, p_green, p_blue));
+  FastLED.show();
+}
+
+void setHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value) {
+  fill_solid(leds, NUM_LEDS, CHSV(p_hue, p_saturation, p_value));
   FastLED.show();
 }
 
@@ -168,7 +175,6 @@ bool processJson(char* message) {
   if (root.containsKey("state")) {
     if (strcmp(root["state"], LIGHT_ON) == 0) {
       stateOn = true;
-      //setColor(red, green, blue);
     }
     else if (strcmp(root["state"], LIGHT_OFF) == 0) {
       stateOn = false;
@@ -375,7 +381,7 @@ void setup() {
   // init FastLED and the LED strip
   FastLED.addLeds<CHIPSET, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
   FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
-  setColor(0, 0, 0);
+  setRGB(0, 0, 0);
 
   // init the builtin led on the ESP8266
   pinMode(LED_BUILTIN, OUTPUT);
@@ -405,7 +411,7 @@ void handleColorChange() {
       if (wasInEffect) {
         wasInEffect = false;
       }
-      setColor(realRed, realGreen, realBlue);
+      setRGB(realRed, realGreen, realBlue);
 
       redVal = realRed;
       grnVal = realGreen;
@@ -434,7 +440,7 @@ void handleColorChange() {
         grnVal = calculateVal(stepG, grnVal, loopCount);
         bluVal = calculateVal(stepB, bluVal, loopCount);
 
-        setColor(redVal, grnVal, bluVal); // Write current values to LED pins
+        setRGB(redVal, grnVal, bluVal); // Write current values to LED pins
 
         Serial.print("Loop count: ");
         Serial.println(loopCount);
@@ -518,13 +524,83 @@ int getFlashSpeed(){
   }
 }
 
+int getAnimationSpeed(){
+  switch (animationSpeed) {
+    case 1:
+      return 100;
+      break;
+    case 2:
+      return 67;
+      break;
+    case 3:
+      return 33;
+      break;
+    case 4:
+      return 17;
+      break;
+    case 5:
+      return 14;
+      break;
+    case 6:
+      return 12;
+      break;
+    case 7:
+      return 10;
+      break;
+    default:
+      return 33;
+  }
+}
+
+int getCycleSpeed(){
+  switch (animationSpeed) {
+    case 1:
+      return 100;
+      break;
+    case 2:
+      return 67;
+      break;
+    case 3:
+      return 33;
+      break;
+    case 4:
+      return 17;
+      break;
+    case 5:
+      return 14;
+      break;
+    case 6:
+      return 12;
+      break;
+    case 7:
+      return 10;
+      break;
+    default:
+      return 33;
+  }
+}
+
+//CYCLE HUE
+long lastHueCycle = 0;
+void cycleHue(){
+    long updateThreshold = getCycleSpeed();
+    long now = millis();
+    if (now - lastHueCycle >= updateThreshold) {
+    // save the last time you changed Hue
+      lastHueCycle = now;
+      gHue++;
+    }
+}
+
 long lastUpdate = 0;
 bool shouldUpdate() {
   long updateThreshold;
   if (currentEffect == "Flash") {
     updateThreshold = getFlashSpeed();
+  } else if (currentEffect == "Fade") {
+    updateThreshold = 17;
   } else {
-    updateThreshold = 33;
+    updateThreshold = getAnimationSpeed();
   }
   long now = millis();
   
@@ -539,15 +615,15 @@ bool shouldUpdate() {
 void handleFlash() {
   if(shouldUpdate()) {
     if(flash_index == 0){
-      setColor(255,0,0);
+      setRGB(255,0,0);
       flash_index++;
     }
     else if(flash_index == 1){
-      setColor(0,255,0);
+      setRGB(0,255,0);
       flash_index++;
     }
     else{
-      setColor(0,0,255);
+      setRGB(0,0,255);
       flash_index = 0;
     }
   }
@@ -555,7 +631,10 @@ void handleFlash() {
 
 // Fade
 void handleFade() {
-  
+  cycleHue();
+  if(shouldUpdate()) {
+    setHSV(gHue, 255, 255);
+  }
 }
 
 

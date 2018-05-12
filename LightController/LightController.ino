@@ -23,7 +23,7 @@
 /************ Configuration Variables ******************/
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 // the maximum value you can set brightness to out of 255 
-#define MAX_BRIGHTNESS = 63;
+#define MAX_BRIGHTNESS 63
 // pin used for the rgb led strip (PWM)
 #define DATA_PIN 3 // This is pin D3 on the NodeMCU ESP8266
 // how many leds in your strip?

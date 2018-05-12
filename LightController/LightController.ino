@@ -45,6 +45,9 @@ const PROGMEM uint16_t MQTT_SERVER_PORT = 1883;
 // connection
 const PROGMEM char* MQTT_LIGHT_CONNECTED_TOPIC = "office/rgb1/connected";
 
+// effect list
+const PROGMEM char* MQTT_EFFECT_LIST_TOPIC = "office/rgb1/effects";
+
 // state
 const PROGMEM char* MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/state";
 const PROGMEM char* MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/set";
@@ -91,6 +94,16 @@ int loopCount = 0;
 int stepR, stepG, stepB;
 int redVal, grnVal, bluVal;
 
+// Globals for animations
+#define NO_EFFECT "None"
+char* effects[] = {"Flash", "Fade"};
+int numEffects = 2;
+String currentEffect = NO_EFFECT;
+int animationSpeed = 4;
+bool wasInEffect = false;
+
+//Flash
+int flash_index = 0;
 
 
 /************ Functions ******************/
@@ -99,7 +112,6 @@ void setColor(uint8_t p_red, uint8_t p_green, uint8_t p_blue) {
   fill_solid(leds, NUM_LEDS, CRGB(p_red, p_green, p_blue));
   FastLED.show();
 }
-
 
 
 // function called when a MQTT message arrived
@@ -138,7 +150,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
 }
 
 
-// Take JSON message and parse it
+// function called to take JSON message, parse it, then set the according variables
 bool processJson(char* message) {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
 
@@ -160,9 +172,18 @@ bool processJson(char* message) {
   }
 
   if (root.containsKey("color")) {
+    // Turn the light on if it isn't
     if(!stateOn){
       stateOn = true;
     }
+
+    // Set the current effect to None
+    if (currentEffect != NO_EFFECT){
+      currentEffect = NO_EFFECT;
+      wasInEffect = true;
+    }
+
+    // Set the color variables
     red = root["color"]["r"];
     green = root["color"]["g"];
     blue = root["color"]["b"];
@@ -173,17 +194,26 @@ bool processJson(char* message) {
     FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
     FastLED.show();
   }
-
+  /*
   if (root.containsKey("transition")) {
     transitionTime = root["transition"];
   }
-  else {
-    //transitionTime = 0;
+  */
+
+  if (root.containsKey("effect")) {
+    for(int i = 0; i < numEffects; i++) {
+      if (strcmp(root["effect"], effects[i]) == 0){
+        // Set effect if it is supported on this controller
+        if(!stateOn){
+          stateOn = true;
+        }
+        currentEffect = root["effect"].asString();
+        break;
+      }
+    }
   }
-  
   return true;
 }
-
 
 
 // send light state over MQTT
@@ -204,10 +234,28 @@ void sendState() {
   // populate payload with brightness
   root["brightness"] = brightness;
 
+  // populate payload with current effect
+  root["effect"] = currentEffect;
+  
   char buffer[root.measureLength() + 1];
   root.printTo(buffer, sizeof(buffer));
 
   client.publish(MQTT_LIGHT_STATE_TOPIC, buffer, true);
+}
+
+
+// send effect list over MQTT
+void sendEffectList() {
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonArray& effectList = jsonBuffer.createArray();
+  for(int i = 0; i < numEffects; i++) {
+    effectList.add(effects[i]);
+  }
+  char buffer[effectList.measureLength() + 1];
+  effectList.printTo(buffer, sizeof(buffer));
+
+  client.publish(MQTT_EFFECT_LIST_TOPIC, buffer, true);
 }
 
 
@@ -223,6 +271,7 @@ boolean reconnect() {
     
     // publish the initial values
     sendState();
+    sendEffectList();
 
     // ... and resubscribe
     client.subscribe(MQTT_LIGHT_COMMAND_TOPIC);
@@ -342,10 +391,16 @@ void setup() {
 
 
 /************ Crossfade transition function ******************/
-void handleCrossfade() {
+void handleColorChange() {
   if (startFade) {
-    // If we don't want to fade, skip it.
-    if (transitionTime == 0) {
+    // TODO: Clean up logic
+    if (currentEffect != NO_EFFECT && stateOn){
+      return;
+    }
+    if (transitionTime == 0 || currentEffect != NO_EFFECT || wasInEffect) {
+      if (wasInEffect) {
+        wasInEffect = false;
+      }
       setColor(realRed, realGreen, realBlue);
 
       redVal = realRed;
@@ -416,7 +471,53 @@ void loop() {
   }
 
   // Handles crossfading between colors/setting the color through the colorpicker
-  handleCrossfade();
+  handleColorChange();
+
+  // Handle the current effect
+  if (currentEffect == NO_EFFECT || stateOn == false){
+    // do nothing
+  } else if (currentEffect == "Flash") {
+    handleFlash();
+  } else if (currentEffect == "Fade") {
+    handleFade();
+  }
+}
+
+
+
+/************ Animations ******************/
+long lastUpdate = 0;
+bool shouldUpdate() {
+  long now = millis();
+  long updateThreshold = 1000;
+  if (now - lastUpdate > updateThreshold) {
+    lastUpdate = now;
+    return true;
+  }
+  return false;
+}
+
+// Flash
+void handleFlash() {
+  if(shouldUpdate()) {
+    if(flash_index == 0){
+      setColor(255,0,0);
+      flash_index++;
+    }
+    else if(flash_index == 1){
+      setColor(0,255,0);
+      flash_index++;
+    }
+    else{
+      setColor(0,0,255);
+      flash_index = 0;
+    }
+  }
+}
+
+// Fade
+void handleFade() {
+  
 }
 
 

@@ -288,7 +288,7 @@ void sendEffectList() {
 boolean reconnect() {
   setMqttIpWithMDNS();
   if (client.connect(MQTT_CLIENT_ID, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, LIGHT_DISCONNECTED)) {
-    Serial.println("INFO: connected");
+    Serial.println("INFO: connected to MQTT broker");
     
     // Once connected, publish an announcement...
     // publish that the ESP is connected
@@ -326,9 +326,6 @@ void setupWifi() {
 /************ Find MDNS name of MQTT server ******************/
 void setMqttIpWithMDNS() {
   char hostString[16] = {0};
-  if (!MDNS.begin(hostString)) {
-    Serial.println("ERROR: Error setting up MDNS responder!");
-  }
   int n = MDNS.queryService("mqtt", "tcp");
   if (n == 0) {
     Serial.println("INFO: no services found");

@@ -97,7 +97,7 @@ byte realBlue = 0;
 // Globals for fade/transitions
 bool startFade = false;
 unsigned long lastLoop = 0;
-int transitionTime = 5; // Set to 0 for instant color changes
+int transitionTime = 0; // Set to 0 for instant color changes
 bool inFade = false;
 int loopCount = 0;
 int stepR, stepG, stepB;
@@ -224,7 +224,9 @@ bool processJson(char* message) {
   }
 
   if (root.containsKey("speed")) {
-    animationSpeed = root["speed"];
+    if (root["speed"] > 1 && root["speed"] < 7) {
+      animationSpeed = (int)root["speed"];
+    }
   }
   
   return true;
@@ -251,6 +253,9 @@ void sendState() {
 
   // populate payload with current effect
   root["effect"] = currentEffect;
+
+  // populate payload with current effect speed
+  root["speed"] = animationSpeed;
   
   char buffer[root.measureLength() + 1];
   root.printTo(buffer, sizeof(buffer));

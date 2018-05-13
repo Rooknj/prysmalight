@@ -217,6 +217,11 @@ bool processJson(char* message) {
         if(!stateOn){
           stateOn = true;
         }
+        if (red != 0 || green != 0 || blue != 0) {
+          red = 0;
+          green = 0;
+          blue = 0;
+        }
         currentEffect = root["effect"].asString();
         break;
       }
@@ -224,7 +229,7 @@ bool processJson(char* message) {
   }
 
   if (root.containsKey("speed")) {
-    if (root["speed"] > 1 && root["speed"] < 7) {
+    if (root["speed"] >= 1 && root["speed"] <= 7) {
       animationSpeed = (int)root["speed"];
     }
   }

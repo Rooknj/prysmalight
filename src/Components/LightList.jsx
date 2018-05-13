@@ -40,6 +40,9 @@ const GET_LIGHTS = gql`
                 g
                 b
             }
+            effect
+            speed
+            supportedEffects
         }
     }
 `;

@@ -6,7 +6,7 @@ import throttle from "lodash.throttle";
 
 import Card, { CardHeader, CardContent } from "material-ui/Card";
 import Avatar from "material-ui/Avatar";
-import red from "material-ui/colors/red";
+import grey from "material-ui/colors/grey";
 import { withStyles } from "material-ui/styles";
 
 import Switch from "material-ui/Switch";
@@ -18,10 +18,12 @@ import "./slider.css";
 import Grid from "material-ui/Grid";
 import Typography from "material-ui/Typography";
 
+import HightlightIcon from "@material-ui/icons/Highlight";
+
 const styles = theme => ({
     card: {},
     avatar: {
-        backgroundColor: red[500]
+        backgroundColor: grey[400]
     },
     huePicker: {
         // This disables scrolling when using the slider
@@ -92,6 +94,9 @@ const LIGHT_CHANGED = gql`
                 g
                 b
             }
+            effect
+            speed
+            supportedEffects
         }
     }
 `;
@@ -105,6 +110,9 @@ class Light extends React.Component {
             state: this.props.light.state,
             brightness: this.props.light.brightness,
             color: this.props.light.color,
+            effect: this.props.light.effect,
+            speed: this.props.light.speed,
+            supportedEffects: this.props.light.supportedEffects,
             ignoreUpdates: false,
             colors: colors
         };
@@ -119,11 +127,24 @@ class Light extends React.Component {
         },
         prevState
     ) {
+        // Dont rerender if data is loading or if we are currently interacting with the UI
+        // TODO check if this is why we are not getting subscription updates
         if (loading || prevState.ignoreUpdates) {
             return prevState;
         }
-        const { connected, state, brightness, color } = lightChanged;
+
+        // decompose the incoming data from the subscription
+        const {
+            connected,
+            state,
+            brightness,
+            color,
+            effect,
+            speed
+        } = lightChanged;
         let nextState = {};
+
+        // If the incoming data is the same as the current state, ignore it
         if (state && state !== prevState.state) {
             nextState = { ...nextState, ...{ state } };
         }
@@ -144,6 +165,14 @@ class Light extends React.Component {
         ) {
             nextState = { ...nextState, ...{ color } };
         }
+        if (effect && effect !== prevState.effect) {
+            nextState = { ...nextState, ...{ effect } };
+        }
+        if (speed && speed !== prevState.speed) {
+            nextState = { ...nextState, ...{ speed } };
+        }
+
+        // If nextState is empty, that means all the data is the same so we should just return the previous state
         return Object.keys(nextState).length > 0 ? nextState : prevState;
     }
 
@@ -235,7 +264,13 @@ class Light extends React.Component {
                                     aria-label="Light"
                                     className={classes.avatar}
                                 >
-                                    R
+                                    <HightlightIcon
+                                        nativeColor={`rgb(${
+                                            this.state.color.r
+                                        },${this.state.color.g},${
+                                            this.state.color.b
+                                        })`}
+                                    />
                                 </Avatar>
                             }
                         />

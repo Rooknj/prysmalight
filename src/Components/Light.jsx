@@ -405,9 +405,6 @@ class Light extends React.Component {
                                             id: "effect"
                                         }}
                                     >
-                                        <MenuItem value="">
-                                            <em>None</em>
-                                        </MenuItem>
                                         {this.state.supportedEffects.map(
                                             effect => (
                                                 <MenuItem

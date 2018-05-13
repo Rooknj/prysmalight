@@ -13,6 +13,26 @@ type Subscription {
   lightChanged(lightId: String!): Light
 }
 
+type Light {
+  id: String # uique name of accessory
+  connected: Int
+  state: String # curent power status
+  brightness: Int # current brightness
+  color: Color # current color
+  effect: String # current effect
+  speed: Int # effect speed
+  supportedEffects: [String] # List of supported effects
+}
+
+input LightInput {
+  id: String!
+  state: String
+  brightness: Int
+  color: ColorInput
+  effect: String
+  speed: Int
+}
+
 type Color {
   r: Int!
   g: Int!
@@ -23,19 +43,4 @@ input ColorInput {
   r: Int!
   g: Int!
   b: Int!
-}
-
-type Light {
-  id: String # uique name of accessory
-  connected: Int
-  state: String # curent power status
-  brightness: Int # current brightness
-  color: Color # current color
-}
-
-input LightInput {
-  id: String! # name of accessory
-  state: String # curent power status
-  brightness: Int # current brightness
-  color: ColorInput # current color
 }

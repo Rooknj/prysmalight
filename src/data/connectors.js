@@ -19,6 +19,7 @@ const MQTT_LIGHT_CONNECTED_TOPIC = "office/rgb1/connected";
 // state
 const MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/state";
 const MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/set";
+const MQTT_EFFECT_LIST_TOPIC = "office/rgb1/effects";
 
 // MQTT: payloads by default (on/off)
 const LIGHT_ON = "ON";
@@ -65,6 +66,7 @@ mqttClient.on("connect", () => {
   ChalkConsole.info(`Connected to MQTT broker`);
   subscribeTo(MQTT_LIGHT_CONNECTED_TOPIC);
   subscribeTo(MQTT_LIGHT_STATE_TOPIC);
+  subscribeTo(MQTT_EFFECT_LIST_TOPIC);
 });
 
 // On reconnect attempt
@@ -101,8 +103,25 @@ class LightConnector {
 
     const onStateMessage = data => {
       const message = JSON.parse(data);
-      Object.assign(this.lights[0], message);
-      pubsub.publish("lightChanged", { lightChanged: message });
+      // TODO: add data checking
+      const { state, brightness, color, effect, speed } = message;
+      let newState = {};
+      if (state) newState = { ...newState, state };
+      if (brightness) newState = { ...newState, brightness };
+      if (color) newState = { ...newState, color };
+      if (effect) newState = { ...newState, effect };
+      if (speed) newState = { ...newState, speed };
+      Object.assign(this.lights[0], newState);
+      pubsub.publish("lightChanged", { lightChanged: newState });
+    };
+
+    const onEffectListMessage = data => {
+      const effectList = JSON.parse(data);
+
+      Object.assign(this.lights[0], { supportedEffects: effectList });
+      pubsub.publish("lightChanged", {
+        lightChanged: { supportedEffects: effectList }
+      });
     };
 
     // Route each MQTT topic to it's respective message handler
@@ -115,6 +134,8 @@ class LightConnector {
         onConnectedMessage(data);
       } else if (topic === MQTT_LIGHT_STATE_TOPIC) {
         onStateMessage(data);
+      } else if (topic === MQTT_EFFECT_LIST_TOPIC) {
+        onEffectListMessage(data);
       } else {
         ChalkConsole.error(
           `Received messsage that belonged to a topic we are not supposed to be subscribed to`
@@ -129,11 +150,15 @@ class LightConnector {
   };
 
   setLight = light => {
-    const { state, brightness, color } = light;
+    const { state, brightness, color, effect, speed } = light;
+    // TODO: add data checking
     let payload = {};
     if (state) payload = { ...payload, state };
     if (brightness) payload = { ...payload, brightness };
     if (color) payload = { ...payload, color };
+    if (effect) payload = { ...payload, effect };
+    if (speed) payload = { ...payload, speed };
+    console.log("payload:", payload);
     publishTo(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(JSON.stringify(payload)));
     return true;
   };

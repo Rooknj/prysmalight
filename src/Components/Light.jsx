@@ -20,8 +20,16 @@ import Typography from "material-ui/Typography";
 
 import HightlightIcon from "@material-ui/icons/Highlight";
 
+import Select from "material-ui/Select";
+import { InputLabel } from "material-ui/Input";
+import { MenuItem } from "material-ui/Menu";
+import { FormControl } from "material-ui/Form";
+
 const styles = theme => ({
-    card: {},
+    card: {
+        minWidth: 300,
+        maxWidth: 400
+    },
     avatar: {
         backgroundColor: grey[400]
     },
@@ -34,6 +42,10 @@ const styles = theme => ({
     },
     materialPicker: {
         boxSizing: "content-box"
+    },
+    formControl: {
+        margin: theme.spacing.unit,
+        minWidth: 120
     }
 });
 
@@ -246,6 +258,20 @@ class Light extends React.Component {
         this.setLight(variables);
     };
 
+    handleInputChange = evt => {
+        this.setState({
+            [evt.target.name]: evt.target.value,
+            ignoreUpdates: true
+        });
+        const variables = {
+            light: {
+                id: this.props.light.id,
+                [evt.target.name]: evt.target.value
+            }
+        };
+        this.setLight(variables);
+    };
+
     displayConnection = () => {
         return this.state.connected === 2 ? "Connected" : "Disonnected";
     };
@@ -254,7 +280,7 @@ class Light extends React.Component {
         const { classes } = this.props;
         return (
             <Card className={classes.card}>
-                <Grid container>
+                <Grid container justify="space-between">
                     <Grid item xs={9}>
                         <CardHeader
                             title={this.state.id}
@@ -278,9 +304,11 @@ class Light extends React.Component {
                     <Grid
                         item
                         xs={3}
-                        justify="flex-end"
-                        alignItems="center"
-                        style={{ display: "flex" }}
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-end"
+                        }}
                     >
                         <Switch
                             checked={this.state.state === "ON" ? true : false}
@@ -322,27 +350,105 @@ class Light extends React.Component {
                                 className={classes.huePicker}
                             />
                         </Grid>
-                        <Grid item xs={6}>
-                            <CirclePicker
-                                color={this.state.color}
-                                onChange={this.handleColorChange}
-                                width={"100%"}
-                                colors={this.state.colors}
-                                className={classes.circlePicker}
-                            />
-                        </Grid>
                         <Grid
-                            item
-                            xs={6}
+                            container
                             justify="flex-end"
                             alignItems="center"
-                            style={{ display: "flex" }}
+                            alignContent="space-between"
                         >
-                            <MaterialPicker
-                                color={this.state.color}
-                                onChange={this.handleColorChange}
-                                className={classes.materialPicker}
-                            />
+                            <Grid
+                                item
+                                xs={6}
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "space-around"
+                                }}
+                            >
+                                <CirclePicker
+                                    color={this.state.color}
+                                    onChange={this.handleColorChange}
+                                    width={"100%"}
+                                    colors={this.state.colors}
+                                    className={classes.circlePicker}
+                                />
+                            </Grid>
+                            <Grid
+                                item
+                                xs={6}
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "flex-end"
+                                }}
+                            >
+                                <MaterialPicker
+                                    color={this.state.color}
+                                    onChange={this.handleColorChange}
+                                    className={classes.materialPicker}
+                                />
+                            </Grid>
+                        </Grid>
+                        <Grid
+                            container
+                            justify="space-between"
+                            alignItems="center"
+                        >
+                            <Grid item xs={6}>
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor="effect">
+                                        Effect
+                                    </InputLabel>
+                                    <Select
+                                        value={this.state.effect}
+                                        onChange={this.handleInputChange}
+                                        inputProps={{
+                                            name: "effect",
+                                            id: "effect"
+                                        }}
+                                    >
+                                        <MenuItem value="">
+                                            <em>None</em>
+                                        </MenuItem>
+                                        {this.state.supportedEffects.map(
+                                            effect => (
+                                                <MenuItem
+                                                    key={effect}
+                                                    value={effect}
+                                                >
+                                                    {effect}
+                                                </MenuItem>
+                                            )
+                                        )}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid
+                                item
+                                xs={6}
+                                style={{
+                                    display: "flex",
+                                    justifyContent: "flex-end"
+                                }}
+                            >
+                                <FormControl className={classes.formControl}>
+                                    <InputLabel htmlFor="speed">
+                                        Speed
+                                    </InputLabel>
+                                    <Select
+                                        value={this.state.speed}
+                                        onChange={this.handleInputChange}
+                                        inputProps={{
+                                            name: "speed",
+                                            id: "speed"
+                                        }}
+                                    >
+                                        {[1, 2, 3, 4, 5, 6, 7].map(speed => (
+                                            <MenuItem key={speed} value={speed}>
+                                                {speed}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </CardContent>

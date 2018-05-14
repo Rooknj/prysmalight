@@ -83,7 +83,7 @@ uint8_t blue = 0;
 int animationSpeed = 4;
 #define NO_EFFECT "None"
 String currentEffect = NO_EFFECT;
-char* effects[] = {"Flash", "Fade", "Rainbow", "Confetti", "Cylon", "Juggle", "BPM", "Sinelon"}; // Change to add effect
+char* effects[] = {"Flash", "Fade", "Rainbow", "Cylon", "Sinelon", "Confetti", "BPM", "Juggle"}; // Change to add effect
 int numEffects = 8; // Change to add effect
 // define the array of leds
 CRGB leds[NUM_LEDS];

@@ -691,11 +691,39 @@ void handleJuggle() {
 }
 
 // BPM
+int getBPM(){
+  switch (animationSpeed) {
+    case 1:
+      return 10;
+      break;
+    case 2:
+      return 15;
+      break;
+    case 3:
+      return 30;
+      break;
+    case 4:
+      return 60;
+      break;
+    case 5:
+      return 90;
+      break;
+    case 6:
+      return 120;
+      break;
+    case 7:
+      return 150;
+      break;
+    default:
+      return 180;
+  }
+}
+
 void handleBPM() {
   if(shouldUpdate()) {
     cycleHue();
     // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-    uint8_t BeatsPerMinute = 60;
+    uint8_t BeatsPerMinute = getBPM();
     CRGBPalette16 palette = PartyColors_p;
     uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
     for( int i = 0; i < NUM_LEDS; i++) { //9948

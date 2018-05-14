@@ -83,8 +83,8 @@ uint8_t blue = 0;
 int animationSpeed = 4;
 #define NO_EFFECT "None"
 String currentEffect = NO_EFFECT;
-char* effects[] = {"Flash", "Fade", "Rainbow", "Confetti", "Cylon", "Juggle", "BPM"}; // Change to add effect
-int numEffects = 7; // Change to add effect
+char* effects[] = {"Flash", "Fade", "Rainbow", "Confetti", "Cylon", "Juggle", "BPM", "Sinelon"}; // Change to add effect
+int numEffects = 8; // Change to add effect
 // define the array of leds
 CRGB leds[NUM_LEDS];
 
@@ -520,6 +520,8 @@ void loop() {
     handleJuggle();
   } else if (currentEffect == "BPM") {
     handleBPM();
+  } else if (currentEffect == "Sinelon") {
+    handleSinelon();
   }
 }
 
@@ -729,6 +731,16 @@ void handleBPM() {
     for( int i = 0; i < NUM_LEDS; i++) { //9948
         leds[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
     }
+    FastLED.show();
+  }
+}
+
+void handleSinelon() {
+  if(shouldUpdate()) {
+    cycleHue();
+    fadeToBlackBy( leds, NUM_LEDS, 20);
+    int pos = beatsin16( (int)(getBPM()/5), 0, NUM_LEDS-1 );
+    leds[pos] += CHSV( gHue, 255, 192);
     FastLED.show();
   }
 }

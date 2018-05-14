@@ -23,7 +23,7 @@
 /************ Configuration Variables ******************/
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 // the maximum value you can set brightness to out of 255 
-#define MAX_BRIGHTNESS 63
+#define MAX_BRIGHTNESS 255
 // pin used for the rgb led strip (PWM)
 #define DATA_PIN 3 // This is pin D3 on the NodeMCU ESP8266
 // how many leds in your strip?
@@ -83,8 +83,8 @@ uint8_t blue = 0;
 int animationSpeed = 4;
 #define NO_EFFECT "None"
 String currentEffect = NO_EFFECT;
-char* effects[] = {"Flash", "Fade"}; // Change to add effect
-int numEffects = 2;
+char* effects[] = {"Flash", "Fade", "Rainbow", "Confetti", "Cylon", "Juggle", "BPM"}; // Change to add effect
+int numEffects = 7; // Change to add effect
 // define the array of leds
 CRGB leds[NUM_LEDS];
 
@@ -111,6 +111,10 @@ byte flash_index = 0;
 
 // Fade
 byte gHue = 0;
+
+// Cylon
+int LED = 0;
+bool forward = true;
 
 // Change to add effect
 
@@ -506,6 +510,16 @@ void loop() {
     handleFlash();
   } else if (currentEffect == "Fade") {
     handleFade();
+  } else if (currentEffect == "Rainbow") {
+    handleRainbow();
+  } else if (currentEffect == "Confetti") {
+    handleConfetti();
+  } else if (currentEffect == "Cylon") {
+    handleCylon();
+  } else if (currentEffect == "Juggle") {
+    handleJuggle();
+  } else if (currentEffect == "BPM") {
+    handleBPM();
   }
 }
 
@@ -540,34 +554,6 @@ int getFlashSpeed(){
   }
 }
 
-int getAnimationSpeed(){
-  switch (animationSpeed) {
-    case 1:
-      return 100;
-      break;
-    case 2:
-      return 67;
-      break;
-    case 3:
-      return 33;
-      break;
-    case 4:
-      return 17;
-      break;
-    case 5:
-      return 14;
-      break;
-    case 6:
-      return 12;
-      break;
-    case 7:
-      return 10;
-      break;
-    default:
-      return 33;
-  }
-}
-
 int getCycleSpeed(){
   switch (animationSpeed) {
     case 1:
@@ -599,13 +585,7 @@ int getCycleSpeed(){
 //CYCLE HUE
 long lastHueCycle = 0;
 void cycleHue(){
-    long updateThreshold = getCycleSpeed();
-    long now = millis();
-    if (now - lastHueCycle >= updateThreshold) {
-    // save the last time you changed Hue
-      lastHueCycle = now;
-      gHue++;
-    }
+  gHue++;
 }
 
 long lastUpdate = 0;
@@ -613,10 +593,8 @@ bool shouldUpdate() {
   long updateThreshold;
   if (currentEffect == "Flash") {
     updateThreshold = getFlashSpeed();
-  } else if (currentEffect == "Fade") {
-    updateThreshold = 17;
   } else {
-    updateThreshold = getAnimationSpeed();
+    updateThreshold = getCycleSpeed();
   }
   long now = millis();
   
@@ -647,9 +625,83 @@ void handleFlash() {
 
 // Fade
 void handleFade() {
-  cycleHue();
   if(shouldUpdate()) {
+    cycleHue();
     setHSV(gHue, 255, 255);
+  }
+}
+
+// Rainbow
+void handleRainbow() {
+  if(shouldUpdate()) {
+    cycleHue();
+    fill_rainbow( leds, NUM_LEDS, gHue, 7);
+    FastLED.show(); 
+  }
+}
+
+// Confetti
+void handleConfetti() {
+  if(shouldUpdate()) {
+    cycleHue();
+    fadeToBlackBy( leds, NUM_LEDS, 10);
+    int pos = random16(NUM_LEDS);
+    leds[pos] += CHSV( gHue + random8(64), 200, 255);
+    FastLED.show();   
+  }
+}
+
+// Cylon
+void fadeall() { for(int i = 0; i < NUM_LEDS; i++) { leds[i].nscale8(247); } }
+
+void handleCylon() {
+  if(shouldUpdate()) {
+    cycleHue();
+    fadeall();
+    // First slide the led in one direction
+    if(LED >= NUM_LEDS - 1){
+        forward = false;
+    }
+    else if(LED <= 0){
+        forward = true;
+    }
+    if(forward){
+        LED++;
+    }
+    else{
+        LED--;
+    }
+    leds[LED] = CHSV(gHue, 255, 255);
+    FastLED.show();
+  }
+}
+
+// Juggle
+void handleJuggle() {
+  if(shouldUpdate()) {
+    // eight colored dots, weaving in and out of sync with each other
+    fadeToBlackBy( leds, NUM_LEDS, 20);
+    byte dothue = 0;
+    for( int i = 0; i < 8; i++) {
+        leds[beatsin16(i+7,0,NUM_LEDS)] |= CHSV(dothue, 200, 255);
+        dothue += 32;
+    }
+    FastLED.show();
+  }
+}
+
+// BPM
+void handleBPM() {
+  if(shouldUpdate()) {
+    cycleHue();
+    // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
+    uint8_t BeatsPerMinute = 60;
+    CRGBPalette16 palette = PartyColors_p;
+    uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
+    for( int i = 0; i < NUM_LEDS; i++) { //9948
+        leds[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
+    }
+    FastLED.show();
   }
 }
 

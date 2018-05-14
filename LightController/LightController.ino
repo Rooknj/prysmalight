@@ -35,7 +35,7 @@
 // What is the color order of your LED strip?
 #define COLOR_ORDER GRB
 
-
+// Search "Change to add effect" to find all areas you need to edit to add an effect
 
 /************ MQTT Setup Variables ******************/
 // MQTT: ID, server IP, port, username and password
@@ -83,7 +83,7 @@ uint8_t blue = 0;
 int animationSpeed = 4;
 #define NO_EFFECT "None"
 String currentEffect = NO_EFFECT;
-char* effects[] = {"Flash", "Fade"};
+char* effects[] = {"Flash", "Fade"}; // Change to add effect
 int numEffects = 2;
 // define the array of leds
 CRGB leds[NUM_LEDS];
@@ -111,6 +111,10 @@ byte flash_index = 0;
 
 // Fade
 byte gHue = 0;
+
+// Change to add effect
+
+
 
 /************ Functions ******************/
 // function called to fill the LED strip a solid color
@@ -496,7 +500,7 @@ void loop() {
   handleColorChange();
 
   // Handle the current effect
-  if (currentEffect == NO_EFFECT || stateOn == false){
+  if (currentEffect == NO_EFFECT || stateOn == false){ // Change to add effect
     // do nothing
   } else if (currentEffect == "Flash") {
     handleFlash();
@@ -649,7 +653,7 @@ void handleFade() {
   }
 }
 
-
+// Change to add effect
 
 // From https://www.arduino.cc/en/Tutorial/ColorCrossfader
 /* BELOW THIS LINE IS THE MATH -- YOU SHOULDN'T NEED TO CHANGE THIS FOR THE BASICS

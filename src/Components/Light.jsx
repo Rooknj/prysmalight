@@ -259,10 +259,18 @@ class Light extends React.Component {
     };
 
     handleInputChange = evt => {
-        this.setState({
-            [evt.target.name]: evt.target.value,
-            ignoreUpdates: true
-        });
+        if (evt.target.name === "effect") {
+            this.setState({
+                [evt.target.name]: evt.target.value,
+                state: "ON",
+                ignoreUpdates: true
+            });
+        } else {
+            this.setState({
+                [evt.target.name]: evt.target.value,
+                ignoreUpdates: true
+            });
+        }
         const variables = {
             light: {
                 id: this.props.light.id,

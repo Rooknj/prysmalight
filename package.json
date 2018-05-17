@@ -37,7 +37,7 @@
     "build": "babel src --out-dir lib --copy-files && pkg . --targets node8-linux-armv7",
     "start": "NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
     "startMock": "MOCK=true nodemon src/server.js --exec babel-node",
-    "prodServer": "node lib/server.js"
+    "publishProd": "./publish.sh"
   },
   "babel": {
     "presets": [

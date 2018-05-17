@@ -1,9 +1,12 @@
 version: "3"
 services:
   server:
-    build: .
-    image: lightapp2-server-develop
-    volumes:
-      - .:/usr/src/app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lightapp2-server-prod
     ports:
       - "4001:4001"
+
+# Run prod
+# docker-compose -f docker-compose.prod.yml up -d

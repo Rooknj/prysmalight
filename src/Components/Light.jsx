@@ -4,26 +4,28 @@ import { graphql } from "react-apollo";
 import gql from "graphql-tag";
 import throttle from "lodash.throttle";
 
-import Card, { CardHeader, CardContent } from "material-ui/Card";
-import Avatar from "material-ui/Avatar";
-import grey from "material-ui/colors/grey";
-import { withStyles } from "material-ui/styles";
+import Card from "@material-ui/core/Card";
+import CardHeader from "@material-ui/core/CardHeader";
+import CardContent from "@material-ui/core/CardContent";
+import Avatar from "@material-ui/core/Avatar";
+import grey from "@material-ui/core/colors/grey";
+import { withStyles } from "@material-ui/core/styles";
 
-import Switch from "material-ui/Switch";
+import Switch from "@material-ui/core/Switch";
 
 import { MaterialPicker, CirclePicker, HuePicker } from "react-color";
 import Slider from "rc-slider";
 import "./slider.css";
 
-import Grid from "material-ui/Grid";
-import Typography from "material-ui/Typography";
+import Grid from "@material-ui/core/Grid";
+import Typography from "@material-ui/core/Typography";
 
 import HightlightIcon from "@material-ui/icons/Highlight";
 
-import Select from "material-ui/Select";
-import { InputLabel } from "material-ui/Input";
-import { MenuItem } from "material-ui/Menu";
-import { FormControl } from "material-ui/Form";
+import Select from "@material-ui/core/Select";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
 
 const styles = theme => ({
     card: {

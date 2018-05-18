@@ -32,7 +32,9 @@ const pubsub = new PubSub();
 
 // Connect to MQTT server
 const mqttClient = MQTT.connect(MQTT_CLIENT, {
-  reconnectPeriod: 5000 // Amount of time between reconnection attempts
+  reconnectPeriod: 5000, // Amount of time between reconnection attempts
+  username: "pi",
+  password: "MQTTIsBetterThanUDP"
 });
 
 // Subscribe method with logging
@@ -76,7 +78,7 @@ mqttClient.on("reconnect", () => {
 
 // On connection or parsing error
 mqttClient.on("error", error => {
-  ChalkConsole.error(`Error connecting to MQTT broker. Error: ${error}`);
+  ChalkConsole.error(`Failed to connect to MQTT broker => ${error}`);
 });
 
 class LightConnector {

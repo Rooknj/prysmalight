@@ -15,8 +15,6 @@ RUN adduser --system --disabled-password --disabled-login mosquitto
 
 COPY config /mqtt/config
 
-COPY config/p1.txt /etc/mosquitto
-
 VOLUME ["/mqtt/config", "/mqtt/data", "/mqtt/log"]
 
 EXPOSE 1883 9001

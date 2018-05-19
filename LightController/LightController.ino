@@ -333,12 +333,27 @@ bool processHomekitJson(char* message) {
     } else if (strcmp(root["characteristic"], "Saturation") == 0){
       if (root.containsKey("value")) {
         if (root["value"]) {
-          //brightness = root["value"];
-          //FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
-          //FastLED.show();
-          //setHomekitSaturation = true;
+          saturation = root["value"];
+          CRGB color = CHSV(map(hue, 0, 359, 0, 255), map(saturation, 0, 100, 0, 255), 255);
+          // Turn the light on if it isn't
+          if(!stateOn){
+            stateOn = true;
+            setHomekitOn = true;
+          }
+      
+          // Set the current effect to None
+          if (currentEffect != NO_EFFECT){
+            currentEffect = NO_EFFECT;
+            wasInEffect = true;
+          }
+      
+          // Set the color variables
+          red = color.r;
+          green = color.g;
+          blue = color.b;
+          setHomekitSaturation = true;
         }
-      }
+      }   
     }
   }
   
@@ -445,6 +460,10 @@ boolean reconnect() {
     client.publish(MQTT_LIGHT_CONNECTED_TOPIC, LIGHT_CONNECTED, true);
     
     // publish the initial values
+    setHomekitOn = true;
+    setHomekitBrightness = true;
+    setHomekitHue = true;
+    setHomekitSaturation = true;
     sendState();
     sendEffectList();
 

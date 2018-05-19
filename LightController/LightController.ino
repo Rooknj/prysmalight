@@ -361,7 +361,7 @@ void setMqttIpWithMDNS() {
 
 /************ OTA Setup ******************/
 void setupOTA() {
-    // OTA Setup
+  // OTA Setup
   ArduinoOTA.onStart([]() {
     Serial.println("INFO: starting OTA upload");
     digitalWrite(LED_BUILTIN, LOW);
@@ -385,6 +385,8 @@ void setupOTA() {
     else if (error == OTA_END_ERROR) Serial.println("OTA End Failed");
   });
 
+  ArduinoOTA.setHostname("Light 1");
+  ArduinoOTA.setPassword("ESP8266Rulez");
   ArduinoOTA.begin();
   Serial.println("INFO: OTA ready");
 }

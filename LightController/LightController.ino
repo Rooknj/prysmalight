@@ -30,7 +30,7 @@
 // how many leds in your strip?
 #define NUM_LEDS 150
 // Enables Serial and print statements
-#define DEBUG true
+#define DEBUG false
 // Which LED strip are you using?
 #define CHIPSET WS2812B
 // What is the color order of your LED strip?

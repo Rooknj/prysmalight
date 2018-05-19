@@ -42,14 +42,10 @@
 const PROGMEM char* MQTT_CLIENT_ID = "office_rgb_light";
 char MQTT_SERVER_IP[16];
 const PROGMEM uint16_t MQTT_SERVER_PORT = 1883;
-//const PROGMEM char* MQTT_USER = "[Redacted]";
-//const PROGMEM char* MQTT_PASSWORD = "[Redacted]";
+const PROGMEM char* MQTT_USER = "pi";
+const PROGMEM char* MQTT_PASSWORD = "MQTTIsBetterThanUDP";
 
 // MQTT: topics
-// creds
-const PROGMEM char* MQTT_CLIENT_USER = "pi";
-const PROGMEM char* MQTT_CLIENT_PW = "MQTTIsBetterThanUDP";
-
 // connection
 const PROGMEM char* MQTT_LIGHT_CONNECTED_TOPIC = "office/rgb1/connected";
 
@@ -299,7 +295,7 @@ void sendEffectList() {
 // MQTT connect/reconnect function
 boolean reconnect() {
   setMqttIpWithMDNS();
-  if (client.connect(MQTT_CLIENT_ID, MQTT_CLIENT_USER, MQTT_CLIENT_PW, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, LIGHT_DISCONNECTED)) {
+  if (client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, LIGHT_DISCONNECTED)) {
     Serial.println("INFO: connected to MQTT broker");
     
     // Once connected, publish an announcement...

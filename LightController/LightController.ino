@@ -21,6 +21,7 @@
 
 
 /************ Configuration Variables ******************/
+#define NAME "Light 1"
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 // the maximum value you can set brightness to out of 255 
 #define MAX_BRIGHTNESS 255
@@ -29,7 +30,7 @@
 // how many leds in your strip?
 #define NUM_LEDS 150
 // Enables Serial and print statements
-#define DEBUG false
+#define DEBUG true
 // Which LED strip are you using?
 #define CHIPSET WS2812B
 // What is the color order of your LED strip?
@@ -39,7 +40,7 @@
 
 /************ MQTT Setup Variables ******************/
 // MQTT: ID, server IP, port, username and password
-const PROGMEM char* MQTT_CLIENT_ID = "office_rgb_light";
+const PROGMEM char* MQTT_CLIENT_ID = NAME;
 char MQTT_SERVER_IP[16];
 const PROGMEM uint16_t MQTT_SERVER_PORT = 1883;
 const PROGMEM char* MQTT_USER = "pi";
@@ -55,6 +56,10 @@ const PROGMEM char* MQTT_EFFECT_LIST_TOPIC = "office/rgb1/effects";
 // state
 const PROGMEM char* MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/state";
 const PROGMEM char* MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/set";
+
+// homebridge
+const PROGMEM char* HOMEKIT_LIGHT_STATE_TOPIC = "lightapp2/to/set";
+const PROGMEM char* HOMEKIT_LIGHT_COMMAND_TOPIC = "lightapp2/from/set";
 
 // payloads by default (on/off)
 const PROGMEM char* LIGHT_ON = "ON";
@@ -144,9 +149,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
     message[i] = (char)payload[i];
   }
   message[length] = '\0';
+  
   Serial.println(message);
-
-  if (!processJson(message)) {
+  if (strcmp(topic, MQTT_LIGHT_COMMAND_TOPIC) == 0) {
+    if (!processJson(message)) {
+      return;
+    }
+  } else if (strcmp(topic, HOMEKIT_LIGHT_COMMAND_TOPIC) == 0) {
+    if (!processHomekitJson(message)) {
+      return;
+    }
+  } else {
     return;
   }
 
@@ -246,6 +259,41 @@ bool processJson(char* message) {
 }
 
 
+// function called to take Homekit JSON message, parse it, then set the according variables
+bool processHomekitJson(char* message) {
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.parseObject(message);
+
+  if (!root.success()) {
+    Serial.println("ERROR: parseObject() failed");
+    return false;
+  }
+
+  if (root.containsKey("name")) {
+    if (strcmp(root["name"], NAME) != 0){
+      Serial.println("Message was for different light");
+      return true;
+    }
+  }
+
+  if (root.containsKey("characteristic")) {
+    if (strcmp(root["characteristic"], "On") == 0){
+      if (root.containsKey("value")) {
+        if (root["value"]) {
+          stateOn = true;
+        } else {
+          stateOn = false;
+        }
+        sendHomekitState("On");
+      }
+    }
+  }
+  
+  return true;
+}
+
+
 // send light state over MQTT
 void sendState() {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
@@ -274,6 +322,51 @@ void sendState() {
   root.printTo(buffer, sizeof(buffer));
 
   client.publish(MQTT_LIGHT_STATE_TOPIC, buffer, true);
+}
+
+
+// send light state over MQTT
+void sendHomekitState(char* characteristic) {
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  // populate payload with state
+  root["state"] = (stateOn) ? LIGHT_ON : LIGHT_OFF;
+
+  // populate payload with color
+  JsonObject& color = root.createNestedObject("color");
+  color["r"] = red;
+  color["g"] = green;
+  color["b"] = blue;
+  
+  // populate payload with name
+  root["name"] = NAME;
+
+  // populate payload with service_name
+  root["service_name"] = NAME;
+
+  // populate payload with characteristic
+  root["characteristic"] = characteristic;
+
+  // populate payload with characteristic
+  if (strcmp(root["characteristic"], "On") == 0) {
+    root["value"] = stateOn;
+  } else if (strcmp(root["characteristic"], "Brightness") == 0) {
+    root["value"] = brightness;
+  } else if (strcmp(root["characteristic"], "Hue") == 0) {
+    CHSV& color = CRGB(red, green, blue);
+    root["value"] = map(color.h, 0, 255, 0, 359);
+  } else if (strcmp(root["characteristic"], "Saturation") == 0) {
+    CHSV& color = CRGB(red, green, blue);
+    root["value"] = map(color.s, 0, 255, 0, 100);
+  }
+  
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+
+  Serial.println(buffer);
+  client.publish(HOMEKIT_LIGHT_STATE_TOPIC, buffer, true);
 }
 
 
@@ -308,6 +401,7 @@ boolean reconnect() {
 
     // ... and resubscribe
     client.subscribe(MQTT_LIGHT_COMMAND_TOPIC);
+    client.subscribe(HOMEKIT_LIGHT_COMMAND_TOPIC);
   }
   return client.connected();
 }

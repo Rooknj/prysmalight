@@ -82,8 +82,8 @@ const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 // variables used to store the state, the brightness and the color of the light
 boolean stateOn = false;
 uint8_t brightness = 100;
-uint8_t red = 0;
-uint8_t green = 255;
+uint8_t red = 255;
+uint8_t green = 0;
 uint8_t blue = 0;
 int animationSpeed = 4;
 #define NO_EFFECT "None"
@@ -93,6 +93,13 @@ int numEffects = 8; // Change to add effect
 // define the array of leds
 CRGB leds[NUM_LEDS];
 
+// Homekit variables
+int hue = 0;
+int saturation = 0;
+bool setHomekitOn = false;
+bool setHomekitBrightness = false;
+bool setHomekitHue = false;
+bool setHomekitSaturation = false;
 
 // Real values to write to the LEDs (ex. including brightness and state)
 byte realRed = 0;
@@ -177,7 +184,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   startFade = true;
   inFade = false; // Kill the current fade
-
   sendState();
 }
 
@@ -200,12 +206,14 @@ bool processJson(char* message) {
     else if (strcmp(root["state"], LIGHT_OFF) == 0) {
       stateOn = false;
     }
+    setHomekitOn = true;
   }
 
   if (root.containsKey("color")) {
     // Turn the light on if it isn't
     if(!stateOn){
       stateOn = true;
+      setHomekitOn = true;
     }
 
     // Set the current effect to None
@@ -224,6 +232,7 @@ bool processJson(char* message) {
     brightness = root["brightness"];
     FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
     FastLED.show();
+    setHomekitBrightness = true;
   }
   /*
   if (root.containsKey("transition")) {
@@ -237,6 +246,7 @@ bool processJson(char* message) {
         // Set effect if it is supported on this controller
         if(!stateOn){
           stateOn = true;
+          setHomekitOn = true;
         }
         if (red != 0 || green != 0 || blue != 0) {
           red = 0;
@@ -272,7 +282,7 @@ bool processHomekitJson(char* message) {
 
   if (root.containsKey("name")) {
     if (strcmp(root["name"], NAME) != 0){
-      Serial.println("Message was for different light");
+      Serial.println("DEBUG: Message was for different light");
       return true;
     }
   }
@@ -285,7 +295,16 @@ bool processHomekitJson(char* message) {
         } else {
           stateOn = false;
         }
-        sendHomekitState("On");
+        setHomekitOn = true;
+      }
+    } else if (strcmp(root["characteristic"], "Brightness") == 0){
+      if (root.containsKey("value")) {
+        if (root["value"]) {
+          brightness = root["value"];
+          FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
+          FastLED.show();
+          setHomekitBrightness = false;
+        }
       }
     }
   }
@@ -322,6 +341,14 @@ void sendState() {
   root.printTo(buffer, sizeof(buffer));
 
   client.publish(MQTT_LIGHT_STATE_TOPIC, buffer, true);
+  if (setHomekitOn) {
+    setHomekitOn = false;
+    sendHomekitState("On");
+  } 
+  if (setHomekitBrightness) {
+    setHomekitBrightness = false;
+    sendHomekitState("Brightness");
+  }
 }
 
 
@@ -330,15 +357,6 @@ void sendHomekitState(char* characteristic) {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
 
   JsonObject& root = jsonBuffer.createObject();
-
-  // populate payload with state
-  root["state"] = (stateOn) ? LIGHT_ON : LIGHT_OFF;
-
-  // populate payload with color
-  JsonObject& color = root.createNestedObject("color");
-  color["r"] = red;
-  color["g"] = green;
-  color["b"] = blue;
   
   // populate payload with name
   root["name"] = NAME;
@@ -355,11 +373,9 @@ void sendHomekitState(char* characteristic) {
   } else if (strcmp(root["characteristic"], "Brightness") == 0) {
     root["value"] = brightness;
   } else if (strcmp(root["characteristic"], "Hue") == 0) {
-    CHSV& color = CRGB(red, green, blue);
-    root["value"] = map(color.h, 0, 255, 0, 359);
+    root["value"] = hue;
   } else if (strcmp(root["characteristic"], "Saturation") == 0) {
-    CHSV& color = CRGB(red, green, blue);
-    root["value"] = map(color.s, 0, 255, 0, 100);
+    root["value"] = saturation;
   }
   
   char buffer[root.measureLength() + 1];

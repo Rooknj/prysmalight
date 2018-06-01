@@ -9,8 +9,6 @@ import LightHeader from "./LightHeader";
 import CardContent from "@material-ui/core/CardContent";
 import { withStyles } from "@material-ui/core/styles";
 
-import Switch from "@material-ui/core/Switch";
-
 import { MaterialPicker, CirclePicker, HuePicker } from "react-color";
 import Slider from "rc-slider";
 import "./slider.css";
@@ -41,11 +39,6 @@ const styles = theme => ({
     formControl: {
         margin: theme.spacing.unit,
         minWidth: 120
-    },
-    switchGrid: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end"
     }
 });
 
@@ -283,23 +276,13 @@ class Light extends React.Component {
         const { classes } = this.props;
         return (
             <Card className={classes.card}>
-                <Grid container justify="space-between">
-                    <Grid item xs={9}>
-                        <LightHeader
-                            id={this.state.id}
-                            color={this.state.color}
-                            connected={this.state.connected}
-                        />
-                    </Grid>
-                    <Grid item xs={3} className={classes.switchGrid}>
-                        <Switch
-                            checked={this.state.state === "ON" ? true : false}
-                            onChange={this.handleStateChange}
-                            disabled={this.state.connected !== 2}
-                            color="primary"
-                        />
-                    </Grid>
-                </Grid>
+                <LightHeader
+                    id={this.state.id}
+                    color={this.state.color}
+                    connected={this.state.connected}
+                    state={this.state.state}
+                    onChange={this.handleStateChange}
+                />
                 <CardContent>
                     <Grid
                         container

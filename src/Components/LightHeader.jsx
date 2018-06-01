@@ -1,14 +1,15 @@
 import React from "react";
 import PropTypes from "prop-types";
-import CardHeader from "@material-ui/core/CardHeader";
-import Avatar from "@material-ui/core/Avatar";
-import HightlightIcon from "@material-ui/icons/Highlight";
 import { withStyles } from "@material-ui/core/styles";
-import grey from "@material-ui/core/colors/grey";
+import Switch from "@material-ui/core/Switch";
+import Grid from "@material-ui/core/Grid";
+import LightStatus from "./LightStatus";
 
 const styles = theme => ({
-    avatar: {
-        backgroundColor: grey[400]
+    switchGrid: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end"
     }
 });
 
@@ -21,19 +22,23 @@ const defaultProps = {};
 
 const LightHeader = props => {
     return (
-        <CardHeader
-            title={props.id}
-            subheader={props.connected === 2 ? "Connected" : "Disonnected"}
-            avatar={
-                <Avatar aria-label="Light" className={props.classes.avatar}>
-                    <HightlightIcon
-                        nativeColor={`rgb(${props.color.r},${props.color.g},${
-                            props.color.b
-                        })`}
-                    />
-                </Avatar>
-            }
-        />
+        <Grid container justify="space-between">
+            <Grid item xs={9}>
+                <LightStatus
+                    id={props.id}
+                    color={props.color}
+                    connected={props.connected}
+                />
+            </Grid>
+            <Grid item xs={3} className={props.classes.switchGrid}>
+                <Switch
+                    checked={props.state === "ON" ? true : false}
+                    onChange={props.onChange}
+                    disabled={props.connected !== 2}
+                    color="primary"
+                />
+            </Grid>
+        </Grid>
     );
 };
 

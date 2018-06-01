@@ -5,10 +5,8 @@ import gql from "graphql-tag";
 import throttle from "lodash.throttle";
 
 import Card from "@material-ui/core/Card";
-import CardHeader from "@material-ui/core/CardHeader";
+import LightHeader from "./LightHeader";
 import CardContent from "@material-ui/core/CardContent";
-import Avatar from "@material-ui/core/Avatar";
-import grey from "@material-ui/core/colors/grey";
 import { withStyles } from "@material-ui/core/styles";
 
 import Switch from "@material-ui/core/Switch";
@@ -20,8 +18,6 @@ import "./slider.css";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 
-import HightlightIcon from "@material-ui/icons/Highlight";
-
 import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
@@ -31,9 +27,6 @@ const styles = theme => ({
     card: {
         minWidth: 300,
         maxWidth: 400
-    },
-    avatar: {
-        backgroundColor: grey[400]
     },
     huePicker: {
         // This disables scrolling when using the slider
@@ -48,6 +41,11 @@ const styles = theme => ({
     formControl: {
         margin: theme.spacing.unit,
         minWidth: 120
+    },
+    switchGrid: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end"
     }
 });
 
@@ -142,7 +140,6 @@ class Light extends React.Component {
         prevState
     ) {
         // Dont rerender if data is loading or if we are currently interacting with the UI
-        // TODO check if this is why we are not getting subscription updates
         if (loading || prevState.ignoreUpdates) {
             return prevState;
         }
@@ -282,44 +279,19 @@ class Light extends React.Component {
         this.setLight(variables);
     };
 
-    displayConnection = () => {
-        return this.state.connected === 2 ? "Connected" : "Disonnected";
-    };
-
     render() {
         const { classes } = this.props;
         return (
             <Card className={classes.card}>
                 <Grid container justify="space-between">
                     <Grid item xs={9}>
-                        <CardHeader
-                            title={this.state.id}
-                            subheader={this.displayConnection()}
-                            avatar={
-                                <Avatar
-                                    aria-label="Light"
-                                    className={classes.avatar}
-                                >
-                                    <HightlightIcon
-                                        nativeColor={`rgb(${
-                                            this.state.color.r
-                                        },${this.state.color.g},${
-                                            this.state.color.b
-                                        })`}
-                                    />
-                                </Avatar>
-                            }
+                        <LightHeader
+                            id={this.state.id}
+                            color={this.state.color}
+                            connected={this.state.connected}
                         />
                     </Grid>
-                    <Grid
-                        item
-                        xs={3}
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "flex-end"
-                        }}
-                    >
+                    <Grid item xs={3} className={classes.switchGrid}>
                         <Switch
                             checked={this.state.state === "ON" ? true : false}
                             onChange={this.handleStateChange}

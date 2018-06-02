@@ -6,12 +6,13 @@ import CardContent from "@material-ui/core/CardContent";
 import { MaterialPicker, CirclePicker, HuePicker } from "react-color";
 import Slider from "rc-slider";
 import Typography from "@material-ui/core/Typography";
-import "./slider.css";
 
 import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
+
+import BrightnessSection from "./BrightnessSection";
 
 const styles = theme => ({
     huePicker: {
@@ -45,6 +46,7 @@ const defaultProps = {};
 const LightContent = props => {
     return (
         <CardContent>
+            <BrightnessSection {...props} />
             <Grid
                 container
                 direction="row"
@@ -52,19 +54,6 @@ const LightContent = props => {
                 justify="center"
                 alignItems="center"
             >
-                <Grid item xs={12}>
-                    <Typography variant="body2">Brightness</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <Slider
-                        min={0}
-                        max={100}
-                        step={1}
-                        value={props.brightness}
-                        onChange={props.onBrightnessChange}
-                        disabled={props.connected !== 2}
-                    />
-                </Grid>
                 <Grid item xs={12}>
                     <Typography variant="body2">Color</Typography>
                 </Grid>

@@ -4,7 +4,6 @@ import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import CardContent from "@material-ui/core/CardContent";
 import { MaterialPicker, CirclePicker, HuePicker } from "react-color";
-import Slider from "rc-slider";
 import Typography from "@material-ui/core/Typography";
 
 import Select from "@material-ui/core/Select";
@@ -13,18 +12,9 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 
 import BrightnessSection from "./BrightnessSection";
+import ColorSection from "./ColorSection";
 
 const styles = theme => ({
-    huePicker: {
-        // This disables scrolling when using the slider
-        touchAction: "none"
-    },
-    circlePicker: {
-        justifyContent: "flex-left"
-    },
-    materialPicker: {
-        boxSizing: "content-box"
-    },
     formControl: {
         margin: theme.spacing.unit,
         minWidth: 120
@@ -47,6 +37,7 @@ const LightContent = props => {
     return (
         <CardContent>
             <BrightnessSection {...props} />
+            <ColorSection {...props} />
             <Grid
                 container
                 direction="row"
@@ -54,54 +45,6 @@ const LightContent = props => {
                 justify="center"
                 alignItems="center"
             >
-                <Grid item xs={12}>
-                    <Typography variant="body2">Color</Typography>
-                </Grid>
-                <Grid item xs={12}>
-                    <HuePicker
-                        color={props.color}
-                        onChange={props.onColorChange}
-                        width={"100%"}
-                        className={props.classes.huePicker}
-                    />
-                </Grid>
-                <Grid
-                    container
-                    justify="flex-end"
-                    alignItems="center"
-                    alignContent="space-between"
-                >
-                    <Grid
-                        item
-                        xs={6}
-                        style={{
-                            display: "flex",
-                            justifyContent: "space-around"
-                        }}
-                    >
-                        <CirclePicker
-                            color={props.color}
-                            onChange={props.onColorChange}
-                            width={"100%"}
-                            colors={props.colors}
-                            className={props.classes.circlePicker}
-                        />
-                    </Grid>
-                    <Grid
-                        item
-                        xs={6}
-                        style={{
-                            display: "flex",
-                            justifyContent: "flex-end"
-                        }}
-                    >
-                        <MaterialPicker
-                            color={props.color}
-                            onChange={props.onColorChange}
-                            className={props.classes.materialPicker}
-                        />
-                    </Grid>
-                </Grid>
                 <Grid container justify="space-between" alignItems="center">
                     <Grid item xs={6}>
                         <FormControl className={props.classes.formControl}>

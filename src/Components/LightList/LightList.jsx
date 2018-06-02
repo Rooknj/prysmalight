@@ -130,7 +130,6 @@ const updateLightList = (prev, { subscriptionData }) => {
 const LightList = props => (
     <Query query={GET_LIGHTS}>
         {({ loading, error, data, subscribeToMore }) => {
-            console.log(loading, error, data);
             if (loading) return "Loading...";
             if (error) return `Error! ${error.message}`;
             if (!data.lights[0].state)

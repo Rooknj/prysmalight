@@ -6,39 +6,13 @@ import throttle from "lodash.throttle";
 
 import Card from "@material-ui/core/Card";
 import LightHeader from "./LightHeader";
-import CardContent from "@material-ui/core/CardContent";
 import { withStyles } from "@material-ui/core/styles";
-
-import { MaterialPicker, CirclePicker, HuePicker } from "react-color";
-import Slider from "rc-slider";
-import "./slider.css";
-
-import Grid from "@material-ui/core/Grid";
-import Typography from "@material-ui/core/Typography";
-
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
+import LightContent from "./LightContent";
 
 const styles = theme => ({
     card: {
         minWidth: 300,
         maxWidth: 400
-    },
-    huePicker: {
-        // This disables scrolling when using the slider
-        touchAction: "none"
-    },
-    circlePicker: {
-        justifyContent: "flex-left"
-    },
-    materialPicker: {
-        boxSizing: "content-box"
-    },
-    formControl: {
-        margin: theme.spacing.unit,
-        minWidth: 120
     }
 });
 
@@ -283,137 +257,18 @@ class Light extends React.Component {
                     state={this.state.state}
                     onChange={this.handleStateChange}
                 />
-                <CardContent>
-                    <Grid
-                        container
-                        direction="row"
-                        spacing={16}
-                        justify="center"
-                        alignItems="center"
-                    >
-                        <Grid item xs={12}>
-                            <Typography variant="body2">Brightness</Typography>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Slider
-                                min={0}
-                                max={100}
-                                step={1}
-                                value={this.state.brightness}
-                                onChange={this.handleBrightnessChange}
-                                disabled={this.state.connected !== 2}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography variant="body2">Color</Typography>
-                        </Grid>
-                        <Grid item xs={12}>
-                            <HuePicker
-                                color={this.state.color}
-                                onChange={this.handleColorChange}
-                                width={"100%"}
-                                className={classes.huePicker}
-                            />
-                        </Grid>
-                        <Grid
-                            container
-                            justify="flex-end"
-                            alignItems="center"
-                            alignContent="space-between"
-                        >
-                            <Grid
-                                item
-                                xs={6}
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "space-around"
-                                }}
-                            >
-                                <CirclePicker
-                                    color={this.state.color}
-                                    onChange={this.handleColorChange}
-                                    width={"100%"}
-                                    colors={this.state.colors}
-                                    className={classes.circlePicker}
-                                />
-                            </Grid>
-                            <Grid
-                                item
-                                xs={6}
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "flex-end"
-                                }}
-                            >
-                                <MaterialPicker
-                                    color={this.state.color}
-                                    onChange={this.handleColorChange}
-                                    className={classes.materialPicker}
-                                />
-                            </Grid>
-                        </Grid>
-                        <Grid
-                            container
-                            justify="space-between"
-                            alignItems="center"
-                        >
-                            <Grid item xs={6}>
-                                <FormControl className={classes.formControl}>
-                                    <InputLabel htmlFor="effect">
-                                        Effect
-                                    </InputLabel>
-                                    <Select
-                                        value={this.state.effect}
-                                        onChange={this.handleInputChange}
-                                        inputProps={{
-                                            name: "effect",
-                                            id: "effect"
-                                        }}
-                                    >
-                                        {this.state.supportedEffects.map(
-                                            effect => (
-                                                <MenuItem
-                                                    key={effect}
-                                                    value={effect}
-                                                >
-                                                    {effect}
-                                                </MenuItem>
-                                            )
-                                        )}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-                            <Grid
-                                item
-                                xs={6}
-                                style={{
-                                    display: "flex",
-                                    justifyContent: "flex-end"
-                                }}
-                            >
-                                <FormControl className={classes.formControl}>
-                                    <InputLabel htmlFor="speed">
-                                        Speed
-                                    </InputLabel>
-                                    <Select
-                                        value={this.state.speed}
-                                        onChange={this.handleInputChange}
-                                        inputProps={{
-                                            name: "speed",
-                                            id: "speed"
-                                        }}
-                                    >
-                                        {[1, 2, 3, 4, 5, 6, 7].map(speed => (
-                                            <MenuItem key={speed} value={speed}>
-                                                {speed}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                            </Grid>
-                        </Grid>
-                    </Grid>
-                </CardContent>
+                <LightContent
+                    connected={this.state.connected}
+                    brightness={this.state.brightness}
+                    color={this.state.color}
+                    colors={this.state.colors}
+                    effect={this.state.effect}
+                    supportedEffects={this.state.supportedEffects}
+                    speed={this.state.speed}
+                    onBrightnessChange={this.handleBrightnessChange}
+                    onColorChange={this.handleColorChange}
+                    onInputChange={this.handleInputChange}
+                />
             </Card>
         );
     }

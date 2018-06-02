@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { graphql } from "react-apollo";
+import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import Light from "./Light/Light";
 import Grid from "@material-ui/core/Grid";
@@ -47,25 +47,41 @@ const GET_LIGHTS = gql`
     }
 `;
 
-const LightList = ({ data: { loading, error, lights }, classes }) => {
-    if (loading) return "Loading...";
-    if (error) return `Error! ${error.message}`;
-    //TODO find more elegant way to do this
-    if (!lights[0].state) return "Error: No lights are connected to the server";
-    return (
-        <div className={classes.root}>
-            <Grid container spacing={0} justify="center" alignItems="center">
-                {lights.map(light => (
-                    <Grid key={light.id} item xs={11} sm={6} md={4} lg={3}>
-                        <Light light={light} />
+const LightList = props => (
+    <Query query={GET_LIGHTS}>
+        {({ loading, error, data }) => {
+            if (loading) return "Loading...";
+            if (error) return `Error! ${error.message}`;
+            if (!data.lights[0].state)
+                return "Error: No lights are connected to the server";
+            return (
+                <div className={props.classes.root}>
+                    <Grid
+                        container
+                        spacing={0}
+                        justify="center"
+                        alignItems="center"
+                    >
+                        {data.lights.map(light => (
+                            <Grid
+                                key={light.id}
+                                item
+                                xs={11}
+                                sm={6}
+                                md={4}
+                                lg={3}
+                            >
+                                <Light light={light} />
+                            </Grid>
+                        ))}
                     </Grid>
-                ))}
-            </Grid>
-        </div>
-    );
-};
+                </div>
+            );
+        }}
+    </Query>
+);
 
 LightList.propTypes = propTypes;
 LightList.defaultProps = defaultProps;
 
-export default withStyles(styles)(graphql(GET_LIGHTS)(LightList));
+export default withStyles(styles)(LightList);

@@ -16,7 +16,10 @@ const propTypes = {
     colors: PropTypes.array.isRequired,
     effect: PropTypes.string.isRequired,
     supportedEffects: PropTypes.array.isRequired,
-    speed: PropTypes.number.isRequired
+    speed: PropTypes.number.isRequired,
+    onBrightnessChange: PropTypes.func.isRequired,
+    onColorChange: PropTypes.func.isRequired,
+    onInputChange: PropTypes.func.isRequired
 };
 
 const defaultProps = {};

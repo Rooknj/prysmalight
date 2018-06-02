@@ -8,7 +8,11 @@ import "./slider.css";
 
 const styles = theme => ({});
 
-const propTypes = {};
+const propTypes = {
+    connected: PropTypes.number.isRequired,
+    brightness: PropTypes.number.isRequired,
+    onBrightnessChange: PropTypes.func.isRequired
+};
 
 const defaultProps = {};
 

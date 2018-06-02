@@ -18,7 +18,11 @@ const styles = theme => ({
     }
 });
 
-const propTypes = {};
+const propTypes = {
+    color: PropTypes.object.isRequired,
+    colors: PropTypes.array.isRequired,
+    onColorChange: PropTypes.func.isRequired
+};
 
 const defaultProps = {};
 

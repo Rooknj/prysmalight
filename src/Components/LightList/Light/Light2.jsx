@@ -1,0 +1,279 @@
+import React from "react";
+import PropTypes from "prop-types";
+import { graphql } from "react-apollo";
+import gql from "graphql-tag";
+import throttle from "lodash.throttle";
+
+import Card from "@material-ui/core/Card";
+import LightHeader from "./LightHeader/LightHeader";
+import { withStyles } from "@material-ui/core/styles";
+import LightContent from "./LightContent/LightContent";
+
+const styles = theme => ({
+    card: {
+        minWidth: 300,
+        maxWidth: 400
+    }
+});
+
+const colors = [
+    "#FF0000", //red
+    "#FFA500", //orange
+    "#FFFF00", //yellow
+    "#00FF00", //green
+    "#00FFFF", //cyan
+    "#0000FF", //blue
+    "#A500FF", //purple
+    "#FF00FF" //pink
+];
+
+const propTypes = {
+    light: PropTypes.shape({
+        id: PropTypes.string,
+        connected: PropTypes.number,
+        state: PropTypes.string,
+        brightness: PropTypes.number,
+        color: PropTypes.shape({
+            r: PropTypes.number,
+            g: PropTypes.number,
+            b: PropTypes.number
+        })
+    }).isRequired
+};
+
+const defaultProps = {
+    light: {
+        id: "",
+        connected: 0,
+        state: "OFF",
+        brightness: 0,
+        color: {
+            r: 0,
+            g: 0,
+            b: 0
+        }
+    }
+};
+
+const SET_LIGHT = gql`
+    mutation setLight($light: LightInput!) {
+        setLight(light: $light)
+    }
+`;
+
+const LIGHT_CHANGED = gql`
+    subscription lightChanged {
+        lightChanged(lightId: "Light 1") {
+            id
+            connected
+            state
+            brightness
+            color {
+                r
+                g
+                b
+            }
+            effect
+            speed
+            supportedEffects
+        }
+    }
+`;
+
+class Light extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            id: this.props.light.id,
+            connected: this.props.light.connected,
+            state: this.props.light.state,
+            brightness: this.props.light.brightness,
+            color: this.props.light.color,
+            effect: this.props.light.effect,
+            speed: this.props.light.speed,
+            supportedEffects: this.props.light.supportedEffects,
+            ignoreUpdates: false,
+            colors: colors
+        };
+    }
+
+    static propTypes = propTypes;
+    static defaultProps = defaultProps;
+
+    static getDerivedStateFromProps(
+        {
+            data: { loading, lightChanged }
+        },
+        prevState
+    ) {
+        // Dont rerender if data is loading or if we are currently interacting with the UI
+        if (loading || prevState.ignoreUpdates) {
+            return prevState;
+        }
+
+        // decompose the incoming data from the subscription
+        const {
+            connected,
+            state,
+            brightness,
+            color,
+            effect,
+            speed
+        } = lightChanged;
+        let nextState = {};
+
+        // If the incoming data is the same as the current state, ignore it
+        if (state && state !== prevState.state) {
+            nextState = { ...nextState, ...{ state } };
+        }
+        if (brightness && brightness !== prevState.brightness) {
+            nextState = { ...nextState, ...{ brightness } };
+        }
+        if (
+            typeof connected === "number" &&
+            connected !== prevState.connected
+        ) {
+            nextState = { ...nextState, ...{ connected } };
+        }
+        if (
+            color &&
+            (color.r !== prevState.color.r ||
+                color.g !== prevState.color.g ||
+                color.b !== prevState.color.b)
+        ) {
+            nextState = { ...nextState, ...{ color } };
+        }
+        if (effect && effect !== prevState.effect) {
+            nextState = { ...nextState, ...{ effect } };
+        }
+        if (speed && speed !== prevState.speed) {
+            nextState = { ...nextState, ...{ speed } };
+        }
+
+        // If nextState is empty, that means all the data is the same so we should just return the previous state
+        return Object.keys(nextState).length > 0 ? nextState : prevState;
+    }
+
+    handleMutationCompleted = ({ data }) => {
+        //console.log("Data Received: ", data);
+    };
+
+    handleMutationError = error => {
+        console.error("Error Setting Light:", error);
+    };
+
+    setLight = throttle(variables => {
+        this.props
+            .mutate({ variables })
+            .then(this.handleMutationCompleted)
+            .catch(this.handleMutationError);
+        this.setState({ ignoreUpdates: false });
+    }, 500);
+
+    handleStateChange = evt => {
+        this.setState({
+            state: evt.target.checked ? "ON" : "OFF",
+            ignoreUpdates: true
+        });
+        const variables = {
+            light: {
+                id: this.props.light.id,
+                state: evt.target.checked ? "ON" : "OFF"
+            }
+        };
+        this.setLight(variables);
+    };
+
+    handleBrightnessChange = brightness => {
+        this.setState({
+            brightness,
+            ignoreUpdates: true
+        });
+        const variables = {
+            light: {
+                id: this.props.light.id,
+                brightness
+            }
+        };
+        this.setLight(variables);
+    };
+
+    handleColorChange = ({ rgb: { r, g, b } }) => {
+        if (
+            r === this.state.color.r &&
+            g === this.state.color.g &&
+            b === this.state.color.b
+        ) {
+            return;
+        }
+        this.setState({
+            color: { r, g, b },
+            state: "ON",
+            ignoreUpdates: true
+        });
+        const variables = {
+            light: {
+                id: this.props.light.id,
+                color: {
+                    r,
+                    g,
+                    b
+                }
+            }
+        };
+        this.setLight(variables);
+    };
+
+    handleInputChange = evt => {
+        if (evt.target.name === "effect") {
+            this.setState({
+                [evt.target.name]: evt.target.value,
+                state: "ON",
+                ignoreUpdates: true
+            });
+        } else {
+            this.setState({
+                [evt.target.name]: evt.target.value,
+                ignoreUpdates: true
+            });
+        }
+        const variables = {
+            light: {
+                id: this.props.light.id,
+                [evt.target.name]: evt.target.value
+            }
+        };
+        this.setLight(variables);
+    };
+
+    render() {
+        const { classes } = this.props;
+        return (
+            <Card className={classes.card}>
+                <LightHeader
+                    id={this.state.id}
+                    color={this.state.color}
+                    connected={this.state.connected}
+                    state={this.state.state}
+                    onChange={this.handleStateChange}
+                />
+                <LightContent
+                    connected={this.state.connected}
+                    brightness={this.state.brightness}
+                    color={this.state.color}
+                    colors={this.state.colors}
+                    effect={this.state.effect}
+                    supportedEffects={this.state.supportedEffects}
+                    speed={this.state.speed}
+                    onBrightnessChange={this.handleBrightnessChange}
+                    onColorChange={this.handleColorChange}
+                    onInputChange={this.handleInputChange}
+                />
+            </Card>
+        );
+    }
+}
+
+export default withStyles(styles)(
+    graphql(LIGHT_CHANGED)(graphql(SET_LIGHT)(Light))
+);

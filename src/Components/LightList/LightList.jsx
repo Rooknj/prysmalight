@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { Query } from "react-apollo";
 import gql from "graphql-tag";
 import Light from "./Light/Light";
+import Light2 from "./Light/Light2";
 import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 
@@ -72,6 +73,7 @@ const LightList = props => (
                                 lg={3}
                             >
                                 <Light light={light} />
+                                <Light2 light={light} />
                             </Grid>
                         ))}
                     </Grid>

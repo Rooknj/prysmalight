@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Subscription } from "react-apollo";
+import { Mutation } from "react-apollo";
 import gql from "graphql-tag";
 import throttle from "lodash.throttle";
 
@@ -64,57 +64,28 @@ const SET_LIGHT = gql`
     }
 `;
 
-const LIGHT_CHANGED = gql`
-    subscription lightChanged($lightId: String!) {
-        lightChanged(lightId: $lightId) {
-            id
-            connected
-            state
-            brightness
-            color {
-                r
-                g
-                b
-            }
-            effect
-            speed
-            supportedEffects
-        }
-    }
-`;
-
 const Light = props => (
-    <Subscription
-        subscription={LIGHT_CHANGED}
-        variables={{ lightId: props.light.id }}
-    >
-        {({ loading, data }) => {
-            console.log(loading, data);
-            return (
-                <Card className={props.classes.card}>
-                    <LightHeader
-                        id={props.light.id}
-                        color={props.light.color}
-                        connected={props.light.connected}
-                        state={props.light.state}
-                        onChange={() => console.log("triggered")}
-                    />
-                    <LightContent
-                        connected={props.light.connected}
-                        brightness={props.light.brightness}
-                        color={props.light.color}
-                        colors={colors}
-                        effect={props.light.effect}
-                        supportedEffects={props.light.supportedEffects}
-                        speed={props.light.speed}
-                        onBrightnessChange={() => console.log("triggered")}
-                        onColorChange={() => console.log("triggered")}
-                        onInputChange={() => console.log("triggered")}
-                    />
-                </Card>
-            );
-        }}
-    </Subscription>
+    <Card className={props.classes.card}>
+        <LightHeader
+            id={props.light.id}
+            color={props.light.color}
+            connected={props.light.connected}
+            state={props.light.state}
+            onChange={() => console.log("triggered")}
+        />
+        <LightContent
+            connected={props.light.connected}
+            brightness={props.light.brightness}
+            color={props.light.color}
+            colors={colors}
+            effect={props.light.effect}
+            supportedEffects={props.light.supportedEffects}
+            speed={props.light.speed}
+            onBrightnessChange={() => console.log("triggered")}
+            onColorChange={() => console.log("triggered")}
+            onInputChange={() => console.log("triggered")}
+        />
+    </Card>
 );
 
 Light.propTypes = propTypes;

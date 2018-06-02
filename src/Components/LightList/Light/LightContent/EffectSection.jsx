@@ -7,6 +7,7 @@ import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
+import Typography from "@material-ui/core/Typography";
 
 const styles = theme => ({
     formControl: {
@@ -33,6 +34,9 @@ const EffectSection = props => {
             justify="space-between"
             alignItems="center"
         >
+            <Grid item xs={12}>
+                <Typography variant="body2">Animations</Typography>
+            </Grid>
             <Grid item xs={6}>
                 <FormControl className={props.classes.formControl}>
                     <InputLabel htmlFor="effect">Effect</InputLabel>

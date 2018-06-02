@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { graphql } from "react-apollo";
 import gql from "graphql-tag";
-import Light from "./Light.jsx";
+import Light from "./Light/Light";
 import Grid from "@material-ui/core/Grid";
 import { withStyles } from "@material-ui/core/styles";
 

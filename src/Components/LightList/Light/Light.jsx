@@ -5,9 +5,9 @@ import gql from "graphql-tag";
 import throttle from "lodash.throttle";
 
 import Card from "@material-ui/core/Card";
-import LightHeader from "./LightHeader";
+import LightHeader from "./LightHeader/LightHeader";
 import { withStyles } from "@material-ui/core/styles";
-import LightContent from "./LightContent";
+import LightContent from "./LightContent/LightContent";
 
 const styles = theme => ({
     card: {

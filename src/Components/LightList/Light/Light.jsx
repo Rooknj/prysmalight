@@ -64,14 +64,15 @@ const SET_LIGHT = gql`
     }
 `;
 
-const handleLightChange = throttle((setLight, light) => {
-    console.log("sending");
-    setLight({
-        variables: {
-            light
-        }
-    });
-}, 100);
+const handleLightChange = throttle(
+    (setLight, light) =>
+        setLight({
+            variables: {
+                light
+            }
+        }),
+    100
+);
 
 const Light = props => (
     <Mutation mutation={SET_LIGHT}>

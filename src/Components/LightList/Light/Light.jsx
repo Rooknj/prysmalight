@@ -64,28 +64,69 @@ const SET_LIGHT = gql`
     }
 `;
 
+const handleLightChange = throttle((setLight, light) => {
+    console.log("sending");
+    setLight({
+        variables: {
+            light
+        }
+    });
+}, 100);
+
 const Light = props => (
-    <Card className={props.classes.card}>
-        <LightHeader
-            id={props.light.id}
-            color={props.light.color}
-            connected={props.light.connected}
-            state={props.light.state}
-            onChange={() => console.log("triggered")}
-        />
-        <LightContent
-            connected={props.light.connected}
-            brightness={props.light.brightness}
-            color={props.light.color}
-            colors={colors}
-            effect={props.light.effect}
-            supportedEffects={props.light.supportedEffects}
-            speed={props.light.speed}
-            onBrightnessChange={() => console.log("triggered")}
-            onColorChange={() => console.log("triggered")}
-            onInputChange={() => console.log("triggered")}
-        />
-    </Card>
+    <Mutation mutation={SET_LIGHT}>
+        {(setLight, result) => {
+            const handleStateChange = e =>
+                handleLightChange(setLight, {
+                    id: props.light.id,
+                    state: e.target.checked ? "ON" : "OFF"
+                });
+            const handleBrightnessChange = brightness =>
+                handleLightChange(setLight, { id: props.light.id, brightness });
+            const handleColorChange = ({ rgb: { r, g, b } }) => {
+                if (
+                    r === props.light.color.r &&
+                    g === props.light.color.g &&
+                    b === props.light.color.b
+                ) {
+                    return;
+                }
+                handleLightChange(setLight, {
+                    id: props.light.id,
+                    color: { r, g, b }
+                });
+            };
+            const handleEffectChange = e =>
+                handleLightChange(setLight, {
+                    id: props.light.id,
+                    [e.target.name]: e.target.value
+                });
+            return (
+                <Card className={props.classes.card}>
+                    <LightHeader
+                        id={props.light.id}
+                        color={props.light.color}
+                        connected={props.light.connected}
+                        state={props.light.state}
+                        onChange={handleStateChange}
+                    />
+                    <LightContent
+                        connected={props.light.connected}
+                        brightness={props.light.brightness}
+                        color={props.light.color}
+                        colors={colors}
+                        effect={props.light.effect}
+                        supportedEffects={props.light.supportedEffects}
+                        speed={props.light.speed}
+                        onBrightnessChange={handleBrightnessChange}
+                        onColorChange={handleColorChange}
+                        onInputChange={handleEffectChange}
+                    />
+                    {result.loading && <p>Loading...</p>}
+                </Card>
+            );
+        }}
+    </Mutation>
 );
 
 Light.propTypes = propTypes;

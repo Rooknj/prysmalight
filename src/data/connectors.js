@@ -14,12 +14,12 @@ if (process.env.MOCK) {
 
 // MQTT: topics
 // connection
-const MQTT_LIGHT_CONNECTED_TOPIC = "office/rgb1/connected";
+const MQTT_LIGHT_CONNECTED_TOPIC = "lightapp2/light/connected";
 
 // state
-const MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/state";
-const MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/set";
-const MQTT_EFFECT_LIST_TOPIC = "office/rgb1/effects";
+const MQTT_LIGHT_STATE_TOPIC = "lightapp2/light/state";
+const MQTT_LIGHT_COMMAND_TOPIC = "lightapp2/light/command";
+const MQTT_EFFECT_LIST_TOPIC = "lightapp2/light/effects";
 
 // MQTT: payloads by default (on/off)
 const LIGHT_ON = "ON";
@@ -154,7 +154,7 @@ class LightConnector {
   setLight = light => {
     const { state, brightness, color, effect, speed } = light;
     // TODO: add data checking
-    let payload = {};
+    let payload = { name: "Light 1" };
     if (state) payload = { ...payload, state };
     if (brightness) payload = { ...payload, brightness };
     if (color) payload = { ...payload, color };

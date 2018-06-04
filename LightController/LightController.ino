@@ -23,7 +23,6 @@
 /************ Configuration Variables ******************/
 #define NAME "Light 1"
 
-#define MQTT_VERSION MQTT_VERSION_3_1_1
 // the maximum value you can set brightness to out of 255 
 #define MAX_BRIGHTNESS 255
 // pin used for the rgb led strip (PWM)
@@ -76,7 +75,8 @@ WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
 // Make this bigger if you need to add more objects to the json
-const int BUFFER_SIZE = 150;
+// Also make sure MQTT_MAX_PACKET_SIZE in PubSubClient.h is big enough
+const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
 
 
 

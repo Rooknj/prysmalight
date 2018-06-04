@@ -122,7 +122,6 @@ const Light = props => (
                         onColorChange={handleColorChange}
                         onInputChange={handleEffectChange}
                     />
-                    {result.loading && <p>Loading...</p>}
                 </Card>
             );
         }}

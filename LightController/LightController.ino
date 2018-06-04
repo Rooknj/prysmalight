@@ -31,7 +31,7 @@
 // how many leds in your strip?
 #define NUM_LEDS 150
 // Enables Serial and print statements
-#define DEBUG false
+#define DEBUG true
 // Which LED strip are you using?
 #define CHIPSET WS2812B
 // What is the color order of your LED strip?
@@ -49,14 +49,14 @@ const PROGMEM char* MQTT_PASSWORD = "MQTTIsBetterThanUDP";
 
 // MQTT: topics
 // connection
-char MQTT_LIGHT_CONNECTED_TOPIC[40];
+char* MQTT_LIGHT_CONNECTED_TOPIC = "lightapp2/light/connected";
 
 // effect list
-char MQTT_EFFECT_LIST_TOPIC[40];
+char* MQTT_EFFECT_LIST_TOPIC = "lightapp2/light/effects";
 
 // state
-char MQTT_LIGHT_STATE_TOPIC[40];
-char MQTT_LIGHT_COMMAND_TOPIC[40];
+char* MQTT_LIGHT_STATE_TOPIC = "lightapp2/light/state";
+char* MQTT_LIGHT_COMMAND_TOPIC = "lightapp2/light/command";
 
 // homebridge
 char* HOMEKIT_LIGHT_STATE_TOPIC = "lightapp2/to/set";
@@ -75,7 +75,8 @@ char m_msg_buffer[MSG_BUFFER_SIZE];
 WiFiClient wifiClient;
 PubSubClient client(wifiClient);
 
-const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
+// Make this bigger if you need to add more objects to the json
+const int BUFFER_SIZE = 150;
 
 
 
@@ -198,6 +199,13 @@ bool processJson(char* message) {
   if (!root.success()) {
     Serial.println("ERROR: parseObject() failed");
     return false;
+  }
+
+  if (root.containsKey("name")) {
+    if (strcmp(root["name"], NAME) != 0){
+      Serial.println("DEBUG: Message was for different light");
+      return true;
+    }
   }
 
   if (root.containsKey("state")) {
@@ -452,27 +460,11 @@ void sendEffectList() {
   client.publish(MQTT_EFFECT_LIST_TOPIC, buffer, true);
 }
 
-void setMqttTopics() {
-  strcpy(MQTT_LIGHT_CONNECTED_TOPIC, NAME);
-  strcat(MQTT_LIGHT_CONNECTED_TOPIC, "/light/connected");
-
-  strcpy(MQTT_EFFECT_LIST_TOPIC, NAME);
-  strcat(MQTT_EFFECT_LIST_TOPIC, "/light/effects");
-
-  strcpy(MQTT_LIGHT_STATE_TOPIC, NAME);
-  strcat(MQTT_LIGHT_STATE_TOPIC, "/light/state");
-
-  strcpy(MQTT_LIGHT_COMMAND_TOPIC, NAME);
-  strcat(MQTT_LIGHT_COMMAND_TOPIC, "/light/set");
-  return;
-}
-
 
 
 // MQTT connect/reconnect function
 boolean reconnect() {
   setMqttIpWithMDNS();
-  setMqttTopics();
 
   if (client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, LIGHT_DISCONNECTED)) {
     Serial.println("INFO: connected to MQTT broker");

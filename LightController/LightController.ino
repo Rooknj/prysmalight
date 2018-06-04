@@ -22,6 +22,7 @@
 
 /************ Configuration Variables ******************/
 #define NAME "Light 1"
+
 #define MQTT_VERSION MQTT_VERSION_3_1_1
 // the maximum value you can set brightness to out of 255 
 #define MAX_BRIGHTNESS 255
@@ -48,18 +49,18 @@ const PROGMEM char* MQTT_PASSWORD = "MQTTIsBetterThanUDP";
 
 // MQTT: topics
 // connection
-const PROGMEM char* MQTT_LIGHT_CONNECTED_TOPIC = "office/rgb1/connected";
+char MQTT_LIGHT_CONNECTED_TOPIC[40];
 
 // effect list
-const PROGMEM char* MQTT_EFFECT_LIST_TOPIC = "office/rgb1/effects";
+char MQTT_EFFECT_LIST_TOPIC[40];
 
 // state
-const PROGMEM char* MQTT_LIGHT_STATE_TOPIC = "office/rgb1/light/state";
-const PROGMEM char* MQTT_LIGHT_COMMAND_TOPIC = "office/rgb1/light/set";
+char MQTT_LIGHT_STATE_TOPIC[40];
+char MQTT_LIGHT_COMMAND_TOPIC[40];
 
 // homebridge
-const PROGMEM char* HOMEKIT_LIGHT_STATE_TOPIC = "lightapp2/to/set";
-const PROGMEM char* HOMEKIT_LIGHT_COMMAND_TOPIC = "lightapp2/from/set";
+char* HOMEKIT_LIGHT_STATE_TOPIC = "lightapp2/to/set";
+char* HOMEKIT_LIGHT_COMMAND_TOPIC = "lightapp2/from/set";
 
 // payloads by default (on/off)
 const PROGMEM char* LIGHT_ON = "ON";
@@ -448,10 +449,28 @@ void sendEffectList() {
   client.publish(MQTT_EFFECT_LIST_TOPIC, buffer, true);
 }
 
+void setMqttTopics() {
+  strcpy(MQTT_LIGHT_CONNECTED_TOPIC, NAME);
+  strcat(MQTT_LIGHT_CONNECTED_TOPIC, "/light/connected");
+
+  strcpy(MQTT_EFFECT_LIST_TOPIC, NAME);
+  strcat(MQTT_EFFECT_LIST_TOPIC, "/light/effects");
+
+  strcpy(MQTT_LIGHT_STATE_TOPIC, NAME);
+  strcat(MQTT_LIGHT_STATE_TOPIC, "/light/state");
+
+  strcpy(MQTT_LIGHT_COMMAND_TOPIC, NAME);
+  strcat(MQTT_LIGHT_COMMAND_TOPIC, "/light/set");
+  return;
+}
+
+
 
 // MQTT connect/reconnect function
 boolean reconnect() {
   setMqttIpWithMDNS();
+  setMqttTopics();
+
   if (client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, LIGHT_DISCONNECTED)) {
     Serial.println("INFO: connected to MQTT broker");
     

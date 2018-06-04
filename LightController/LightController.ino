@@ -368,6 +368,9 @@ void sendState() {
 
   JsonObject& root = jsonBuffer.createObject();
 
+  // populate payload with name
+  root["name"] = NAME;
+  
   // populate payload with state
   root["state"] = (stateOn) ? LIGHT_ON : LIGHT_OFF;
 

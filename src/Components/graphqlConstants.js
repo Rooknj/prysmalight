@@ -37,3 +37,9 @@ export const GET_LIGHTS = gql`
         }
     }
 `;
+
+export const SET_LIGHT = gql`
+    mutation setLight($light: LightInput!) {
+        setLight(light: $light)
+    }
+`;

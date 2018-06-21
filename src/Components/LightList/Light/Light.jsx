@@ -1,13 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Mutation } from "react-apollo";
-import gql from "graphql-tag";
-import throttle from "lodash.throttle";
+import { Mutation, Subscription } from "react-apollo";
+import { throttle, get } from "lodash";
 
 import Card from "@material-ui/core/Card";
 import LightHeader from "./LightHeader/LightHeader";
 import { withStyles } from "@material-ui/core/styles";
 import LightContent from "./LightContent/LightContent";
+import { LIGHT_CHANGED, SET_LIGHT } from "../../graphqlConstants";
 
 const styles = theme => ({
     card: {
@@ -58,12 +58,6 @@ const defaultProps = {
     }
 };
 
-const SET_LIGHT = gql`
-    mutation setLight($light: LightInput!) {
-        setLight(light: $light)
-    }
-`;
-
 const handleLightChange = throttle(
     (setLight, light) =>
         setLight({
@@ -73,6 +67,12 @@ const handleLightChange = throttle(
         }),
     100
 );
+
+// props.subscribeToMore({
+//     document: LIGHT_CHANGED,
+//     variables: { lightId: light.id },
+//     updateQuery: lightUtil.updateQueryWithSubscription
+// });
 
 const Light = props => (
     <Mutation mutation={SET_LIGHT}>
@@ -103,27 +103,62 @@ const Light = props => (
                     [e.target.name]: e.target.value
                 });
             return (
-                <Card className={props.classes.card}>
-                    <LightHeader
-                        id={props.light.id}
-                        color={props.light.color}
-                        connected={props.light.connected}
-                        state={props.light.state}
-                        onChange={handleStateChange}
-                    />
-                    <LightContent
-                        connected={props.light.connected}
-                        brightness={props.light.brightness}
-                        color={props.light.color}
-                        colors={colors}
-                        effect={props.light.effect}
-                        supportedEffects={props.light.supportedEffects}
-                        speed={props.light.speed}
-                        onBrightnessChange={handleBrightnessChange}
-                        onColorChange={handleColorChange}
-                        onInputChange={handleEffectChange}
-                    />
-                </Card>
+                <Subscription
+                    subscription={LIGHT_CHANGED}
+                    variables={{ lightId: props.light.id }}
+                >
+                    {({ data, error, loading }) => {
+                        return (
+                            <Card className={props.classes.card}>
+                                <LightHeader
+                                    id={props.light.id}
+                                    color={get(
+                                        data,
+                                        "lightChanged.color",
+                                        props.light.color
+                                    )}
+                                    connected={props.light.connected}
+                                    state={get(
+                                        data,
+                                        "lightChanged.state",
+                                        props.light.state
+                                    )}
+                                    onChange={handleStateChange}
+                                />
+                                <LightContent
+                                    connected={props.light.connected}
+                                    brightness={get(
+                                        data,
+                                        "lightChanged.brightness",
+                                        props.light.brightness
+                                    )}
+                                    color={get(
+                                        data,
+                                        "lightChanged.color",
+                                        props.light.color
+                                    )}
+                                    colors={colors}
+                                    effect={get(
+                                        data,
+                                        "lightChanged.effect",
+                                        props.light.effect
+                                    )}
+                                    supportedEffects={
+                                        props.light.supportedEffects
+                                    }
+                                    speed={get(
+                                        data,
+                                        "lightChanged.speed",
+                                        props.light.speed
+                                    )}
+                                    onBrightnessChange={handleBrightnessChange}
+                                    onColorChange={handleColorChange}
+                                    onInputChange={handleEffectChange}
+                                />
+                            </Card>
+                        );
+                    }}
+                </Subscription>
             );
         }}
     </Mutation>

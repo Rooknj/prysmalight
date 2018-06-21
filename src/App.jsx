@@ -1,20 +1,16 @@
-import React, { Component } from "react";
+import React from "react";
 import LightTool from "./Components/LightTool";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import "./App.css";
 
-class App extends Component {
-    render() {
-        return (
-            <div className="App">
-                <React.Fragment>
-                    <CssBaseline />
-                    {<LightTool />}
-                </React.Fragment>
-            </div>
-        );
-    }
-}
+const App = props => (
+    <div className="App">
+        <React.Fragment>
+            <CssBaseline />
+            {<LightTool />}
+        </React.Fragment>
+    </div>
+);
 
 export default App;
 

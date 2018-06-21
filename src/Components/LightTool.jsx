@@ -1,11 +1,11 @@
 import React from "react";
-import LightList from "./LightList/LightList";
+import LightListQueryWrapper from "./LightList/LightListQueryWrapper";
 
 const LightTool = props => {
     return (
         <div>
             <br />
-            <LightList />
+            <LightListQueryWrapper />
         </div>
     );
 };

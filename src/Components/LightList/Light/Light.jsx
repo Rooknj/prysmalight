@@ -105,70 +105,56 @@ const WithSetLightHandlers = props => {
 const Light = props => (
     <Mutation mutation={SET_LIGHT}>
         {(setLight, result) => {
-            console.log("mutation");
             return (
-                <WithSetLightHandlers setLight={setLight} light={props.light}>
-                    {({
-                        handleStateChange,
-                        handleBrightnessChange,
-                        handleColorChange,
-                        handleEffectChange
-                    }) => {
-                        console.log("withHandlers");
+                <Subscription
+                    subscription={LIGHT_CHANGED}
+                    variables={{ lightId: props.light.id }}
+                >
+                    {({ data, error, loading }) => {
+                        const lightChanged = get(
+                            data,
+                            "lightChanged",
+                            props.light
+                        );
+                        const {
+                            connected,
+                            state,
+                            brightness,
+                            color,
+                            effect,
+                            speed
+                        } = lightChanged;
                         return (
-                            <Subscription
-                                subscription={LIGHT_CHANGED}
-                                variables={{ lightId: props.light.id }}
+                            <WithSetLightHandlers
+                                setLight={setLight}
+                                light={lightChanged}
                             >
-                                {({ data, error, loading }) => {
-                                    console.log("Subscription");
+                                {({
+                                    handleStateChange,
+                                    handleBrightnessChange,
+                                    handleColorChange,
+                                    handleEffectChange
+                                }) => {
                                     return (
                                         <Card className={props.classes.card}>
                                             <LightHeader
                                                 id={props.light.id}
-                                                color={get(
-                                                    data,
-                                                    "lightChanged.color",
-                                                    props.light.color
-                                                )}
-                                                connected={
-                                                    props.light.connected
-                                                }
-                                                state={get(
-                                                    data,
-                                                    "lightChanged.state",
-                                                    props.light.state
-                                                )}
+                                                color={color}
+                                                connected={connected}
+                                                state={state}
                                                 onChange={handleStateChange}
+                                                waiting={result.loading}
                                             />
                                             <LightContent
-                                                connected={
-                                                    props.light.connected
-                                                }
-                                                brightness={get(
-                                                    data,
-                                                    "lightChanged.brightness",
-                                                    props.light.brightness
-                                                )}
-                                                color={get(
-                                                    data,
-                                                    "lightChanged.color",
-                                                    props.light.color
-                                                )}
+                                                connected={connected}
+                                                brightness={brightness}
+                                                color={color}
                                                 colors={colors}
-                                                effect={get(
-                                                    data,
-                                                    "lightChanged.effect",
-                                                    props.light.effect
-                                                )}
+                                                effect={effect}
                                                 supportedEffects={
                                                     props.light.supportedEffects
                                                 }
-                                                speed={get(
-                                                    data,
-                                                    "lightChanged.speed",
-                                                    props.light.speed
-                                                )}
+                                                speed={speed}
                                                 onBrightnessChange={
                                                     handleBrightnessChange
                                                 }
@@ -182,10 +168,10 @@ const Light = props => (
                                         </Card>
                                     );
                                 }}
-                            </Subscription>
+                            </WithSetLightHandlers>
                         );
                     }}
-                </WithSetLightHandlers>
+                </Subscription>
             );
         }}
     </Mutation>

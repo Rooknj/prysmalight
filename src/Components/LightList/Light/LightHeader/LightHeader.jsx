@@ -21,14 +21,18 @@ const propTypes = {
 const defaultProps = {};
 
 const LightHeader = props => {
+    console.log("props", props.waiting);
     return (
         <Grid container justify="space-between">
-            <Grid item xs={9}>
+            <Grid item xs={6}>
                 <LightStatus
                     id={props.id}
                     color={props.color}
                     connected={props.connected}
                 />
+            </Grid>
+            <Grid item xs={3} className={props.classes.switchGrid}>
+                {props.waiting && "loading"}
             </Grid>
             <Grid item xs={3} className={props.classes.switchGrid}>
                 <Switch

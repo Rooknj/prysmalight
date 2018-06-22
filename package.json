@@ -22,8 +22,6 @@
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.2",
     "react-test-renderer": "^16.3.2",
-    "rxjs": "^6.1.0",
-    "rxjs-compat": "^6.1.0",
     "subscriptions-transport-ws": "^0.9.7"
   },
   "devDependencies": {

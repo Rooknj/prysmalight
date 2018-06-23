@@ -1,10 +1,21 @@
 import React from "react";
 import LightTool from "./Components/LightTool";
 import CssBaseline from "@material-ui/core/CssBaseline";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import Typography from "@material-ui/core/Typography";
+
 import "./App.css";
 
 const App = props => (
     <div className="App">
+        <AppBar position="static" color="default">
+            <Toolbar>
+                <Typography variant="title" color="inherit">
+                    Light App 2.0
+                </Typography>
+            </Toolbar>
+        </AppBar>
         <React.Fragment>
             <CssBaseline />
             {<LightTool />}

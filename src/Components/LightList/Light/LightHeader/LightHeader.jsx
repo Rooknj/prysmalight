@@ -21,7 +21,6 @@ const propTypes = {
 const defaultProps = {};
 
 const LightHeader = props => {
-    console.log("props", props.waiting);
     return (
         <Grid container justify="space-between">
             <Grid item xs={6}>

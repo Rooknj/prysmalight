@@ -1,6 +1,5 @@
 export default class lightUtil {
     updateQueryWithSubscription = (prev, { subscriptionData }) => {
-        console.log("Update");
         if (!subscriptionData.data) return prev;
 
         const {

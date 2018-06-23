@@ -76,4 +76,10 @@ const LightContainer = adopt({
     )
 });
 
+LightContainer.propTypes = {
+    mutation: PropTypes.object.isRequired,
+    subscription: PropTypes.object.isRequired,
+    subscriptionVariables: PropTypes.object.isRequired
+};
+
 export default LightContainer;

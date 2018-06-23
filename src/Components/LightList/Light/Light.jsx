@@ -60,59 +60,57 @@ const defaultProps = {
 };
 
 const Light = props => (
-    <div>
-        <LightContainer
-            mutation={SET_LIGHT}
-            subscription={LIGHT_CHANGED}
-            subscriptionVariables={{ lightId: props.light.id }}
-        >
-            {({ mutationProps, subscriptionProps, handlerProps }) => {
-                const lightChanged = get(
-                    subscriptionProps,
-                    "result.data.lightChanged",
-                    props.light
-                );
-                const {
-                    connected,
-                    state,
-                    brightness,
-                    color,
-                    effect,
-                    speed
-                } = lightChanged;
-                const {
-                    handleStateChange,
-                    handleBrightnessChange,
-                    handleColorChange,
-                    handleEffectChange
-                } = handlerProps.handlers;
-                return (
-                    <Card className={props.classes.card}>
-                        <LightHeader
-                            id={props.light.id}
-                            color={color}
-                            connected={connected}
-                            state={state}
-                            onChange={handleStateChange}
-                            waiting={mutationProps.result.loading}
-                        />
-                        <LightContent
-                            connected={connected}
-                            brightness={brightness}
-                            color={color}
-                            colors={colors}
-                            effect={effect}
-                            supportedEffects={props.light.supportedEffects}
-                            speed={speed}
-                            onBrightnessChange={handleBrightnessChange}
-                            onColorChange={handleColorChange}
-                            onInputChange={handleEffectChange}
-                        />
-                    </Card>
-                );
-            }}
-        </LightContainer>
-    </div>
+    <LightContainer
+        mutation={SET_LIGHT}
+        subscription={LIGHT_CHANGED}
+        subscriptionVariables={{ lightId: props.light.id }}
+    >
+        {({ mutationProps, subscriptionProps, handlerProps }) => {
+            const lightChanged = get(
+                subscriptionProps,
+                "result.data.lightChanged",
+                props.light
+            );
+            const {
+                connected,
+                state,
+                brightness,
+                color,
+                effect,
+                speed
+            } = lightChanged;
+            const {
+                handleStateChange,
+                handleBrightnessChange,
+                handleColorChange,
+                handleEffectChange
+            } = handlerProps.handlers;
+            return (
+                <Card className={props.classes.card}>
+                    <LightHeader
+                        id={props.light.id}
+                        color={color}
+                        connected={connected}
+                        state={state}
+                        onChange={handleStateChange}
+                        waiting={mutationProps.result.loading}
+                    />
+                    <LightContent
+                        connected={connected}
+                        brightness={brightness}
+                        color={color}
+                        colors={colors}
+                        effect={effect}
+                        supportedEffects={props.light.supportedEffects}
+                        speed={speed}
+                        onBrightnessChange={handleBrightnessChange}
+                        onColorChange={handleColorChange}
+                        onInputChange={handleEffectChange}
+                    />
+                </Card>
+            );
+        }}
+    </LightContainer>
 );
 
 Light.propTypes = propTypes;

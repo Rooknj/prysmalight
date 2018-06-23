@@ -4,6 +4,7 @@ import { withStyles } from "@material-ui/core/styles";
 import Switch from "@material-ui/core/Switch";
 import Grid from "@material-ui/core/Grid";
 import LightStatus from "./LightStatus";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 const styles = theme => ({
     switchGrid: {
@@ -31,7 +32,7 @@ const LightHeader = props => {
                 />
             </Grid>
             <Grid item xs={3} className={props.classes.switchGrid}>
-                {props.waiting && "loading"}
+                {props.waiting && <CircularProgress />}
             </Grid>
             <Grid item xs={3} className={props.classes.switchGrid}>
                 <Switch

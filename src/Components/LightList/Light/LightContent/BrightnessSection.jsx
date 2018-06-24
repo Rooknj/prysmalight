@@ -3,8 +3,7 @@ import PropTypes from "prop-types";
 import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import Slider from "rc-slider";
-import "./slider.css";
+import Slider from "@material-ui/lab/Slider";
 
 const styles = theme => ({});
 
@@ -30,10 +29,10 @@ const BrightnessSection = props => {
             </Grid>
             <Grid item xs={12}>
                 <Slider
+                    value={props.brightness}
                     min={0}
                     max={100}
                     step={1}
-                    value={props.brightness}
                     onChange={props.onBrightnessChange}
                     disabled={props.connected !== 2}
                 />

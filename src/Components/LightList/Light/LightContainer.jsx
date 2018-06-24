@@ -21,7 +21,7 @@ const WithSetLightHandlers = props => {
             id: get(props, "light.id", ""),
             state: e.target.checked ? "ON" : "OFF"
         });
-    const handleBrightnessChange = brightness =>
+    const handleBrightnessChange = (event, brightness) =>
         handleLightChange(setLight, {
             id: get(props, "light.id", ""),
             brightness

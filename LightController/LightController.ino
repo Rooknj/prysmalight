@@ -9,6 +9,8 @@
          |___/                                           
 */
 
+#include "config.h"
+
 #include <ESP8266WiFi.h>          // ESP8266 Core WiFi Library
 #include <ESP8266mDNS.h>          // Enables finding addresses in the .local domain
 #include <DNSServer.h>            // Local DNS Server used for redirecting all requests to the configuration portal
@@ -19,28 +21,11 @@
 #include "FastLED.h"              // LED strip control library
 #include <ArduinoJson.h>          // Parse JSON
 
-
-/************ Configuration Variables ******************/
-#define NAME "Light 1"
-
-// the maximum value you can set brightness to out of 255 
-#define MAX_BRIGHTNESS 255
-// pin used for the rgb led strip (PWM)
-#define DATA_PIN 3 // This is pin D3 on the NodeMCU ESP8266
-// how many leds in your strip?
-#define NUM_LEDS 150
-// Enables Serial and print statements
-#define DEBUG true
-// Which LED strip are you using?
-#define CHIPSET WS2812B
-// What is the color order of your LED strip?
-#define COLOR_ORDER GRB
-
 // Search "Change to add effect" to find all areas you need to edit to add an effect
 
 /************ MQTT Setup Variables ******************/
 // MQTT: ID, server IP, port, username and password
-const PROGMEM char* MQTT_CLIENT_ID = NAME;
+const PROGMEM char* MQTT_CLIENT_ID = CONFIG_NAME;
 char MQTT_SERVER_IP[16];
 const PROGMEM uint16_t MQTT_SERVER_PORT = 1883;
 const PROGMEM char* MQTT_USER = "pi";
@@ -93,7 +78,7 @@ String currentEffect = NO_EFFECT;
 char* effects[] = {"Flash", "Fade", "Rainbow", "Cylon", "Sinelon", "Confetti", "BPM", "Juggle"}; // Change to add effect
 int numEffects = 8; // Change to add effect
 // define the array of leds
-CRGB leds[NUM_LEDS];
+CRGB leds[CONFIG_NUM_LEDS];
 
 // Homekit variables
 int hue = 0;
@@ -137,12 +122,12 @@ bool forward = true;
 /************ Functions ******************/
 // function called to fill the LED strip a solid color
 void setRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue) {
-  fill_solid(leds, NUM_LEDS, CRGB(p_red, p_green, p_blue));
+  fill_solid(leds, CONFIG_NUM_LEDS, CRGB(p_red, p_green, p_blue));
   FastLED.show();
 }
 
 void setHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value) {
-  fill_solid(leds, NUM_LEDS, CHSV(p_hue, p_saturation, p_value));
+  fill_solid(leds, CONFIG_NUM_LEDS, CHSV(p_hue, p_saturation, p_value));
   FastLED.show();
 }
 
@@ -202,7 +187,7 @@ bool processJson(char* message) {
   }
 
   if (root.containsKey("name")) {
-    if (strcmp(root["name"], NAME) != 0){
+    if (strcmp(root["name"], CONFIG_NAME) != 0){
       Serial.println("DEBUG: Message was for different light");
       return true;
     }
@@ -239,7 +224,7 @@ bool processJson(char* message) {
 
   if (root.containsKey("brightness")) {
     brightness = root["brightness"];
-    FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
+    FastLED.setBrightness(map(brightness, 0, 100, 0, CONFIG_MAX_BRIGHTNESS));
     FastLED.show();
     setHomekitBrightness = true;
   }
@@ -290,7 +275,7 @@ bool processHomekitJson(char* message) {
   }
 
   if (root.containsKey("name")) {
-    if (strcmp(root["name"], NAME) != 0){
+    if (strcmp(root["name"], CONFIG_NAME) != 0){
       Serial.println("DEBUG: Message was for different light");
       return true;
     }
@@ -310,7 +295,7 @@ bool processHomekitJson(char* message) {
       if (root.containsKey("value")) {
         if (root["value"]) {
           brightness = root["value"];
-          FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
+          FastLED.setBrightness(map(brightness, 0, 100, 0, CONFIG_MAX_BRIGHTNESS));
           FastLED.show();
           setHomekitBrightness = true;
         }
@@ -377,7 +362,7 @@ void sendState() {
   JsonObject& root = jsonBuffer.createObject();
 
   // populate payload with name
-  root["name"] = NAME;
+  root["name"] = CONFIG_NAME;
   
   // populate payload with state
   root["state"] = (stateOn) ? LIGHT_ON : LIGHT_OFF;
@@ -419,10 +404,10 @@ void sendHomekitState(char* characteristic) {
   JsonObject& root = jsonBuffer.createObject();
   
   // populate payload with name
-  root["name"] = NAME;
+  root["name"] = CONFIG_NAME;
 
   // populate payload with service_name
-  root["service_name"] = NAME;
+  root["service_name"] = CONFIG_NAME;
 
   // populate payload with characteristic
   root["characteristic"] = characteristic;
@@ -572,13 +557,13 @@ void setupOTA() {
 /************ Arduino Setup ******************/
 void setup() {
   // Set Serial Communication rate
-  if (DEBUG) {
+  if (CONFIG_DEBUG) {
     Serial.begin(115200);
   }
 
   // init FastLED and the LED strip
-  FastLED.addLeds<CHIPSET, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS);
-  FastLED.setBrightness(map(brightness, 0, 100, 0, MAX_BRIGHTNESS));
+  FastLED.addLeds<CONFIG_CHIPSET, CONFIG_DATA_PIN, CONFIG_COLOR_ORDER>(leds, CONFIG_NUM_LEDS);
+  FastLED.setBrightness(map(brightness, 0, 100, 0, CONFIG_MAX_BRIGHTNESS));
   setRGB(0, 0, 0);
 
   // init the builtin led on the ESP8266
@@ -815,7 +800,7 @@ void handleFade() {
 void handleRainbow() {
   if(shouldUpdate()) {
     cycleHue();
-    fill_rainbow( leds, NUM_LEDS, gHue, 7);
+    fill_rainbow( leds, CONFIG_NUM_LEDS, gHue, 7);
     FastLED.show(); 
   }
 }
@@ -824,22 +809,22 @@ void handleRainbow() {
 void handleConfetti() {
   if(shouldUpdate()) {
     cycleHue();
-    fadeToBlackBy( leds, NUM_LEDS, 10);
-    int pos = random16(NUM_LEDS);
+    fadeToBlackBy( leds, CONFIG_NUM_LEDS, 10);
+    int pos = random16(CONFIG_NUM_LEDS);
     leds[pos] += CHSV( gHue + random8(64), 200, 255);
     FastLED.show();   
   }
 }
 
 // Cylon
-void fadeall() { for(int i = 0; i < NUM_LEDS; i++) { leds[i].nscale8(247); } }
+void fadeall() { for(int i = 0; i < CONFIG_NUM_LEDS; i++) { leds[i].nscale8(247); } }
 
 void handleCylon() {
   if(shouldUpdate()) {
     cycleHue();
     fadeall();
     // First slide the led in one direction
-    if(LED >= NUM_LEDS - 1){
+    if(LED >= CONFIG_NUM_LEDS - 1){
         forward = false;
     }
     else if(LED <= 0){
@@ -860,10 +845,10 @@ void handleCylon() {
 void handleJuggle() {
   if(shouldUpdate()) {
     // eight colored dots, weaving in and out of sync with each other
-    fadeToBlackBy( leds, NUM_LEDS, 20);
+    fadeToBlackBy( leds, CONFIG_NUM_LEDS, 20);
     byte dothue = 0;
     for( int i = 0; i < 8; i++) {
-        leds[beatsin16(i+7,0,NUM_LEDS-1)] |= CHSV(dothue, 200, 255);
+        leds[beatsin16(i+7,0,CONFIG_NUM_LEDS-1)] |= CHSV(dothue, 200, 255);
         dothue += 32;
     }
     FastLED.show();
@@ -906,7 +891,7 @@ void handleBPM() {
     uint8_t BeatsPerMinute = getBPM();
     CRGBPalette16 palette = PartyColors_p;
     uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
-    for( int i = 0; i < NUM_LEDS; i++) { //9948
+    for( int i = 0; i < CONFIG_NUM_LEDS; i++) { //9948
         leds[i] = ColorFromPalette(palette, gHue+(i*2), beat-gHue+(i*10));
     }
     FastLED.show();
@@ -916,8 +901,8 @@ void handleBPM() {
 void handleSinelon() {
   if(shouldUpdate()) {
     cycleHue();
-    fadeToBlackBy( leds, NUM_LEDS, 20);
-    int pos = beatsin16( (int)(getBPM()/5), 0, NUM_LEDS-1 );
+    fadeToBlackBy( leds, CONFIG_NUM_LEDS, 20);
+    int pos = beatsin16( (int)(getBPM()/5), 0, CONFIG_NUM_LEDS-1 );
     leds[pos] += CHSV( gHue, 255, 192);
     FastLED.show();
   }

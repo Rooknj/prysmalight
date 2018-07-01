@@ -435,12 +435,19 @@ void sendHomekitState(char* characteristic) {
 void sendEffectList() {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
 
-  JsonArray& effectList = jsonBuffer.createArray();
+  JsonObject& root = jsonBuffer.createObject();
+
+  // populate payload with name
+  root["name"] = CONFIG_NAME;
+
+  // populate payload with effect list
+  JsonArray& effectList = root.createNestedArray("effectList");
   for(int i = 0; i < numEffects; i++) {
     effectList.add(effects[i]);
   }
-  char buffer[effectList.measureLength() + 1];
-  effectList.printTo(buffer, sizeof(buffer));
+  
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
 
   client.publish(MQTT_EFFECT_LIST_TOPIC, buffer, true);
 }
@@ -451,12 +458,28 @@ void sendEffectList() {
 boolean reconnect() {
   setMqttIpWithMDNS();
 
-  if (client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, LIGHT_DISCONNECTED)) {
+  // Set up connection state payload
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+  JsonObject& root = jsonBuffer.createObject();
+  // populate payload with name
+  root["name"] = CONFIG_NAME;
+  // populate payload with connection status
+  root["connection"] = LIGHT_DISCONNECTED;
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+  
+  if (client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, buffer)) {
     Serial.println("INFO: connected to MQTT broker");
     
     // Once connected, publish an announcement...
     // publish that the ESP is connected
-    client.publish(MQTT_LIGHT_CONNECTED_TOPIC, LIGHT_CONNECTED, true);
+    
+    // populate payload with new connection status
+    root["connection"] = LIGHT_CONNECTED;
+    char buffer[root.measureLength() + 1];
+    root.printTo(buffer, sizeof(buffer));
+    
+    client.publish(MQTT_LIGHT_CONNECTED_TOPIC, buffer, true);
     
     // publish the initial values
     setHomekitOn = true;

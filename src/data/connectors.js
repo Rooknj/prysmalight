@@ -27,6 +27,17 @@ const LIGHT_OFF = "OFF";
 const LIGHT_CONNECTED = 2;
 const LIGHT_DISCONNECTED = 0;
 
+const getNewLight = id => ({
+  id,
+  connected: 0,
+  state: "OFF",
+  brightness: 100,
+  color: { r: 255, g: 0, b: 0 },
+  effect: "None",
+  speed: 4,
+  supportedEffects: []
+});
+
 // Initialize PubSub
 const pubsub = new PubSub();
 
@@ -84,12 +95,19 @@ mqttClient.on("error", error => {
 class LightConnector {
   constructor() {
     // Light Data Store
-    this.lights = [{}];
+    this.lights = [];
 
     // MQTT Message Handlers
     // This gets triggered when the connection of the light changes
     const onConnectedMessage = data => {
       const message = JSON.parse(data);
+
+      if (!message.name) {
+        ChalkConsole.error(
+          `Received messsage on connected topic that did not have an id\nMessage: ${data}`
+        );
+        return;
+      }
 
       let connected;
       if (Number(message.connection) === LIGHT_DISCONNECTED) {
@@ -102,13 +120,32 @@ class LightConnector {
         );
         return;
       }
-      Object.assign(this.lights[0], { connected });
-      pubsub.publish("lightChanged", { lightChanged: { connected } });
+
+      // Find the light in our data store whose id matches the message name
+      const changedLight = this.lights.find(light => light.id === message.name);
+      if (!changedLight) {
+        // If the light doesnt exist in our data store yet, add it
+        let newLight = getNewLight(message.name);
+        Object.assign(newLight, { connected });
+        this.lights.push(newLight);
+        pubsub.publish("lightChanged", { lightChanged: newLight });
+      } else {
+        // Push changes to existing light
+        Object.assign(changedLight, { connected });
+        pubsub.publish("lightChanged", { lightChanged: changedLight });
+      }
     };
 
     // This gets triggered when the state of the light changes
     const onStateMessage = data => {
       const message = JSON.parse(data);
+      if (!message.name) {
+        ChalkConsole.error(
+          `Received messsage on State topic that did not have an id\nMessage: ${data}`
+        );
+        return;
+      }
+
       // TODO: add data checking
       const { state, brightness, color, effect, speed } = message;
       let newState = {};
@@ -117,17 +154,46 @@ class LightConnector {
       if (color) newState = { ...newState, color };
       if (effect) newState = { ...newState, effect };
       if (speed) newState = { ...newState, speed };
-      Object.assign(this.lights[0], newState);
-      pubsub.publish("lightChanged", { lightChanged: newState });
+
+      // Find the light in our data store whose id matches the message name
+      const changedLight = this.lights.find(light => light.id === message.name);
+      if (!changedLight) {
+        // If the light doesnt exist in our data store yet, add it
+        let newLight = getNewLight(message.name);
+        Object.assign(newLight, newState);
+        this.lights.push(newLight);
+        pubsub.publish("lightChanged", { lightChanged: newLight });
+      } else {
+        // Push changes to existing light
+        Object.assign(changedLight, newState);
+        pubsub.publish("lightChanged", { lightChanged: changedLight });
+      }
     };
 
     // This gets triggered when the light sends its effect list
     const onEffectListMessage = data => {
       const message = JSON.parse(data);
-      Object.assign(this.lights[0], { supportedEffects: message.effectList });
-      pubsub.publish("lightChanged", {
-        lightChanged: { supportedEffects: message.effectList }
-      });
+
+      if (!message.name) {
+        ChalkConsole.error(
+          `Received messsage on Effect List topic that did not have an id\nMessage: ${data}`
+        );
+        return;
+      }
+
+      // Find the light in our data store whose id matches the message name
+      const changedLight = this.lights.find(light => light.id === message.name);
+      if (!changedLight) {
+        // If the light doesnt exist in our data store yet, add it
+        let newLight = getNewLight(message.name);
+        Object.assign(newLight, { supportedEffects: message.effectList });
+        this.lights.push(newLight);
+        pubsub.publish("lightChanged", { lightChanged: newLight });
+      } else {
+        // Push changes to existing light
+        Object.assign(changedLight, { supportedEffects: message.effectList });
+        pubsub.publish("lightChanged", { lightChanged: changedLight });
+      }
     };
 
     // Route each MQTT topic to it's respective message handler

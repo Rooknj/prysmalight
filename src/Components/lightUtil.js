@@ -11,9 +11,9 @@ export default class lightUtil {
             effect,
             speed
         } = subscriptionData.data.lightChanged;
-        const prevLight = prev.lights.find(light => light.id === "Light 1");
+        //const prevLight = prev.lights.find(light => light.id === "Light 1");
         // TODO: Enable this line when you start returning the Light ID from the backend
-        //const prevLight = prev.lights.find((light) => light.id === id);
+        const prevLight = prev.lights.find(light => light.id === id);
 
         let nextState = {};
         // If the incoming data is the same as the current state, ignore it

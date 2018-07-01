@@ -18,12 +18,12 @@ const WithSetLightHandlers = props => {
     );
     const handleStateChange = e =>
         handleLightChange(setLight, {
-            id: get(props, "light.id", ""),
+            id: get(props, "light.id", props.lightId),
             state: e.target.checked ? "ON" : "OFF"
         });
     const handleBrightnessChange = (event, brightness) =>
         handleLightChange(setLight, {
-            id: get(props, "light.id", ""),
+            id: get(props, "light.id", props.lightId),
             brightness
         });
     const handleColorChange = ({ rgb: { r, g, b } }) => {
@@ -35,13 +35,13 @@ const WithSetLightHandlers = props => {
             return;
         }
         handleLightChange(setLight, {
-            id: props.light.id,
+            id: get(props, "light.id", props.lightId),
             color: { r, g, b }
         });
     };
     const handleEffectChange = e =>
         handleLightChange(setLight, {
-            id: props.light.id,
+            id: get(props, "light.id", props.lightId),
             [e.target.name]: e.target.value
         });
     return props.children({
@@ -66,10 +66,11 @@ const LightContainer = adopt({
             {result => render({ result })}
         </Subscription>
     ),
-    handlerProps: ({ render, mutationProps, subscriptionProps }) => (
+    handlerProps: ({ render, mutationProps, subscriptionProps, lightId }) => (
         <WithSetLightHandlers
             setLight={mutationProps.setLight}
-            light={get(subscriptionProps, "data.lightChanged", null)}
+            light={get(subscriptionProps, "result.data.lightChanged", null)}
+            lightId={lightId}
         >
             {handlers => render({ handlers })}
         </WithSetLightHandlers>

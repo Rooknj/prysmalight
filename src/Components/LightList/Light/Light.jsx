@@ -61,6 +61,7 @@ const defaultProps = {
 
 const Light = props => (
     <LightContainer
+        lightId={props.light.id}
         mutation={SET_LIGHT}
         subscription={LIGHT_CHANGED}
         subscriptionVariables={{ lightId: props.light.id }}

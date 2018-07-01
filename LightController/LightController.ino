@@ -27,9 +27,9 @@
 // MQTT: ID, server IP, port, username and password
 const PROGMEM char* MQTT_CLIENT_ID = CONFIG_NAME;
 char MQTT_SERVER_IP[16];
-const PROGMEM uint16_t MQTT_SERVER_PORT = 1883;
-const PROGMEM char* MQTT_USER = "pi";
-const PROGMEM char* MQTT_PASSWORD = "MQTTIsBetterThanUDP";
+const PROGMEM uint16_t MQTT_SERVER_PORT = CONFIG_MQTT_SERVER_PORT;
+const PROGMEM char* MQTT_USER = CONFIG_MQTT_USER;
+const PROGMEM char* MQTT_PASSWORD = CONFIG_MQTT_PASSWORD;
 
 // MQTT: topics
 // connection
@@ -479,7 +479,7 @@ boolean reconnect() {
 void setupWifi() {
   // Autoconnect to Wifi
   WiFiManager wifiManager;
-  if (!wifiManager.autoConnect("Nick's Lightapp-ESP8266", "991f76a6ab")) {
+  if (!wifiManager.autoConnect(CONFIG_WIFI_MANAGER_AP, CONFIG_WIFI_MANAGER_PW)) {
     // (AP-Name, Password)
     Serial.println("ERROR: failed to connect to Wifi");
     Serial.println("DEBUG: try resetting the module");
@@ -504,7 +504,7 @@ void setMqttIpWithMDNS() {
       // Going through every available service,
       // we're searching for the one whose hostname 
       // matches what we want, and then get its IP
-      if (MDNS.hostname(i) == "raspberrypi") {
+      if (MDNS.hostname(i) == CONFIG_MDNS_HOSTNAME) {
         String MQTT_HOST = String(MDNS.IP(i)[0]) + String(".") +\
         String(MDNS.IP(i)[1]) + String(".") +\
         String(MDNS.IP(i)[2]) + String(".") +\

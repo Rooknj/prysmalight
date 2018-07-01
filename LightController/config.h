@@ -13,3 +13,12 @@
 #define CONFIG_CHIPSET WS2812B
 // What is the color order of your LED strip?
 #define CONFIG_COLOR_ORDER GRB
+
+#define CONFIG_MQTT_SERVER_PORT 1883
+#define CONFIG_MQTT_USER "pi"
+#define CONFIG_MQTT_PASSWORD "MQTTIsBetterThanUDP"
+
+#define CONFIG_WIFI_MANAGER_AP "Nick's Lightapp-ESP8266"
+#define CONFIG_WIFI_MANAGER_PW "991f76a6ab"
+
+#define CONFIG_MDNS_HOSTNAME "raspberrypi"

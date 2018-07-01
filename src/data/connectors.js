@@ -84,16 +84,17 @@ mqttClient.on("error", error => {
 class LightConnector {
   constructor() {
     // Light Data Store
-    this.lights = [{ id: "Light 1" }];
+    this.lights = [{}];
 
     // MQTT Message Handlers
-
     // This gets triggered when the connection of the light changes
     const onConnectedMessage = data => {
+      const message = JSON.parse(data);
+
       let connected;
-      if (Number(data) === LIGHT_DISCONNECTED) {
+      if (Number(message.connection) === LIGHT_DISCONNECTED) {
         connected = LIGHT_DISCONNECTED;
-      } else if (Number(data) === LIGHT_CONNECTED) {
+      } else if (Number(message.connection) === LIGHT_CONNECTED) {
         connected = LIGHT_CONNECTED;
       } else {
         ChalkConsole.error(

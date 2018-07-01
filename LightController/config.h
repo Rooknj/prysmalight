@@ -22,3 +22,6 @@
 #define CONFIG_WIFI_MANAGER_PW "991f76a6ab"
 
 #define CONFIG_MDNS_HOSTNAME "raspberrypi"
+
+#define CONFIG_OTA_PASSWORD "ESP8266Rulez"
+

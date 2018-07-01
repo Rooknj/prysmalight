@@ -546,8 +546,8 @@ void setupOTA() {
     else if (error == OTA_END_ERROR) Serial.println("OTA End Failed");
   });
 
-  ArduinoOTA.setHostname("Light 1");
-  ArduinoOTA.setPassword("ESP8266Rulez");
+  ArduinoOTA.setHostname(CONFIG_NAME);
+  ArduinoOTA.setPassword(CONFIG_OTA_PASSWORD);
   ArduinoOTA.begin();
   Serial.println("INFO: OTA ready");
 }

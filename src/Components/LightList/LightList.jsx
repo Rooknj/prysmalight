@@ -9,21 +9,15 @@ const styles = theme => ({
 });
 
 const propTypes = {
-    data: PropTypes.shape({
-        loading: PropTypes.bool,
-        error: PropTypes.object,
-        lights: PropTypes.arrayOf(
-            PropTypes.shape({
-                id: PropTypes.string
-            })
-        )
-    }).isRequired
+    lights: PropTypes.arrayOf(
+        PropTypes.shape({
+            id: PropTypes.string
+        })
+    )
 };
 
 const defaultProps = {
-    data: {
-        lights: []
-    }
+    lights: []
 };
 
 const LightList = props => (

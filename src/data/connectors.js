@@ -87,6 +87,8 @@ class LightConnector {
     this.lights = [{ id: "Light 1" }];
 
     // MQTT Message Handlers
+
+    // This gets triggered when the connection of the light changes
     const onConnectedMessage = data => {
       let connected;
       if (Number(data) === LIGHT_DISCONNECTED) {
@@ -103,6 +105,7 @@ class LightConnector {
       pubsub.publish("lightChanged", { lightChanged: { connected } });
     };
 
+    // This gets triggered when the state of the light changes
     const onStateMessage = data => {
       const message = JSON.parse(data);
       // TODO: add data checking
@@ -117,12 +120,12 @@ class LightConnector {
       pubsub.publish("lightChanged", { lightChanged: newState });
     };
 
+    // This gets triggered when the light sends its effect list
     const onEffectListMessage = data => {
-      const effectList = JSON.parse(data);
-
-      Object.assign(this.lights[0], { supportedEffects: effectList });
+      const message = JSON.parse(data);
+      Object.assign(this.lights[0], { supportedEffects: message.effectList });
       pubsub.publish("lightChanged", {
-        lightChanged: { supportedEffects: effectList }
+        lightChanged: { supportedEffects: message.effectList }
       });
     };
 
@@ -147,20 +150,21 @@ class LightConnector {
     });
   }
 
+  // TODO: Add an error message if no light was found
   getLight = lightId => {
-    return this.lights[0];
+    return this.lights.find(light => light.id === lightId);
   };
 
+  // This gets triggered if you call setLight
   setLight = light => {
-    const { state, brightness, color, effect, speed } = light;
+    const { id, state, brightness, color, effect, speed } = light;
     // TODO: add data checking
-    let payload = { name: "Light 1" };
+    let payload = { name: id };
     if (state) payload = { ...payload, state };
     if (brightness) payload = { ...payload, brightness };
     if (color) payload = { ...payload, color };
     if (effect) payload = { ...payload, effect };
     if (speed) payload = { ...payload, speed };
-    console.log("payload:", payload);
     publishTo(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(JSON.stringify(payload)));
     return true;
   };

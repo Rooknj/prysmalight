@@ -12,7 +12,9 @@ const resolvers = {
   },
   Subscription: {
     lightChanged: {
-      subscribe: () => lightConnector.subscribeLight()
+      subscribe: (_, { lightId }) => {
+        return lightConnector.subscribeLight(lightId);
+      }
     }
   }
 };

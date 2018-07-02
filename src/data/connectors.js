@@ -1,6 +1,6 @@
 import ChalkConsole from "../ChalkConsole.js";
 import MQTT from "async-mqtt";
-import { PubSub } from "graphql-subscriptions";
+import { PubSub, withFilter } from "graphql-subscriptions";
 
 // MQTT: client
 let MQTT_CLIENT;
@@ -128,11 +128,11 @@ class LightConnector {
         let newLight = getNewLight(message.name);
         Object.assign(newLight, { connected });
         this.lights.push(newLight);
-        pubsub.publish("lightChanged", { lightChanged: newLight });
+        pubsub.publish(message.name, { lightChanged: newLight });
       } else {
         // Push changes to existing light
         Object.assign(changedLight, { connected });
-        pubsub.publish("lightChanged", { lightChanged: changedLight });
+        pubsub.publish(message.name, { lightChanged: changedLight });
       }
     };
 
@@ -162,11 +162,11 @@ class LightConnector {
         let newLight = getNewLight(message.name);
         Object.assign(newLight, newState);
         this.lights.push(newLight);
-        pubsub.publish("lightChanged", { lightChanged: newLight });
+        pubsub.publish(message.name, { lightChanged: newLight });
       } else {
         // Push changes to existing light
         Object.assign(changedLight, newState);
-        pubsub.publish("lightChanged", { lightChanged: changedLight });
+        pubsub.publish(message.name, { lightChanged: changedLight });
       }
     };
 
@@ -188,11 +188,11 @@ class LightConnector {
         let newLight = getNewLight(message.name);
         Object.assign(newLight, { supportedEffects: message.effectList });
         this.lights.push(newLight);
-        pubsub.publish("lightChanged", { lightChanged: newLight });
+        pubsub.publish(message.name, { lightChanged: newLight });
       } else {
         // Push changes to existing light
         Object.assign(changedLight, { supportedEffects: message.effectList });
-        pubsub.publish("lightChanged", { lightChanged: changedLight });
+        pubsub.publish(message.name, { lightChanged: changedLight });
       }
     };
 
@@ -236,8 +236,8 @@ class LightConnector {
     return true;
   };
 
-  subscribeLight = () => {
-    return pubsub.asyncIterator("lightChanged");
+  subscribeLight = lightId => {
+    return pubsub.asyncIterator(lightId);
   };
 
   getLights = () => {

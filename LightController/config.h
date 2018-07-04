@@ -20,18 +20,24 @@
 // What is the color order of your LED strip?
 #define CONFIG_COLOR_ORDER GRB
 
+// MQTT client config options
 #define CONFIG_MQTT_SERVER_PORT 1883
 #define CONFIG_MQTT_USER "pi"
 #define CONFIG_MQTT_PASSWORD "MQTTIsBetterThanUDP"
+
+// MQTT topic-name strings
 #define CONFIG_MQTT_TOP "lightapp2"
 #define CONFIG_MQTT_CONNECTION "connected"
 #define CONFIG_MQTT_EFFECT_LIST "effects"
 #define CONFIG_MQTT_STATE "state"
 #define CONFIG_MQTT_COMMAND "command"
 
+// Wifi manager access point config
 #define CONFIG_WIFI_MANAGER_PW "991f76a6ab"
 
+// MDNS config
 #define CONFIG_MDNS_HOSTNAME "raspberrypi"
 
+// OTA config
 #define CONFIG_OTA_PASSWORD "ESP8266Rulez"
 

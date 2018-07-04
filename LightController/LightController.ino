@@ -31,16 +31,22 @@ const PROGMEM uint16_t MQTT_SERVER_PORT = CONFIG_MQTT_SERVER_PORT;
 const PROGMEM char* MQTT_USER = CONFIG_MQTT_USER;
 const PROGMEM char* MQTT_PASSWORD = CONFIG_MQTT_PASSWORD;
 
+void createMqttTopic(char* bufferVariable, char* topLevel, char* lightName, char* topic) {
+  strcpy(bufferVariable,topLevel);
+  strcat(bufferVariable,"/");
+  strcat(bufferVariable,lightName);  
+  strcat(bufferVariable,"/");
+  strcat(bufferVariable,topic);
+}
+
 // MQTT: topics
 // connection
-char* MQTT_LIGHT_CONNECTED_TOPIC = "lightapp2/light/connected";
-
+char MQTT_LIGHT_CONNECTED_TOPIC[36];
 // effect list
-char* MQTT_EFFECT_LIST_TOPIC = "lightapp2/light/effects";
-
+char MQTT_EFFECT_LIST_TOPIC[34];
 // state
-char* MQTT_LIGHT_STATE_TOPIC = "lightapp2/light/state";
-char* MQTT_LIGHT_COMMAND_TOPIC = "lightapp2/light/command";
+char MQTT_LIGHT_STATE_TOPIC[32];
+char MQTT_LIGHT_COMMAND_TOPIC[34];
 
 // homebridge
 char* HOMEKIT_LIGHT_STATE_TOPIC = "lightapp2/to/set";
@@ -502,7 +508,7 @@ boolean reconnect() {
 void setupWifi() {
   // Autoconnect to Wifi
   WiFiManager wifiManager;
-  if (!wifiManager.autoConnect(CONFIG_WIFI_MANAGER_AP, CONFIG_WIFI_MANAGER_PW)) {
+  if (!wifiManager.autoConnect(CONFIG_NAME, CONFIG_WIFI_MANAGER_PW)) {
     // (AP-Name, Password)
     Serial.println("ERROR: failed to connect to Wifi");
     Serial.println("DEBUG: try resetting the module");
@@ -584,6 +590,17 @@ void setup() {
     Serial.begin(115200);
   }
 
+  // Create MQTT topic strings
+  createMqttTopic(MQTT_LIGHT_CONNECTED_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_CONNECTION);
+  createMqttTopic(MQTT_EFFECT_LIST_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_EFFECT_LIST);
+  createMqttTopic(MQTT_LIGHT_STATE_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_STATE);
+  createMqttTopic(MQTT_LIGHT_COMMAND_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_COMMAND);
+
+  Serial.println(MQTT_LIGHT_CONNECTED_TOPIC);
+  Serial.println(MQTT_EFFECT_LIST_TOPIC);
+  Serial.println(MQTT_LIGHT_STATE_TOPIC);
+  Serial.println(MQTT_LIGHT_COMMAND_TOPIC);
+  
   // init FastLED and the LED strip
   FastLED.addLeds<CONFIG_CHIPSET, CONFIG_DATA_PIN, CONFIG_COLOR_ORDER>(leds, CONFIG_NUM_LEDS);
   FastLED.setBrightness(map(brightness, 0, 100, 0, CONFIG_MAX_BRIGHTNESS));

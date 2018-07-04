@@ -16,35 +16,49 @@ const styles = theme => ({
 
 const propTypes = {
     id: PropTypes.string.isRequired,
-    color: PropTypes.object.isRequired
+    color: PropTypes.object.isRequired,
+    connected: PropTypes.number.isRequired,
+    state: PropTypes.oneOf(["ON", "OFF"]).isRequired,
+    waiting: PropTypes.bool,
+    classes: PropTypes.object,
+    onChange: PropTypes.func
 };
 
-const defaultProps = {};
-
-const LightHeader = props => {
-    return (
-        <Grid container justify="space-between">
-            <Grid item xs={8}>
-                <LightStatus
-                    id={props.id}
-                    color={props.color}
-                    connected={props.connected}
-                />
-            </Grid>
-            <Grid item xs={2} className={props.classes.switchGrid}>
-                {props.waiting && <CircularProgress />}
-            </Grid>
-            <Grid item xs={2} className={props.classes.switchGrid}>
-                <Switch
-                    checked={props.state === "ON" ? true : false}
-                    onChange={props.onChange}
-                    disabled={props.connected !== 2}
-                    color="primary"
-                />
-            </Grid>
-        </Grid>
-    );
+const defaultProps = {
+    classes: {}
 };
+
+class LightHeader extends React.Component {
+    render() {
+        const {
+            id,
+            color,
+            connected,
+            state,
+            waiting,
+            classes,
+            onChange
+        } = this.props;
+        return (
+            <Grid container justify="space-between">
+                <Grid item xs={8}>
+                    <LightStatus id={id} color={color} connected={connected} />
+                </Grid>
+                <Grid item xs={2} className={classes.switchGrid}>
+                    {waiting && <CircularProgress />}
+                </Grid>
+                <Grid item xs={2} className={classes.switchGrid}>
+                    <Switch
+                        checked={state === "ON" ? true : false}
+                        onChange={onChange}
+                        disabled={connected !== 2}
+                        color="primary"
+                    />
+                </Grid>
+            </Grid>
+        );
+    }
+}
 
 LightHeader.propTypes = propTypes;
 LightHeader.defaultProps = defaultProps;

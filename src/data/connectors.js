@@ -263,7 +263,10 @@ class LightConnector {
     if (color) payload = { ...payload, color };
     if (effect) payload = { ...payload, effect };
     if (speed) payload = { ...payload, speed };
-    publishTo(MQTT_LIGHT_COMMAND_TOPIC, Buffer.from(JSON.stringify(payload)));
+    publishTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
+      Buffer.from(JSON.stringify(payload))
+    );
     return true;
   };
 

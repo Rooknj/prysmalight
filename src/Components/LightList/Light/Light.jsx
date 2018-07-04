@@ -42,7 +42,8 @@ const propTypes = {
         effect: PropTypes.string,
         speed: PropTypes.number,
         supportedEffects: PropTypes.array
-    }).isRequired
+    }).isRequired,
+    classes: PropTypes.object
 };
 
 const defaultProps = {
@@ -56,63 +57,66 @@ const defaultProps = {
             g: 0,
             b: 0
         }
-    }
+    },
+    classes: {}
 };
 
-const Light = props => (
-    <LightContainer
-        lightId={props.light.id}
-        mutation={SET_LIGHT}
-        subscription={LIGHT_CHANGED}
-        subscriptionVariables={{ lightId: props.light.id }}
-    >
-        {({ mutationProps, subscriptionProps, handlerProps }) => {
-            const lightChanged = get(
-                subscriptionProps,
-                "result.data.lightChanged",
-                props.light
-            );
-            const {
-                connected,
-                state,
-                brightness,
-                color,
-                effect,
-                speed
-            } = lightChanged;
-            const {
-                handleStateChange,
-                handleBrightnessChange,
-                handleColorChange,
-                handleEffectChange
-            } = handlerProps.handlers;
-            return (
-                <Card className={props.classes.card}>
-                    <LightHeader
-                        id={props.light.id}
-                        color={color}
-                        connected={connected}
-                        state={state}
-                        onChange={handleStateChange}
-                        waiting={mutationProps.result.loading}
-                    />
-                    <LightContent
-                        connected={connected}
-                        brightness={brightness}
-                        color={color}
-                        colors={colors}
-                        effect={effect}
-                        supportedEffects={props.light.supportedEffects}
-                        speed={speed}
-                        onBrightnessChange={handleBrightnessChange}
-                        onColorChange={handleColorChange}
-                        onInputChange={handleEffectChange}
-                    />
-                </Card>
-            );
-        }}
-    </LightContainer>
-);
+const Light = ({ light, classes }) => {
+    return (
+        <LightContainer
+            lightId={light.id}
+            mutation={SET_LIGHT}
+            subscription={LIGHT_CHANGED}
+            subscriptionVariables={{ lightId: light.id }}
+        >
+            {({ mutationProps, subscriptionProps, handlerProps }) => {
+                const lightChanged = get(
+                    subscriptionProps,
+                    "result.data.lightChanged",
+                    light
+                );
+                const {
+                    connected,
+                    state,
+                    brightness,
+                    color,
+                    effect,
+                    speed
+                } = lightChanged;
+                const {
+                    handleStateChange,
+                    handleBrightnessChange,
+                    handleColorChange,
+                    handleEffectChange
+                } = handlerProps.handlers;
+                return (
+                    <Card className={classes.card}>
+                        <LightHeader
+                            id={light.id}
+                            color={color}
+                            connected={connected}
+                            state={state}
+                            onChange={handleStateChange}
+                            waiting={mutationProps.result.loading}
+                        />
+                        <LightContent
+                            connected={connected}
+                            brightness={brightness}
+                            color={color}
+                            colors={colors}
+                            effect={effect}
+                            supportedEffects={light.supportedEffects}
+                            speed={speed}
+                            onBrightnessChange={handleBrightnessChange}
+                            onColorChange={handleColorChange}
+                            onInputChange={handleEffectChange}
+                        />
+                    </Card>
+                );
+            }}
+        </LightContainer>
+    );
+};
 
 Light.propTypes = propTypes;
 Light.defaultProps = defaultProps;

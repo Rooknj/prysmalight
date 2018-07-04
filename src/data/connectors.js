@@ -13,13 +13,11 @@ if (process.env.MOCK) {
 }
 
 // MQTT: topics
-// connection
-const MQTT_LIGHT_CONNECTED_TOPIC = "lightapp2/light/connected";
-
-// state
-const MQTT_LIGHT_STATE_TOPIC = "lightapp2/light/state";
-const MQTT_LIGHT_COMMAND_TOPIC = "lightapp2/light/command";
-const MQTT_EFFECT_LIST_TOPIC = "lightapp2/light/effects";
+const MQTT_LIGHT_TOP_LEVEL = "lightapp2";
+const MQTT_LIGHT_CONNECTED_TOPIC = "connected";
+const MQTT_LIGHT_STATE_TOPIC = "state";
+const MQTT_LIGHT_COMMAND_TOPIC = "command";
+const MQTT_EFFECT_LIST_TOPIC = "effects";
 
 // MQTT: payloads by default (on/off)
 const LIGHT_ON = "ON";
@@ -27,6 +25,7 @@ const LIGHT_OFF = "OFF";
 const LIGHT_CONNECTED = 2;
 const LIGHT_DISCONNECTED = 0;
 
+// Function to return a new light object with default values
 const getNewLight = id => ({
   id,
   connected: 0,
@@ -62,7 +61,7 @@ const subscribeTo = topic => {
     );
 };
 
-// Subscribe method with logging
+// Publish method with logging
 const publishTo = (topic, payload) => {
   mqttClient
     .publish(topic, payload)
@@ -74,32 +73,44 @@ const publishTo = (topic, payload) => {
     );
 };
 
-// On connect
-mqttClient.on("connect", () => {
-  ChalkConsole.info(`Connected to MQTT broker`);
-  subscribeTo(MQTT_LIGHT_CONNECTED_TOPIC);
-  subscribeTo(MQTT_LIGHT_STATE_TOPIC);
-  subscribeTo(MQTT_EFFECT_LIST_TOPIC);
-});
-
-// On reconnect attempt
-mqttClient.on("reconnect", () => {
-  ChalkConsole.debug(`Attempting reconnection to MQTT broker`);
-});
-
-// On connection or parsing error
-mqttClient.on("error", error => {
-  ChalkConsole.error(`Failed to connect to MQTT broker => ${error}`);
-});
+const findLight = (lightId, lights) => {
+  return lights.find(light => light.id === lightId);
+};
 
 class LightConnector {
   constructor() {
     // Light Data Store
-    this.lights = [];
+    this.lights = [getNewLight("Light 1"), getNewLight("Light 2")];
+
+    // On connect
+    mqttClient.on("connect", () => {
+      ChalkConsole.info(`Connected to MQTT broker`);
+      this.lights.forEach(light => {
+        subscribeTo(
+          `${MQTT_LIGHT_TOP_LEVEL}/${light.id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
+        );
+        subscribeTo(
+          `${MQTT_LIGHT_TOP_LEVEL}/${light.id}/${MQTT_LIGHT_STATE_TOPIC}`
+        );
+        subscribeTo(
+          `${MQTT_LIGHT_TOP_LEVEL}/${light.id}/${MQTT_EFFECT_LIST_TOPIC}`
+        );
+      });
+    });
+
+    // On reconnect attempt
+    mqttClient.on("reconnect", () => {
+      ChalkConsole.debug(`Attempting reconnection to MQTT broker`);
+    });
+
+    // On connection or parsing error
+    mqttClient.on("error", error => {
+      ChalkConsole.error(`Failed to connect to MQTT broker => ${error}`);
+    });
 
     // MQTT Message Handlers
     // This gets triggered when the connection of the light changes
-    const onConnectedMessage = data => {
+    const handleConnectedMessage = data => {
       const message = JSON.parse(data);
 
       if (!message.name) {
@@ -137,7 +148,7 @@ class LightConnector {
     };
 
     // This gets triggered when the state of the light changes
-    const onStateMessage = data => {
+    const handleStateMessage = data => {
       const message = JSON.parse(data);
       if (!message.name) {
         ChalkConsole.error(
@@ -171,7 +182,7 @@ class LightConnector {
     };
 
     // This gets triggered when the light sends its effect list
-    const onEffectListMessage = data => {
+    const handleEffectListMessage = data => {
       const message = JSON.parse(data);
 
       if (!message.name) {
@@ -198,20 +209,40 @@ class LightConnector {
 
     // Route each MQTT topic to it's respective message handler
     mqttClient.on("message", (topic, message) => {
+      // Convert message into a string
       const data = message.toString();
       ChalkConsole.info(
         `Received message on topic ${topic} with a payload of ${data}`
       );
-      if (topic === MQTT_LIGHT_CONNECTED_TOPIC) {
-        onConnectedMessage(data);
-      } else if (topic === MQTT_LIGHT_STATE_TOPIC) {
-        onStateMessage(data);
-      } else if (topic === MQTT_EFFECT_LIST_TOPIC) {
-        onEffectListMessage(data);
-      } else {
+
+      // Split the topic into it's individual tokens to evaluate
+      const topicTokens = topic.split("/");
+      // If this mqtt message is not from lightapp2, then ignore it
+      if (topicTokens[0] !== MQTT_LIGHT_TOP_LEVEL) {
         ChalkConsole.error(
-          `Received messsage that belonged to a topic we are not supposed to be subscribed to`
+          `Received messsage that belonged to a top level topic we are not supposed to be subscribed to`
         );
+        return;
+      }
+      // Find the light the message pertains to in our database of lights
+      const topicLight = findLight(topicTokens[1], this.lights);
+      if (!topicLight) {
+        ChalkConsole.error(
+          `Could not find ${topicTokens[1]} in our database of lights`
+        );
+        return;
+      }
+      // Send the message data to the correct handler
+      if (topicTokens[2] === MQTT_LIGHT_CONNECTED_TOPIC) {
+        console.log("Connection message");
+        handleConnectedMessage(data);
+      } else if (topicTokens[2] === MQTT_LIGHT_STATE_TOPIC) {
+        console.log("state message");
+        handleStateMessage(data);
+      } else if (topicTokens[2] === MQTT_EFFECT_LIST_TOPIC) {
+        console.log("effect message");
+        handleEffectListMessage(data);
+      } else {
         return;
       }
     });
@@ -219,7 +250,7 @@ class LightConnector {
 
   // TODO: Add an error message if no light was found
   getLight = lightId => {
-    return this.lights.find(light => light.id === lightId);
+    return findLight(lightId, this.lights);
   };
 
   // This gets triggered if you call setLight

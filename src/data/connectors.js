@@ -73,6 +73,16 @@ const publishTo = (topic, payload) => {
     );
 };
 
+// Unsubscribe method with logging
+const unsubscribeFrom = topic => {
+  mqttClient
+    .unsubscribe(topic)
+    .then(() => ChalkConsole.info(`Unsubscribed from ${topic}`))
+    .catch(error =>
+      ChalkConsole.error(`Error unsubscribing from ${topic} Error: ${error}`)
+    );
+};
+
 const findLight = (lightId, lights) => {
   return lights.find(light => light.id === lightId);
 };
@@ -268,6 +278,52 @@ class LightConnector {
       Buffer.from(JSON.stringify(payload))
     );
     return true;
+  };
+
+  addLight = lightId => {
+    if (findLight(lightId, this.lights)) {
+      ChalkConsole.error(`Error adding ${lightId}: Light already exists`);
+      // TODO: return actual graphql error message
+      return;
+    }
+    // Add new light to light database
+    this.lights.push(getNewLight(lightId));
+
+    // Subscribe to new messages from the new light
+    subscribeTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_LIGHT_CONNECTED_TOPIC}`
+    );
+    subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_LIGHT_STATE_TOPIC}`);
+    subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_EFFECT_LIST_TOPIC}`);
+
+    // Return the new light
+    return findLight(lightId, this.lights);
+  };
+
+  removeLight = lightId => {
+    if (!findLight(lightId, this.lights)) {
+      ChalkConsole.error(`Error removing ${lightId}: Light does not exist`);
+      // TODO: return actual graphql error message
+      return;
+    }
+    // Find the index of the light to remove
+    const lightToRemove = findLight(lightId, this.lights);
+    const indexToRemove = this.lights.indexOf(lightToRemove);
+    // Remove the light from the database
+    this.lights.splice(indexToRemove, 1);
+    // unsubscribe from the light's messages
+    unsubscribeFrom(
+      `${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_LIGHT_CONNECTED_TOPIC}`
+    );
+    unsubscribeFrom(
+      `${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_LIGHT_STATE_TOPIC}`
+    );
+    unsubscribeFrom(
+      `${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_EFFECT_LIST_TOPIC}`
+    );
+
+    // Return the removed light
+    return lightToRemove;
   };
 
   subscribeLight = lightId => {

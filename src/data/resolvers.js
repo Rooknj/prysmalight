@@ -8,7 +8,9 @@ const resolvers = {
     lights: () => lightConnector.getLights()
   },
   Mutation: {
-    setLight: (_, { light }) => lightConnector.setLight(light)
+    setLight: (_, { light }) => lightConnector.setLight(light),
+    addLight: (_, { lightId }) => lightConnector.addLight(lightId),
+    removeLight: (_, { lightId }) => lightConnector.removeLight(lightId)
   },
   Subscription: {
     lightChanged: {

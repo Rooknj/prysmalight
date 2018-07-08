@@ -1,11 +1,11 @@
 import React from "react";
-import LightListQueryWrapper from "./LightList/LightListQueryWrapper";
+import LightListQueryContainer from "./LightList/LightListQueryContainer";
 
 const LightTool = props => {
     return (
         <div>
             <br />
-            <LightListQueryWrapper />
+            <LightListQueryContainer />
         </div>
     );
 };

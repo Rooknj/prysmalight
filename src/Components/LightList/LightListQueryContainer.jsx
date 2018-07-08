@@ -27,7 +27,7 @@ const defaultProps = {
     }
 };
 
-const LightListQueryWrapper = props => (
+const LightListQueryContainer = props => (
     <Query query={GET_LIGHTS}>
         {({ loading, error, data }) => {
             if (loading) return "Loading...";
@@ -39,7 +39,7 @@ const LightListQueryWrapper = props => (
     </Query>
 );
 
-LightListQueryWrapper.propTypes = propTypes;
-LightListQueryWrapper.defaultProps = defaultProps;
+LightListQueryContainer.propTypes = propTypes;
+LightListQueryContainer.defaultProps = defaultProps;
 
-export default withStyles(styles)(LightListQueryWrapper);
+export default withStyles(styles)(LightListQueryContainer);

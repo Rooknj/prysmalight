@@ -6,7 +6,7 @@ type Query {
 
 # This schema allows the following mutations:
 type Mutation {
-  setLight(light: LightInput!): Boolean
+  setLight(light: LightInput!): Light
   addLight(lightId: String!): Light
   removeLight(lightId: String!): Light
 }

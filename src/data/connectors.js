@@ -91,6 +91,8 @@ class LightConnector {
   constructor() {
     // Light Data Store
     this.lights = [getNewLight("Light 1"), getNewLight("Light 2")];
+    // Our mutation number to match each mutation to it's response
+    this.mutationNumber = 0;
 
     // On connect
     mqttClient.on("connect", () => {
@@ -267,7 +269,8 @@ class LightConnector {
   setLight = light => {
     const { id, state, brightness, color, effect, speed } = light;
     // TODO: add data checking
-    let payload = { name: id };
+    // Initialize the payload with it's unique mutationId and the lightId to change
+    let payload = { mutationId: this.mutationNumber++, name: id };
     if (state) payload = { ...payload, state };
     if (brightness) payload = { ...payload, brightness };
     if (color) payload = { ...payload, color };
@@ -277,7 +280,7 @@ class LightConnector {
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
       Buffer.from(JSON.stringify(payload))
     );
-    return true;
+    return Object.assign({}, findLight(light.id, this.lights), light);
   };
 
   addLight = lightId => {

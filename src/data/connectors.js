@@ -1,6 +1,10 @@
 import ChalkConsole from "../ChalkConsole.js";
 import MQTT from "async-mqtt";
-import { PubSub, withFilter } from "graphql-subscriptions";
+import { PubSub } from "graphql-subscriptions";
+import events from "events";
+
+// Instantiate the eventEmitter
+const eventEmitter = new events.EventEmitter();
 
 // MQTT: client
 let MQTT_CLIENT;
@@ -19,9 +23,7 @@ const MQTT_LIGHT_STATE_TOPIC = "state";
 const MQTT_LIGHT_COMMAND_TOPIC = "command";
 const MQTT_EFFECT_LIST_TOPIC = "effects";
 
-// MQTT: payloads by default (on/off)
-const LIGHT_ON = "ON";
-const LIGHT_OFF = "OFF";
+// MQTT: payloads by default
 const LIGHT_CONNECTED = 2;
 const LIGHT_DISCONNECTED = 0;
 
@@ -170,7 +172,7 @@ class LightConnector {
       }
 
       // TODO: add data checking
-      const { state, brightness, color, effect, speed } = message;
+      const { mutationId, state, brightness, color, effect, speed } = message;
       let newState = {};
       if (state) newState = { ...newState, state };
       if (brightness) newState = { ...newState, brightness };
@@ -189,7 +191,10 @@ class LightConnector {
       } else {
         // Push changes to existing light
         Object.assign(changedLight, newState);
+        // Publish to the subscription async interator
         pubsub.publish(message.name, { lightChanged: changedLight });
+        // Publish to the mutation response event
+        eventEmitter.emit("mutationResponse", mutationId, changedLight);
       }
     };
 
@@ -246,13 +251,10 @@ class LightConnector {
       }
       // Send the message data to the correct handler
       if (topicTokens[2] === MQTT_LIGHT_CONNECTED_TOPIC) {
-        console.log("Connection message");
         handleConnectedMessage(data);
       } else if (topicTokens[2] === MQTT_LIGHT_STATE_TOPIC) {
-        console.log("state message");
         handleStateMessage(data);
       } else if (topicTokens[2] === MQTT_EFFECT_LIST_TOPIC) {
-        console.log("effect message");
         handleEffectListMessage(data);
       } else {
         return;
@@ -276,11 +278,32 @@ class LightConnector {
     if (color) payload = { ...payload, color };
     if (effect) payload = { ...payload, effect };
     if (speed) payload = { ...payload, speed };
-    publishTo(
-      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
-      Buffer.from(JSON.stringify(payload))
-    );
-    return Object.assign({}, findLight(light.id, this.lights), light);
+    return new Promise((resolve, reject) => {
+      // When we get a message from the light, check to see if it had the same mutationId
+      // If it did, resolve with the new light's state and remove the event listenet
+      const handleMutationResponse = (mutationId, changedLight) => {
+        if (mutationId === payload.mutationId) {
+          eventEmitter.removeListener(
+            "mutationResponse",
+            handleMutationResponse
+          );
+          resolve(changedLight);
+        }
+      };
+      eventEmitter.on("mutationResponse", handleMutationResponse);
+
+      // Publish to the light
+      publishTo(
+        `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
+        Buffer.from(JSON.stringify(payload))
+      );
+
+      // If the response takes too long, error outs
+      setTimeout(() => {
+        eventEmitter.removeListener("mutationResponse", handleMutationResponse);
+        reject("Response took too long to reach the server");
+      }, 3000);
+    });
   };
 
   addLight = lightId => {

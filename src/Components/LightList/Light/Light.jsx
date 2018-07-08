@@ -69,8 +69,9 @@ class Light extends React.Component {
             loading,
             onStateChange,
             onEffectChange,
-            classes,
-            ...props
+            onBrightnessChange,
+            onColorChange,
+            classes
         } = this.props;
         return (
             <Card className={classes.card}>
@@ -83,7 +84,6 @@ class Light extends React.Component {
                     waiting={loading}
                 />
                 <LightContent
-                    {...props}
                     connected={light.connected}
                     brightness={light.brightness}
                     color={light.color}
@@ -92,6 +92,8 @@ class Light extends React.Component {
                     supportedEffects={light.supportedEffects}
                     speed={light.speed}
                     onInputChange={onEffectChange}
+                    onBrightnessChange={onBrightnessChange}
+                    onColorChange={onColorChange}
                 />
             </Card>
         );

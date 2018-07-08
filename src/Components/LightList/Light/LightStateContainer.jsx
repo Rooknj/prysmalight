@@ -23,17 +23,17 @@ class LightStateContainer extends React.Component {
         };
     }
 
-    static getDerivedStateFromProps(props, state) {
-        console.log(props, state);
-        return state;
-    }
-
     handleStateChange = e => {
         const { setLight, light } = this.props;
         throttleSetLight(setLight, {
             id: light.id,
             state: e.target.checked ? "ON" : "OFF"
         });
+        // TODO: get rid of this for optimistic updates
+        const newLightState = Object.assign({}, this.state.light, {
+            state: e.target.checked ? "ON" : "OFF"
+        });
+        this.setState({ light: newLightState });
     };
 
     handleBrightnessChange = (event, brightness) => {

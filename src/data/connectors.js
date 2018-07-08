@@ -301,7 +301,7 @@ class LightConnector {
       // If the response takes too long, error outs
       setTimeout(() => {
         eventEmitter.removeListener("mutationResponse", handleMutationResponse);
-        reject("Response took too long to reach the server");
+        reject(`Response from ${id} took too long to reach the server`);
       }, 3000);
     });
   };

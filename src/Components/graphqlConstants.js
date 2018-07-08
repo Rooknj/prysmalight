@@ -39,6 +39,19 @@ export const GET_LIGHTS = gql`
 
 export const SET_LIGHT = gql`
     mutation setLight($light: LightInput!) {
-        setLight(light: $light)
+        setLight(light: $light) {
+            id
+            connected
+            state
+            brightness
+            color {
+                r
+                g
+                b
+            }
+            effect
+            speed
+            supportedEffects
+        }
     }
 `;

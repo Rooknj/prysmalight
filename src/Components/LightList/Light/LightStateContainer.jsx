@@ -4,31 +4,44 @@ import PropTypes from "prop-types";
 import { throttle } from "lodash";
 import Light from "./Light";
 
-const throttleSetLight = throttle(
-    (setLight, light) =>
-        setLight({
-            variables: {
-                light
-            }
-        }),
-    100
-);
+const throttleSetLight = throttle((setLight, newLight, oldLight) => {
+    // newColor will keep the __typename from the old light while assigning new color values
+    const newColor = Object.assign({}, oldLight.color, newLight.color);
+    // Set up the optimistic response
+    const optimisticResponse = {
+        __typename: "Mutation",
+        setLight: {
+            __typename: "Light",
+            ...oldLight,
+            ...newLight,
+            color: newColor
+        }
+    };
+    setLight({
+        variables: {
+            light: newLight
+        },
+        optimisticResponse
+    });
+}, 100);
 
 class LightStateContainer extends React.Component {
     handleStateChange = e => {
         const { setLight, light } = this.props;
-        throttleSetLight(setLight, {
+        const newLight = {
             id: light.id,
             state: e.target.checked ? "ON" : "OFF"
-        });
+        };
+        throttleSetLight(setLight, newLight, light);
     };
 
     handleBrightnessChange = (event, brightness) => {
         const { setLight, light } = this.props;
-        throttleSetLight(setLight, {
+        const newLight = {
             id: light.id,
             brightness
-        });
+        };
+        throttleSetLight(setLight, newLight, light);
     };
 
     handleColorChange = ({ rgb: { r, g, b } }) => {
@@ -36,18 +49,20 @@ class LightStateContainer extends React.Component {
         if (r === light.color.r && g === light.color.g && b === light.color.b) {
             return;
         }
-        throttleSetLight(setLight, {
+        const newLight = {
             id: light.id,
             color: { r, g, b }
-        });
+        };
+        throttleSetLight(setLight, newLight, light);
     };
 
     handleEffectChange = e => {
         const { setLight, light } = this.props;
-        throttleSetLight(setLight, {
+        const newLight = {
             id: light.id,
             [e.target.name]: e.target.value
-        });
+        };
+        throttleSetLight(setLight, newLight, light);
     };
 
     render() {

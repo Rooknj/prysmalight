@@ -31,6 +31,9 @@ class LightMutationContainer extends React.Component {
         return (
             <Mutation mutation={SET_LIGHT}>
                 {(mutate, { data, loading, error }) => {
+                    if (error) {
+                        console.error(error);
+                    }
                     return (
                         <LightStateContainer
                             {...this.props}

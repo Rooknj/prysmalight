@@ -1,14 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import LightContainer from "./LightContainer";
-import { get } from "lodash";
-
 import Card from "@material-ui/core/Card";
 import LightHeader from "./LightHeader/LightHeader";
 import { withStyles } from "@material-ui/core/styles";
 import LightContent from "./LightContent/LightContent";
-import { LIGHT_CHANGED, SET_LIGHT } from "../../graphqlConstants";
 
 const styles = theme => ({
     card: {
@@ -43,6 +39,11 @@ const propTypes = {
         speed: PropTypes.number,
         supportedEffects: PropTypes.array
     }).isRequired,
+    loading: PropTypes.bool,
+    onStateChange: PropTypes.func.isRequired,
+    onBrightnessChange: PropTypes.func.isRequired,
+    onColorChange: PropTypes.func.isRequired,
+    onEffectChange: PropTypes.func.isRequired,
     classes: PropTypes.object
 };
 
@@ -61,62 +62,41 @@ const defaultProps = {
     classes: {}
 };
 
-const Light = ({ light, classes }) => {
-    return (
-        <LightContainer
-            lightId={light.id}
-            mutation={SET_LIGHT}
-            subscription={LIGHT_CHANGED}
-            subscriptionVariables={{ lightId: light.id }}
-        >
-            {({ mutationProps, subscriptionProps, handlerProps }) => {
-                const lightChanged = get(
-                    subscriptionProps,
-                    "result.data.lightChanged",
-                    light
-                );
-                const {
-                    connected,
-                    state,
-                    brightness,
-                    color,
-                    effect,
-                    speed
-                } = lightChanged;
-                const {
-                    handleStateChange,
-                    handleBrightnessChange,
-                    handleColorChange,
-                    handleEffectChange
-                } = handlerProps.handlers;
-                return (
-                    <Card className={classes.card}>
-                        <LightHeader
-                            id={light.id}
-                            color={color}
-                            connected={connected}
-                            state={state}
-                            onChange={handleStateChange}
-                            waiting={mutationProps.result.loading}
-                        />
-                        <LightContent
-                            connected={connected}
-                            brightness={brightness}
-                            color={color}
-                            colors={colors}
-                            effect={effect}
-                            supportedEffects={light.supportedEffects}
-                            speed={speed}
-                            onBrightnessChange={handleBrightnessChange}
-                            onColorChange={handleColorChange}
-                            onInputChange={handleEffectChange}
-                        />
-                    </Card>
-                );
-            }}
-        </LightContainer>
-    );
-};
+class Light extends React.Component {
+    render() {
+        const {
+            light,
+            loading,
+            onStateChange,
+            onEffectChange,
+            classes,
+            ...props
+        } = this.props;
+        return (
+            <Card className={classes.card}>
+                <LightHeader
+                    id={light.id}
+                    color={light.color}
+                    connected={light.connected}
+                    state={light.state}
+                    onChange={onStateChange}
+                    waiting={loading}
+                />
+                <LightContent
+                    {...props}
+                    connected={light.connected}
+                    brightness={light.brightness}
+                    color={light.color}
+                    colors={colors}
+                    effect={light.effect}
+                    supportedEffects={light.supportedEffects}
+                    speed={light.speed}
+                    onInputChange={onEffectChange}
+                />
+            </Card>
+        );
+    }
+}
 
 Light.propTypes = propTypes;
 Light.defaultProps = defaultProps;

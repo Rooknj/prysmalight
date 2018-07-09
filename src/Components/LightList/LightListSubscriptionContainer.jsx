@@ -12,11 +12,7 @@ const defaultProps = {};
 class LightListSubscriptionContainer extends React.Component {
     componentDidMount() {
         this.props.subscribeToLightChanges({
-            document: LIGHTS_CHANGED,
-            updateQuery: (prev, { subscriptionData }) => {
-                console.log(subscriptionData);
-                return prev;
-            }
+            document: LIGHTS_CHANGED
         });
     }
 

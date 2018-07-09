@@ -2,12 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Query } from "react-apollo";
 import { GET_LIGHTS } from "../graphqlConstants";
-import { withStyles } from "@material-ui/core/styles";
 import LightListSubscriptionContainer from "./LightListSubscriptionContainer";
-
-const styles = theme => ({
-    root: {}
-});
 
 const propTypes = {};
 
@@ -37,4 +32,4 @@ const LightListQueryContainer = props => (
 LightListQueryContainer.propTypes = propTypes;
 LightListQueryContainer.defaultProps = defaultProps;
 
-export default withStyles(styles)(LightListQueryContainer);
+export default LightListQueryContainer;

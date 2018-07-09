@@ -1,16 +1,12 @@
 import React from "react";
-import PropTypes from "prop-types";
+//import PropTypes from "prop-types";
 import { Query } from "react-apollo";
 import { GET_LIGHTS } from "../graphqlConstants";
 import LightListSubscriptionContainer from "./LightListSubscriptionContainer";
 
 const propTypes = {};
 
-const defaultProps = {
-    data: {
-        lights: []
-    }
-};
+const defaultProps = {};
 
 const LightListQueryContainer = props => (
     <Query query={GET_LIGHTS}>

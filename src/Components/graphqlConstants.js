@@ -3,6 +3,7 @@ import gql from "graphql-tag";
 export const LIGHTS_CHANGED = gql`
     subscription lightsChanged {
         lightsChanged {
+            id
             connected
             state
             brightness

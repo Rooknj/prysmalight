@@ -17,6 +17,11 @@ const resolvers = {
       subscribe: (_, { lightId }) => {
         return lightConnector.subscribeLight(lightId);
       }
+    },
+    lightsChanged: {
+      subscribe: _ => {
+        return lightConnector.subscribeAllLights();
+      }
     }
   }
 };

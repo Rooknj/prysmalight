@@ -148,17 +148,10 @@ class LightConnector {
 
       // Find the light in our data store whose id matches the message name
       const changedLight = this.lights.find(light => light.id === message.name);
-      if (!changedLight) {
-        // If the light doesnt exist in our data store yet, add it
-        let newLight = getNewLight(message.name);
-        Object.assign(newLight, { connected });
-        this.lights.push(newLight);
-        pubsub.publish(message.name, { lightChanged: newLight });
-      } else {
-        // Push changes to existing light
-        Object.assign(changedLight, { connected });
-        pubsub.publish(message.name, { lightChanged: changedLight });
-      }
+      // Push changes to existing light
+      Object.assign(changedLight, { connected });
+      pubsub.publish(message.name, { lightChanged: changedLight });
+      pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
 
     // This gets triggered when the state of the light changes
@@ -182,20 +175,13 @@ class LightConnector {
 
       // Find the light in our data store whose id matches the message name
       const changedLight = this.lights.find(light => light.id === message.name);
-      if (!changedLight) {
-        // If the light doesnt exist in our data store yet, add it
-        let newLight = getNewLight(message.name);
-        Object.assign(newLight, newState);
-        this.lights.push(newLight);
-        pubsub.publish(message.name, { lightChanged: newLight });
-      } else {
-        // Push changes to existing light
-        Object.assign(changedLight, newState);
-        // Publish to the subscription async interator
-        pubsub.publish(message.name, { lightChanged: changedLight });
-        // Publish to the mutation response event
-        eventEmitter.emit("mutationResponse", mutationId, changedLight);
-      }
+      // Push changes to existing light
+      Object.assign(changedLight, newState);
+      // Publish to the subscription async interator
+      pubsub.publish(message.name, { lightChanged: changedLight });
+      pubsub.publish("lightsChanged", { lightsChanged: changedLight });
+      // Publish to the mutation response event
+      eventEmitter.emit("mutationResponse", mutationId, changedLight);
     };
 
     // This gets triggered when the light sends its effect list
@@ -211,17 +197,10 @@ class LightConnector {
 
       // Find the light in our data store whose id matches the message name
       const changedLight = this.lights.find(light => light.id === message.name);
-      if (!changedLight) {
-        // If the light doesnt exist in our data store yet, add it
-        let newLight = getNewLight(message.name);
-        Object.assign(newLight, { supportedEffects: message.effectList });
-        this.lights.push(newLight);
-        pubsub.publish(message.name, { lightChanged: newLight });
-      } else {
-        // Push changes to existing light
-        Object.assign(changedLight, { supportedEffects: message.effectList });
-        pubsub.publish(message.name, { lightChanged: changedLight });
-      }
+      // Push changes to existing light
+      Object.assign(changedLight, { supportedEffects: message.effectList });
+      pubsub.publish(message.name, { lightChanged: changedLight });
+      pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
 
     // Route each MQTT topic to it's respective message handler
@@ -352,8 +331,14 @@ class LightConnector {
     return lightToRemove;
   };
 
+  // Subscribe to one specific light's changes
   subscribeLight = lightId => {
     return pubsub.asyncIterator(lightId);
+  };
+
+  // Subscribe to all light's changes
+  subscribeAllLights = lightId => {
+    return pubsub.asyncIterator("lightsChanged");
   };
 
   getLights = () => {

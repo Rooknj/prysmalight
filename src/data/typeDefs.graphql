@@ -13,6 +13,7 @@ type Mutation {
 
 type Subscription {
   lightChanged(lightId: String!): Light
+  lightsChanged: Light
 }
 
 type Light {

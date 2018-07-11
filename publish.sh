@@ -63,6 +63,10 @@ if [ "$tag" = "" ]; then
     getTagFromUser
 fi
 
+if [$TRAVIS]; then
+    echo "Logging into docker"
+    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
+
 # If the user skipped the confirmation step, then go straight to building
 if [ "$skipConfirm" = "1" ]; then
     buildDocker

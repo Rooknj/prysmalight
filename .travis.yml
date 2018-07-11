@@ -8,3 +8,8 @@ script:
   - yarn install
   - yarn test
   - yarn build
+deploy:
+  provider: script
+  script: yarn publishTest
+  on:
+    branch: travis

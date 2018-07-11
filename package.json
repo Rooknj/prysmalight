@@ -44,6 +44,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "publishProd": "./publish.sh"
+    "publishProd": "./publish.sh -t latest -Y",
+    "publishTest": "./publish.sh -t test -Y"
   }
 }

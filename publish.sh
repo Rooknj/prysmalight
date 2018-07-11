@@ -9,7 +9,7 @@ skipConfirm=
 
 ##### Functions
 usage() {
-    echo "usage: sysinfo_page [-n --name]  [-Y | --yes] [-h | --help]"
+    echo "usage: sysinfo_page [-t --tag]  [-Y | --yes] [-h | --help]"
 }
 
 buildDocker() {
@@ -61,11 +61,6 @@ done
 # If the tag is empty, prompt the user for one
 if [ "$tag" = "" ]; then
     getTagFromUser
-fi
-
-if [ "$DEPLOY_ENV" = "TRAVIS" ] ; then
-    echo "Logging into docker"
-    docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD"
 fi
 
 # If the user skipped the confirmation step, then go straight to building

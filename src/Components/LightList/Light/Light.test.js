@@ -3,5 +3,12 @@ import { shallow } from "enzyme";
 import Light from "./Light";
 
 it("renders without crashing", () => {
-    shallow(<Light />);
+    shallow(
+        <Light
+            onStateChange={() => true}
+            onBrightnessChange={() => true}
+            onColorChange={() => true}
+            onEffectChange={() => true}
+        />
+    );
 });

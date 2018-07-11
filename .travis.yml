@@ -1,0 +1,21 @@
+language: node_js
+node_js:
+- stable
+sudo: required
+services:
+- docker
+cache:
+  directories:
+  - node_modules
+script:
+- yarn test
+- yarn build
+deploy:
+  provider: script
+  script: yarn publishProd
+  on:
+    branch: release
+env:
+  global:
+  - DEPLOY_ENV=TRAVIS
+  - secure: Q6IAG8Ye/r4D+XYN0pRfYqrpSYoSvxQ8I3v4BARjV+GsQBuovFeR8a0Xkfl1pPi3IIwdn0em+rmmKICq0PpS0PCMBQlUUOirGDuU+NS0n+QEzcWH3Q8uNpIXAi5Z5piSg2Vm+641PcPRIcCCdklRiQvBunHm1kqrber74dFtXcsJo9mE+4eRJKbK6TQWfa6WyJo0WnxqOYobmJNvWoEccs83YorYaOi/aq7g1EQ6u1QRRy0q4f8qpGY6lPSBZVbqzMUqUwupHmToM6W2XRG6N7MyAiJF/+hO2IJ+VBqT+H5eZouUd0D67L4e7oug50czWv6Ai+Ai535QrVHYrEonea6qMWfyAWStZtbRHFr2VZHdFZLlcKndDqxr1NjbGpV+A/h4Lrcr+CLbWzRyg1ysOZuNSM8LckoW0xkfyJXGkHuZChzgfv+vy+CkAwajOavSIXRS4F577wbDqUFyDJl+Z6cArN/In8CtuRh0YFCd246ZwTfOAxKg7UMTBwhnTjmzlMss26wlAQSsLly5FQvry+Sx+AdJC40ja1DhwTg3vA22u+lfwA/3DNPQzGRXkcXPam3OvTd6N+YhodgBVubaHAxv0Fz3wvbSLJng2BErDOC/Wh5khfbHu69YUuv+JX+px0+oJbmRNBx0yrzQuTEuPhe/yAfPcOHBQGXlj65yvPY=

@@ -9,6 +9,7 @@ cache:
   - node_modules
 script:
 - yarn test
+- yarn global add pkg
 - yarn build
 deploy:
   provider: script

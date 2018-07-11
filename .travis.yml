@@ -13,9 +13,9 @@ script:
 - yarn build
 deploy:
   provider: script
-  script: yarn publishTest
+  script: yarn publishProd
   on:
-    branch: travis
+    branch: release
 env:
   global:
   - DEPLOY_ENV=TRAVIS

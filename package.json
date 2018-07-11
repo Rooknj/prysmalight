@@ -34,11 +34,13 @@
   },
   "scripts": {
     "precommit": "lint-staged",
+    "test": "echo test",
     "build": "babel src --out-dir lib --copy-files && pkg . --targets node8-linux-armv7",
     "start": "NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
     "startLocal": "nodemon src/server.js --exec babel-node",
     "startMock": "MOCK=true nodemon src/server.js --exec babel-node",
-    "publishProd": "./publish.sh"
+    "publishProd": "./publish.sh -t latest -Y",
+    "publishTest": "./publish.sh -t test -Y"
   },
   "babel": {
     "presets": [

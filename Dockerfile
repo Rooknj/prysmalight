@@ -15,11 +15,11 @@ COPY . .
 RUN npm install -g yarn
 RUN yarn --version
 
-# Install app dependencies
-RUN yarn install --silent
-
 # Install pkg
 RUN yarn global add pkg
+
+# Install app dependencies
+RUN yarn install --silent
 
 # Build app
 RUN yarn build

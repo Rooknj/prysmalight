@@ -11,7 +11,7 @@ script:
 - yarn test
 - yarn build
 before_deploy:
-  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+- echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
   script: yarn publishProd
@@ -19,4 +19,4 @@ deploy:
     branch: master
 env:
   global:
-  - secure: Q6IAG8Ye/r4D+XYN0pRfYqrpSYoSvxQ8I3v4BARjV+GsQBuovFeR8a0Xkfl1pPi3IIwdn0em+rmmKICq0PpS0PCMBQlUUOirGDuU+NS0n+QEzcWH3Q8uNpIXAi5Z5piSg2Vm+641PcPRIcCCdklRiQvBunHm1kqrber74dFtXcsJo9mE+4eRJKbK6TQWfa6WyJo0WnxqOYobmJNvWoEccs83YorYaOi/aq7g1EQ6u1QRRy0q4f8qpGY6lPSBZVbqzMUqUwupHmToM6W2XRG6N7MyAiJF/+hO2IJ+VBqT+H5eZouUd0D67L4e7oug50czWv6Ai+Ai535QrVHYrEonea6qMWfyAWStZtbRHFr2VZHdFZLlcKndDqxr1NjbGpV+A/h4Lrcr+CLbWzRyg1ysOZuNSM8LckoW0xkfyJXGkHuZChzgfv+vy+CkAwajOavSIXRS4F577wbDqUFyDJl+Z6cArN/In8CtuRh0YFCd246ZwTfOAxKg7UMTBwhnTjmzlMss26wlAQSsLly5FQvry+Sx+AdJC40ja1DhwTg3vA22u+lfwA/3DNPQzGRXkcXPam3OvTd6N+YhodgBVubaHAxv0Fz3wvbSLJng2BErDOC/Wh5khfbHu69YUuv+JX+px0+oJbmRNBx0yrzQuTEuPhe/yAfPcOHBQGXlj65yvPY=
+    secure: OG30DUqQgP0+UwBnC2eF/iOGlrTllqDiIbYJRqxGS2Dq4daSBv7NX3mv5NkeVis4qa0DnfnvTM/h1p4WTqD1Vd0WWQx+/EPcV9i3SzZwLnN5OsV+Tnl0o8Y8/E7kCQ5p3P/5EApRDa7ffTOYhjs2tEk37qsQo3hNm3cqySQK+l1qmDqpyATd5SRVFExyw0LzasaPH52YcbZwGuASKH8BPysy3FUt8WpSTzLNaWVrJH+GkWjLYfQjrLXd7pA2BZW93P8hG2xJN5vCEdnnPYvzsmOk7ksBG2CX+7jIUaE3KsXjSPqnwC0ntspvE/gDx/lQ4gyas74gVZn9BcBqq76Zd+z56kvDXUWl+lKeNhDzz3JqZi6/6Kcm+bSNECC0zJOUie8H/R/U2jj7IDJSurPXLUFK5ortQa7AW+NErDkzFkcCY4dBByl9RYgp0pMBCbUP/qo3bu+osMrRLxie0tQ3aXCMZ8H5n9usx1xaGH9e0oTiFIjYT3ykrkBZ55EP39D1MA7rMYAevQLdmEpTNhENnfr7DPCXftObDdvCFxuzZrR6qDPLczQq91hsTfsnSyXUdQOw6FhT98kdZFhmOs5OybhyEk6Aq0U29pKdiY3/nYCDEKmk7LypdaOfTq6B7i5MFn7FHfhViTUSED+Ng1ydwuF4rgh3/49GB1ZB/J8UZe8=

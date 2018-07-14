@@ -10,7 +10,7 @@ cache:
 script:
 - yarn test
 - yarn build
-- docker run --rm --privileged multiarch/qemu-user-static:register --reset #This adds QEMU to the travis instance which allows us to run commands on the ARM architecture within docker images
+- docker run --rm --privileged multiarch/qemu-user-static:register --reset
 - docker-compose build
 - docker tag lightapp2-server-prod rooknj/lightapp2:server-$tag
 before_deploy:
@@ -22,5 +22,5 @@ deploy:
     branch: master
 env:
   global:
-    secure: OG30DUqQgP0+UwBnC2eF/iOGlrTllqDiIbYJRqxGS2Dq4daSBv7NX3mv5NkeVis4qa0DnfnvTM/h1p4WTqD1Vd0WWQx+/EPcV9i3SzZwLnN5OsV+Tnl0o8Y8/E7kCQ5p3P/5EApRDa7ffTOYhjs2tEk37qsQo3hNm3cqySQK+l1qmDqpyATd5SRVFExyw0LzasaPH52YcbZwGuASKH8BPysy3FUt8WpSTzLNaWVrJH+GkWjLYfQjrLXd7pA2BZW93P8hG2xJN5vCEdnnPYvzsmOk7ksBG2CX+7jIUaE3KsXjSPqnwC0ntspvE/gDx/lQ4gyas74gVZn9BcBqq76Zd+z56kvDXUWl+lKeNhDzz3JqZi6/6Kcm+bSNECC0zJOUie8H/R/U2jj7IDJSurPXLUFK5ortQa7AW+NErDkzFkcCY4dBByl9RYgp0pMBCbUP/qo3bu+osMrRLxie0tQ3aXCMZ8H5n9usx1xaGH9e0oTiFIjYT3ykrkBZ55EP39D1MA7rMYAevQLdmEpTNhENnfr7DPCXftObDdvCFxuzZrR6qDPLczQq91hsTfsnSyXUdQOw6FhT98kdZFhmOs5OybhyEk6Aq0U29pKdiY3/nYCDEKmk7LypdaOfTq6B7i5MFn7FHfhViTUSED+Ng1ydwuF4rgh3/49GB1ZB/J8UZe8=
-    tag: latest
+  - tag: latest
+  - secure: RUlG1RCWB7qK1BGTPHLBlqmUgNzkIQpv6axnoSafgzWX1Kypf+UbzJy9Uu2oADDa5DPEyNjNkC+c5FTtjbdq360JnNHkOuvEmxR8R7kyCJ57Fe1KfWJV8/NCMBTKmukhMydslocT5h26QDjv0U3+RAe/NyFDrRKcEoMsOkxzXEkABq+xLymGcSiliCHBIVRsLnvA9h3morWjLu9o+KTl/R0e0P1zPLgqtFLD3EHtMaXtSwr3/9cq+OQYbt0gdFLpBJRrhDu665jVeeHpT8ji1ssWW2JPiJkE/Qom7oySRB+8oZ/oMlsLK/ft4M80YMiBitFlm0mzIC5AoNE8c0CNjeYiOygF71t5Nr6ms7GCorGeHEfTwzC9BxR4qbxAtKX92QP59X8Y43wW9ioLZ3fGPtjB3PylksInLdLObRnzfvSBY3xmGg/ifPvcSUeFhK25M9gvGVR2ge3FHm/RtzWLx+zOAQNwiDuYs4k/AvLevBdlaAXpjWsBk1ws4eyEhb99p2xDBuwPXZVwSXbcNfwX55Q8EmehCzbUuYBHzKudSWRCuTKIxH4lYNETi/fyhv7TX6gFa1+Z5GN647tBq/tvo9Pt8gdR6WGZrhXUGRjlIKj6z1CKTamUbHE85gnpTA5Ns5y+s9PvxsmQ6LDUxlhI+zvTj5lGC2tEPm3UQNr6V0o=

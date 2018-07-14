@@ -5,6 +5,7 @@ sudo: required
 services:
 - docker
 script:
+- docker run --rm --privileged multiarch/qemu-user-static:register --reset
 - docker-compose build
 - docker tag lightapp2-broker-prod rooknj/lightapp2:broker-$tag
 before_deploy:

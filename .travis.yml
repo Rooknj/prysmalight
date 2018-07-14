@@ -12,12 +12,12 @@ script:
 - yarn test
 - yarn build
 - docker-compose build
-- docker tag lightapp2-client-prod rooknj/lightapp2:client-$TAG
+- docker tag lightapp2-client-prod rooknj/lightapp2:client-$tag
 before_deploy:
   - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
-  script: docker push rooknj/lightapp2:client-$TAG
+  script: docker push rooknj/lightapp2:client-$tag
   on:
     branch: test-travis
 env:

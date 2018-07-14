@@ -1,6 +1,6 @@
 ## Build Environment
 # The latest LTS version of node
-FROM arm32v7/node:9.11-stretch as builder
+FROM node:9.6.1 as builder
 
 # Create app directory
 WORKDIR /usr/src/app

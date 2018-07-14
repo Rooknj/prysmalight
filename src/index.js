@@ -11,17 +11,19 @@ import registerServiceWorker from "./registerServiceWorker";
 // Apollo imports
 import { ApolloClient } from "apollo-client"; // Base Apollo
 import { ApolloProvider } from "react-apollo"; // Connect Apollo to React
-
 import { InMemoryCache } from "apollo-cache-inmemory"; // Local Cache Storage
-
 import { ApolloLink, split } from "apollo-link"; // Handles and manages the differnet apollo-link packages
 import { onError } from "apollo-link-error"; // Do custom logic when a GraphQL or network error occurs
 import { getMainDefinition } from "apollo-utilities"; // Aids with splitting links
 import { HttpLink } from "apollo-link-http"; // Use Apollo Over HTTP (Queries, Mutations)
 import { WebSocketLink } from "apollo-link-ws"; // Use Apollo Over Websockets (Subscriptions)
 
-//const serverName = "localhost";
-const serverName = "raspberrypi.local";
+let serverName;
+if (process.env.REACT_APP_ENV === "local") {
+    serverName = "localhost";
+} else {
+    serverName = "raspberrypi.local";
+}
 
 // Create an http link:
 const httpLink = new HttpLink({

@@ -34,7 +34,7 @@ getConfirmationFromUser() {
 
 promptUser() {
     getConfirmationFromUser
-    if [ "$CONFIRM" = "Y" ] ; then
+    if [ "$confirm" = "Y" ] ; then
         buildDocker
     else
         echo "Aborting"

@@ -19,6 +19,7 @@ RUN yarn global add pkg
 
 # Build app
 RUN yarn build
+RUN pkg . --targets node8-linux-armv7
 
 CMD ["yarn", "prodServer"]
 

@@ -14,10 +14,22 @@ const styles = theme => ({
 
 const propTypes = {
     id: PropTypes.string.isRequired,
-    color: PropTypes.object.isRequired
+    color: PropTypes.shape({
+        r: PropTypes.number.isRequired,
+        g: PropTypes.number.isRequired,
+        b: PropTypes.number.isRequired
+    }),
+    classes: PropTypes.object
 };
 
-const defaultProps = {};
+const defaultProps = {
+    classes: {},
+    color: {
+        r: 0,
+        g: 0,
+        b: 0
+    }
+};
 
 const LightStatus = props => {
     return (

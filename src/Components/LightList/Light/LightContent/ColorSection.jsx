@@ -19,12 +19,31 @@ const styles = theme => ({
 });
 
 const propTypes = {
-    color: PropTypes.object.isRequired,
-    colors: PropTypes.array.isRequired,
-    onColorChange: PropTypes.func.isRequired
+    color: PropTypes.object,
+    colors: PropTypes.array,
+    onColorChange: PropTypes.func,
+    classes: PropTypes.object
 };
 
-const defaultProps = {};
+const defaultProps = {
+    classes: {},
+    colors: [
+        "#000000", //red
+        "#FFA500", //orange
+        "#FFFF00", //yellow
+        "#00FF00", //green
+        "#00FFFF", //cyan
+        "#0000FF", //blue
+        "#A500FF", //purple
+        "#FF00FF" //pink
+    ],
+    onColorChange: () => {},
+    color: {
+        r: 0,
+        g: 0,
+        b: 0
+    }
+};
 
 const ColorSection = props => {
     return (

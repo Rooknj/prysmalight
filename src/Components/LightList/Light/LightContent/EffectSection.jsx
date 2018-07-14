@@ -17,13 +17,20 @@ const styles = theme => ({
 });
 
 const propTypes = {
-    effect: PropTypes.string.isRequired,
-    onInputChange: PropTypes.func.isRequired,
-    supportedEffects: PropTypes.array.isRequired,
-    speed: PropTypes.number.isRequired
+    effect: PropTypes.string,
+    onInputChange: PropTypes.func,
+    supportedEffects: PropTypes.array,
+    speed: PropTypes.number,
+    classes: PropTypes.object
 };
 
-const defaultProps = {};
+const defaultProps = {
+    effect: "None",
+    onInputChange: () => {},
+    supportedEffects: [],
+    speed: 4,
+    classes: {}
+};
 
 const EffectSection = props => {
     return (

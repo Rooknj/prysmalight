@@ -8,12 +8,16 @@ import Slider from "@material-ui/lab/Slider";
 const styles = theme => ({});
 
 const propTypes = {
-    connected: PropTypes.number.isRequired,
-    brightness: PropTypes.number.isRequired,
-    onBrightnessChange: PropTypes.func.isRequired
+    connected: PropTypes.number,
+    brightness: PropTypes.number,
+    onBrightnessChange: PropTypes.func
 };
 
-const defaultProps = {};
+const defaultProps = {
+    connected: 0,
+    brightness: 100,
+    onBrightnessChange: () => {}
+};
 
 const BrightnessSection = props => {
     return (

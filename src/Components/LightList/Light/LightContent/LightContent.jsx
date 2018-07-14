@@ -1,25 +1,25 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
 import CardContent from "@material-ui/core/CardContent";
-
 import BrightnessSection from "./BrightnessSection";
 import ColorSection from "./ColorSection";
 import EffectSection from "./EffectSection";
 
-const styles = theme => ({});
-
 const propTypes = {
-    connected: PropTypes.number.isRequired,
-    brightness: PropTypes.number.isRequired,
-    color: PropTypes.object.isRequired,
-    colors: PropTypes.array.isRequired,
-    effect: PropTypes.string.isRequired,
-    supportedEffects: PropTypes.array.isRequired,
-    speed: PropTypes.number.isRequired,
-    onBrightnessChange: PropTypes.func.isRequired,
-    onColorChange: PropTypes.func.isRequired,
-    onInputChange: PropTypes.func.isRequired
+    connected: PropTypes.number,
+    brightness: PropTypes.number,
+    color: PropTypes.shape({
+        r: PropTypes.number.isRequired,
+        g: PropTypes.number.isRequired,
+        b: PropTypes.number.isRequired
+    }),
+    colors: PropTypes.arrayOf(PropTypes.string),
+    effect: PropTypes.string,
+    supportedEffects: PropTypes.arrayOf(PropTypes.string),
+    speed: PropTypes.number,
+    onBrightnessChange: PropTypes.func,
+    onColorChange: PropTypes.func,
+    onInputChange: PropTypes.func
 };
 
 const defaultProps = {};
@@ -37,4 +37,4 @@ const LightContent = props => {
 LightContent.propTypes = propTypes;
 LightContent.defaultProps = defaultProps;
 
-export default withStyles(styles)(LightContent);
+export default LightContent;

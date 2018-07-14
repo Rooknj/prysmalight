@@ -1,6 +1,6 @@
 ## Build Environment
 # The latest LTS version of node
-FROM arm32v7/node:9.11.1-stretch as builder
+FROM resin/raspberrypi3-node:8.0.0 as builder
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -10,6 +10,10 @@ ENV BABEL_ENV="production"
 
 # Add app
 COPY . .
+
+# Install Yarn
+RUN npm install -g yarn
+RUN yarn --version
 
 # Install app dependencies
 RUN yarn install --silent

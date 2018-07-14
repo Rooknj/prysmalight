@@ -10,7 +10,7 @@ cache:
 script:
 - yarn test
 - yarn build
-- docker run --rm --privileged multiarch/qemu-user-static:register --reset
+- docker run --rm --privileged multiarch/qemu-user-static:register --reset #This adds QEMU to the travis instance which allows us to run commands on the ARM architecture within docker images
 - docker-compose build
 - docker tag lightapp2-server-prod rooknj/lightapp2:server-$tag
 before_deploy:

@@ -3,13 +3,14 @@ import { shallow, mount } from "enzyme";
 import { MockedProvider } from "react-apollo/test-utils";
 import { GET_LIGHTS } from "../graphqlConstants";
 import wait from "waait";
-
 import LightListQueryContainer, {
     Loading,
     ErrorPage
 } from "./LightListQueryContainer";
-
 import LightListSubscriptionContainer from "./LightListSubscriptionContainer";
+
+// Mock out the Subscription Container so that it will not get rendered when mounting the Query Container
+jest.mock("./LightListSubscriptionContainer");
 
 const MOCK_LIGHT = {
     id: "LightListQueryContainerTest",
@@ -39,76 +40,45 @@ it("shows Loading component when loading", () => {
     expect(wrapper.find(Loading)).toHaveLength(1);
 });
 
-it("shows ErrorPage component when it receives an error", () => {
-    const mocks = [
-        {
-            request: {
-                query: GET_LIGHTS
-            },
-            error: new Error("LightListQueryContainer Test Error")
-        }
-    ];
+it("shows ErrorPage component when it receives an error", async () => {
+    const getLightErrorMock = {
+        request: {
+            query: GET_LIGHTS
+        },
+        error: new Error("LightListQueryContainer Test Error")
+    };
     const wrapper = mount(
-        <MockedProvider mocks={mocks} addTypename={false}>
+        <MockedProvider mocks={[getLightErrorMock]} addTypename={false}>
             <LightListQueryContainer />
         </MockedProvider>
     );
 
-    // wait for query response
-    wait(0).then(() => {
-        expect(wrapper.find(ErrorPage)).toHaveLength(1);
-    });
+    await wait(0); // wait for query response
+    wrapper.update(); // Update the wrapper with query response
+    expect(wrapper.find(Loading)).toHaveLength(0); // Make sure the loading component is gone
+    expect(wrapper.find(ErrorPage)).toHaveLength(1); // Make sure the error component is there
 });
 
-it("shows ErrorPage component if no lights are returned from query", () => {
-    const mocks = [
-        {
-            request: {
-                query: GET_LIGHTS
-            },
-            result: {
-                data: {
-                    lights: []
-                }
+it("shows the LightListSubscriptionContainer if there are no errors and it receives lights", async () => {
+    const getLightMock = {
+        request: {
+            query: GET_LIGHTS
+        },
+        result: {
+            data: {
+                lights: [MOCK_LIGHT]
             }
         }
-    ];
+    };
     const wrapper = mount(
-        <MockedProvider mocks={mocks} addTypename={false}>
+        <MockedProvider mocks={[getLightMock]} addTypename={false}>
             <LightListQueryContainer />
         </MockedProvider>
     );
 
-    // wait for query response
-    wait(0).then(() => {
-        expect(wrapper.find(ErrorPage)).toHaveLength(1);
-    });
-});
-
-it("shows the LightListSubscriptionContainer if there are no errors and it receives lights", () => {
-    const mocks = [
-        {
-            request: {
-                query: GET_LIGHTS
-            },
-            result: {
-                data: {
-                    lights: [MOCK_LIGHT]
-                }
-            }
-        }
-    ];
-    const wrapper = mount(
-        <MockedProvider mocks={mocks} addTypename={false}>
-            <LightListQueryContainer />
-        </MockedProvider>
-    );
-
-    // wait for query response
-    wait(0).then(() => {
-        // Expect the correct component
-        expect(wrapper.find(LightListSubscriptionContainer)).toHaveLength(1);
-        // Expect no errors
-        expect(wrapper.find(ErrorPage)).toHaveLength(0);
-    });
+    await wait(0); // wait for query response
+    wrapper.update(); // Update the wrapper with query response
+    expect(wrapper.find(Loading)).toHaveLength(0); // Make sure the loading component is gone
+    expect(wrapper.find(ErrorPage)).toHaveLength(0); // Expect no errors
+    expect(wrapper.find(LightListSubscriptionContainer)).toHaveLength(1); // Expect the correct component
 });

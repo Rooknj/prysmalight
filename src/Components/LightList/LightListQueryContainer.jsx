@@ -17,12 +17,6 @@ const LightListQueryContainer = () => (
         {({ loading, error, data, subscribeToMore }) => {
             if (loading) return <Loading />;
             if (error) return <ErrorPage message={error.message} />;
-            if (!data.lights[0].state)
-                return (
-                    <ErrorPage
-                        message={"No lights are connected to the server"}
-                    />
-                );
             return (
                 <LightListSubscriptionContainer
                     lights={data.lights}

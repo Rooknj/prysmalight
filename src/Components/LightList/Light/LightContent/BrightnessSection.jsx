@@ -1,11 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/lab/Slider";
-
-const styles = theme => ({});
 
 const propTypes = {
     connected: PropTypes.number,
@@ -48,4 +45,4 @@ const BrightnessSection = props => {
 BrightnessSection.propTypes = propTypes;
 BrightnessSection.defaultProps = defaultProps;
 
-export default withStyles(styles)(BrightnessSection);
+export default BrightnessSection;

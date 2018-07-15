@@ -1,7 +1,7 @@
 import React from "react";
 import LightListQueryContainer from "./LightList/LightListQueryContainer";
 
-const LightTool = props => {
+const LightTool = () => {
     return (
         <div>
             <br />

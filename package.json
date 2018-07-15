@@ -23,7 +23,8 @@
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.2",
     "react-test-renderer": "^16.3.2",
-    "subscriptions-transport-ws": "^0.9.7"
+    "subscriptions-transport-ws": "^0.9.7",
+    "waait": "^1.0.2"
   },
   "devDependencies": {
     "enzyme": "^3.3.0",
@@ -41,8 +42,9 @@
   "scripts": {
     "precommit": "lint-staged",
     "start": "react-scripts start",
+    "startLocal": "REACT_APP_ENV=local react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "REACT_APP_ENV=test react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "publishProd": "./publish.sh -t latest -Y",
     "publishTest": "./publish.sh -t test -Y"

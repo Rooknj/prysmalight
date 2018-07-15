@@ -7,7 +7,7 @@ import Typography from "@material-ui/core/Typography";
 
 import "./App.css";
 
-const App = props => (
+const App = () => (
     <div className="App">
         <AppBar position="static" color="default">
             <Toolbar>

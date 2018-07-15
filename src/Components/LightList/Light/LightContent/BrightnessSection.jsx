@@ -1,19 +1,20 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Slider from "@material-ui/lab/Slider";
 
-const styles = theme => ({});
-
 const propTypes = {
-    connected: PropTypes.number.isRequired,
-    brightness: PropTypes.number.isRequired,
-    onBrightnessChange: PropTypes.func.isRequired
+    connected: PropTypes.number,
+    brightness: PropTypes.number,
+    onBrightnessChange: PropTypes.func
 };
 
-const defaultProps = {};
+const defaultProps = {
+    connected: 0,
+    brightness: 100,
+    onBrightnessChange: () => {}
+};
 
 const BrightnessSection = props => {
     return (
@@ -44,4 +45,4 @@ const BrightnessSection = props => {
 BrightnessSection.propTypes = propTypes;
 BrightnessSection.defaultProps = defaultProps;
 
-export default withStyles(styles)(BrightnessSection);
+export default BrightnessSection;

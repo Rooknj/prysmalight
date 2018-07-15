@@ -8,13 +8,15 @@ const propTypes = {};
 
 const defaultProps = {};
 
-const LightListQueryContainer = props => (
+export const Loading = () => "Loading...";
+
+export const ErrorPage = ({ message }) => `Error: ${message}`;
+
+const LightListQueryContainer = () => (
     <Query query={GET_LIGHTS}>
         {({ loading, error, data, subscribeToMore }) => {
-            if (loading) return "Loading...";
-            if (error) return `Error! ${error.message}`;
-            if (!data.lights[0].state)
-                return "Error: No lights are connected to the server";
+            if (loading) return <Loading />;
+            if (error) return <ErrorPage message={error.message} />;
             return (
                 <LightListSubscriptionContainer
                     lights={data.lights}

@@ -4,6 +4,14 @@ import PropTypes from "prop-types";
 import { throttle } from "lodash";
 import Light from "./Light";
 
+// Need to set the throttle speed to 0 when running tests so that setLight gets called on every test
+let throttleSpeed;
+if (process.env.REACT_APP_ENV === "test") {
+    throttleSpeed = 0;
+} else {
+    throttleSpeed = 100;
+}
+
 const throttleSetLight = throttle((setLight, newLight, oldLight) => {
     // newColor will keep the __typename from the old light while assigning new color values
     const newColor = Object.assign({}, oldLight.color, newLight.color);
@@ -23,7 +31,7 @@ const throttleSetLight = throttle((setLight, newLight, oldLight) => {
         },
         optimisticResponse
     });
-}, 100);
+}, throttleSpeed);
 
 class LightStateContainer extends React.Component {
     handleStateChange = e => {
@@ -35,7 +43,7 @@ class LightStateContainer extends React.Component {
         throttleSetLight(setLight, newLight, light);
     };
 
-    handleBrightnessChange = (event, brightness) => {
+    handleBrightnessChange = (_, brightness) => {
         const { setLight, light } = this.props;
         const newLight = {
             id: light.id,
@@ -82,19 +90,20 @@ class LightStateContainer extends React.Component {
 
 LightStateContainer.propTypes = {
     light: PropTypes.shape({
-        id: PropTypes.string,
+        id: PropTypes.string.isRequired,
         connected: PropTypes.number,
         state: PropTypes.string,
         brightness: PropTypes.number,
         color: PropTypes.shape({
-            r: PropTypes.number,
-            g: PropTypes.number,
-            b: PropTypes.number
+            r: PropTypes.number.isRequired,
+            g: PropTypes.number.isRequired,
+            b: PropTypes.number.isRequired
         }),
         effect: PropTypes.string,
         speed: PropTypes.number,
         supportedEffects: PropTypes.array
-    }).isRequired
+    }).isRequired,
+    loading: PropTypes.bool
 };
 
 export default LightStateContainer;

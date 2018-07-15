@@ -16,16 +16,29 @@ const styles = theme => ({
 
 const propTypes = {
     id: PropTypes.string.isRequired,
-    color: PropTypes.object.isRequired,
-    connected: PropTypes.number.isRequired,
-    state: PropTypes.oneOf(["ON", "OFF"]).isRequired,
+    color: PropTypes.shape({
+        r: PropTypes.number.isRequired,
+        g: PropTypes.number.isRequired,
+        b: PropTypes.number.isRequired
+    }),
+    connected: PropTypes.number,
+    state: PropTypes.oneOf(["ON", "OFF"]),
     waiting: PropTypes.bool,
     classes: PropTypes.object,
     onChange: PropTypes.func
 };
 
 const defaultProps = {
-    classes: {}
+    classes: {},
+    color: {
+        r: 0,
+        g: 0,
+        b: 0
+    },
+    connected: 0,
+    state: "OFF",
+    waiting: false,
+    onChange: () => {}
 };
 
 class LightHeader extends React.Component {

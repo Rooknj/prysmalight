@@ -7,7 +7,7 @@ import LightContent from "./LightContent/LightContent";
 
 import styled from "styled-components";
 
-const StyledCard = styled.div`
+const StyledCardWrapper = styled.div`
     min-width: 20rem;
     max-width: 27rem;
     margin: 0 auto;
@@ -73,7 +73,7 @@ class Light extends React.Component {
             onColorChange
         } = this.props;
         return (
-            <StyledCard>
+            <StyledCardWrapper>
                 <Card>
                     <LightHeader
                         id={light.id}
@@ -96,7 +96,7 @@ class Light extends React.Component {
                         onColorChange={onColorChange}
                     />
                 </Card>
-            </StyledCard>
+            </StyledCardWrapper>
         );
     }
 }

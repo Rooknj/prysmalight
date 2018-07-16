@@ -6,7 +6,7 @@ import HightlightIcon from "@material-ui/icons/Highlight";
 import grey from "@material-ui/core/colors/grey";
 import styled from "styled-components";
 
-const StyledAvatar = styled.div`
+const StyledAvatar = styled(Avatar)`
     backgroundcolor: ${grey[400]};
 `;
 
@@ -35,14 +35,15 @@ const LightStatus = props => {
             title={props.id}
             subheader={props.connected === 2 ? "Connected" : "Disonnected"}
             avatar={
-                <StyledAvatar>
-                    <Avatar aria-label="Light" className={props.classes.avatar}>
-                        <HightlightIcon
-                            nativeColor={`rgb(${props.color.r},${
-                                props.color.g
-                            },${props.color.b})`}
-                        />
-                    </Avatar>
+                <StyledAvatar
+                    aria-label="Light"
+                    className={props.classes.avatar}
+                >
+                    <HightlightIcon
+                        nativeColor={`rgb(${props.color.r},${props.color.g},${
+                            props.color.b
+                        })`}
+                    />
                 </StyledAvatar>
             }
         />

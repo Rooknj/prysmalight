@@ -35,19 +35,21 @@ class LightHeader extends React.Component {
         const { id, color, connected, state, waiting, onChange } = this.props;
         return (
             <Grid container alignItems="center">
-                <Grid item xs={8}>
+                <Grid item xs={7}>
                     <LightStatus id={id} color={color} connected={connected} />
                 </Grid>
-                <Grid item xs={2}>
-                    {waiting && <CircularProgress />}
-                </Grid>
-                <Grid item xs={2}>
-                    <Switch
-                        checked={state === "ON" ? true : false}
-                        onChange={onChange}
-                        disabled={connected !== 2}
-                        color="primary"
-                    />
+                <Grid item xs={5}>
+                    <Grid container justify="flex-end">
+                        <Grid item>{waiting && <CircularProgress />}</Grid>
+                        <Grid item>
+                            <Switch
+                                checked={state === "ON" ? true : false}
+                                onChange={onChange}
+                                disabled={connected !== 2}
+                                color="primary"
+                            />
+                        </Grid>
+                    </Grid>
                 </Grid>
             </Grid>
         );

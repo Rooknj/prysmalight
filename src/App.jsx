@@ -4,18 +4,21 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
+import { ThemeProvider } from "styled-components";
 
 const App = () => (
-    <CssBaseline>
-        <AppBar position="static" color="default">
-            <Toolbar>
-                <Typography variant="title" color="inherit">
-                    Light App 2.0
-                </Typography>
-            </Toolbar>
-        </AppBar>
-        <LightTool />
-    </CssBaseline>
+    <ThemeProvider theme={{ style: "light" }}>
+        <CssBaseline>
+            <AppBar position="static" color="default">
+                <Toolbar>
+                    <Typography variant="title" color="inherit">
+                        Light App 2.0
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+            <LightTool />
+        </CssBaseline>
+    </ThemeProvider>
 );
 
 export default App;

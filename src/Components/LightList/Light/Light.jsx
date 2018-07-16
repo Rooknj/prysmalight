@@ -44,8 +44,7 @@ const propTypes = {
     onStateChange: PropTypes.func.isRequired,
     onBrightnessChange: PropTypes.func.isRequired,
     onColorChange: PropTypes.func.isRequired,
-    onEffectChange: PropTypes.func.isRequired,
-    classes: PropTypes.object
+    onEffectChange: PropTypes.func.isRequired
 };
 
 const defaultProps = {

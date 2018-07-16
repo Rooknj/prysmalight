@@ -1,18 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
 import Switch from "@material-ui/core/Switch";
 import Grid from "@material-ui/core/Grid";
 import LightStatus from "./LightStatus";
 import CircularProgress from "@material-ui/core/CircularProgress";
-
-const styles = theme => ({
-    switchGrid: {
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end"
-    }
-});
 
 const propTypes = {
     id: PropTypes.string.isRequired,
@@ -24,12 +15,10 @@ const propTypes = {
     connected: PropTypes.number,
     state: PropTypes.oneOf(["ON", "OFF"]),
     waiting: PropTypes.bool,
-    classes: PropTypes.object,
     onChange: PropTypes.func
 };
 
 const defaultProps = {
-    classes: {},
     color: {
         r: 0,
         g: 0,
@@ -43,24 +32,16 @@ const defaultProps = {
 
 class LightHeader extends React.Component {
     render() {
-        const {
-            id,
-            color,
-            connected,
-            state,
-            waiting,
-            classes,
-            onChange
-        } = this.props;
+        const { id, color, connected, state, waiting, onChange } = this.props;
         return (
-            <Grid container justify="space-between">
+            <Grid container alignItems="center">
                 <Grid item xs={8}>
                     <LightStatus id={id} color={color} connected={connected} />
                 </Grid>
-                <Grid item xs={2} className={classes.switchGrid}>
+                <Grid item xs={2}>
                     {waiting && <CircularProgress />}
                 </Grid>
-                <Grid item xs={2} className={classes.switchGrid}>
+                <Grid item xs={2}>
                     <Switch
                         checked={state === "ON" ? true : false}
                         onChange={onChange}
@@ -76,4 +57,4 @@ class LightHeader extends React.Component {
 LightHeader.propTypes = propTypes;
 LightHeader.defaultProps = defaultProps;
 
-export default withStyles(styles)(LightHeader);
+export default LightHeader;

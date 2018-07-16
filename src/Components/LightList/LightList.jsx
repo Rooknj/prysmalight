@@ -28,7 +28,6 @@ const defaultProps = {
 
 const LightList = ({ lights }) => (
     <React.Fragment>
-        <br />
         <Grid
             container
             justify={lights.length < 4 ? "space-around" : "flex-start"}

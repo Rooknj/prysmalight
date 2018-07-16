@@ -4,26 +4,25 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
+import { withTheme } from "@material-ui/core/styles";
+import { ThemeProvider } from "styled-components";
 
-import "./App.css";
-
-const App = () => (
-    <div className="App">
-        <AppBar position="static" color="default">
-            <Toolbar>
-                <Typography variant="title" color="inherit">
-                    Light App 2.0
-                </Typography>
-            </Toolbar>
-        </AppBar>
-        <React.Fragment>
-            <CssBaseline />
-            {<LightTool />}
-        </React.Fragment>
-    </div>
+const App = ({ theme }) => (
+    <ThemeProvider theme={{ ...theme }}>
+        <CssBaseline>
+            <AppBar position="static" color="default">
+                <Toolbar>
+                    <Typography variant="title" color="inherit">
+                        Light App 2.0
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+            <LightTool />
+        </CssBaseline>
+    </ThemeProvider>
 );
 
-export default App;
+export default withTheme()(App);
 
 /*
     React Notes!

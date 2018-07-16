@@ -1,32 +1,48 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { withStyles } from "@material-ui/core/styles";
 import Grid from "@material-ui/core/Grid";
 import { MaterialPicker, CirclePicker, HuePicker } from "react-color";
 import Typography from "@material-ui/core/Typography";
+import styled from "styled-components";
 
-const styles = theme => ({
-    huePicker: {
-        // This disables scrolling when using the slider
-        touchAction: "none"
-    },
-    circlePicker: {
-        justifyContent: "flex-left"
-    },
-    materialPicker: {
-        boxSizing: "content-box"
-    }
-});
+const StyledCirclePicker = styled(CirclePicker)`
+    justify-content: flex-start;
+    width: 100% !important;
+    height: 100% !important;
+    align-items: center;
+    margin-top: 0.2em;
+    margin-left: 0.5em;
+    display: flex;
+    justify-content: flex-start;
+`;
+
+const StyledMaterialPicker = styled(MaterialPicker)`
+    box-sizing: content-box;
+`;
+
+const StyledMaterialPickerGrid = styled(Grid)`
+    display: flex;
+    justify-content: flex-end;
+`;
+
+const StyledMaterialPickerWrapper = styled.div`
+    margin-top: 0.5em;
+    margin-right: 0.5em;
+    margin-bottom: 0.5em;
+`;
+
+const StyledHuePicker = styled(HuePicker)`
+    width: 100%;
+    touch-action: none;
+`;
 
 const propTypes = {
     color: PropTypes.object,
     colors: PropTypes.array,
-    onColorChange: PropTypes.func,
-    classes: PropTypes.object
+    onColorChange: PropTypes.func
 };
 
 const defaultProps = {
-    classes: {},
     colors: [
         "#000000", //red
         "#FFA500", //orange
@@ -58,49 +74,27 @@ const ColorSection = props => {
                 <Typography variant="body2">Color</Typography>
             </Grid>
             <Grid item xs={12}>
-                <HuePicker
+                <StyledHuePicker
                     color={props.color}
                     onChange={props.onColorChange}
-                    width={"100%"}
-                    className={props.classes.huePicker}
                 />
             </Grid>
-            <Grid
-                container
-                justify="flex-end"
-                alignItems="center"
-                alignContent="space-between"
-            >
-                <Grid
-                    item
-                    xs={6}
-                    style={{
-                        display: "flex",
-                        justifyContent: "space-around"
-                    }}
-                >
-                    <CirclePicker
+            <Grid container>
+                <Grid item xs={6}>
+                    <StyledCirclePicker
                         color={props.color}
                         onChange={props.onColorChange}
-                        width={"100%"}
                         colors={props.colors}
-                        className={props.classes.circlePicker}
                     />
                 </Grid>
-                <Grid
-                    item
-                    xs={6}
-                    style={{
-                        display: "flex",
-                        justifyContent: "flex-end"
-                    }}
-                >
-                    <MaterialPicker
-                        color={props.color}
-                        onChange={props.onColorChange}
-                        className={props.classes.materialPicker}
-                    />
-                </Grid>
+                <StyledMaterialPickerGrid item xs={6}>
+                    <StyledMaterialPickerWrapper>
+                        <StyledMaterialPicker
+                            color={props.color}
+                            onChange={props.onColorChange}
+                        />
+                    </StyledMaterialPickerWrapper>
+                </StyledMaterialPickerGrid>
             </Grid>
         </Grid>
     );
@@ -109,4 +103,4 @@ const ColorSection = props => {
 ColorSection.propTypes = propTypes;
 ColorSection.defaultProps = defaultProps;
 
-export default withStyles(styles)(ColorSection);
+export default ColorSection;

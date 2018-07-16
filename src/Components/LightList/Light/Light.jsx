@@ -3,15 +3,16 @@ import PropTypes from "prop-types";
 
 import Card from "@material-ui/core/Card";
 import LightHeader from "./LightHeader/LightHeader";
-import { withStyles } from "@material-ui/core/styles";
 import LightContent from "./LightContent/LightContent";
 
-const styles = theme => ({
-    card: {
-        minWidth: 300,
-        maxWidth: 400
-    }
-});
+import styled from "styled-components";
+
+const StyledCardWrapper = styled.div`
+    min-width: 20rem;
+    max-width: 27rem;
+    margin: 0 auto;
+    padding: 1em;
+`;
 
 const colors = [
     "#FF0000", //red
@@ -43,8 +44,7 @@ const propTypes = {
     onStateChange: PropTypes.func.isRequired,
     onBrightnessChange: PropTypes.func.isRequired,
     onColorChange: PropTypes.func.isRequired,
-    onEffectChange: PropTypes.func.isRequired,
-    classes: PropTypes.object
+    onEffectChange: PropTypes.func.isRequired
 };
 
 const defaultProps = {
@@ -58,8 +58,7 @@ const defaultProps = {
             g: 0,
             b: 0
         }
-    },
-    classes: {}
+    }
 };
 
 class Light extends React.Component {
@@ -70,32 +69,33 @@ class Light extends React.Component {
             onStateChange,
             onEffectChange,
             onBrightnessChange,
-            onColorChange,
-            classes
+            onColorChange
         } = this.props;
         return (
-            <Card className={classes.card}>
-                <LightHeader
-                    id={light.id}
-                    color={light.color}
-                    connected={light.connected}
-                    state={light.state}
-                    onChange={onStateChange}
-                    waiting={loading}
-                />
-                <LightContent
-                    connected={light.connected}
-                    brightness={light.brightness}
-                    color={light.color}
-                    colors={colors}
-                    effect={light.effect}
-                    supportedEffects={light.supportedEffects}
-                    speed={light.speed}
-                    onInputChange={onEffectChange}
-                    onBrightnessChange={onBrightnessChange}
-                    onColorChange={onColorChange}
-                />
-            </Card>
+            <StyledCardWrapper>
+                <Card>
+                    <LightHeader
+                        id={light.id}
+                        color={light.color}
+                        connected={light.connected}
+                        state={light.state}
+                        onChange={onStateChange}
+                        waiting={loading}
+                    />
+                    <LightContent
+                        connected={light.connected}
+                        brightness={light.brightness}
+                        color={light.color}
+                        colors={colors}
+                        effect={light.effect}
+                        supportedEffects={light.supportedEffects}
+                        speed={light.speed}
+                        onInputChange={onEffectChange}
+                        onBrightnessChange={onBrightnessChange}
+                        onColorChange={onColorChange}
+                    />
+                </Card>
+            </StyledCardWrapper>
         );
     }
 }
@@ -103,4 +103,4 @@ class Light extends React.Component {
 Light.propTypes = propTypes;
 Light.defaultProps = defaultProps;
 
-export default withStyles(styles)(Light);
+export default Light;

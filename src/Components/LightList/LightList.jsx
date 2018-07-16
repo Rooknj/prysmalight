@@ -27,13 +27,19 @@ const defaultProps = {
 };
 
 const LightList = ({ lights }) => (
-    <Grid container spacing={0} justify="center" alignItems="center">
-        {lights.map(light => (
-            <Grid key={light.id} item xs={11} sm={6} md={4} lg={3}>
-                <LightMutationContainer light={light} />
-            </Grid>
-        ))}
-    </Grid>
+    <React.Fragment>
+        <br />
+        <Grid
+            container
+            justify={lights.length < 4 ? "space-around" : "flex-start"}
+        >
+            {lights.map(light => (
+                <Grid key={light.id} item xs={12} sm={12} md={6} lg={4} xl={3}>
+                    <LightMutationContainer light={light} />
+                </Grid>
+            ))}
+        </Grid>
+    </React.Fragment>
 );
 
 LightList.propTypes = propTypes;

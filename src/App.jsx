@@ -4,10 +4,11 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
+import { withTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "styled-components";
 
-const App = () => (
-    <ThemeProvider theme={{ style: "light" }}>
+const App = ({ theme }) => (
+    <ThemeProvider theme={{ ...theme }}>
         <CssBaseline>
             <AppBar position="static" color="default">
                 <Toolbar>
@@ -21,7 +22,7 @@ const App = () => (
     </ThemeProvider>
 );
 
-export default App;
+export default withTheme()(App);
 
 /*
     React Notes!

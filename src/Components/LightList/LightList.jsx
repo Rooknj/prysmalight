@@ -29,9 +29,9 @@ const defaultProps = {
 const LightList = ({ lights }) => (
     <React.Fragment>
         <br />
-        <Grid container spacing={8} justify="center" alignItems="center">
+        <Grid container justify="space-around">
             {lights.map(light => (
-                <Grid key={light.id} item xs={11} sm={6} md={4} lg={3}>
+                <Grid key={light.id} item xs={12} sm={12} md={6} lg={4} xl={3}>
                     <LightMutationContainer light={light} />
                 </Grid>
             ))}

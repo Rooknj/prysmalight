@@ -1,11 +1,11 @@
 import React from "react";
 import LightListQueryContainer from "./LightList/LightListQueryContainer";
-import LightActions from "./LightActions/LightActions";
+import LightActionsContainer from "./LightActions/LightActionsContainer";
 
 const LightTool = () => (
     <React.Fragment>
         <LightListQueryContainer />
-        <LightActions />
+        <LightActionsContainer />
     </React.Fragment>
 );
 

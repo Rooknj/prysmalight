@@ -13,11 +13,13 @@ import LightListSubscriptionContainer from "./LightListSubscriptionContainer";
 jest.mock("./LightListSubscriptionContainer");
 
 const MOCK_LIGHT = {
+  __typename: "Light",
   id: "LightListQueryContainerTest",
   state: "ON",
   connected: 2,
   brightness: 76,
   color: {
+    __typename: "Color",
     r: 255,
     g: 0,
     b: 35
@@ -33,7 +35,7 @@ it("renders without crashing", () => {
 
 it("shows Loading component when loading", () => {
   const wrapper = mount(
-    <MockedProvider mocks={[]} addTypename={false}>
+    <MockedProvider mocks={[]}>
       <LightListQueryContainer />
     </MockedProvider>
   );
@@ -48,7 +50,7 @@ it("shows ErrorPage component when it receives an error", async () => {
     error: new Error("LightListQueryContainer Test Error")
   };
   const wrapper = mount(
-    <MockedProvider mocks={[getLightErrorMock]} addTypename={false}>
+    <MockedProvider mocks={[getLightErrorMock]}>
       <LightListQueryContainer />
     </MockedProvider>
   );
@@ -71,7 +73,7 @@ it("shows the LightListSubscriptionContainer if there are no errors and it recei
     }
   };
   const wrapper = mount(
-    <MockedProvider mocks={[getLightMock]} addTypename={false}>
+    <MockedProvider mocks={[getLightMock]}>
       <LightListQueryContainer />
     </MockedProvider>
   );

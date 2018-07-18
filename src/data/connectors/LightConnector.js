@@ -106,7 +106,9 @@ class LightConnector {
     this.lights = await Lights.findAll().map(dbLight =>
       getNewLight(dbLight.id)
     );
-
+    ChalkConsole.info(
+      `Fetched [${this.lights.map(light => light.id)}] from the database`
+    );
     // Set up onConnect callback
     mqttClient.on("connect", () => {
       ChalkConsole.info(`Connected to MQTT broker`);

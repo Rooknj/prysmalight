@@ -20,64 +20,64 @@ import { WebSocketLink } from "apollo-link-ws"; // Use Apollo Over Websockets (S
 
 let serverName;
 if (process.env.REACT_APP_ENV === "local") {
-    serverName = "localhost";
+  serverName = "localhost";
 } else {
-    serverName = "raspberrypi.local";
+  serverName = "raspberrypi.local";
 }
 
 // Create an http link:
 const httpLink = new HttpLink({
-    uri: "http://" + serverName + ":4001/graphql"
+  uri: "http://" + serverName + ":4001/graphql"
 });
 
 // Create a WebSocket link:
 const wsLink = new WebSocketLink({
-    uri: `ws://${serverName}:4001/subscriptions`,
-    options: {
-        reconnect: true
-    }
+  uri: `ws://${serverName}:4001/subscriptions`,
+  options: {
+    reconnect: true
+  }
 });
 
 // This link will handle sending out HTTP and WS requests
 const HTTP_WS_LINK = split(
-    // Split the links so your query and mutations go to the apollo-link-http while subscriptions go to apollo-link-ws
-    ({ query }) => {
-        const { kind, operation } = getMainDefinition(query);
-        return kind === "OperationDefinition" && operation === "subscription";
-    },
-    wsLink,
-    httpLink
+  // Split the links so your query and mutations go to the apollo-link-http while subscriptions go to apollo-link-ws
+  ({ query }) => {
+    const { kind, operation } = getMainDefinition(query);
+    return kind === "OperationDefinition" && operation === "subscription";
+  },
+  wsLink,
+  httpLink
 );
 
 // This link does custom logic when a GraphQL or network error occurs
 const ON_ERROR_LINK = onError(({ graphQLErrors, networkError }) => {
-    if (graphQLErrors)
-        graphQLErrors.map(({ message, locations, path }) =>
-            console.error(
-                `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
-            )
-        );
-    if (networkError) console.error(`[Network error]: ${networkError}`);
+  if (graphQLErrors)
+    graphQLErrors.map(({ message, locations, path }) =>
+      console.error(
+        `[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`
+      )
+    );
+  if (networkError) console.error(`[Network error]: ${networkError}`);
 });
 
 const CACHE = new InMemoryCache();
 
 // Point appolo towards graphql server
 const client = new ApolloClient({
-    link: ApolloLink.from([
-        ON_ERROR_LINK,
-        //STATE_LINK,
-        HTTP_WS_LINK
-    ]),
-    cache: CACHE
+  link: ApolloLink.from([
+    ON_ERROR_LINK,
+    //STATE_LINK,
+    HTTP_WS_LINK
+  ]),
+  cache: CACHE
 });
 
 // Render React App on the DOM
 ReactDOM.render(
-    <ApolloProvider client={client}>
-        <App />
-    </ApolloProvider>,
-    document.getElementById("root")
+  <ApolloProvider client={client}>
+    <App />
+  </ApolloProvider>,
+  document.getElementById("root")
 );
 
 // Start Service Worker

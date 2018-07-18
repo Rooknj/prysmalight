@@ -13,18 +13,18 @@ export const Loading = () => "Loading...";
 export const ErrorPage = ({ message }) => `Error: ${message}`;
 
 const LightListQueryContainer = () => (
-    <Query query={GET_LIGHTS}>
-        {({ loading, error, data, subscribeToMore }) => {
-            if (loading) return <Loading />;
-            if (error) return <ErrorPage message={error.message} />;
-            return (
-                <LightListSubscriptionContainer
-                    lights={data.lights}
-                    subscribeToLightChanges={subscribeToMore}
-                />
-            );
-        }}
-    </Query>
+  <Query query={GET_LIGHTS}>
+    {({ loading, error, data, subscribeToMore }) => {
+      if (loading) return <Loading />;
+      if (error) return <ErrorPage message={error.message} />;
+      return (
+        <LightListSubscriptionContainer
+          lights={data.lights}
+          subscribeToLightChanges={subscribeToMore}
+        />
+      );
+    }}
+  </Query>
 );
 
 LightListQueryContainer.propTypes = propTypes;

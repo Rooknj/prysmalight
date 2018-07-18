@@ -3,5 +3,5 @@ import { shallow } from "enzyme";
 import LightMutationContainer from "./LightMutationContainer";
 
 it("renders without crashing", () => {
-    shallow(<LightMutationContainer />);
+  shallow(<LightMutationContainer />);
 });

@@ -7,12 +7,16 @@ import bodyParser from "body-parser";
 import schema from "./data/schema";
 import { execute, subscribe } from "graphql";
 import { SubscriptionServer } from "subscriptions-transport-ws";
+import compression from "compression";
+import helmet from "helmet";
 
 const GRAPHQL_PORT = 4001;
 
 const graphQLServer = express();
 
 graphQLServer.use("*", cors());
+graphQLServer.use(helmet());
+graphQLServer.use(compression());
 graphQLServer.use("/graphql", bodyParser.json(), graphqlExpress({ schema }));
 graphQLServer.use(
   "/graphiql",

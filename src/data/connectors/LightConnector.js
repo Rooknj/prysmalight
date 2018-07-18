@@ -2,6 +2,7 @@ import ChalkConsole from "../../ChalkConsole.js";
 import MQTT from "async-mqtt";
 import { PubSub } from "graphql-subscriptions";
 import events from "events";
+import { Lights } from "./sqliteClient";
 
 // Instantiate the eventEmitter
 const eventEmitter = new events.EventEmitter();
@@ -91,12 +92,22 @@ const findLight = (lightId, lights) => {
 
 class LightConnector {
   constructor() {
-    // Light Data Store
-    this.lights = [getNewLight("Light 1"), getNewLight("Light 2")];
+    // Light inMemory Data Store
+    this.lights = [];
     // Our mutation number to match each mutation to it's response
     this.mutationNumber = 0;
+    this.isInitialized = false;
+    // Start the initialize function
+    this.init();
+  }
 
-    // On connect
+  async init() {
+    // Populate our inMemory Data Store with the light id's from our database
+    this.lights = await Lights.findAll().map(dbLight =>
+      getNewLight(dbLight.id)
+    );
+
+    // Set up onConnect callback
     mqttClient.on("connect", () => {
       ChalkConsole.info(`Connected to MQTT broker`);
       this.lights.forEach(light => {
@@ -112,12 +123,12 @@ class LightConnector {
       });
     });
 
-    // On reconnect attempt
+    // Set up onReconnect callback
     mqttClient.on("reconnect", () => {
       ChalkConsole.debug(`Attempting reconnection to MQTT broker`);
     });
 
-    // On connection or parsing error
+    // Set up onError callback
     mqttClient.on("error", error => {
       ChalkConsole.error(`Failed to connect to MQTT broker => ${error}`);
     });
@@ -153,7 +164,6 @@ class LightConnector {
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
-
     // This gets triggered when the state of the light changes
     const handleStateMessage = data => {
       const message = JSON.parse(data);
@@ -183,7 +193,6 @@ class LightConnector {
       // Publish to the mutation response event
       eventEmitter.emit("mutationResponse", mutationId, changedLight);
     };
-
     // This gets triggered when the light sends its effect list
     const handleEffectListMessage = data => {
       const message = JSON.parse(data);
@@ -203,7 +212,7 @@ class LightConnector {
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
 
-    // Route each MQTT topic to it's respective message handler
+    // Set up onMessage callback
     mqttClient.on("message", (topic, message) => {
       // Convert message into a string
       const data = message.toString();
@@ -228,7 +237,7 @@ class LightConnector {
         );
         return;
       }
-      // Send the message data to the correct handler
+      // Route each MQTT message to it's respective message handler depending on topic
       if (topicTokens[2] === MQTT_LIGHT_CONNECTED_TOPIC) {
         handleConnectedMessage(data);
       } else if (topicTokens[2] === MQTT_LIGHT_STATE_TOPIC) {
@@ -239,6 +248,9 @@ class LightConnector {
         return;
       }
     });
+
+    // Set isInitialized to true
+    this.isInitialized = true;
   }
 
   // TODO: Add an error message if no light was found
@@ -285,12 +297,17 @@ class LightConnector {
     });
   };
 
-  addLight = lightId => {
+  async addLight(lightId) {
     if (findLight(lightId, this.lights)) {
       ChalkConsole.error(`Error adding ${lightId}: Light already exists`);
       // TODO: return actual graphql error message
       return;
     }
+
+    await Lights.create({
+      id: lightId
+    });
+
     // Add new light to light database
     this.lights.push(getNewLight(lightId));
 
@@ -303,14 +320,21 @@ class LightConnector {
 
     // Return the new light
     return findLight(lightId, this.lights);
-  };
+  }
 
-  removeLight = lightId => {
+  async removeLight(lightId) {
     if (!findLight(lightId, this.lights)) {
       ChalkConsole.error(`Error removing ${lightId}: Light does not exist`);
       // TODO: return actual graphql error message
       return;
     }
+
+    await Lights.destroy({
+      where: {
+        id: lightId
+      }
+    });
+
     // Find the index of the light to remove
     const lightToRemove = findLight(lightId, this.lights);
     const indexToRemove = this.lights.indexOf(lightToRemove);
@@ -329,7 +353,7 @@ class LightConnector {
 
     // Return the removed light
     return lightToRemove;
-  };
+  }
 
   // Subscribe to one specific light's changes
   subscribeLight = lightId => {

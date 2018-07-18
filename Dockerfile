@@ -30,9 +30,6 @@ CMD ["yarn", "prodServer"]
 ## Prod Environment
 FROM resin/rpi-raspbian:jessie
 
-RUN apt-get update && \
-    apt-get upgrade -y 
-
 WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app/lightapp2-server /usr/src/app

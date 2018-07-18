@@ -1,4 +1,4 @@
-import { LightConnector } from "./connectors";
+import LightConnector from "./connectors/LightConnector";
 
 const lightConnector = new LightConnector();
 

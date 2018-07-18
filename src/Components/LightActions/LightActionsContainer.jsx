@@ -6,6 +6,34 @@ import LightFormDialog from "./LightFormDialog";
 import { Mutation } from "react-apollo";
 import { ADD_LIGHT, REMOVE_LIGHT, GET_LIGHTS } from "../graphqlConstants";
 
+const addLightToCache = (cache, { data: { addLight } }) => {
+    if (!addLight) return;
+    const { lights } = cache.readQuery({
+        query: GET_LIGHTS
+    });
+    cache.writeQuery({
+        query: GET_LIGHTS,
+        data: { lights: lights.concat([addLight]) }
+    });
+};
+
+const removeLightFromCache = (cache, { data: { removeLight } }) => {
+    if (!removeLight) return;
+    const { lights } = cache.readQuery({
+        query: GET_LIGHTS
+    });
+    var index = lights.indexOf(
+        lights.find(light => light.id === removeLight.id)
+    );
+    if (index > -1) {
+        lights.splice(index, 1);
+    }
+    cache.writeQuery({
+        query: GET_LIGHTS,
+        data: { lights }
+    });
+};
+
 class LightActions extends React.Component {
     constructor(props) {
         super(props);
@@ -55,8 +83,16 @@ class LightActions extends React.Component {
         });
     };
 
-    handleMutationError = () => {
-        console.log("Error");
+    handleMutationError = error => {
+        console.error(error);
+    };
+
+    handleMutationComplete = data => {
+        if (data.addLight) {
+            this.setState({ showAddLight: false });
+        } else if (data.removeLight) {
+            this.setState({ showRemoveLight: false });
+        }
     };
 
     render() {
@@ -67,81 +103,55 @@ class LightActions extends React.Component {
                 <LightSpeedDial actions={actions} />
                 <Mutation
                     mutation={ADD_LIGHT}
-                    update={(cache, { data: { addLight } }) => {
-                        if (!addLight) return;
-                        const { lights } = cache.readQuery({
-                            query: GET_LIGHTS
-                        });
-                        cache.writeQuery({
-                            query: GET_LIGHTS,
-                            data: { lights: lights.concat([addLight]) }
-                        });
-                    }}
+                    update={addLightToCache}
+                    onCompleted={this.handleMutationComplete}
+                    onError={this.handleMutationError}
                 >
-                    {(addLight, { data, loading, error }) => {
-                        if (error) {
-                            this.handleMutationError(error);
-                        }
-                        return (
-                            <LightFormDialog
-                                title="Add Light"
-                                contentText="Enter the name of the light you want to add"
-                                submitText="Add Light"
-                                open={showAddLight}
-                                loading={loading}
-                                onClose={this.handleCloseAddLight}
-                                onSubmit={lightId => {
-                                    addLight({
-                                        variables: {
-                                            lightId: lightId
-                                        }
-                                    });
-                                }}
-                            />
-                        );
-                    }}
+                    {(addLight, { data, loading, error }) => (
+                        <LightFormDialog
+                            title="Add Light"
+                            contentText="Enter the name of the light you want to add"
+                            submitText="Add Light"
+                            open={showAddLight}
+                            loading={loading}
+                            success={data}
+                            error={error}
+                            onClose={this.handleCloseAddLight}
+                            onSubmit={lightId => {
+                                addLight({
+                                    variables: {
+                                        lightId: lightId
+                                    }
+                                });
+                            }}
+                        />
+                    )}
                 </Mutation>
                 <Mutation
                     mutation={REMOVE_LIGHT}
-                    update={(cache, { data: { removeLight } }) => {
-                        if (!removeLight) return;
-                        const { lights } = cache.readQuery({
-                            query: GET_LIGHTS
-                        });
-                        var index = lights.indexOf(
-                            lights.find(light => light.id === removeLight.id)
-                        );
-                        if (index > -1) {
-                            lights.splice(index, 1);
-                        }
-                        cache.writeQuery({
-                            query: GET_LIGHTS,
-                            data: { lights }
-                        });
-                    }}
+                    update={removeLightFromCache}
+                    onCompleted={this.handleMutationComplete}
+                    onError={this.handleMutationError}
                 >
-                    {(removeLight, { data, loading, error }) => {
-                        if (error) {
-                            this.handleMutationError(error);
-                        }
-                        return (
-                            <LightFormDialog
-                                title="Remove Light"
-                                contentText="Enter the name of the light you want to remove"
-                                submitText="Remove Light"
-                                open={showRemoveLight}
-                                loading={loading}
-                                onClose={this.handleCloseRemoveLight}
-                                onSubmit={lightId => {
-                                    removeLight({
-                                        variables: {
-                                            lightId: lightId
-                                        }
-                                    });
-                                }}
-                            />
-                        );
-                    }}
+                    {(removeLight, { data, loading, error }) => (
+                        <LightFormDialog
+                            title="Remove Light"
+                            contentText="Enter the name of the light you want to remove"
+                            submitText="Remove Light"
+                            open={showRemoveLight}
+                            loading={loading}
+                            success={data}
+                            error={error}
+                            onClose={this.handleCloseRemoveLight}
+                            onSubmit={lightId => {
+                                removeLight({
+                                    variables: {
+                                        lightId: lightId
+                                    }
+                                });
+                            }}
+                        />
+                    )}
                 </Mutation>
             </React.Fragment>
         );

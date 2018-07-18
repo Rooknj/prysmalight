@@ -27,7 +27,16 @@ class LightFormDialog extends React.Component {
     };
 
     render() {
-        const { open, title, contentText, submitText, onClose } = this.props;
+        const {
+            open,
+            title,
+            contentText,
+            submitText,
+            onClose,
+            loading,
+            error,
+            success
+        } = this.props;
         return (
             <Dialog open={open} onClose={onClose} aria-labelledby={title}>
                 <DialogTitle id={title}>{title}</DialogTitle>
@@ -48,7 +57,11 @@ class LightFormDialog extends React.Component {
                     <Button onClick={onClose} color="primary">
                         Cancel
                     </Button>
-                    <Button onClick={this.handleSubmit} color="primary">
+                    <Button
+                        onClick={this.handleSubmit}
+                        color="primary"
+                        disabled={loading}
+                    >
                         {submitText}
                     </Button>
                 </DialogActions>

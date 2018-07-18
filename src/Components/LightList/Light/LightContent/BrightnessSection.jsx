@@ -45,4 +45,4 @@ const BrightnessSection = props => {
 BrightnessSection.propTypes = propTypes;
 BrightnessSection.defaultProps = defaultProps;
 
-export default BrightnessSectionw;
+export default BrightnessSection;

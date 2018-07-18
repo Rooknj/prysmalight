@@ -2,7 +2,7 @@ import Sequelize from "sequelize";
 
 const db = new Sequelize("lights", null, null, {
   dialect: "sqlite",
-  storage: "./lights.sqlite"
+  storage: "./database/lights.sqlite"
 });
 
 const LightModel = db.define("light", {

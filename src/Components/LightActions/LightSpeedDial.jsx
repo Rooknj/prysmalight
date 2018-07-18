@@ -72,4 +72,18 @@ class LightSpeedDial extends React.Component {
     }
 }
 
+LightSpeedDial.propTypes = {
+    actions: PropTypes.arrayOf(
+        PropTypes.shape({
+            name: PropTypes.string.isRequired,
+            icon: PropTypes.object.isRequired,
+            handler: PropTypes.func.isRequired
+        })
+    )
+};
+
+LightSpeedDial.defaultProps = {
+    actions: []
+};
+
 export default LightSpeedDial;

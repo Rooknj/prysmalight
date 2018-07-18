@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Dialog from "@material-ui/core/Dialog";
@@ -33,9 +34,7 @@ class LightFormDialog extends React.Component {
             contentText,
             submitText,
             onClose,
-            loading,
-            error,
-            success
+            loading
         } = this.props;
         return (
             <Dialog open={open} onClose={onClose} aria-labelledby={title}>
@@ -70,7 +69,14 @@ class LightFormDialog extends React.Component {
     }
 }
 
-LightFormDialog.propTypes = {};
+LightFormDialog.propTypes = {
+    open: PropTypes.bool,
+    title: PropTypes.string,
+    contentText: PropTypes.string,
+    submitText: PropTypes.string,
+    onClose: PropTypes.func,
+    loading: PropTypes.bool
+};
 
 LightFormDialog.defaultProps = {
     submitText: "Submit"

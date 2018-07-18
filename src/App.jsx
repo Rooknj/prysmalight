@@ -8,18 +8,18 @@ import { withTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "styled-components";
 
 const App = ({ theme }) => (
-    <ThemeProvider theme={{ ...theme }}>
-        <CssBaseline>
-            <AppBar position="static" color="default">
-                <Toolbar>
-                    <Typography variant="title" color="inherit">
-                        Light App 2.0
-                    </Typography>
-                </Toolbar>
-            </AppBar>
-            <LightTool />
-        </CssBaseline>
-    </ThemeProvider>
+  <ThemeProvider theme={{ ...theme }}>
+    <CssBaseline>
+      <AppBar position="static" color="default">
+        <Toolbar>
+          <Typography variant="title" color="inherit">
+            Light App 2.0
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <LightTool />
+    </CssBaseline>
+  </ThemeProvider>
 );
 
 export default withTheme()(App);

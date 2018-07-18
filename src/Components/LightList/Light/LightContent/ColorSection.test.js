@@ -3,5 +3,5 @@ import { shallow } from "enzyme";
 import ColorSection from "./ColorSection";
 
 it("renders without crashing", () => {
-    shallow(<ColorSection />);
+  shallow(<ColorSection />);
 });

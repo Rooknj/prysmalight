@@ -3,5 +3,5 @@ import { shallow } from "enzyme";
 import LightTool from "./LightTool";
 
 it("renders without crashing", () => {
-    shallow(<LightTool />);
+  shallow(<LightTool />);
 });

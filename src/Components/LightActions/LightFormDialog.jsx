@@ -9,77 +9,86 @@ import DialogContentText from "@material-ui/core/DialogContentText";
 import DialogTitle from "@material-ui/core/DialogTitle";
 
 class LightFormDialog extends React.Component {
-    constructor(props) {
-        super(props);
+  constructor(props) {
+    super(props);
 
-        this.state = {
-            lightId: ""
-        };
+    this.state = {
+      lightId: ""
+    };
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    // Clear the lightId if the modal is closed
+    if (!props.open) {
+      return { ...state, lightId: "" };
     }
 
-    handleChange = e => {
-        this.setState({
-            lightId: e.target.value
-        });
-    };
+    return state;
+  }
 
-    handleSubmit = () => {
-        this.props.onSubmit(this.state.lightId);
-    };
+  handleChange = e => {
+    this.setState({
+      lightId: e.target.value
+    });
+  };
 
-    render() {
-        const {
-            open,
-            title,
-            contentText,
-            submitText,
-            onClose,
-            loading
-        } = this.props;
-        return (
-            <Dialog open={open} onClose={onClose} aria-labelledby={title}>
-                <DialogTitle id={title}>{title}</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>{contentText}</DialogContentText>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="lightName"
-                        label="Light Name"
-                        type="text"
-                        fullWidth
-                        value={this.state.lightId}
-                        onChange={this.handleChange}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={onClose} color="primary">
-                        Cancel
-                    </Button>
-                    <Button
-                        onClick={this.handleSubmit}
-                        color="primary"
-                        disabled={loading}
-                    >
-                        {submitText}
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        );
-    }
+  handleSubmit = () => {
+    this.props.onSubmit(this.state.lightId);
+  };
+
+  render() {
+    const {
+      open,
+      title,
+      contentText,
+      submitText,
+      onClose,
+      loading
+    } = this.props;
+    return (
+      <Dialog open={open} onClose={onClose} aria-labelledby={title}>
+        <DialogTitle id={title}>{title}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>{contentText}</DialogContentText>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="lightName"
+            label="Light Name"
+            type="text"
+            fullWidth
+            value={this.state.lightId}
+            onChange={this.handleChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={this.handleSubmit}
+            color="primary"
+            disabled={loading}
+          >
+            {submitText}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    );
+  }
 }
 
 LightFormDialog.propTypes = {
-    open: PropTypes.bool,
-    title: PropTypes.string,
-    contentText: PropTypes.string,
-    submitText: PropTypes.string,
-    onClose: PropTypes.func,
-    loading: PropTypes.bool
+  open: PropTypes.bool,
+  title: PropTypes.string,
+  contentText: PropTypes.string,
+  submitText: PropTypes.string,
+  onClose: PropTypes.func,
+  loading: PropTypes.bool
 };
 
 LightFormDialog.defaultProps = {
-    submitText: "Submit"
+  submitText: "Submit"
 };
 
 export default LightFormDialog;

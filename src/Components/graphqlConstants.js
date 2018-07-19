@@ -17,6 +17,23 @@ const LIGHT_DATA = gql`
   }
 `;
 
+export const LIGHT_ADDED = gql`
+  subscription lightAdded {
+    lightAdded {
+      ...lightData
+    }
+  }
+  ${LIGHT_DATA}
+`;
+
+export const LIGHT_REMOVED = gql`
+  subscription lightRemoved {
+    lightRemoved {
+      id
+    }
+  }
+`;
+
 export const LIGHTS_CHANGED = gql`
   subscription lightsChanged {
     lightsChanged {

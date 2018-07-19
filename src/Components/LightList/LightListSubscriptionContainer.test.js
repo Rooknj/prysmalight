@@ -18,5 +18,5 @@ it("subscribes to light changes on mount", () => {
   );
 
   // Expect the subscription function to be called once
-  expect(subscribeToLightChangesSpy).toHaveBeenCalledTimes(1);
+  expect(subscribeToLightChangesSpy).toHaveBeenCalledTimes(3);
 });

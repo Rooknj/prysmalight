@@ -1,4 +1,5 @@
 import Sequelize from "sequelize";
+import "sqlite3";
 
 const db = new Sequelize("lights", null, null, {
   dialect: "sqlite",

@@ -321,7 +321,9 @@ class LightConnector {
     subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_EFFECT_LIST_TOPIC}`);
 
     // Return the new light
-    return findLight(lightId, this.lights);
+    const lightAdded = findLight(lightId, this.lights);
+    pubsub.publish("lightAdded", { lightAdded });
+    return lightAdded;
   }
 
   async removeLight(lightId) {
@@ -354,6 +356,7 @@ class LightConnector {
     );
 
     // Return the removed light
+    pubsub.publish("lightRemoved", { lightRemoved: lightToRemove });
     return lightToRemove;
   }
 
@@ -365,6 +368,14 @@ class LightConnector {
   // Subscribe to all light's changes
   subscribeAllLights = lightId => {
     return pubsub.asyncIterator("lightsChanged");
+  };
+
+  subscribeLightAdded = lightId => {
+    return pubsub.asyncIterator("lightAdded");
+  };
+
+  subscribeLightRemoved = lightId => {
+    return pubsub.asyncIterator("lightRemoved");
   };
 
   getLights = () => {

@@ -61,7 +61,7 @@
     "prod-server": "lib/server.js"
   },
   "pkg": {
-    "assets": "lib/data/typeDefs.graphql"
+    "assets": ["lib/data/typeDefs.graphql", "node_modules/sqlite3/sqlite3"]
   },
   "main": "lib/server.js"
 }

@@ -2,7 +2,6 @@ import ChalkConsole from "../../ChalkConsole.js";
 import MQTT from "async-mqtt";
 import { PubSub } from "graphql-subscriptions";
 import events from "events";
-import { Lights } from "./sqliteClient";
 
 // Instantiate the eventEmitter
 const eventEmitter = new events.EventEmitter();
@@ -102,13 +101,10 @@ class LightConnector {
   }
 
   async init() {
-    // Populate our inMemory Data Store with the light id's from our database
-    this.lights = await Lights.findAll().map(dbLight =>
-      getNewLight(dbLight.id)
-    );
-    ChalkConsole.info(
-      `Fetched [${this.lights.map(light => light.id)}] from the database`
-    );
+    // TODO: Get lights from persistent data storage
+    // Populate our inMemory Data Store with the light id's
+    this.lights = [getNewLight("Light 1")];
+
     // Set up onConnect callback
     mqttClient.on("connect", () => {
       ChalkConsole.info(`Connected to MQTT broker`);
@@ -306,9 +302,7 @@ class LightConnector {
       return;
     }
 
-    await Lights.create({
-      id: lightId
-    });
+    // TODO: Add light to persistent data storage
 
     // Add new light to light database
     this.lights.push(getNewLight(lightId));
@@ -333,11 +327,7 @@ class LightConnector {
       return;
     }
 
-    await Lights.destroy({
-      where: {
-        id: lightId
-      }
-    });
+    // TODO: remove light from persistent data storage
 
     // Find the index of the light to remove
     const lightToRemove = findLight(lightId, this.lights);

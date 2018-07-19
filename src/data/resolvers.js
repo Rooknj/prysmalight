@@ -22,6 +22,16 @@ const resolvers = {
       subscribe: _ => {
         return lightConnector.subscribeAllLights();
       }
+    },
+    lightAdded: {
+      subscribe: _ => {
+        return lightConnector.subscribeLightAdded();
+      }
+    },
+    lightRemoved: {
+      subscribe: _ => {
+        return lightConnector.subscribeLightRemoved();
+      }
     }
   }
 };

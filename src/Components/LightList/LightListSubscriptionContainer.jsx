@@ -1,6 +1,10 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { LIGHTS_CHANGED } from "../graphqlConstants";
+import {
+  LIGHTS_CHANGED,
+  LIGHT_ADDED,
+  LIGHT_REMOVED
+} from "../graphqlConstants";
 import LightList from "./LightList";
 
 const propTypes = {
@@ -27,10 +31,44 @@ const defaultProps = {
   subscribeToLightChanges: () => {}
 };
 
+const addLightToQuery = (cacheData, { subscriptionData }) => {
+  // If no data was returned, do nothing
+  if (!subscriptionData) return cacheData;
+  // Find the id of the new light
+  const newLight = subscriptionData.data.lightAdded;
+  // If the light already exists in the cache, do nothing
+  if (cacheData.lights.find(light => light.id === newLight.id)) {
+    return cacheData;
+  }
+  // If the light doesnt exist, add it to the cache
+  return Object.assign({}, cacheData, {
+    lights: [...cacheData.lights, newLight]
+  });
+};
+
+const removeLightFromQuery = (cacheData, { subscriptionData }) => {
+  // If no data was returned, do nothing
+  if (!subscriptionData) return cacheData;
+
+  // Find the index of the light to be removed and remove it
+  const lightToRemove = subscriptionData.data.lightRemoved;
+  return Object.assign({}, cacheData, {
+    lights: cacheData.lights.filter(light => light.id !== lightToRemove.id)
+  });
+};
+
 class LightListSubscriptionContainer extends React.Component {
   componentDidMount() {
     this.props.subscribeToLightChanges({
       document: LIGHTS_CHANGED
+    });
+    this.props.subscribeToLightChanges({
+      document: LIGHT_ADDED,
+      updateQuery: addLightToQuery
+    });
+    this.props.subscribeToLightChanges({
+      document: LIGHT_REMOVED,
+      updateQuery: removeLightFromQuery
     });
   }
 

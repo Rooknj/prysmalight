@@ -7,8 +7,6 @@ services:
     image: lightapp2-server-prod
     ports:
       - "4001:4001"
-    volumes:
-      - ./database:/database
 
 # Run prod
-# docker-compose -f docker-compose.prod.yml up -d
+# docker-compose up -d

@@ -8,7 +8,7 @@ import bodyParser from "body-parser"; // Parses HTTP requests
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { execute, subscribe } from "graphql";
 import ChalkConsole from "./ChalkConsole";
-import schema from "./Components/Light/lightSchema";
+import schema from "./components/lights/lightsSchema";
 
 const GRAPHQL_PORT = 4001;
 

@@ -1,8 +1,8 @@
 import { makeExecutableSchema, addMockFunctionsToSchema } from "graphql-tools";
 import { importSchema } from "graphql-import";
-import resolvers from "./resolvers";
+import resolvers from "./lightResolvers";
 
-const typeDefs = importSchema(`${__dirname}/typeDefs.graphql`);
+const typeDefs = importSchema(`${__dirname}/lightTypeDefs.graphql`);
 
 const schema = makeExecutableSchema({ typeDefs, resolvers });
 

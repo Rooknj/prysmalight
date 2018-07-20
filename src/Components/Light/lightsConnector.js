@@ -1,4 +1,4 @@
-import ChalkConsole from "../../ChalkConsole.js";
+import ChalkConsole from "../../ChalkConsole";
 import MQTT from "async-mqtt";
 import { PubSub } from "graphql-subscriptions";
 import events from "events";

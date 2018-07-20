@@ -1,4 +1,3 @@
-import ChalkConsole from "./ChalkConsole.js";
 import express from "express"; // NodeJS Web Server
 import cors from "cors"; // Cross Origin Resource Sharing Middleware
 import helmet from "helmet"; // Security Middleware
@@ -8,7 +7,8 @@ import { createServer } from "http"; // Library to create an http server
 import bodyParser from "body-parser"; // Parses HTTP requests
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { execute, subscribe } from "graphql";
-import schema from "./data/schema";
+import ChalkConsole from "./ChalkConsole";
+import schema from "./Components/Light/lightSchema";
 
 const GRAPHQL_PORT = 4001;
 
@@ -32,7 +32,7 @@ webServer.listen(GRAPHQL_PORT, () => {
   // Start the GraphQL Subscriptions server
   new SubscriptionServer(
     { execute, subscribe, schema },
-    { server: ws, path: "/subscriptions" }
+    { server: webServer, path: "/subscriptions" }
   );
 
   ChalkConsole.info(

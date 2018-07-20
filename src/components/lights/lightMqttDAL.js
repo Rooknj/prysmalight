@@ -65,18 +65,6 @@ const unsubscribeFrom = topic => {
     );
 };
 
-const defaultConnectHandler = () => {
-  ChalkConsole.info(`Connected to MQTT broker`);
-};
-
-const defaultReconnectHandler = () => {
-  ChalkConsole.debug(`Attempting reconnection to MQTT broker`);
-};
-
-const defaultErrorHandler = () => {
-  ChalkConsole.error(`Failed to connect to MQTT broker => ${error}`);
-};
-
 class LightMqttDAL {
   constructor() {
     this.connectionHandler = () => console.log("Connection Message");

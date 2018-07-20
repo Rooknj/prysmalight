@@ -4,113 +4,34 @@ import { PubSub } from "graphql-subscriptions";
 import events from "events";
 
 import Light from "./light";
+import LightMqttDAL from "./lightMqttDAL";
 
 const light = new Light();
+const mqttDAL = new LightMqttDAL();
 
 // Instantiate the eventEmitter
 const eventEmitter = new events.EventEmitter();
 
-// MQTT: client
-let MQTT_CLIENT;
-if (process.env.MOCK) {
-  MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
-} else if (process.env.NODE_ENV == "development") {
-  MQTT_CLIENT = "tcp://raspberrypi.local:1883";
-} else {
-  MQTT_CLIENT = "tcp://localhost:1883";
-}
-
-// MQTT: topics
-const MQTT_LIGHT_TOP_LEVEL = "lightapp2";
-const MQTT_LIGHT_CONNECTED_TOPIC = "connected";
-const MQTT_LIGHT_STATE_TOPIC = "state";
-const MQTT_LIGHT_COMMAND_TOPIC = "command";
-const MQTT_EFFECT_LIST_TOPIC = "effects";
+// Initialize PubSub
+const pubsub = new PubSub();
 
 // MQTT: payloads by default
 const LIGHT_CONNECTED = 2;
 const LIGHT_DISCONNECTED = 0;
 
-// Initialize PubSub
-const pubsub = new PubSub();
-
-// Connect to MQTT server
-const mqttClient = MQTT.connect(MQTT_CLIENT, {
-  reconnectPeriod: 5000, // Amount of time between reconnection attempts
-  username: "pi",
-  password: "MQTTIsBetterThanUDP"
-});
-
-// Subscribe method with logging
-const subscribeTo = topic => {
-  mqttClient
-    .subscribe(topic)
-    .then(granted =>
-      ChalkConsole.info(
-        `Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`
-      )
-    )
-    .catch(error =>
-      ChalkConsole.error(`Error subscribing to ${topic} Error: ${error}`)
-    );
-};
-
-// Publish method with logging
-const publishTo = (topic, payload) => {
-  mqttClient
-    .publish(topic, payload)
-    .then(() =>
-      ChalkConsole.info(`Published payload of ${payload} to ${topic}`)
-    )
-    .catch(error =>
-      ChalkConsole.error(`Error publishing to ${topic} Error: ${error}`)
-    );
-};
-
-// Unsubscribe method with logging
-const unsubscribeFrom = topic => {
-  mqttClient
-    .unsubscribe(topic)
-    .then(() => ChalkConsole.info(`Unsubscribed from ${topic}`))
-    .catch(error =>
-      ChalkConsole.error(`Error unsubscribing from ${topic} Error: ${error}`)
-    );
-};
-
 class LightConnector {
   constructor() {
     // Our mutation number to match each mutation to it's response
     this.mutationNumber = 0;
-    this.isInitialized = false;
     // Start the initialize function
     this.init();
   }
 
   async init() {
     // Set up onConnect callback
-    mqttClient.on("connect", () => {
+    mqttDAL.onConnect(() => {
       ChalkConsole.info(`Connected to MQTT broker`);
-      light.getAllLights().forEach(light => {
-        subscribeTo(
-          `${MQTT_LIGHT_TOP_LEVEL}/${light.id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
-        );
-        subscribeTo(
-          `${MQTT_LIGHT_TOP_LEVEL}/${light.id}/${MQTT_LIGHT_STATE_TOPIC}`
-        );
-        subscribeTo(
-          `${MQTT_LIGHT_TOP_LEVEL}/${light.id}/${MQTT_EFFECT_LIST_TOPIC}`
-        );
-      });
-    });
-
-    // Set up onReconnect callback
-    mqttClient.on("reconnect", () => {
-      ChalkConsole.debug(`Attempting reconnection to MQTT broker`);
-    });
-
-    // Set up onError callback
-    mqttClient.on("error", error => {
-      ChalkConsole.error(`Failed to connect to MQTT broker => ${error}`);
+      light.getAllLights().forEach(light => mqttDAL.subscribeToLight(light.id));
     });
 
     // MQTT Message Handlers
@@ -192,45 +113,9 @@ class LightConnector {
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
 
-    // Set up onMessage callback
-    mqttClient.on("message", (topic, message) => {
-      // Convert message into a string
-      const data = message.toString();
-      ChalkConsole.info(
-        `Received message on topic ${topic} with a payload of ${data}`
-      );
-
-      // Split the topic into it's individual tokens to evaluate
-      const topicTokens = topic.split("/");
-      // If this mqtt message is not from lightapp2, then ignore it
-      if (topicTokens[0] !== MQTT_LIGHT_TOP_LEVEL) {
-        ChalkConsole.error(
-          `Received messsage that belonged to a top level topic we are not supposed to be subscribed to`
-        );
-        return;
-      }
-      // Find the light the message pertains to in our database of lights
-      const topicLight = light.getLight(topicTokens[1]);
-      if (!topicLight) {
-        ChalkConsole.error(
-          `Could not find ${topicTokens[1]} in our database of lights`
-        );
-        return;
-      }
-      // Route each MQTT message to it's respective message handler depending on topic
-      if (topicTokens[2] === MQTT_LIGHT_CONNECTED_TOPIC) {
-        handleConnectedMessage(data);
-      } else if (topicTokens[2] === MQTT_LIGHT_STATE_TOPIC) {
-        handleStateMessage(data);
-      } else if (topicTokens[2] === MQTT_EFFECT_LIST_TOPIC) {
-        handleEffectListMessage(data);
-      } else {
-        return;
-      }
-    });
-
-    // Set isInitialized to true
-    this.isInitialized = true;
+    mqttDAL.onConnectionMessage(handleConnectedMessage);
+    mqttDAL.onEffectListMessage(handleEffectListMessage);
+    mqttDAL.onStateMessage(handleStateMessage);
   }
 
   // TODO: Add an error message if no light was found
@@ -264,10 +149,7 @@ class LightConnector {
       eventEmitter.on("mutationResponse", handleMutationResponse);
 
       // Publish to the light
-      publishTo(
-        `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
-        Buffer.from(JSON.stringify(payload))
-      );
+      mqttDAL.publishToLight(id, payload);
 
       // If the response takes too long, error outs
       setTimeout(() => {
@@ -290,11 +172,7 @@ class LightConnector {
     const lightAdded = light.addLight(lightId);
 
     // Subscribe to new messages from the new light
-    subscribeTo(
-      `${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_LIGHT_CONNECTED_TOPIC}`
-    );
-    subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_LIGHT_STATE_TOPIC}`);
-    subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_EFFECT_LIST_TOPIC}`);
+    mqttDAL.subscribeToLight(lightId);
 
     pubsub.publish("lightAdded", { lightAdded });
     return lightAdded;
@@ -311,15 +189,7 @@ class LightConnector {
     const lightRemoved = light.removeLight(lightId);
 
     // unsubscribe from the light's messages
-    unsubscribeFrom(
-      `${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_LIGHT_CONNECTED_TOPIC}`
-    );
-    unsubscribeFrom(
-      `${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_LIGHT_STATE_TOPIC}`
-    );
-    unsubscribeFrom(
-      `${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_EFFECT_LIST_TOPIC}`
-    );
+    mqttDAL.unsubscribeFromLight(lightId);
 
     // Return the removed light
     pubsub.publish("lightRemoved", { lightRemoved });

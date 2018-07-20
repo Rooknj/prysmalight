@@ -14,33 +14,33 @@ const findLight = (lightId, lights) => {
   return lights.find(light => light.id === lightId);
 };
 
+// TODO: Get lights from persistent data storage
+// Populate our inMemory Data Store with the light id's
+let lightsDB = [getNewLight("Light 1")];
+
 class Light {
-  constructor() {
-    // TODO: Get lights from persistent data storage
-    // Populate our inMemory Data Store with the light id's
-    this.lights = [getNewLight("Light 1")];
-  }
+  constructor() {}
 
   getAllLights() {
-    return this.lights;
+    return lightsDB;
   }
 
   getLight(id) {
-    return findLight(id, this.lights);
+    return findLight(id, lightsDB);
   }
 
   addLight(id) {
     const newLight = getNewLight(id);
-    this.lights.push(newLight);
+    lightsDB.push(newLight);
     return newLight;
   }
 
   removeLight(id) {
     // Find the index of the light to remove
     const lightToRemove = this.getLight(id);
-    const indexToRemove = this.lights.indexOf(lightToRemove);
+    const indexToRemove = lightsDB.indexOf(lightToRemove);
     // Remove the light from the database
-    this.lights.splice(indexToRemove, 1);
+    lightsDB.splice(indexToRemove, 1);
     return lightToRemove;
   }
 }

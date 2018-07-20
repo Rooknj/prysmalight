@@ -1,14 +1,14 @@
 import ChalkConsole from "./ChalkConsole.js";
-import express from "express";
-import { createServer } from "http";
-import cors from "cors";
-import { graphqlExpress, graphiqlExpress } from "apollo-server-express";
-import bodyParser from "body-parser";
-import schema from "./data/schema";
-import { execute, subscribe } from "graphql";
+import express from "express"; // NodeJS Web Server
+import cors from "cors"; // Cross Origin Resource Sharing Middleware
+import helmet from "helmet"; // Security Middleware
+import compression from "compression"; // Compression Middleware
+import { graphqlExpress, graphiqlExpress } from "apollo-server-express"; // Hook up graphQL to express middleware
+import { createServer } from "http"; // Library to create an http server
+import bodyParser from "body-parser"; // Parses HTTP requests
 import { SubscriptionServer } from "subscriptions-transport-ws";
-import compression from "compression";
-import helmet from "helmet";
+import { execute, subscribe } from "graphql";
+import schema from "./data/schema";
 
 const GRAPHQL_PORT = 4001;
 
@@ -26,18 +26,20 @@ graphQLServer.use(
   })
 );
 
-const ws = createServer(graphQLServer);
+// Create the Web Server from our express object and listen on the correct port
+const webServer = createServer(graphQLServer);
+webServer.listen(GRAPHQL_PORT, () => {
+  // Start the GraphQL Subscriptions server
+  new SubscriptionServer(
+    { execute, subscribe, schema },
+    { server: ws, path: "/subscriptions" }
+  );
 
-ws.listen(GRAPHQL_PORT, () => {
   ChalkConsole.info(
     `GraphiQL is now running on http://localhost:${GRAPHQL_PORT}/graphiql`
   );
   ChalkConsole.info(
     `GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}`
-  );
-  new SubscriptionServer(
-    { execute, subscribe, schema },
-    { server: ws, path: "/subscriptions" }
   );
   ChalkConsole.info(
     `GraphQL Subscription Server is now running on ws://localhost:${GRAPHQL_PORT}/subscriptions`

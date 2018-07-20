@@ -12,13 +12,13 @@ import schema from "./components/lights/lightsSchema";
 
 const GRAPHQL_PORT = 4001;
 
-const graphQLServer = express();
+const app = express();
 
-graphQLServer.use("*", cors());
-graphQLServer.use(helmet());
-graphQLServer.use(compression());
-graphQLServer.use("/graphql", bodyParser.json(), graphqlExpress({ schema }));
-graphQLServer.use(
+app.use("*", cors());
+app.use(helmet());
+app.use(compression());
+app.use("/graphql", bodyParser.json(), graphqlExpress({ schema }));
+app.use(
   "/graphiql",
   graphiqlExpress({
     endpointURL: "/graphql",
@@ -27,12 +27,12 @@ graphQLServer.use(
 );
 
 // Create the Web Server from our express object and listen on the correct port
-const webServer = createServer(graphQLServer);
-webServer.listen(GRAPHQL_PORT, () => {
+const graphQLServer = createServer(app);
+graphQLServer.listen(GRAPHQL_PORT, () => {
   // Start the GraphQL Subscriptions server
   new SubscriptionServer(
     { execute, subscribe, schema },
-    { server: webServer, path: "/subscriptions" }
+    { server: graphQLServer, path: "/subscriptions" }
   );
 
   ChalkConsole.info(

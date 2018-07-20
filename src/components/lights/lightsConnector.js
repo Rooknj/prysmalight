@@ -126,26 +126,31 @@ class LightConnector {
   // This gets triggered if you call setLight
   setLight = light => {
     const { id, state, brightness, color, effect, speed } = light;
-    // TODO: add data checking
-    // Initialize the payload with it's unique mutationId and the lightId to change
+
+    // Initialize the MQTT payload with it's unique mutationId and the id of the light to change
     let payload = { mutationId: this.mutationNumber++, name: id };
     if (state) payload = { ...payload, state };
     if (brightness) payload = { ...payload, brightness };
     if (color) payload = { ...payload, color };
     if (effect) payload = { ...payload, effect };
     if (speed) payload = { ...payload, speed };
+
+    // Return a promise which resolves when the light responds to this message
     return new Promise((resolve, reject) => {
-      // When we get a message from the light, check to see if it had the same mutationId
-      // If it did, resolve with the new light's state and remove the event listenet
       const handleMutationResponse = (mutationId, changedLight) => {
+        // If the mutationId on the light's response matches the mutationId we sent on this mutation
         if (mutationId === payload.mutationId) {
+          // Remove this mutation's event listener
           eventEmitter.removeListener(
             "mutationResponse",
             handleMutationResponse
           );
+          // Resolve with the light's response data
           resolve(changedLight);
         }
       };
+
+      // Every time we get a new message from the light, check to see if it has the same mutationId
       eventEmitter.on("mutationResponse", handleMutationResponse);
 
       // Publish to the light

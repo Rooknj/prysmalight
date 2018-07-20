@@ -3,6 +3,10 @@ import MQTT from "async-mqtt";
 import { PubSub } from "graphql-subscriptions";
 import events from "events";
 
+import Light from "./light";
+
+const light = new Light();
+
 // Instantiate the eventEmitter
 const eventEmitter = new events.EventEmitter();
 
@@ -26,18 +30,6 @@ const MQTT_EFFECT_LIST_TOPIC = "effects";
 // MQTT: payloads by default
 const LIGHT_CONNECTED = 2;
 const LIGHT_DISCONNECTED = 0;
-
-// Function to return a new light object with default values
-const getNewLight = id => ({
-  id,
-  connected: 0,
-  state: "OFF",
-  brightness: 100,
-  color: { r: 255, g: 0, b: 0 },
-  effect: "None",
-  speed: 4,
-  supportedEffects: []
-});
 
 // Initialize PubSub
 const pubsub = new PubSub();
@@ -85,14 +77,8 @@ const unsubscribeFrom = topic => {
     );
 };
 
-const findLight = (lightId, lights) => {
-  return lights.find(light => light.id === lightId);
-};
-
 class LightConnector {
   constructor() {
-    // Light inMemory Data Store
-    this.lights = [];
     // Our mutation number to match each mutation to it's response
     this.mutationNumber = 0;
     this.isInitialized = false;
@@ -101,14 +87,10 @@ class LightConnector {
   }
 
   async init() {
-    // TODO: Get lights from persistent data storage
-    // Populate our inMemory Data Store with the light id's
-    this.lights = [getNewLight("Light 1")];
-
     // Set up onConnect callback
     mqttClient.on("connect", () => {
       ChalkConsole.info(`Connected to MQTT broker`);
-      this.lights.forEach(light => {
+      light.getAllLights().forEach(light => {
         subscribeTo(
           `${MQTT_LIGHT_TOP_LEVEL}/${light.id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
         );
@@ -156,7 +138,7 @@ class LightConnector {
       }
 
       // Find the light in our data store whose id matches the message name
-      const changedLight = this.lights.find(light => light.id === message.name);
+      const changedLight = light.getLight(message.name);
       // Push changes to existing light
       Object.assign(changedLight, { connected });
       pubsub.publish(message.name, { lightChanged: changedLight });
@@ -182,7 +164,7 @@ class LightConnector {
       if (speed) newState = { ...newState, speed };
 
       // Find the light in our data store whose id matches the message name
-      const changedLight = this.lights.find(light => light.id === message.name);
+      const changedLight = light.getLight(message.name);
       // Push changes to existing light
       Object.assign(changedLight, newState);
       // Publish to the subscription async interator
@@ -203,7 +185,7 @@ class LightConnector {
       }
 
       // Find the light in our data store whose id matches the message name
-      const changedLight = this.lights.find(light => light.id === message.name);
+      const changedLight = light.getLight(message.name);
       // Push changes to existing light
       Object.assign(changedLight, { supportedEffects: message.effectList });
       pubsub.publish(message.name, { lightChanged: changedLight });
@@ -228,7 +210,7 @@ class LightConnector {
         return;
       }
       // Find the light the message pertains to in our database of lights
-      const topicLight = findLight(topicTokens[1], this.lights);
+      const topicLight = light.getLight(topicTokens[1]);
       if (!topicLight) {
         ChalkConsole.error(
           `Could not find ${topicTokens[1]} in our database of lights`
@@ -253,7 +235,7 @@ class LightConnector {
 
   // TODO: Add an error message if no light was found
   getLight = lightId => {
-    return findLight(lightId, this.lights);
+    return lights.getLight(lightId);
   };
 
   // This gets triggered if you call setLight
@@ -296,7 +278,7 @@ class LightConnector {
   };
 
   async addLight(lightId) {
-    if (findLight(lightId, this.lights)) {
+    if (light.getLight(lightId)) {
       ChalkConsole.error(`Error adding ${lightId}: Light already exists`);
       // TODO: return actual graphql error message
       return;
@@ -305,7 +287,7 @@ class LightConnector {
     // TODO: Add light to persistent data storage
 
     // Add new light to light database
-    this.lights.push(getNewLight(lightId));
+    const lightAdded = light.addLight(lightId);
 
     // Subscribe to new messages from the new light
     subscribeTo(
@@ -314,26 +296,20 @@ class LightConnector {
     subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_LIGHT_STATE_TOPIC}`);
     subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_EFFECT_LIST_TOPIC}`);
 
-    // Return the new light
-    const lightAdded = findLight(lightId, this.lights);
     pubsub.publish("lightAdded", { lightAdded });
     return lightAdded;
   }
 
   async removeLight(lightId) {
-    if (!findLight(lightId, this.lights)) {
+    if (!light.getLight(lightId)) {
       ChalkConsole.error(`Error removing ${lightId}: Light does not exist`);
       // TODO: return actual graphql error message
       return;
     }
 
-    // TODO: remove light from persistent data storage
+    // Remove light from database
+    const lightRemoved = light.removeLight(lightId);
 
-    // Find the index of the light to remove
-    const lightToRemove = findLight(lightId, this.lights);
-    const indexToRemove = this.lights.indexOf(lightToRemove);
-    // Remove the light from the database
-    this.lights.splice(indexToRemove, 1);
     // unsubscribe from the light's messages
     unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${lightId}/${MQTT_LIGHT_CONNECTED_TOPIC}`
@@ -346,8 +322,8 @@ class LightConnector {
     );
 
     // Return the removed light
-    pubsub.publish("lightRemoved", { lightRemoved: lightToRemove });
-    return lightToRemove;
+    pubsub.publish("lightRemoved", { lightRemoved });
+    return lightRemoved;
   }
 
   // Subscribe to one specific light's changes
@@ -369,7 +345,7 @@ class LightConnector {
   };
 
   getLights = () => {
-    return this.lights;
+    return light.getAllLights();
   };
 }
 

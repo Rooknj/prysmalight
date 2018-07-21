@@ -67,9 +67,12 @@ const unsubscribeFrom = topic => {
 
 class LightMqttDAL {
   constructor() {
+    // Default message handlers
     this.connectionHandler = () => console.log("Connection Message");
     this.effectListHandler = () => console.log("Effect List Message");
     this.stateHandler = () => console.log("State Message");
+
+    // Set up MQTT client to route messages to the appropriate callback handler function
     mqttClient.on("message", (topic, message) => {
       // Convert message into a string
       const data = message.toString();
@@ -87,7 +90,7 @@ class LightMqttDAL {
         return;
       }
 
-      //TODO: Add error check if the light stored in this variable is in our database
+      //TODO: Move this logic out of here and into the controller (maybe pass the lightId to the handler too)
       // Find the light the message pertains to in our database of lights
       const topicLight = light.getLight(topicTokens[1]);
       if (!topicLight) {

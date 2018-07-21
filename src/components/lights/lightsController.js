@@ -145,6 +145,10 @@ class LightConnector {
             "mutationResponse",
             handleMutationResponse
           );
+
+          // Set the light in our data store
+          light.setLight(changedLight);
+
           // Resolve with the light's response data
           resolve(changedLight);
         }

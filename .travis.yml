@@ -12,7 +12,7 @@ before_deploy:
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
-  script: docker push rooknj/lightapp2:broker-x64-$tag && docker push rooknj/lightapp2:broker-rpi-$tag
+  script: docker push rooknj/lightapp2:broker-rpi-$tag
   on:
     branch: master
 env:

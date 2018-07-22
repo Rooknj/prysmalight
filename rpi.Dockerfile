@@ -1,5 +1,5 @@
 # build environment
-FROM arm32v7/node:carbon as builder
+FROM resin/raspberrypi3-node:8.0.0 as builder
 WORKDIR /usr/src/app
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 COPY package.json /usr/src/app/package.json

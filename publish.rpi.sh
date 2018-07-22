@@ -14,7 +14,7 @@ usage() {
 
 buildDocker() {
     echo "Building docker image"
-    docker-compose build
+    docker-compose -f docker-compose.rpi.yml build
 
     echo "Tagging docker image with \"client-rpi-$tag\""
     docker tag lightapp2-client-rpi rooknj/lightapp2:client-rpi-$tag

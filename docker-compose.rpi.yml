@@ -3,7 +3,7 @@ services:
   client:
     build:
       context: .
-      dockerfile: Dockerfile
-    image: lightapp2-client-x64
+      dockerfile: rpi.Dockerfile
+    image: lightapp2-client-rpi
     ports:
       - "80:80"

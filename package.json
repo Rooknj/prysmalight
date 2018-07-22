@@ -44,7 +44,9 @@
     "startLocal": "nodemon src/server.js --exec babel-node",
     "startMock": "MOCK=true nodemon src/server.js --exec babel-node",
     "publishProd": "./publish.sh -t latest -Y",
-    "publishTest": "./publish.sh -t test -Y"
+    "publishTest": "./publish.sh -t test -Y",
+    "publishProdRpi": "./publish.rpi.sh -t latest -Y",
+    "publishTestRpi": "./publish.rpi.sh -t test -Y"
   },
   "babel": {
     "presets": [
@@ -60,7 +62,7 @@
     "prod-server": "lib/server.js"
   },
   "pkg": {
-    "assets": "lib/data/typeDefs.graphql"
+    "assets": "lib/components/typeDefs.graphql"
   },
   "main": "lib/server.js"
 }

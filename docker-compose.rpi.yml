@@ -1,0 +1,11 @@
+version: "3"
+services:
+  server:
+    build:
+      context: .
+      dockerfile: rpi.Dockerfile
+    image: lightapp2-server-rpi
+  redis:
+    image: arm32v7/redis:latest
+    ports:
+      - "6379:6379"

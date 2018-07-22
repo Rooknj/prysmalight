@@ -1,9 +1,13 @@
 version: "3"
 services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lightapp2-server-x64
+    ports:
+      - "4001:4001"
   redis:
     image: redis:latest
     ports:
       - "6379:6379"
-
-# Run prod
-# docker-compose up -d

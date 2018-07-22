@@ -10,14 +10,16 @@ cache:
 script:
 - yarn test
 - yarn build
-- docker run --rm --privileged multiarch/qemu-user-static:register --reset
 - docker-compose build
-- docker tag lightapp2-server-prod rooknj/lightapp2:server-$tag
+- docker tag lightapp2-server-x64 rooknj/lightapp2:server-x64-$tag
+- docker run --rm --privileged multiarch/qemu-user-static:register --reset
+- docker-compose -f docker-compose.rpi.yml build
+- docker tag lightapp2-server-rpi rooknj/lightapp2:server-rpi-$tag
 before_deploy:
 - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
-  script: docker push rooknj/lightapp2:server-$tag
+  script: docker push rooknj/lightapp2:server-x64-$tag && docker push rooknj/lightapp2:server-rpi-$tag
   on:
     branch: master
 env:

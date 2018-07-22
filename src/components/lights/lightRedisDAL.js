@@ -82,10 +82,17 @@ class Light {
 
   async getLight(id) {
     // Get all info about the light
-    const response = await asyncHGETALL(id);
+    const lightDataResponse = await asyncHGETALL(id);
+    const lightEffectResponse = await asyncSMEMBERS(
+      lightDataResponse.effectsKey
+    );
 
     // Convert that info into a javascript object
-    const lightObject = mapRedisObjectToLightObject(id, response, ["Hello"]);
+    const lightObject = mapRedisObjectToLightObject(
+      id,
+      lightDataResponse,
+      lightEffectResponse
+    );
     return lightObject;
   }
 
@@ -111,13 +118,18 @@ class Light {
       redisObject.push("color:green", lightData.color.g);
       redisObject.push("color:blue", lightData.color.b);
     }
+    let addEffectsPromise = Promise.resolve();
     if (lightData.hasOwnProperty("supportedEffects")) {
       redisObject.push("effectsKey", `${id}:effects`);
+      addEffectsPromise = asyncSADD(
+        `${id}:effects`,
+        lightData.supportedEffects
+      );
     }
 
-    console.log(redisObject);
-    const response = await asyncHMSET(redisObject);
-    console.log("Set light:", response);
+    const addLightDataPromise = await asyncHMSET(redisObject);
+    // Wait until all data is saved
+    await Promise.all([addLightDataPromise, addEffectsPromise]);
     return this.getLight(id);
   }
 

@@ -184,7 +184,7 @@ class Light {
     switch (response2) {
       case 1:
         console.log("Light successfully deleted");
-        return id;
+        return { id };
       default:
         //TODO: throw error
         console.log("Error deleting light");

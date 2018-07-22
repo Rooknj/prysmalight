@@ -58,7 +58,6 @@ class LightConnector {
       const changedLight = await lightRedisDAL.setLight(message.name, {
         connected: connectionPayload
       });
-      console.log(changedLight);
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
@@ -75,7 +74,6 @@ class LightConnector {
       if (speed) newState = { ...newState, speed };
 
       const changedLight = await lightRedisDAL.setLight(message.name, newState);
-      console.log(changedLight);
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
       // Publish to the mutation response event
@@ -87,7 +85,6 @@ class LightConnector {
       const changedLight = await lightRedisDAL.setLight(message.name, {
         supportedEffects: message.effectList
       });
-      console.log(changedLight);
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
@@ -125,9 +122,6 @@ class LightConnector {
             handleMutationResponse
           );
 
-          // Set the light in our data store
-          lightRedisDAL.setLight(changedLight);
-
           // Resolve with the light's response data
           resolve(changedLight);
         }
@@ -149,35 +143,40 @@ class LightConnector {
 
   async addLight(lightId) {
     // TODO: implmement hasLight
-    // if (lightRedisDAL.hasLight(lightId)) {
+    // if (await lightRedisDAL.hasLight(lightId)) {
     //   ChalkConsole.error(`Error adding ${lightId}: Light already exists`);
     //   // TODO: return actual graphql error message
     //   return;
     // }
 
     // Add new light to light database
-    const lightAdded = lightRedisDAL.addLight(lightId);
+    const lightAdded = await lightRedisDAL.addLight(lightId);
 
     // Subscribe to new messages from the new light
     mqttDAL.subscribeToLight(lightId);
 
+    // TODO: Find a way to check if the light is connected
+    // If it is connected, return then.
+    // Wait a max of .5 seconds?
     pubsub.publish("lightAdded", { lightAdded });
     return lightAdded;
   }
 
   async removeLight(lightId) {
-    if (!lightRedisDAL.getLight(lightId)) {
-      ChalkConsole.error(`Error removing ${lightId}: Light does not exist`);
-      // TODO: return actual graphql error message
-      return;
-    }
-
-    // Remove light from database
-    const lightRemoved = lightRedisDAL.removeLight(lightId);
+    // TODO: implmement hasLight
+    // if (!await lightRedisDAL.hasLight(lightId)) {
+    //   ChalkConsole.error(`Error removing ${lightId}: Light does not exist`);
+    //   // TODO: return actual graphql error message
+    //   return;
+    // }
 
     // unsubscribe from the light's messages
     mqttDAL.unsubscribeFromLight(lightId);
 
+    // Remove light from database
+    const lightRemoved = await lightRedisDAL.removeLight(lightId);
+
+    console.log(lightRemoved);
     // Return the removed light
     pubsub.publish("lightRemoved", { lightRemoved });
     return lightRemoved;

@@ -62,8 +62,9 @@ class LightConnector {
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
+
     // This gets triggered when the state of the light changes
-    const handleStateMessage = message => {
+    const handleStateMessage = async message => {
       // TODO: add data checking
       const { mutationId, state, brightness, color, effect, speed } = message;
       let newState = {};
@@ -73,29 +74,27 @@ class LightConnector {
       if (effect) newState = { ...newState, effect };
       if (speed) newState = { ...newState, speed };
 
-      // Find the light in our data store whose id matches the message name
-      const changedLight = lightRedisDAL.getLight(message.name);
-      // Push changes to existing light
-      Object.assign(changedLight, newState);
-      // Publish to the subscription async interator
+      const changedLight = await lightRedisDAL.setLight(message.name, newState);
+      console.log(changedLight);
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
       // Publish to the mutation response event
       eventEmitter.emit("mutationResponse", mutationId, changedLight);
     };
+
     // This gets triggered when the light sends its effect list
-    const handleEffectListMessage = message => {
-      // Find the light in our data store whose id matches the message name
-      const changedLight = lightRedisDAL.getLight(message.name);
-      // Push changes to existing light
-      Object.assign(changedLight, { supportedEffects: message.effectList });
+    const handleEffectListMessage = async message => {
+      const changedLight = await lightRedisDAL.setLight(message.name, {
+        supportedEffects: message.effectList
+      });
+      console.log(changedLight);
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
 
     mqttDAL.onConnectionMessage(handleConnectedMessage);
-    //mqttDAL.onEffectListMessage(handleEffectListMessage);
-    //mqttDAL.onStateMessage(handleStateMessage);
+    mqttDAL.onStateMessage(handleStateMessage);
+    mqttDAL.onEffectListMessage(handleEffectListMessage);
   }
 
   // TODO: Add an error message if no light was found

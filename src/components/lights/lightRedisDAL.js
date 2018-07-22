@@ -4,7 +4,11 @@ import { promisify } from "util";
 const client = redis.createClient();
 const asyncSMEMBERS = promisify(client.SMEMBERS).bind(client);
 const asyncSADD = promisify(client.SADD).bind(client);
-const asyncSREM = promisify(client.SREM).bind(client);
+//const asyncSREM = promisify(client.SREM).bind(client);
+const asyncINCR = promisify(client.INCR).bind(client);
+const asyncZADD = promisify(client.ZADD).bind(client);
+const asyncZREM = promisify(client.ZREM).bind(client);
+const asyncZRANGE = promisify(client.ZRANGE).bind(client);
 const asyncHMSET = promisify(client.HMSET).bind(client);
 const asyncDEL = promisify(client.DEL).bind(client);
 const asyncHGETALL = promisify(client.HGETALL).bind(client);
@@ -68,7 +72,7 @@ class Light {
 
   async getAllLights() {
     // Get all the light keys from redis
-    const lightKeys = await asyncSMEMBERS("lightKeys");
+    const lightKeys = await asyncZRANGE("lightKeys", 0, -1);
 
     // For each light key, get the corresponding light data
     const mapLightPromises = lightKeys.map(async lightKey =>
@@ -134,7 +138,8 @@ class Light {
   }
 
   async addLight(id) {
-    const response = await asyncSADD("lightKeys", id);
+    const score = await asyncINCR("lightScore");
+    const response = await asyncZADD("lightKeys", score, id);
 
     let response2;
     switch (response) {
@@ -164,7 +169,7 @@ class Light {
   }
 
   async removeLight(id) {
-    const response = await asyncSREM("lightKeys", id);
+    const response = await asyncZREM("lightKeys", id);
 
     let response2;
     switch (response) {

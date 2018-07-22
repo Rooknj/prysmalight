@@ -12,12 +12,14 @@ script:
 - yarn test
 - yarn build
 - docker-compose build
-- docker tag lightapp2-client-prod rooknj/lightapp2:client-$tag
+- docker tag lightapp2-client-x64 rooknj/lightapp2:client-x64-$tag
+- docker-compose -f docker-compose.rpi.yml build
+- docker tag lightapp2-client-rpi rooknj/lightapp2:client-rpi-$tag
 before_deploy:
 - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
-  script: docker push rooknj/lightapp2:client-$tag
+  script: docker push rooknj/lightapp2:client-x64-$tag && docker push rooknj/lightapp2:client-rpi-$tag
   on:
     branch: master
 env:

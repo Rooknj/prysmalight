@@ -47,7 +47,9 @@
     "build": "react-scripts build",
     "test": "REACT_APP_ENV=test react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "publishProd": "./publish.sh -t latest -Y",
-    "publishTest": "./publish.sh -t test -Y"
+    "publishProdX64": "./publish.sh -t latest -Y",
+    "publishTestX64": "./publish.sh -t test -Y",
+    "publishProdRpi": "./publish.rpi.sh -t latest -Y",
+    "publishTestRpi": "./publish.rpi.sh -t test -Y"
   }
 }

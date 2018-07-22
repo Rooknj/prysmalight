@@ -16,11 +16,11 @@ buildDocker() {
     echo "Building docker image"
     docker-compose build
 
-    echo "Tagging docker image with \"client-x64-$tag\""
-    docker tag lightapp2-client-x64 rooknj/lightapp2:client-x64-$tag
+    echo "Tagging docker image with \"client-rpi-$tag\""
+    docker tag lightapp2-client-rpi rooknj/lightapp2:client-rpi-$tag
 
     echo "Pushing docker image"
-    docker push rooknj/lightapp2:client-x64-$tag
+    docker push rooknj/lightapp2:client-rpi-$tag
 }
 
 getTagFromUser() {
@@ -29,7 +29,7 @@ getTagFromUser() {
 }
 
 getConfirmationFromUser() {
-    printf "I will tag this docker image with \"client-x64-$tag\", is that ok? [Y/n]: " 
+    printf "I will tag this docker image with \"client-rpi-$tag\", is that ok? [Y/n]: " 
     read confirm
 }
 

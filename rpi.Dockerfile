@@ -1,5 +1,5 @@
 # build environment
-FROM node:carbon-alpine as builder
+FROM arm32v7/node:carbon as builder
 WORKDIR /usr/src/app
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 COPY package.json /usr/src/app/package.json
@@ -10,7 +10,7 @@ COPY . /usr/src/app
 RUN yarn build
 
 # production environment
-FROM nginx:stable
+FROM arm32v7/nginx:stable
 COPY --from=builder /usr/src/app/build /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

@@ -13,6 +13,7 @@ script:
 - yarn build
 - docker-compose build
 - docker tag lightapp2-client-x64 rooknj/lightapp2:client-x64-$tag
+- docker run --rm --privileged multiarch/qemu-user-static:register --reset
 - docker-compose -f docker-compose.rpi.yml build
 - docker tag lightapp2-client-rpi rooknj/lightapp2:client-rpi-$tag
 before_deploy:

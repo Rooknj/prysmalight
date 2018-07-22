@@ -7,7 +7,3 @@ services:
     image: lightapp2-client-x64
     ports:
       - "80:80"
-  
-
-# Run prod
-# docker-compose -f docker-compose.prod.yml up -d

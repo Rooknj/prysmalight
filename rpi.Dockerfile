@@ -4,6 +4,11 @@ WORKDIR /usr/src/app
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 COPY package.json /usr/src/app/package.json
 COPY yarn.lock /usr/src/app/yarn.lock
+
+# Install Yarn
+RUN npm install -g yarn
+RUN yarn --version
+
 RUN yarn install --silent
 RUN yarn global add react-scripts@1.1.2 --silent
 COPY . /usr/src/app

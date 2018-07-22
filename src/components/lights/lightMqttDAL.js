@@ -1,8 +1,5 @@
 import MQTT from "async-mqtt";
 import ChalkConsole from "../../ChalkConsole";
-import Light from "./light";
-
-const light = new Light();
 
 // MQTT: client
 let MQTT_CLIENT;
@@ -65,6 +62,19 @@ const unsubscribeFrom = topic => {
     );
 };
 
+// Utility functions
+const parseMqttMessage = jsonData => {
+  const message = JSON.parse(jsonData);
+
+  if (!message.name) {
+    ChalkConsole.error(
+      `Received messsage on connected topic that did not have an id\nMessage: ${data}`
+    );
+    return;
+  }
+  return message;
+};
+
 class LightMqttDAL {
   constructor() {
     // Default message handlers
@@ -92,21 +102,23 @@ class LightMqttDAL {
 
       //TODO: Move this logic out of here and into the controller (maybe pass the lightId to the handler too)
       // Find the light the message pertains to in our database of lights
-      const topicLight = light.getLight(topicTokens[1]);
-      if (!topicLight) {
-        ChalkConsole.error(
-          `Could not find ${topicTokens[1]} in our database of lights`
-        );
-        return;
-      }
+      // const topicLight = light.getLight(topicTokens[1]);
+      // if (!topicLight) {
+      //   ChalkConsole.error(
+      //     `Could not find ${topicTokens[1]} in our database of lights`
+      //   );
+      //   return;
+      // }
 
+      // Parse the JSON into a usable javascript object
+      const messageObject = parseMqttMessage(data);
       // Route each MQTT message to it's respective message handler depending on topic
       if (topicTokens[2] === MQTT_LIGHT_CONNECTED_TOPIC) {
-        this.connectionHandler(data);
+        this.connectionHandler(messageObject);
       } else if (topicTokens[2] === MQTT_LIGHT_STATE_TOPIC) {
-        this.stateHandler(data);
+        this.stateHandler(messageObject);
       } else if (topicTokens[2] === MQTT_EFFECT_LIST_TOPIC) {
-        this.effectListHandler(data);
+        this.effectListHandler(messageObject);
       } else {
         return;
       }

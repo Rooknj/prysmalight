@@ -3,21 +3,28 @@ import MQTT from "async-mqtt";
 import { PubSub } from "graphql-subscriptions";
 import events from "events";
 
-import Light from "./light";
+import LightRedisDAL from "./lightRedisDAL";
 import LightMqttDAL from "./lightMqttDAL";
 
-const light = new Light();
+const lightRedisDAL = new LightRedisDAL();
 const mqttDAL = new LightMqttDAL();
-
-// Instantiate the eventEmitter
 const eventEmitter = new events.EventEmitter();
-
-// Initialize PubSub
 const pubsub = new PubSub();
 
 // MQTT: payloads by default
 const LIGHT_CONNECTED = 2;
 const LIGHT_DISCONNECTED = 0;
+
+// Utility functions
+const mapConnectionMessageToConnectionPayload = connectionMessage => {
+  let connectionString = -1;
+  if (Number(connectionMessage) === LIGHT_DISCONNECTED) {
+    connectionString = LIGHT_DISCONNECTED;
+  } else if (Number(connectionMessage) === LIGHT_CONNECTED) {
+    connectionString = LIGHT_CONNECTED;
+  }
+  return connectionString;
+};
 
 class LightConnector {
   constructor() {
@@ -29,52 +36,34 @@ class LightConnector {
 
   async init() {
     // Set up onConnect callback
-    mqttDAL.onConnect(() => {
+    mqttDAL.onConnect(async () => {
       ChalkConsole.info(`Connected to MQTT broker`);
-      light.getAllLights().forEach(light => mqttDAL.subscribeToLight(light.id));
+      const lights = await lightRedisDAL.getAllLights();
+      lights.forEach(light => mqttDAL.subscribeToLight(light.id));
     });
 
-    // MQTT Message Handlers
     // This gets triggered when the connection of the light changes
-    const handleConnectedMessage = data => {
-      const message = JSON.parse(data);
-
-      if (!message.name) {
-        ChalkConsole.error(
-          `Received messsage on connected topic that did not have an id\nMessage: ${data}`
-        );
-        return;
-      }
-
-      let connected;
-      if (Number(message.connection) === LIGHT_DISCONNECTED) {
-        connected = LIGHT_DISCONNECTED;
-      } else if (Number(message.connection) === LIGHT_CONNECTED) {
-        connected = LIGHT_CONNECTED;
-      } else {
+    const handleConnectedMessage = async message => {
+      // If the connectionPayload isn't correct, return
+      const connectionPayload = mapConnectionMessageToConnectionPayload(
+        message.connection
+      );
+      if (connectionPayload === -1) {
         ChalkConsole.error(
           `Received messsage on connected topic that was not in the correct format\nMessage: ${data}`
         );
         return;
       }
 
-      // Find the light in our data store whose id matches the message name
-      const changedLight = light.getLight(message.name);
-      // Push changes to existing light
-      Object.assign(changedLight, { connected });
+      const changedLight = await lightRedisDAL.setLight(message.name, {
+        connected: connectionPayload
+      });
+      console.log(changedLight);
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
     // This gets triggered when the state of the light changes
-    const handleStateMessage = data => {
-      const message = JSON.parse(data);
-      if (!message.name) {
-        ChalkConsole.error(
-          `Received messsage on State topic that did not have an id\nMessage: ${data}`
-        );
-        return;
-      }
-
+    const handleStateMessage = message => {
       // TODO: add data checking
       const { mutationId, state, brightness, color, effect, speed } = message;
       let newState = {};
@@ -85,7 +74,7 @@ class LightConnector {
       if (speed) newState = { ...newState, speed };
 
       // Find the light in our data store whose id matches the message name
-      const changedLight = light.getLight(message.name);
+      const changedLight = lightRedisDAL.getLight(message.name);
       // Push changes to existing light
       Object.assign(changedLight, newState);
       // Publish to the subscription async interator
@@ -95,18 +84,9 @@ class LightConnector {
       eventEmitter.emit("mutationResponse", mutationId, changedLight);
     };
     // This gets triggered when the light sends its effect list
-    const handleEffectListMessage = data => {
-      const message = JSON.parse(data);
-
-      if (!message.name) {
-        ChalkConsole.error(
-          `Received messsage on Effect List topic that did not have an id\nMessage: ${data}`
-        );
-        return;
-      }
-
+    const handleEffectListMessage = message => {
       // Find the light in our data store whose id matches the message name
-      const changedLight = light.getLight(message.name);
+      const changedLight = lightRedisDAL.getLight(message.name);
       // Push changes to existing light
       Object.assign(changedLight, { supportedEffects: message.effectList });
       pubsub.publish(message.name, { lightChanged: changedLight });
@@ -114,13 +94,13 @@ class LightConnector {
     };
 
     mqttDAL.onConnectionMessage(handleConnectedMessage);
-    mqttDAL.onEffectListMessage(handleEffectListMessage);
-    mqttDAL.onStateMessage(handleStateMessage);
+    //mqttDAL.onEffectListMessage(handleEffectListMessage);
+    //mqttDAL.onStateMessage(handleStateMessage);
   }
 
   // TODO: Add an error message if no light was found
   getLight = lightId => {
-    return lights.getLight(lightId);
+    return lightRedisDAL.getLight(lightId);
   };
 
   // This gets triggered if you call setLight
@@ -147,7 +127,7 @@ class LightConnector {
           );
 
           // Set the light in our data store
-          light.setLight(changedLight);
+          lightRedisDAL.setLight(changedLight);
 
           // Resolve with the light's response data
           resolve(changedLight);
@@ -169,16 +149,15 @@ class LightConnector {
   };
 
   async addLight(lightId) {
-    if (light.getLight(lightId)) {
-      ChalkConsole.error(`Error adding ${lightId}: Light already exists`);
-      // TODO: return actual graphql error message
-      return;
-    }
-
-    // TODO: Add light to persistent data storage
+    // TODO: implmement hasLight
+    // if (lightRedisDAL.hasLight(lightId)) {
+    //   ChalkConsole.error(`Error adding ${lightId}: Light already exists`);
+    //   // TODO: return actual graphql error message
+    //   return;
+    // }
 
     // Add new light to light database
-    const lightAdded = light.addLight(lightId);
+    const lightAdded = lightRedisDAL.addLight(lightId);
 
     // Subscribe to new messages from the new light
     mqttDAL.subscribeToLight(lightId);
@@ -188,14 +167,14 @@ class LightConnector {
   }
 
   async removeLight(lightId) {
-    if (!light.getLight(lightId)) {
+    if (!lightRedisDAL.getLight(lightId)) {
       ChalkConsole.error(`Error removing ${lightId}: Light does not exist`);
       // TODO: return actual graphql error message
       return;
     }
 
     // Remove light from database
-    const lightRemoved = light.removeLight(lightId);
+    const lightRemoved = lightRedisDAL.removeLight(lightId);
 
     // unsubscribe from the light's messages
     mqttDAL.unsubscribeFromLight(lightId);
@@ -224,7 +203,7 @@ class LightConnector {
   };
 
   getLights = () => {
-    return light.getAllLights();
+    return lightRedisDAL.getAllLights();
   };
 }
 

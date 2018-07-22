@@ -1,14 +1,13 @@
 version: "3"
 services:
   broker:
-    build: .
-    image: lightapp2-broker-prod
+    image: eclipse-mosquitto:latest
     ports:
       - "1883:1883"
       - "9001:9001"
     volumes:
-      - ./config:/mqtt/config
-      - /mqtt/data
-      - /mqtt/log
+      - ./config:/mosquitto/config
+      - /mosquitto/data
+      - /mosquitto/log
 
 

@@ -6,13 +6,13 @@ services:
 - docker
 script:
 - docker run --rm --privileged multiarch/qemu-user-static:register --reset
-- docker-compose build
-- docker tag lightapp2-broker-prod rooknj/lightapp2:broker-$tag
+- docker-compose -f docker-compose.rpi.yml build
+- docker tag lightapp2-broker-rpi rooknj/lightapp2:broker-rpi-$tag
 before_deploy:
 - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
-  script: docker push rooknj/lightapp2:broker-$tag
+  script: docker push rooknj/lightapp2:broker-x64-$tag && docker push rooknj/lightapp2:broker-rpi-$tag
   on:
     branch: master
 env:

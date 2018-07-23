@@ -7,7 +7,9 @@ COPY yarn.lock /usr/src/app/yarn.lock
 
 RUN yarn install --silent
 RUN yarn global add react-scripts@1.1.2 --silent
+
 COPY . /usr/src/app
+RUN yarn test
 RUN yarn build
 
 # production environment

@@ -7,7 +7,11 @@ services:
     image: lightapp2-server-x64
     ports:
       - "4001:4001"
+    environment:
+      - IN_DOCKER_CONTAINER=true
   redis:
     image: redis:latest
     ports:
       - "6379:6379"
+    volumes:
+      - ./redisData:/data

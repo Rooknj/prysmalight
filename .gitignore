@@ -1,6 +1,9 @@
 # Dependency directory
 node_modules
 
+# Redis persistant storage
+/redisData
+
 # testing
 /coverage
 

@@ -2,14 +2,18 @@ import MQTT from "async-mqtt";
 import ChalkConsole from "../../ChalkConsole";
 
 // MQTT: client
-let MQTT_CLIENT;
-if (process.env.MOCK) {
-  MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
-} else if (process.env.NODE_ENV == "development") {
-  MQTT_CLIENT = "tcp://raspberrypi.local:1883";
-} else {
-  MQTT_CLIENT = "tcp://localhost:1883";
+let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
+if (process.env.MQTT_HOST) {
+  console.log("Adding custom MQTT host:", process.env.MQTT_HOST);
+  MQTT_BROKER = `tcp://${process.env.MQTT_HOST}:1883`;
 }
+// if (process.env.MOCK) {
+//   MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
+// } else if (process.env.NODE_ENV == "development") {
+//   MQTT_CLIENT = "tcp://raspberrypi.local:1883";
+// } else {
+//   MQTT_CLIENT = ;
+// }
 
 // MQTT: topics
 const MQTT_LIGHT_TOP_LEVEL = "lightapp2";
@@ -20,7 +24,7 @@ const MQTT_EFFECT_LIST_TOPIC = "effects";
 
 // Connect to MQTT server
 // TODO: Might need to move this to the constructor
-const mqttClient = MQTT.connect(MQTT_CLIENT, {
+const mqttClient = MQTT.connect(MQTT_BROKER, {
   reconnectPeriod: 5000, // Amount of time between reconnection attempts
   username: "pi",
   password: "MQTTIsBetterThanUDP"

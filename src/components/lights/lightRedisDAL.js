@@ -1,7 +1,13 @@
 import redis from "redis";
 import { promisify } from "util";
 
-const client = redis.createClient();
+let REDIS_HOST = "localhost";
+if (process.env.IN_DOCKER_CONTAINER) {
+  console.log("Find redis inside docker container");
+  REDIS_HOST = "redis";
+}
+const REDIS_PORT = 6379;
+const client = redis.createClient(REDIS_PORT, REDIS_HOST);
 const asyncSMEMBERS = promisify(client.SMEMBERS).bind(client);
 const asyncSADD = promisify(client.SADD).bind(client);
 //const asyncSREM = promisify(client.SREM).bind(client);
@@ -158,6 +164,9 @@ class Light {
     switch (response2) {
       case "OK":
         console.log("Light successfully added");
+        // Save the redis database to persistant storave
+        client.BGSAVE();
+        // Return the newly added light
         return this.getLight(id);
       default:
         //TODO: throw error
@@ -189,6 +198,9 @@ class Light {
     switch (response2) {
       case 1:
         console.log("Light successfully deleted");
+        // Save the redis database to persistant storave
+        client.BGSAVE();
+        // Return the id of the deleted light
         return { id };
       default:
         //TODO: throw error

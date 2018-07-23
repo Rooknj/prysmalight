@@ -16,6 +16,8 @@ RUN yarn global add pkg
 
 # Install app dependencies
 RUN yarn install --silent
+ # Test app
+RUN yarn test
 
 # Build app
 RUN yarn build

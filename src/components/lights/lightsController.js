@@ -1,5 +1,4 @@
 import ChalkConsole from "../../ChalkConsole";
-import MQTT from "async-mqtt";
 import { PubSub } from "graphql-subscriptions";
 import events from "events";
 
@@ -50,7 +49,7 @@ class LightConnector {
       );
       if (connectionPayload === -1) {
         ChalkConsole.error(
-          `Received messsage on connected topic that was not in the correct format\nMessage: ${data}`
+          `Received messsage on connected topic that was not in the correct format\nMessage: ${message}`
         );
         return;
       }
@@ -94,13 +93,13 @@ class LightConnector {
     mqttDAL.onEffectListMessage(handleEffectListMessage);
   }
 
-  // TODO: Add an error message if no light was found
-  getLight = lightId => {
+  // TODO Add an error message if no light was found
+  getLight(lightId) {
     return lightRedisDAL.getLight(lightId);
-  };
+  }
 
   // This gets triggered if you call setLight
-  setLight = light => {
+  setLight(light) {
     const { id, state, brightness, color, effect, speed } = light;
 
     // Initialize the MQTT payload with it's unique mutationId and the id of the light to change
@@ -139,7 +138,7 @@ class LightConnector {
         reject(`Response from ${id} took too long to reach the server`);
       }, 3000);
     });
-  };
+  }
 
   async addLight(lightId) {
     // TODO: implmement hasLight
@@ -183,26 +182,26 @@ class LightConnector {
   }
 
   // Subscribe to one specific light's changes
-  subscribeLight = lightId => {
+  subscribeLight(lightId) {
     return pubsub.asyncIterator(lightId);
-  };
+  }
 
   // Subscribe to all light's changes
-  subscribeAllLights = lightId => {
+  subscribeAllLights() {
     return pubsub.asyncIterator("lightsChanged");
-  };
+  }
 
-  subscribeLightAdded = lightId => {
+  subscribeLightAdded() {
     return pubsub.asyncIterator("lightAdded");
-  };
+  }
 
-  subscribeLightRemoved = lightId => {
+  subscribeLightRemoved() {
     return pubsub.asyncIterator("lightRemoved");
-  };
+  }
 
-  getLights = () => {
+  getLights() {
     return lightRedisDAL.getAllLights();
-  };
+  }
 }
 
 export default LightConnector;

@@ -11,6 +11,9 @@ ENV BABEL_ENV="production"
 # Add app
 COPY . .
 
+# Start QEMU support for building on all architectures
+RUN [ "cross-build-start" ]
+
 # Install Yarn
 RUN npm install -g yarn
 

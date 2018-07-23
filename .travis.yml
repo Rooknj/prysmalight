@@ -12,7 +12,6 @@ script:
 - yarn build
 - docker-compose build
 - docker tag lightapp2-server-x64 rooknj/lightapp2:server-x64-$tag
-- docker run --rm --privileged multiarch/qemu-user-static:register --reset
 - docker-compose -f docker-compose.rpi.yml build
 - docker tag lightapp2-server-rpi rooknj/lightapp2:server-rpi-$tag
 before_deploy:

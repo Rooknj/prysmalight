@@ -5,7 +5,6 @@ sudo: required
 services:
 - docker
 script:
-- docker run --rm --privileged multiarch/qemu-user-static:register --reset
 - docker-compose -f docker-compose.rpi.yml build
 - docker tag lightapp2-broker-rpi rooknj/lightapp2:broker-rpi-$tag
 before_deploy:

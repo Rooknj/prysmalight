@@ -5,7 +5,9 @@ services:
       context: .
       dockerfile: rpi.Dockerfile
     image: lightapp2-server-rpi
+    environment:
+      - IN_DOCKER_CONTAINER=true
   redis:
-    image: arm32v7/redis:latest
+    image: redis:latest
     ports:
       - "6379:6379"

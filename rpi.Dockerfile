@@ -2,6 +2,9 @@ FROM resin/rpi-raspbian:jessie
 LABEL version="1.0" \
       description=""
 
+# Start QEMU support for building on all architectures
+RUN [ "cross-build-start" ]
+
 ADD https://repo.mosquitto.org/debian/mosquitto-repo.gpg.key .
 RUN apt-key add mosquitto-repo.gpg.key
 ADD https://repo.mosquitto.org/debian/mosquitto-jessie.list /etc/apt/sources.list.d/

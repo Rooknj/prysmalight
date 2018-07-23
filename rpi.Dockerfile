@@ -1,6 +1,6 @@
 ## Build Environment
 # The latest LTS version of node
-FROM resin/raspberrypi3-node:8.0.0 as builder
+FROM resin/raspberrypi3-node:8.11.3-slim as builder
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -13,7 +13,6 @@ COPY . .
 
 # Install Yarn
 RUN npm install -g yarn
-RUN yarn --version
 
 # Install pkg
 RUN yarn global add pkg
@@ -28,7 +27,7 @@ RUN pkg . --targets node8-linux-armv7
 CMD ["yarn", "prodServer"]
 
 ## Prod Environment
-FROM resin/rpi-raspbian:jessie
+FROM resin/raspberrypi3-debian:jessie
 
 WORKDIR /usr/src/app
 

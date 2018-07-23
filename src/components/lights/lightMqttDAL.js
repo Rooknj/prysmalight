@@ -1,18 +1,19 @@
 import MQTT from "async-mqtt";
 import ChalkConsole from "../../ChalkConsole";
-import Light from "./light";
-
-const light = new Light();
 
 // MQTT: client
-let MQTT_CLIENT;
-if (process.env.MOCK) {
-  MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
-} else if (process.env.NODE_ENV == "development") {
-  MQTT_CLIENT = "tcp://raspberrypi.local:1883";
-} else {
-  MQTT_CLIENT = "tcp://localhost:1883";
+let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
+if (process.env.MQTT_HOST) {
+  console.log("Adding custom MQTT host:", process.env.MQTT_HOST);
+  MQTT_BROKER = `tcp://${process.env.MQTT_HOST}:1883`;
 }
+// if (process.env.MOCK) {
+//   MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
+// } else if (process.env.NODE_ENV == "development") {
+//   MQTT_CLIENT = "tcp://raspberrypi.local:1883";
+// } else {
+//   MQTT_CLIENT = ;
+// }
 
 // MQTT: topics
 const MQTT_LIGHT_TOP_LEVEL = "lightapp2";
@@ -23,7 +24,7 @@ const MQTT_EFFECT_LIST_TOPIC = "effects";
 
 // Connect to MQTT server
 // TODO: Might need to move this to the constructor
-const mqttClient = MQTT.connect(MQTT_CLIENT, {
+const mqttClient = MQTT.connect(MQTT_BROKER, {
   reconnectPeriod: 5000, // Amount of time between reconnection attempts
   username: "pi",
   password: "MQTTIsBetterThanUDP"
@@ -65,11 +66,27 @@ const unsubscribeFrom = topic => {
     );
 };
 
+// Utility functions
+const parseMqttMessage = jsonData => {
+  const message = JSON.parse(jsonData);
+
+  if (!message.name) {
+    ChalkConsole.error(
+      `Received messsage on connected topic that did not have an id\nMessage: ${data}`
+    );
+    return;
+  }
+  return message;
+};
+
 class LightMqttDAL {
   constructor() {
+    // Default message handlers
     this.connectionHandler = () => console.log("Connection Message");
     this.effectListHandler = () => console.log("Effect List Message");
     this.stateHandler = () => console.log("State Message");
+
+    // Set up MQTT client to route messages to the appropriate callback handler function
     mqttClient.on("message", (topic, message) => {
       // Convert message into a string
       const data = message.toString();
@@ -87,23 +104,25 @@ class LightMqttDAL {
         return;
       }
 
-      //TODO: Add error check if the light stored in this variable is in our database
+      //TODO: Move this logic out of here and into the controller (maybe pass the lightId to the handler too)
       // Find the light the message pertains to in our database of lights
-      const topicLight = light.getLight(topicTokens[1]);
-      if (!topicLight) {
-        ChalkConsole.error(
-          `Could not find ${topicTokens[1]} in our database of lights`
-        );
-        return;
-      }
+      // const topicLight = light.getLight(topicTokens[1]);
+      // if (!topicLight) {
+      //   ChalkConsole.error(
+      //     `Could not find ${topicTokens[1]} in our database of lights`
+      //   );
+      //   return;
+      // }
 
+      // Parse the JSON into a usable javascript object
+      const messageObject = parseMqttMessage(data);
       // Route each MQTT message to it's respective message handler depending on topic
       if (topicTokens[2] === MQTT_LIGHT_CONNECTED_TOPIC) {
-        this.connectionHandler(data);
+        this.connectionHandler(messageObject);
       } else if (topicTokens[2] === MQTT_LIGHT_STATE_TOPIC) {
-        this.stateHandler(data);
+        this.stateHandler(messageObject);
       } else if (topicTokens[2] === MQTT_EFFECT_LIST_TOPIC) {
-        this.effectListHandler(data);
+        this.effectListHandler(messageObject);
       } else {
         return;
       }

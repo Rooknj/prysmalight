@@ -1,6 +1,6 @@
 ## Build Environment
 # The latest LTS version of node
-FROM node:carbon-alpine as builder
+FROM resin/raspberrypi3-node:8.0.0 as builder
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -11,6 +11,10 @@ ENV BABEL_ENV="production"
 # Add app
 COPY . .
 
+# Install Yarn
+RUN npm install -g yarn
+RUN yarn --version
+
 # Install pkg
 RUN yarn global add pkg
 
@@ -19,12 +23,12 @@ RUN yarn install --silent
 
 # Build app
 RUN yarn build
-RUN pkg . --targets node8-linux-x64
+RUN pkg . --targets node8-linux-armv7
 
 CMD ["yarn", "prodServer"]
 
 ## Prod Environment
-FROM node:carbon
+FROM resin/rpi-raspbian:jessie
 
 WORKDIR /usr/src/app
 

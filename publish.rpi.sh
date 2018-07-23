@@ -13,13 +13,13 @@ usage() {
 
 buildDocker() {
     echo "Building docker image"
-    docker-compose build
+    docker-compose -f docker-compose.rpi.yml build
 
-    echo "Tagging docker image with \"server-x64-$tag\""
-    docker tag lightapp2-server-x64 rooknj/lightapp2:server-x64-$tag
+    echo "Tagging docker image with \"server-rpi-$tag\""
+    docker tag lightapp2-server-rpi rooknj/lightapp2:server-rpi-$tag
 
     echo "Pushing docker image"
-    docker push rooknj/lightapp2:server-x64-$tag
+    docker push rooknj/lightapp2:server-rpi-$tag
 }
 
 getTagFromUser() {
@@ -28,7 +28,7 @@ getTagFromUser() {
 }
 
 getConfirmationFromUser() {
-    printf "I will tag this docker image with \"server-x64-$tag\", is that ok? [Y/n]: " 
+    printf "I will tag this docker image with \"server-rpi-$tag\", is that ok? [Y/n]: " 
     read confirm
 }
 

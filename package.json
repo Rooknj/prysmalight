@@ -50,11 +50,11 @@
   },
   "babel": {
     "presets": [
-      "env", {
+      ["env", {
         "targets": {
           "node": "8.0.0"
         }
-      }
+      }]
     ],
     "plugins": [
       "transform-class-properties",

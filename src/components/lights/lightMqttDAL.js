@@ -72,7 +72,7 @@ const parseMqttMessage = jsonData => {
 
   if (!message.name) {
     ChalkConsole.error(
-      `Received messsage on connected topic that did not have an id\nMessage: ${data}`
+      `Received messsage on connected topic that did not have an id\nMessage: ${message}`
     );
     return;
   }

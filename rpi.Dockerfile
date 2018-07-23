@@ -1,5 +1,5 @@
 # build environment
-FROM resin/raspberrypi3-node:8.0.0 as builder
+FROM resin/raspberrypi3-node:8.11.3-slim as builder
 WORKDIR /usr/src/app
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
 COPY package.json /usr/src/app/package.json
@@ -14,7 +14,9 @@ RUN yarn --version
 
 RUN yarn install --silent
 RUN yarn global add react-scripts@1.1.2 --silent
+
 COPY . /usr/src/app
+RUN yarn testNoWatch
 RUN yarn build
 
 # production environment

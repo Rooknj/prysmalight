@@ -46,6 +46,7 @@
     "startLocal": "REACT_APP_ENV=local react-scripts start",
     "build": "react-scripts build",
     "test": "REACT_APP_ENV=test react-scripts test --env=jsdom",
+    "testNoWatch": "CI=true REACT_APP_ENV=test react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
     "publishProd": "./publish.sh -t latest -Y",
     "publishTest": "./publish.sh -t test -Y",

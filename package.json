@@ -39,7 +39,7 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "test": "./node_modules/.bin/eslint .",
+    "test": "echo test",
     "build": "babel src --out-dir lib --copy-files",
     "start": "NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
     "startLocal": "nodemon src/server.js --exec babel-node",

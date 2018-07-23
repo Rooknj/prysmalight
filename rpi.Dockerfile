@@ -16,12 +16,12 @@ RUN [ "cross-build-start" ]
 
 # Install Yarn
 RUN npm install -g yarn
-
 # Install pkg
 RUN yarn global add pkg
-
 # Install app dependencies
 RUN yarn install --silent
+ # Test app
+RUN yarn test
 
 # Build app
 RUN yarn build

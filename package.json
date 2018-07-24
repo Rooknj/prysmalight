@@ -46,9 +46,9 @@
     "start": "react-scripts start",
     "startLocal": "REACT_APP_ENV=local react-scripts start",
     "build": "react-scripts build",
-    "buildDocker": "./scripts/dockerScripts build",
-    "tagDocker": "./scripts/dockerScripts tag",
-    "publishDocker": "./scripts/dockerScripts publish",
+    "buildDocker": "node scripts/dockerScripts build",
+    "tagDocker": "node scripts/dockerScripts tag",
+    "publishDocker": "node scripts/dockerScripts publish",
     "test": "REACT_APP_ENV=test react-scripts test --env=jsdom",
     "testNoWatch": "CI=true REACT_APP_ENV=test react-scripts test --env=jsdom",
     "eject": "react-scripts eject"

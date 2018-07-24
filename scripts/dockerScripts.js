@@ -74,10 +74,13 @@ const getTag = tag => {
   if (tag) return tag;
 
   const branchName = process.env.TRAVIS_BRANCH;
-  if(branchName === "master") {
-    return "latest";
-  } else {
+  if (branchName) {
+    if (branchName === "master") {
+      return "latest";
+    }
     return "test";
+  } else {
+    return;
   }
 };
 
@@ -100,12 +103,15 @@ const processArgs = args => {
 
   // Get the tag
   const tag = getTag(args.t);
-  console.log("Tag:", tag);
+  if(!tag) {
+    console.log("No tag was provided and you are not in CI pipeline. Aborting");
+    return;
+  }
 
   if (commands.includes("build")) {
     console.log("Building");
     ARCHITECTURES.forEach(arch => {
-      if(arch === "x64") {
+      if (arch === "x64") {
         buildDockerImage();
       } else if (arch === "rpi") {
         buildDockerImage("docker-compose.rpi.yml");
@@ -114,19 +120,19 @@ const processArgs = args => {
       }
     });
   } else if (commands.includes("tag")) {
-    if(process.env.TRAVIS_PULL_REQUEST) {
-      console.log("This is a pull request. Skipping tag")
+    if (process.env.TRAVIS_PULL_REQUEST) {
+      console.log("This is a pull request. Skipping tag");
       return;
     }
     console.log("tagging");
     ARCHITECTURES.forEach(arch => {
       const dockerTag = generateDockerTag(tag, SERVICE, arch);
       const dockerImageName = generateDockerImageName(SERVICE, arch);
-      tagDockerImage(dockerImageName, dockerTag)
+      tagDockerImage(dockerImageName, dockerTag);
     });
   } else if (commands.includes("publish")) {
-    if(process.env.TRAVIS_PULL_REQUEST) {
-      console.log("This is a pull request. Skipping publish")
+    if (process.env.TRAVIS_PULL_REQUEST) {
+      console.log("This is a pull request. Skipping publish");
       return;
     }
     console.log("publishing");

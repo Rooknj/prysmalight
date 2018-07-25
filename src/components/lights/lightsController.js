@@ -1,9 +1,11 @@
-import ChalkConsole from "../../ChalkConsole";
 import { PubSub } from "graphql-subscriptions";
 import events from "events";
 
 import LightRedisDAL from "./lightRedisDAL";
 import LightMqttDAL from "./lightMqttDAL";
+import Debug from "debug";
+
+const debug = Debug("lightController");
 
 const lightRedisDAL = new LightRedisDAL();
 const mqttDAL = new LightMqttDAL();
@@ -36,7 +38,7 @@ class LightConnector {
   async init() {
     // Set up onConnect callback
     mqttDAL.onConnect(async () => {
-      ChalkConsole.info(`Connected to MQTT broker`);
+      debug(`Connected to MQTT broker`);
       const lights = await lightRedisDAL.getAllLights();
       lights.forEach(light => mqttDAL.subscribeToLight(light.id));
     });
@@ -48,7 +50,7 @@ class LightConnector {
         message.connection
       );
       if (connectionPayload === -1) {
-        ChalkConsole.error(
+        debug(
           `Received messsage on connected topic that was not in the correct format\nMessage: ${message}`
         );
         return;
@@ -175,7 +177,6 @@ class LightConnector {
     // Remove light from database
     const lightRemoved = await lightRedisDAL.removeLight(lightId);
 
-    console.log(lightRemoved);
     // Return the removed light
     pubsub.publish("lightRemoved", { lightRemoved });
     return lightRemoved;

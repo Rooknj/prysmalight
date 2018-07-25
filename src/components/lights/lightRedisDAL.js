@@ -1,9 +1,12 @@
 import redis from "redis";
 import { promisify } from "util";
+import Debug from "debug";
+
+const debug = Debug("redisDAL");
 
 let REDIS_HOST = "localhost";
 if (process.env.IN_DOCKER_CONTAINER) {
-  console.log("Find redis inside docker container");
+  debug("Find redis inside docker container");
   REDIS_HOST = "redis";
 }
 const REDIS_PORT = 6379;
@@ -60,19 +63,19 @@ const mapRedisObjectToLightObject = (id, redisResponse, supportedEffects) => ({
 class Light {
   constructor() {
     client.on("connect", () => {
-      console.log("Connected to redis");
+      debug("Connected to redis");
     });
     client.on("ready", () => {
-      console.log("redis is ready");
+      debug("redis is ready");
     });
     client.on("reconnecting", () => {
-      console.log("Attempting to reconnect to redis");
+      debug("Attempting to reconnect to redis");
     });
     client.on("error", () => {
-      console.log("redis encountered an error");
+      debug("redis encountered an error");
     });
     client.on("end", () => {
-      console.log("redis connection was closed");
+      debug("redis connection was closed");
     });
   }
 
@@ -109,7 +112,7 @@ class Light {
   // TODO: Make this function set specific fields on the light and not modify the others
   async setLight(id, lightData) {
     if (!id) {
-      console.error("No ID supplied");
+      debug("No ID supplied to setLight()");
       return;
     }
     let redisObject = [id];
@@ -152,25 +155,25 @@ class Light {
       // If the response is 1, then adding the light was successful
       // If 0, it was unsuccessful
       case 1:
-        console.log("successfully added key");
+        debug("successfully added key");
         response2 = await asyncHMSET(getNewRedisLight(id));
         break;
       default:
         // TODO: Throw error
-        console.log("Error adding key");
+        debug("Error adding key");
         return;
     }
 
     switch (response2) {
       case "OK":
-        console.log("Light successfully added");
+        debug("Light successfully added");
         // Save the redis database to persistant storave
         client.BGSAVE();
         // Return the newly added light
         return this.getLight(id);
       default:
         //TODO: throw error
-        console.log("Error adding light");
+        debug("Error adding light");
         return;
     }
 
@@ -185,31 +188,33 @@ class Light {
       // If the response is 1, then deleting the lightKey was successful
       // If 0, it was unsuccessful
       case 1:
-        console.log("successfully deleted key");
+        debug("successfully deleted key");
         response2 = await asyncDEL(id);
         break;
       default:
         // TODO: Throw error
-        console.log("Error deleting key");
+        debug("Error deleting key");
         return;
     }
 
     // If the response is 1, then deleting the light was successful
     switch (response2) {
       case 1:
-        console.log("Light successfully deleted");
+        debug("Light successfully deleted");
         // Save the redis database to persistant storave
         client.BGSAVE();
         // Return the id of the deleted light
         return { id };
       default:
         //TODO: throw error
-        console.log("Error deleting light");
+        debug("Error deleting light");
         return;
     }
   }
 
+  // TODO: Implement
   async hasLight(id) {
+    debug(id);
     return true;
   }
 }

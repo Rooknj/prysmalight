@@ -32,29 +32,36 @@ const mqttClient = MQTT.connect(MQTT_BROKER, {
 });
 
 // Subscribe method with logging
-const subscribeTo = topic => {
-  mqttClient
-    .subscribe(topic)
-    .then(granted =>
-      debug(`Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`)
-    )
-    .catch(error => debug(`Error subscribing to ${topic} Error: ${error}`));
+const subscribeTo = async topic => {
+  try {
+    const { granted } = await mqttClient.subscribe(topic);
+    debug(`Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`);
+  } catch (error) {
+    debug(`Error subscribing to ${topic} Error: ${error}`);
+    return error;
+  }
 };
 
 // Publish method with logging
-const publishTo = (topic, payload) => {
-  mqttClient
-    .publish(topic, payload)
-    .then(() => debug(`Published payload of ${payload} to ${topic}`))
-    .catch(error => debug(`Error publishing to ${topic} Error: ${error}`));
+const publishTo = async (topic, payload) => {
+  try {
+    await mqttClient.publish(topic, payload);
+    debug(`Published payload of ${payload} to ${topic}`);
+  } catch (error) {
+    debug(`Error publishing to ${topic} Error: ${error}`);
+    return error;
+  }
 };
 
 // Unsubscribe method with logging
-const unsubscribeFrom = topic => {
-  mqttClient
-    .unsubscribe(topic)
-    .then(() => debug(`Unsubscribed from ${topic}`))
-    .catch(error => debug(`Error unsubscribing from ${topic} Error: ${error}`));
+const unsubscribeFrom = async topic => {
+  try {
+    await mqttClient.unsubscribe(topic);
+    debug(`Unsubscribed from ${topic}`);
+  } catch (error) {
+    debug(`Error unsubscribing from ${topic} Error: ${error}`);
+    return error;
+  }
 };
 
 // Utility functions
@@ -63,7 +70,7 @@ const parseMqttMessage = jsonData => {
 
   if (!message.name) {
     debug(
-      `Received messsage on connected topic that did not have an id\nMessage: ${message}`
+      `Received messsage on connected topic that did not have an id. Ignoring\nMessage: ${message}`
     );
     return;
   }

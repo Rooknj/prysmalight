@@ -72,6 +72,10 @@ const generateDockerImageName = (service, arch) =>
 // Get the base tag to be used in this script
 const getTag = tag => {
   if (tag) return tag;
+  const travisTag = process.env.TRAVIS_TAG;
+  if (travisTag) {
+    return travisTag
+  }
 
   const branchName = process.env.TRAVIS_BRANCH;
   if (branchName) {
@@ -107,6 +111,7 @@ const processArgs = args => {
     console.log("No tag was provided and you are not in CI pipeline. Aborting");
     return;
   }
+  console.log("TAG:", tag);
 
   if (commands.includes("build")) {
     console.log("Building");

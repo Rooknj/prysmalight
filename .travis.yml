@@ -1,16 +1,20 @@
 language: node_js
 node_js:
-- stable
+  - stable
 sudo: required
 services:
-- docker
+  - docker
 cache:
+  yarn: true
   directories:
-  - node_modules
+    - node_modules
+install: true
+before_script:
+  - yarn global add minimist
 script:
   - yarn buildDocker
 before_deploy:
-- echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
   skip_cleanup: true
@@ -19,7 +23,7 @@ deploy:
     all_branches: true
 env:
   global:
-  - secure: RUlG1RCWB7qK1BGTPHLBlqmUgNzkIQpv6axnoSafgzWX1Kypf+UbzJy9Uu2oADDa5DPEyNjNkC+c5FTtjbdq360JnNHkOuvEmxR8R7kyCJ57Fe1KfWJV8/NCMBTKmukhMydslocT5h26QDjv0U3+RAe/NyFDrRKcEoMsOkxzXEkABq+xLymGcSiliCHBIVRsLnvA9h3morWjLu9o+KTl/R0e0P1zPLgqtFLD3EHtMaXtSwr3/9cq+OQYbt0gdFLpBJRrhDu665jVeeHpT8ji1ssWW2JPiJkE/Qom7oySRB+8oZ/oMlsLK/ft4M80YMiBitFlm0mzIC5AoNE8c0CNjeYiOygF71t5Nr6ms7GCorGeHEfTwzC9BxR4qbxAtKX92QP59X8Y43wW9ioLZ3fGPtjB3PylksInLdLObRnzfvSBY3xmGg/ifPvcSUeFhK25M9gvGVR2ge3FHm/RtzWLx+zOAQNwiDuYs4k/AvLevBdlaAXpjWsBk1ws4eyEhb99p2xDBuwPXZVwSXbcNfwX55Q8EmehCzbUuYBHzKudSWRCuTKIxH4lYNETi/fyhv7TX6gFa1+Z5GN647tBq/tvo9Pt8gdR6WGZrhXUGRjlIKj6z1CKTamUbHE85gnpTA5Ns5y+s9PvxsmQ6LDUxlhI+zvTj5lGC2tEPm3UQNr6V0o=
+    - secure: RUlG1RCWB7qK1BGTPHLBlqmUgNzkIQpv6axnoSafgzWX1Kypf+UbzJy9Uu2oADDa5DPEyNjNkC+c5FTtjbdq360JnNHkOuvEmxR8R7kyCJ57Fe1KfWJV8/NCMBTKmukhMydslocT5h26QDjv0U3+RAe/NyFDrRKcEoMsOkxzXEkABq+xLymGcSiliCHBIVRsLnvA9h3morWjLu9o+KTl/R0e0P1zPLgqtFLD3EHtMaXtSwr3/9cq+OQYbt0gdFLpBJRrhDu665jVeeHpT8ji1ssWW2JPiJkE/Qom7oySRB+8oZ/oMlsLK/ft4M80YMiBitFlm0mzIC5AoNE8c0CNjeYiOygF71t5Nr6ms7GCorGeHEfTwzC9BxR4qbxAtKX92QP59X8Y43wW9ioLZ3fGPtjB3PylksInLdLObRnzfvSBY3xmGg/ifPvcSUeFhK25M9gvGVR2ge3FHm/RtzWLx+zOAQNwiDuYs4k/AvLevBdlaAXpjWsBk1ws4eyEhb99p2xDBuwPXZVwSXbcNfwX55Q8EmehCzbUuYBHzKudSWRCuTKIxH4lYNETi/fyhv7TX6gFa1+Z5GN647tBq/tvo9Pt8gdR6WGZrhXUGRjlIKj6z1CKTamUbHE85gnpTA5Ns5y+s9PvxsmQ6LDUxlhI+zvTj5lGC2tEPm3UQNr6V0o=
 notifications:
   slack:
     secure: sZbAwpbsoZbslIUZa6bV7iSFImd/FlVsdVBLATSqYJvVRZt5GYNZ7lQYX+j3ll9GcIy2p4RYFapc7Ny59g3GPlRMwfZi4CVwPCIcIL/UwHzjyj2Fz3MwgAqmFK7/tRKc5zJnZhFr4eQsOC9kxanlvzqK2pGFu6OUHB9kwO2Ge8dlzKqtDCN86PkP8PGjCfL4iVIc1KbCTCKnOA8GSeoNLBR7+UfQeDc/+O2xvqssRZCUSvey102ADxEaOHCiVC07PMO9qUupMxkukm4plci79hUdCu+Ja50DNJJc1TsVRw+QQBEcBCOCIA9IzY4bZAeIw0y7u57IxNg0u0DvtmTIWaR2Fa3QfNgXAktri77ilkU5lbyCpHJsRjHeJx1zj97fPMP6RkL2uonCqf2e+820rOkIf5rdb+98SEaRUw/bdrV7QoT0CQ0+0XMwJWtyVd1hmnaf2c4l8UL0z/pwUrfDiRB12B4B0RYlz0L6e/wySRBHXfMto1cr4et80WwxBZ6XeYbYF6tNlPjpn4IM7FHdxZNPx8hcdgWb20C8KpYPXcatpPfRGggEvXsVREPK14MOSZmSJ1Aqi6dHG+X7QajyH8FYS+CWEN3Q6umOC7Fg9UQoWspnyjyzXatTjKOw1nDqZpECItw82DeXwRV7+ftpamABSxfzfcAz/4HgrgDZqr0=

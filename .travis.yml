@@ -15,6 +15,8 @@ deploy:
   provider: script
   skip_cleanup: true
   script: yarn tagDocker && yarn publishDocker
+  on:
+    all_branches: true
 env:
   global:
   - secure: RUlG1RCWB7qK1BGTPHLBlqmUgNzkIQpv6axnoSafgzWX1Kypf+UbzJy9Uu2oADDa5DPEyNjNkC+c5FTtjbdq360JnNHkOuvEmxR8R7kyCJ57Fe1KfWJV8/NCMBTKmukhMydslocT5h26QDjv0U3+RAe/NyFDrRKcEoMsOkxzXEkABq+xLymGcSiliCHBIVRsLnvA9h3morWjLu9o+KTl/R0e0P1zPLgqtFLD3EHtMaXtSwr3/9cq+OQYbt0gdFLpBJRrhDu665jVeeHpT8ji1ssWW2JPiJkE/Qom7oySRB+8oZ/oMlsLK/ft4M80YMiBitFlm0mzIC5AoNE8c0CNjeYiOygF71t5Nr6ms7GCorGeHEfTwzC9BxR4qbxAtKX92QP59X8Y43wW9ioLZ3fGPtjB3PylksInLdLObRnzfvSBY3xmGg/ifPvcSUeFhK25M9gvGVR2ge3FHm/RtzWLx+zOAQNwiDuYs4k/AvLevBdlaAXpjWsBk1ws4eyEhb99p2xDBuwPXZVwSXbcNfwX55Q8EmehCzbUuYBHzKudSWRCuTKIxH4lYNETi/fyhv7TX6gFa1+Z5GN647tBq/tvo9Pt8gdR6WGZrhXUGRjlIKj6z1CKTamUbHE85gnpTA5Ns5y+s9PvxsmQ6LDUxlhI+zvTj5lGC2tEPm3UQNr6V0o=

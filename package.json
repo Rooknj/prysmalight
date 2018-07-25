@@ -41,13 +41,12 @@
     "precommit": "lint-staged",
     "test": "echo test",
     "build": "babel src --out-dir lib --copy-files",
+    "buildDocker": "node scripts/dockerScripts build",
+    "tagDocker": "node scripts/dockerScripts tag",
+    "publishDocker": "node scripts/dockerScripts publish",
     "start": "NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
     "startLocal": "nodemon src/server.js --exec babel-node",
-    "startMock": "MOCK=true nodemon src/server.js --exec babel-node",
-    "publishProd": "./publish.sh -t latest -Y",
-    "publishTest": "./publish.sh -t test -Y",
-    "publishProdRpi": "./publish.rpi.sh -t latest -Y",
-    "publishTestRpi": "./publish.rpi.sh -t test -Y"
+    "startMock": "MOCK=true nodemon src/server.js --exec babel-node"
   },
   "babel": {
     "presets": [

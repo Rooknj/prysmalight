@@ -35,9 +35,9 @@ const buildDockerImage = async dockerComposeFile => {
   }build`;
   console.log(`Executing: ${command}`);
   const { stdout, stderr } = await exec(command);
-  console.log(`Finished: ${command}`);
   console.log("STDOUT:", stdout);
   console.log("STDERR:", stderr);
+  console.log(`Finished: ${command}`);
   return;
 };
 
@@ -46,9 +46,9 @@ const tagDockerImage = async (dockerImageName, dockerTag) => {
   const command = `docker tag ${dockerImageName} ${dockerTag}`;
   console.log(`Executing: ${command}`);
   const { stdout, stderr } = await exec(command);
-  console.log(`Finished: ${command}`);
   console.log("STDOUT:", stdout);
   console.log("STDERR:", stderr);
+  console.log(`Finished: ${command}`);
 };
 
 // Publish the docker image
@@ -56,9 +56,9 @@ const publishDockerImage = async dockerTag => {
   const command = `docker push ${dockerTag}`;
   console.log(`Executing: ${command}`);
   const { stdout, stderr } = await exec(command);
-  console.log(`Finished: ${command}`);
   console.log("STDOUT:", stdout);
   console.log("STDERR:", stderr);
+  console.log(`Finished: ${command}`);
 };
 
 // Create the tag for the docker image
@@ -125,10 +125,6 @@ const processArgs = args => {
       }
     });
   } else if (commands.includes("tag")) {
-    if (process.env.TRAVIS_PULL_REQUEST) {
-      console.log("This is a pull request. Skipping tag");
-      return;
-    }
     console.log("tagging");
     ARCHITECTURES.forEach(arch => {
       const dockerTag = generateDockerTag(tag, SERVICE, arch);
@@ -136,10 +132,6 @@ const processArgs = args => {
       tagDockerImage(dockerImageName, dockerTag);
     });
   } else if (commands.includes("publish")) {
-    if (process.env.TRAVIS_PULL_REQUEST) {
-      console.log("This is a pull request. Skipping publish");
-      return;
-    }
     console.log("publishing");
     ARCHITECTURES.forEach(arch => {
       const dockerTag = generateDockerTag(tag, SERVICE, arch);

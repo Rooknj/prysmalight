@@ -13,6 +13,7 @@ before_deploy:
 - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
+  skip_cleanup: true
   script: yarn tagDocker && yarn publishDocker
 env:
   global:

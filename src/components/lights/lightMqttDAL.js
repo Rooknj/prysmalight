@@ -1,10 +1,11 @@
 import MQTT from "async-mqtt";
-import ChalkConsole from "../../ChalkConsole";
+import Debug from "debug";
 
+const debug = Debug("mqttDAL");
 // MQTT: client
 let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
 if (process.env.MQTT_HOST) {
-  console.log("Adding custom MQTT host:", process.env.MQTT_HOST);
+  debug("Adding custom MQTT host:", process.env.MQTT_HOST);
   MQTT_BROKER = `tcp://${process.env.MQTT_HOST}:1883`;
 }
 // if (process.env.MOCK) {
@@ -35,35 +36,25 @@ const subscribeTo = topic => {
   mqttClient
     .subscribe(topic)
     .then(granted =>
-      ChalkConsole.info(
-        `Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`
-      )
+      debug(`Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`)
     )
-    .catch(error =>
-      ChalkConsole.error(`Error subscribing to ${topic} Error: ${error}`)
-    );
+    .catch(error => debug(`Error subscribing to ${topic} Error: ${error}`));
 };
 
 // Publish method with logging
 const publishTo = (topic, payload) => {
   mqttClient
     .publish(topic, payload)
-    .then(() =>
-      ChalkConsole.info(`Published payload of ${payload} to ${topic}`)
-    )
-    .catch(error =>
-      ChalkConsole.error(`Error publishing to ${topic} Error: ${error}`)
-    );
+    .then(() => debug(`Published payload of ${payload} to ${topic}`))
+    .catch(error => debug(`Error publishing to ${topic} Error: ${error}`));
 };
 
 // Unsubscribe method with logging
 const unsubscribeFrom = topic => {
   mqttClient
     .unsubscribe(topic)
-    .then(() => ChalkConsole.info(`Unsubscribed from ${topic}`))
-    .catch(error =>
-      ChalkConsole.error(`Error unsubscribing from ${topic} Error: ${error}`)
-    );
+    .then(() => debug(`Unsubscribed from ${topic}`))
+    .catch(error => debug(`Error unsubscribing from ${topic} Error: ${error}`));
 };
 
 // Utility functions
@@ -71,7 +62,7 @@ const parseMqttMessage = jsonData => {
   const message = JSON.parse(jsonData);
 
   if (!message.name) {
-    ChalkConsole.error(
+    debug(
       `Received messsage on connected topic that did not have an id\nMessage: ${message}`
     );
     return;
@@ -82,23 +73,21 @@ const parseMqttMessage = jsonData => {
 class LightMqttDAL {
   constructor() {
     // Default message handlers
-    this.connectionHandler = () => console.log("Connection Message");
-    this.effectListHandler = () => console.log("Effect List Message");
-    this.stateHandler = () => console.log("State Message");
+    this.connectionHandler = () => debug("Connection Message");
+    this.effectListHandler = () => debug("Effect List Message");
+    this.stateHandler = () => debug("State Message");
 
     // Set up MQTT client to route messages to the appropriate callback handler function
     mqttClient.on("message", (topic, message) => {
       // Convert message into a string
       const data = message.toString();
-      ChalkConsole.info(
-        `Received message on topic ${topic} with a payload of ${data}`
-      );
+      debug(`Received message on topic ${topic} with a payload of ${data}`);
 
       // Split the topic into it's individual tokens to evaluate
       const topicTokens = topic.split("/");
       // If this mqtt message is not from lightapp2, then ignore it
       if (topicTokens[0] !== MQTT_LIGHT_TOP_LEVEL) {
-        ChalkConsole.error(
+        debug(
           `Received messsage that belonged to a top level topic we are not supposed to be subscribed to`
         );
         return;

@@ -7,8 +7,10 @@ import { createServer } from "http"; // Library to create an http server
 import bodyParser from "body-parser"; // Parses HTTP requests
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { execute, subscribe } from "graphql";
-import ChalkConsole from "./ChalkConsole";
 import schema from "./components/schema";
+import Debug from "debug";
+
+const debug = Debug("server");
 
 const GRAPHQL_PORT = 4001;
 
@@ -35,13 +37,9 @@ graphQLServer.listen(GRAPHQL_PORT, () => {
     { server: graphQLServer, path: "/subscriptions" }
   );
 
-  ChalkConsole.info(
-    `GraphiQL is now running on http://localhost:${GRAPHQL_PORT}/graphiql`
-  );
-  ChalkConsole.info(
-    `GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}`
-  );
-  ChalkConsole.info(
+  debug(`GraphiQL is now running on http://localhost:${GRAPHQL_PORT}/graphiql`);
+  debug(`GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}`);
+  debug(
     `GraphQL Subscription Server is now running on ws://localhost:${GRAPHQL_PORT}/subscriptions`
   );
 });

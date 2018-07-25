@@ -30,6 +30,7 @@ const mapConnectionMessageToConnectionPayload = connectionMessage => {
 class LightConnector {
   constructor() {
     // Our mutation number to match each mutation to it's response
+    // TODO: Store this in redis
     this.mutationNumber = 0;
     // Start the initialize function
     this.init();
@@ -96,11 +97,17 @@ class LightConnector {
   }
 
   // TODO Add an error message if no light was found
-  getLight(lightId) {
-    return lightRedisDAL.getLight(lightId);
+  async getLight(lightId) {
+    try {
+      const light = await lightRedisDAL.getLight(lightId);
+      return light;
+    } catch (error) {
+      return error;
+    }
   }
 
   // This gets triggered if you call setLight
+  // TODO: Add error handling here
   setLight(light) {
     const { id, state, brightness, color, effect, speed } = light;
 
@@ -143,6 +150,7 @@ class LightConnector {
   }
 
   async addLight(lightId) {
+    let lightAdded;
     // TODO: implmement hasLight
     // if (await lightRedisDAL.hasLight(lightId)) {
     //   ChalkConsole.error(`Error adding ${lightId}: Light already exists`);
@@ -151,10 +159,18 @@ class LightConnector {
     // }
 
     // Add new light to light database
-    const lightAdded = await lightRedisDAL.addLight(lightId);
-
+    try {
+      lightAdded = await lightRedisDAL.addLight(lightId);
+    } catch (error) {
+      debug("Error adding light");
+      return error;
+    }
     // Subscribe to new messages from the new light
-    mqttDAL.subscribeToLight(lightId);
+    try {
+      await mqttDAL.subscribeToLight(lightId);
+    } catch (error) {
+      return error;
+    }
 
     // TODO: Find a way to check if the light is connected
     // If it is connected, return then.
@@ -164,6 +180,7 @@ class LightConnector {
   }
 
   async removeLight(lightId) {
+    let lightRemoved;
     // TODO: implmement hasLight
     // if (!await lightRedisDAL.hasLight(lightId)) {
     //   ChalkConsole.error(`Error removing ${lightId}: Light does not exist`);
@@ -172,10 +189,20 @@ class LightConnector {
     // }
 
     // unsubscribe from the light's messages
-    mqttDAL.unsubscribeFromLight(lightId);
+    try {
+      await mqttDAL.unsubscribeFromLight(lightId);
+    } catch (error) {
+      debug("Error unsubscribing light");
+      return error;
+    }
 
     // Remove light from database
-    const lightRemoved = await lightRedisDAL.removeLight(lightId);
+    try {
+      lightRemoved = await lightRedisDAL.removeLight(lightId);
+    } catch (error) {
+      debug("Error removing light from db");
+      return error;
+    }
 
     // Return the removed light
     pubsub.publish("lightRemoved", { lightRemoved });
@@ -200,8 +227,15 @@ class LightConnector {
     return pubsub.asyncIterator("lightRemoved");
   }
 
-  getLights() {
-    return lightRedisDAL.getAllLights();
+  async getLights() {
+    let allLights;
+    try {
+      allLights = await lightRedisDAL.getAllLights();
+    } catch (error) {
+      debug("Error getting all lights");
+      return error;
+    }
+    return allLights;
   }
 }
 

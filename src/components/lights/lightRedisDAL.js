@@ -81,7 +81,13 @@ class Light {
 
   async getAllLights() {
     // Get all the light keys from redis
-    const lightKeys = await asyncZRANGE("lightKeys", 0, -1);
+    let lightKeys, lightsArray;
+    try {
+      lightKeys = await asyncZRANGE("lightKeys", 0, -1);
+    } catch (error) {
+      debug("Error getting light keys from redis");
+      return error;
+    }
 
     // For each light key, get the corresponding light data
     const mapLightPromises = lightKeys.map(async lightKey =>
@@ -89,48 +95,70 @@ class Light {
     );
 
     // Wait for all of the promises returned by this.getLight to resolve
-    const returnVal = await Promise.all(mapLightPromises);
-    return returnVal;
+    try {
+      lightsArray = await Promise.all(mapLightPromises);
+    } catch (error) {
+      debug("Error getting one of the lights from redis");
+      return error;
+    }
+
+    return lightsArray;
   }
 
   async getLight(id) {
-    // Get all info about the light
-    const lightDataResponse = await asyncHGETALL(id);
-    const lightEffectResponse = await asyncSMEMBERS(
-      lightDataResponse.effectsKey
-    );
+    let lightData, lightEffect;
+
+    // Get data about the light
+    try {
+      lightData = await asyncHGETALL(id);
+    } catch (error) {
+      debug(`Error getting light: ${id}`);
+      return error;
+    }
+
+    // Get the light's effects
+    try {
+      lightEffect = await asyncSMEMBERS(lightData.effectsKey);
+    } catch (error) {
+      debug(`Error getting effects for light: ${id}`);
+      return error;
+    }
 
     // Convert that info into a javascript object
-    const lightObject = mapRedisObjectToLightObject(
-      id,
-      lightDataResponse,
-      lightEffectResponse
-    );
+    const lightObject = mapRedisObjectToLightObject(id, lightData, lightEffect);
     return lightObject;
   }
 
-  // TODO: Make this function set specific fields on the light and not modify the others
   async setLight(id, lightData) {
+    // You need an id to set the light
     if (!id) {
       debug("No ID supplied to setLight()");
-      return;
+      return new Error("No ID supplied to setLight()");
     }
+    // Populate the redis object with the id of the light as a key
     let redisObject = [id];
+    // Add the connected data
     if (lightData.hasOwnProperty("connected"))
       redisObject.push("connected", lightData.connected);
+    // Add the connected data
     if (lightData.hasOwnProperty("state"))
       redisObject.push("state", lightData.state);
+    // Add the brightness data
     if (lightData.hasOwnProperty("brightness"))
       redisObject.push("brightness", lightData.brightness);
+    // Add the current effect data
     if (lightData.hasOwnProperty("effect"))
       redisObject.push("effect", lightData.effect);
+    // Add the effect speed data
     if (lightData.hasOwnProperty("speed"))
       redisObject.push("speed", lightData.speed);
+    // Add the color data
     if (lightData.hasOwnProperty("color")) {
       redisObject.push("color:red", lightData.color.r);
       redisObject.push("color:green", lightData.color.g);
       redisObject.push("color:blue", lightData.color.b);
     }
+    // Add the effect list data
     let addEffectsPromise = Promise.resolve();
     if (lightData.hasOwnProperty("supportedEffects")) {
       redisObject.push("effectsKey", `${id}:effects`);
@@ -140,31 +168,59 @@ class Light {
       );
     }
 
-    const addLightDataPromise = await asyncHMSET(redisObject);
+    // Push data object to redis database
+    const addLightDataPromise = asyncHMSET(redisObject);
+
     // Wait until all data is saved
-    await Promise.all([addLightDataPromise, addEffectsPromise]);
+    try {
+      await Promise.all([addLightDataPromise, addEffectsPromise]);
+    } catch (error) {
+      debug("Error setting the light to redis database");
+      return error;
+    }
     return this.getLight(id);
   }
 
   async addLight(id) {
-    const score = await asyncINCR("lightScore");
-    const response = await asyncZADD("lightKeys", score, id);
+    let lightScore, addLightKeyResponse, addLightDataResponse;
 
-    let response2;
-    switch (response) {
+    try {
+      lightScore = await asyncINCR("lightScore");
+    } catch (error) {
+      debug("Error incrementing lightScore in redis");
+      return error;
+    }
+
+    try {
+      addLightKeyResponse = await asyncZADD("lightKeys", lightScore, id);
+    } catch (error) {
+      debug("Error adding light key to redis");
+      return error;
+    }
+
+    switch (addLightKeyResponse) {
       // If the response is 1, then adding the light was successful
       // If 0, it was unsuccessful
       case 1:
         debug("successfully added key");
-        response2 = await asyncHMSET(getNewRedisLight(id));
+        try {
+          addLightDataResponse = await asyncHMSET(getNewRedisLight(id));
+        } catch (error) {
+          debug("Error adding light to redis");
+          return error;
+        }
         break;
       default:
-        // TODO: Throw error
-        debug("Error adding key");
-        return;
+        debug(
+          "Could not add light key to redis. returned with response code != 1"
+        );
+        return new Error(
+          "Could not add light key to redis. returned with response code != 1"
+        );
     }
 
-    switch (response2) {
+    switch (addLightDataResponse) {
+      // If the response is OK, then setting the light was successful
       case "OK":
         debug("Light successfully added");
         // Save the redis database to persistant storave
@@ -172,33 +228,46 @@ class Light {
         // Return the newly added light
         return this.getLight(id);
       default:
-        //TODO: throw error
-        debug("Error adding light");
-        return;
+        debug(
+          'Could not add light key to redis. returned with response code != "OK"'
+        );
+        return new Error(
+          'Could not add light key to redis. returned with response code != "OK"'
+        );
     }
-
-    // If the response is OK, then setting the light was successful
   }
 
   async removeLight(id) {
-    const response = await asyncZREM("lightKeys", id);
+    let removeKeyResponse, deleteLightResponse;
 
-    let response2;
-    switch (response) {
+    try {
+      removeKeyResponse = await asyncZREM("lightKeys", id);
+    } catch (error) {
+      debug("Error removing key from redis");
+      return error;
+    }
+
+    switch (removeKeyResponse) {
       // If the response is 1, then deleting the lightKey was successful
       // If 0, it was unsuccessful
       case 1:
         debug("successfully deleted key");
-        response2 = await asyncDEL(id);
+        try {
+          deleteLightResponse = await asyncDEL(id);
+        } catch (error) {
+          debug("Error removing light data from redis");
+          return error;
+        }
         break;
       default:
-        // TODO: Throw error
-        debug("Error deleting key");
-        return;
+        debug("Could not remove light key from Redis. Response code != 1");
+        return new Error(
+          "Could not remove light key from Redis. Response code != 1"
+        );
     }
 
     // If the response is 1, then deleting the light was successful
-    switch (response2) {
+    switch (deleteLightResponse) {
       case 1:
         debug("Light successfully deleted");
         // Save the redis database to persistant storave
@@ -206,16 +275,19 @@ class Light {
         // Return the id of the deleted light
         return { id };
       default:
-        //TODO: throw error
-        debug("Error deleting light");
-        return;
+        debug("Could not remove light data from Redis. Response code != 1");
+        return new Error(
+          "Could not remove light data from Redis. Response code != 1"
+        );
     }
   }
 
   // TODO: Implement
   async hasLight(id) {
     debug(id);
-    return true;
+    return new Error(
+      "hasLight is not implemented yet. You should be catching this error anyway"
+    );
   }
 }
 

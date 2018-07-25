@@ -31,36 +31,39 @@ const mqttClient = MQTT.connect(MQTT_BROKER, {
   password: "MQTTIsBetterThanUDP"
 });
 
-// Subscribe method with logging
+// Subscribe to the light and return 1 if successful
 const subscribeTo = async topic => {
   try {
     const { granted } = await mqttClient.subscribe(topic);
     debug(`Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`);
+    return 1;
   } catch (error) {
     debug(`Error subscribing to ${topic} Error: ${error}`);
-    return error;
+    throw error;
   }
 };
 
-// Publish method with logging
+// Publish to the light and return 1 if successful
 const publishTo = async (topic, payload) => {
   try {
     await mqttClient.publish(topic, payload);
     debug(`Published payload of ${payload} to ${topic}`);
+    return 1;
   } catch (error) {
     debug(`Error publishing to ${topic} Error: ${error}`);
-    return error;
+    throw error;
   }
 };
 
-// Unsubscribe method with logging
+// Unsubscribe from the light and return 1 if successful
 const unsubscribeFrom = async topic => {
   try {
     await mqttClient.unsubscribe(topic);
     debug(`Unsubscribed from ${topic}`);
+    return 1;
   } catch (error) {
     debug(`Error unsubscribing from ${topic} Error: ${error}`);
-    return error;
+    throw error;
   }
 };
 
@@ -149,25 +152,62 @@ class LightMqttDAL {
     this.effectListHandler = handler;
   }
 
-  subscribeToLight(id) {
-    subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`);
-    subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_STATE_TOPIC}`);
-    subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`);
-  }
-
-  unsubscribeFromLight(id) {
-    unsubscribeFrom(
+  async subscribeToLight(id) {
+    const subscribedToConnected = subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
-    unsubscribeFrom(`${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_STATE_TOPIC}`);
-    unsubscribeFrom(`${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`);
+    const subscribedToState = subscribeTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_STATE_TOPIC}`
+    );
+    const subscribedToEffectList = subscribeTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
+    );
+    try {
+      await Promise.all(
+        subscribedToConnected,
+        subscribedToState,
+        subscribedToEffectList
+      );
+      return 1;
+    } catch (error) {
+      debug(`Unable to subscribe to all topics for light: ${id}`);
+      throw error;
+    }
   }
 
-  publishToLight(id, message) {
-    publishTo(
-      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
-      Buffer.from(JSON.stringify(message))
+  async unsubscribeFromLight(id) {
+    const unsubscribedFromConnected = unsubscribeFrom(
+      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
+    const unsubscribedFromState = unsubscribeFrom(
+      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_STATE_TOPIC}`
+    );
+    const unsubscribedFromEffectList = unsubscribeFrom(
+      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
+    );
+    try {
+      await Promise.all(
+        unsubscribedFromConnected,
+        unsubscribedFromState,
+        unsubscribedFromEffectList
+      );
+      return 1;
+    } catch (error) {
+      debug(`Unable to unsubscribe from all topics for light: ${id}`);
+      throw error;
+    }
+  }
+
+  async publishToLight(id, message) {
+    try {
+      await publishTo(
+        `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
+        Buffer.from(JSON.stringify(message))
+      );
+      return 1;
+    } catch (error) {
+      throw error;
+    }
   }
 }
 

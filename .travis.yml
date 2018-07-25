@@ -5,6 +5,7 @@ sudo: required
 services:
   - docker
 cache:
+  yarn: true
   directories:
     - node_modules
 script:
@@ -14,6 +15,7 @@ before_deploy:
   - yarn global add minimist
 deploy:
   provider: script
+  skip_cleanup: true
   script: yarn tagDocker && yarn publishDocker
   on:
     all_branches: true

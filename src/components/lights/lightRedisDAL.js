@@ -4,6 +4,7 @@ import Debug from "debug";
 
 const debug = Debug("redisDAL");
 
+const TIMEOUT_WAIT = 3000;
 let REDIS_HOST = "localhost";
 if (process.env.IN_DOCKER_CONTAINER) {
   debug("Find redis inside docker container");
@@ -86,7 +87,7 @@ class Light {
 
   async getAllLights() {
     if (!this.isConnected) {
-      await asyncSetTimeout(3000);
+      await asyncSetTimeout(TIMEOUT_WAIT);
       if (!this.isConnected) {
         throw new Error("Can not get all lights. Not connected to Redis");
       }
@@ -118,6 +119,12 @@ class Light {
   }
 
   async getLight(id) {
+    if (!this.isConnected) {
+      await asyncSetTimeout(TIMEOUT_WAIT);
+      if (!this.isConnected) {
+        throw new Error(`Can not get light: ${id}. Not connected to Redis`);
+      }
+    }
     let lightData, lightEffect;
 
     // Get data about the light

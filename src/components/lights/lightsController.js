@@ -224,12 +224,13 @@ class LightConnector {
 
   async addLight(lightId) {
     let lightExists, lightAdded;
+
+    // Check if the light exists already before doing anything else
     try {
       lightExists = await lightRedisDAL.hasLight(lightId);
     } catch (error) {
       return error;
     }
-
     if (lightExists) {
       return new Error(`"${lightId}" is already added`);
     }

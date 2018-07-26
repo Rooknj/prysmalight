@@ -43,8 +43,8 @@ const subscribeTo = async topic => {
     debug(`Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`);
     return 1;
   } catch (error) {
-    debug(`Error subscribing to ${topic} Error: ${error}`);
-    throw error;
+    debug(error);
+    return 0;
   }
 };
 // Publish to the light and return 1 if successful
@@ -54,8 +54,8 @@ const publishTo = async (topic, payload) => {
     debug(`Published payload of ${payload} to ${topic}`);
     return 1;
   } catch (error) {
-    debug(`Error publishing to ${topic} Error: ${error}`);
-    throw error;
+    debug(error);
+    return 0;
   }
 };
 // Unsubscribe from the light and return 1 if successful
@@ -65,8 +65,8 @@ const unsubscribeFrom = async topic => {
     debug(`Unsubscribed from ${topic}`);
     return 1;
   } catch (error) {
-    debug(`Error unsubscribing from ${topic} Error: ${error}`);
-    throw error;
+    debug(error);
+    return 0;
   }
 };
 
@@ -174,13 +174,13 @@ class LightMqttDAL {
     this.effectListHandler = handler;
   }
 
+  // Returns 1 if successful, 0 if not
   async subscribeToLight(id) {
     if (!this.isConnected) {
       await asyncSetTimeout(TIMEOUT_WAIT);
       if (!this.isConnected) {
-        throw new Error(
-          `Can not subscribe to "${id}". Not connected to MQTT Broker`
-        );
+        debug("Can't subscribe, not connected to MQTT broker");
+        return 0;
       }
     }
 
@@ -194,26 +194,32 @@ class LightMqttDAL {
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
     );
     try {
-      await Promise.all([
+      const subscriptionStatusArray = await Promise.all([
         subscribedToConnected,
         subscribedToState,
         subscribedToEffectList
       ]);
+
+      // If any subscription failed, return 0
+      subscriptionStatusArray.forEach(subscriptionStatus => {
+        if (subscriptionStatus !== 1) {
+          debug("failed subscribing to at least one topic");
+          return 0;
+        }
+      });
+
       return 1;
     } catch (error) {
-      debug(`Unable to subscribe to all topics for light: ${id}`);
-      throw error;
+      debug(`error subscribing to "${id}": ${error}`);
+      return 0;
     }
   }
 
+  // Returns 1 if successful, 0 if not
   async unsubscribeFromLight(id) {
     if (!this.isConnected) {
-      await asyncSetTimeout(TIMEOUT_WAIT);
-      if (!this.isConnected) {
-        throw new Error(
-          `Can not unsubscribe from "${id}". Not connected to MQTT Broker`
-        );
-      }
+      debug("Already unsubscribed as client is not connected to MQTT broker");
+      return 1;
     }
 
     const unsubscribedFromConnected = unsubscribeFrom(
@@ -226,25 +232,34 @@ class LightMqttDAL {
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
     );
     try {
-      await Promise.all([
+      const unsubscribeStatusArray = await Promise.all([
         unsubscribedFromConnected,
         unsubscribedFromState,
         unsubscribedFromEffectList
       ]);
+
+      // If any unsubscribe failed, return 0
+      unsubscribeStatusArray.forEach(unsubscribeStatus => {
+        if (unsubscribeStatus !== 1) {
+          debug("failed unsubscribing from at least one topic");
+          return 0;
+        }
+      });
+
       return 1;
     } catch (error) {
-      debug(`Unable to unsubscribe from all topics for light: ${id}`);
-      throw error;
+      debug(`error unsubscribing from "${id}": ${error}`);
+      return 0;
     }
   }
 
+  // Returns 1 if successful, 0 if not
   async publishToLight(id, message) {
     if (!this.isConnected) {
       await asyncSetTimeout(TIMEOUT_WAIT);
       if (!this.isConnected) {
-        throw new Error(
-          `Can not publish to "${id}". Not connected to MQTT Broker`
-        );
+        debug("Message could not be sent. Not connected to MQTT broker");
+        return 0;
       }
     }
 
@@ -255,7 +270,8 @@ class LightMqttDAL {
       );
       return 1;
     } catch (error) {
-      throw error;
+      debug(`error publishing message to "${id}": ${error}`);
+      return 0;
     }
   }
 }

@@ -21,6 +21,7 @@ const asyncZRANGE = promisify(client.ZRANGE).bind(client);
 const asyncHMSET = promisify(client.HMSET).bind(client);
 const asyncDEL = promisify(client.DEL).bind(client);
 const asyncHGETALL = promisify(client.HGETALL).bind(client);
+const asyncSetTimeout = promisify(setTimeout);
 
 // Function to return a new light object with default values
 const getNewRedisLight = id => [
@@ -62,17 +63,21 @@ const mapRedisObjectToLightObject = (id, redisResponse, supportedEffects) => ({
 
 class Light {
   constructor() {
+    this.isConnected = false;
     client.on("connect", () => {
       debug("Connected to redis");
+      this.isConnected = true;
     });
     client.on("ready", () => {
       debug("redis is ready");
     });
     client.on("reconnecting", () => {
       debug("Attempting to reconnect to redis");
+      this.isConnected = false;
     });
     client.on("error", () => {
-      debug("redis encountered an error");
+      // TODO: Figure out which error signifies losing connection
+      //debug("redis encountered an error");
     });
     client.on("end", () => {
       debug("redis connection was closed");
@@ -80,6 +85,13 @@ class Light {
   }
 
   async getAllLights() {
+    if (!this.isConnected) {
+      await asyncSetTimeout(3000);
+      if (!this.isConnected) {
+        throw new Error("Can not get all lights. Not connected to Redis");
+      }
+    }
+
     // Get all the light keys from redis
     let lightKeys, lightsArray;
     try {

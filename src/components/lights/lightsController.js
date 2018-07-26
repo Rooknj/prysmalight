@@ -39,9 +39,25 @@ class LightConnector {
   async init() {
     // Set up onConnect callback
     mqttDAL.onConnect(async () => {
+      let lights;
+
       debug(`Connected to MQTT broker`);
-      const lights = await lightRedisDAL.getAllLights();
-      lights.forEach(light => mqttDAL.subscribeToLight(light.id));
+
+      // Get the saved lights from redis
+      try {
+        lights = await lightRedisDAL.getAllLights();
+      } catch (error) {
+        debug(error);
+        return;
+      }
+
+      lights.forEach(light => {
+        try {
+          mqttDAL.subscribeToLight(light.id);
+        } catch (error) {
+          debug(`could not subscribe to light: ${light}. Error: ${error}`);
+        }
+      });
     });
 
     // This gets triggered when the connection of the light changes

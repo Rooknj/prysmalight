@@ -186,11 +186,11 @@ class LightMqttDAL {
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
     );
     try {
-      await Promise.all(
+      await Promise.all([
         unsubscribedFromConnected,
         unsubscribedFromState,
         unsubscribedFromEffectList
-      );
+      ]);
       return 1;
     } catch (error) {
       debug(`Unable to unsubscribe from all topics for light: ${id}`);

@@ -73,7 +73,7 @@ class Light {
       debug("redis is ready");
     });
     client.on("reconnecting", () => {
-      debug("Attempting to reconnect to redis");
+      //debug("Attempting to reconnect to redis");
       this.isConnected = false;
     });
     client.on("error", () => {
@@ -201,6 +201,12 @@ class Light {
   }
 
   async addLight(id) {
+    if (!this.isConnected) {
+      await asyncSetTimeout(TIMEOUT_WAIT);
+      if (!this.isConnected) {
+        throw new Error(`Can not add light: ${id}. Not connected to Redis`);
+      }
+    }
     let lightScore, addLightKeyResponse, addLightDataResponse;
 
     try {
@@ -257,6 +263,12 @@ class Light {
   }
 
   async removeLight(id) {
+    if (!this.isConnected) {
+      await asyncSetTimeout(TIMEOUT_WAIT);
+      if (!this.isConnected) {
+        throw new Error(`Can not remove light: ${id}. Not connected to Redis`);
+      }
+    }
     let removeKeyResponse, deleteLightResponse;
 
     try {

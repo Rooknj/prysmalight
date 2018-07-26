@@ -1,11 +1,14 @@
 import { PubSub } from "graphql-subscriptions";
 import events from "events";
-
 import LightRedisDAL from "./lightRedisDAL";
 import LightMqttDAL from "./lightMqttDAL";
 import Debug from "debug";
+import { promisify } from "util";
 
 const debug = Debug("lightController");
+
+const TIMEOUT_WAIT = 10000;
+const asyncSetTimeout = promisify(setTimeout);
 
 const lightRedisDAL = new LightRedisDAL();
 const mqttDAL = new LightMqttDAL();
@@ -55,13 +58,15 @@ class LightConnector {
         try {
           mqttDAL.subscribeToLight(light.id);
         } catch (error) {
-          debug(`could not subscribe to light: ${light}. Error: ${error}`);
+          debug(`could not subscribe to "${light}". Error: ${error}`);
         }
       });
     });
 
     // This gets triggered when the connection of the light changes
     const handleConnectedMessage = async message => {
+      let changedLight;
+
       // If the connectionPayload isn't correct, return
       const connectionPayload = mapConnectionMessageToConnectionPayload(
         message.connection
@@ -73,15 +78,27 @@ class LightConnector {
         return;
       }
 
-      const changedLight = await lightRedisDAL.setLight(message.name, {
-        connected: connectionPayload
-      });
+      try {
+        changedLight = await lightRedisDAL.setLight(message.name, {
+          connected: connectionPayload
+        });
+      } catch (error) {
+        debug(
+          `Error changing "${
+            message.name
+          }" connection status in Redis. ${error}`
+        );
+        return;
+      }
+
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
 
     // This gets triggered when the state of the light changes
     const handleStateMessage = async message => {
+      let changedLight;
+
       // TODO: add data checking
       const { mutationId, state, brightness, color, effect, speed } = message;
       let newState = {};
@@ -91,7 +108,12 @@ class LightConnector {
       if (effect) newState = { ...newState, effect };
       if (speed) newState = { ...newState, speed };
 
-      const changedLight = await lightRedisDAL.setLight(message.name, newState);
+      try {
+        changedLight = await lightRedisDAL.setLight(message.name, newState);
+      } catch (error) {
+        debug(`Error changing "${message.name}" state in Redis. ${error}`);
+        return;
+      }
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
       // Publish to the mutation response event
@@ -100,9 +122,19 @@ class LightConnector {
 
     // This gets triggered when the light sends its effect list
     const handleEffectListMessage = async message => {
-      const changedLight = await lightRedisDAL.setLight(message.name, {
-        supportedEffects: message.effectList
-      });
+      let changedLight;
+
+      try {
+        changedLight = await lightRedisDAL.setLight(message.name, {
+          supportedEffects: message.effectList
+        });
+      } catch (error) {
+        debug(
+          `Error changing "${message.name}" effect list in Redis. ${error}`
+        );
+        return;
+      }
+
       pubsub.publish(message.name, { lightChanged: changedLight });
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
@@ -148,7 +180,7 @@ class LightConnector {
     if (speed) payload = { ...payload, speed };
 
     // Return a promise which resolves when the light responds to this message
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       const handleMutationResponse = (mutationId, changedLight) => {
         // If the mutationId on the light's response matches the mutationId we sent on this mutation
         if (mutationId === payload.mutationId) {
@@ -167,13 +199,17 @@ class LightConnector {
       eventEmitter.on("mutationResponse", handleMutationResponse);
 
       // Publish to the light
-      mqttDAL.publishToLight(id, payload);
+      try {
+        await mqttDAL.publishToLight(id, payload);
+      } catch (error) {
+        debug(`Error setting "${id}"`);
+        reject(error);
+      }
 
-      // If the response takes too long, error outs
-      setTimeout(() => {
-        eventEmitter.removeListener("mutationResponse", handleMutationResponse);
-        reject(`Response from ${id} took too long to reach the server`);
-      }, 3000);
+      // Once message is sent, if the response takes too long, error out
+      await asyncSetTimeout(TIMEOUT_WAIT);
+      eventEmitter.removeListener("mutationResponse", handleMutationResponse);
+      reject(`Response from ${id} took too long to reach the server`);
     });
   }
 

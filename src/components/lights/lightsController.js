@@ -112,12 +112,24 @@ class LightConnector {
     mqttDAL.onEffectListMessage(handleEffectListMessage);
   }
 
+  async getLights() {
+    let allLights;
+    try {
+      allLights = await lightRedisDAL.getAllLights();
+    } catch (error) {
+      debug("Error getting lights");
+      return error;
+    }
+    return allLights;
+  }
+
   // TODO Add an error message if no light was found
   async getLight(lightId) {
     try {
       const light = await lightRedisDAL.getLight(lightId);
       return light;
     } catch (error) {
+      debug(`Error getting light: ${lightId}`);
       return error;
     }
   }
@@ -241,17 +253,6 @@ class LightConnector {
 
   subscribeLightRemoved() {
     return pubsub.asyncIterator("lightRemoved");
-  }
-
-  async getLights() {
-    let allLights;
-    try {
-      allLights = await lightRedisDAL.getAllLights();
-    } catch (error) {
-      debug("Error getting all lights");
-      return error;
-    }
-    return allLights;
   }
 }
 

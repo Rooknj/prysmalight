@@ -1,7 +1,13 @@
 import MQTT from "async-mqtt";
+import { promisify } from "util";
 import Debug from "debug";
 
 const debug = Debug("mqttDAL");
+
+// The maximum amount of time to wait until a request fails due to not having a connection
+const TIMEOUT_WAIT = 3000;
+const asyncSetTimeout = promisify(setTimeout);
+
 // MQTT: client
 let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
 if (process.env.MQTT_HOST) {
@@ -30,7 +36,6 @@ const mqttClient = MQTT.connect(MQTT_BROKER, {
   username: "pi",
   password: "MQTTIsBetterThanUDP"
 });
-
 // Subscribe to the light and return 1 if successful
 const subscribeTo = async topic => {
   try {
@@ -42,7 +47,6 @@ const subscribeTo = async topic => {
     throw error;
   }
 };
-
 // Publish to the light and return 1 if successful
 const publishTo = async (topic, payload) => {
   try {
@@ -54,7 +58,6 @@ const publishTo = async (topic, payload) => {
     throw error;
   }
 };
-
 // Unsubscribe from the light and return 1 if successful
 const unsubscribeFrom = async topic => {
   try {
@@ -82,10 +85,17 @@ const parseMqttMessage = jsonData => {
 
 class LightMqttDAL {
   constructor() {
+    this.isConnected = false;
+    this.defaultConnectHandler = () => (this.isConnected = true);
+    this.defaultDisconnectHandler = () => (this.isConnected = false);
+
     // Default message handlers
     this.connectionHandler = () => debug("Connection Message");
     this.effectListHandler = () => debug("Effect List Message");
     this.stateHandler = () => debug("State Message");
+
+    mqttClient.on("connect", this.defaultConnectHandler);
+    mqttClient.on("close", this.defaultDisconnectHandler);
 
     // Set up MQTT client to route messages to the appropriate callback handler function
     mqttClient.on("message", (topic, message) => {
@@ -129,7 +139,19 @@ class LightMqttDAL {
   }
 
   onConnect(handler) {
-    mqttClient.on("connect", handler);
+    const newHandler = () => {
+      this.defaultConnectHandler();
+      handler();
+    };
+    mqttClient.on("connect", newHandler);
+  }
+
+  onDisconnect(handler) {
+    const newHandler = () => {
+      this.defaultDisconnectHandler();
+      handler();
+    };
+    mqttClient.on("close", newHandler);
   }
 
   onReconnect(handler) {
@@ -153,6 +175,15 @@ class LightMqttDAL {
   }
 
   async subscribeToLight(id) {
+    if (!this.isConnected) {
+      await asyncSetTimeout(TIMEOUT_WAIT);
+      if (!this.isConnected) {
+        throw new Error(
+          `Can not subscribe to "${id}". Not connected to MQTT Broker`
+        );
+      }
+    }
+
     const subscribedToConnected = subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -163,11 +194,11 @@ class LightMqttDAL {
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
     );
     try {
-      await Promise.all(
+      await Promise.all([
         subscribedToConnected,
         subscribedToState,
         subscribedToEffectList
-      );
+      ]);
       return 1;
     } catch (error) {
       debug(`Unable to subscribe to all topics for light: ${id}`);
@@ -176,6 +207,15 @@ class LightMqttDAL {
   }
 
   async unsubscribeFromLight(id) {
+    if (!this.isConnected) {
+      await asyncSetTimeout(TIMEOUT_WAIT);
+      if (!this.isConnected) {
+        throw new Error(
+          `Can not unsubscribe from "${id}". Not connected to MQTT Broker`
+        );
+      }
+    }
+
     const unsubscribedFromConnected = unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -199,6 +239,15 @@ class LightMqttDAL {
   }
 
   async publishToLight(id, message) {
+    if (!this.isConnected) {
+      await asyncSetTimeout(TIMEOUT_WAIT);
+      if (!this.isConnected) {
+        throw new Error(
+          `Can not publish to "${id}". Not connected to MQTT Broker`
+        );
+      }
+    }
+
     try {
       await publishTo(
         `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,

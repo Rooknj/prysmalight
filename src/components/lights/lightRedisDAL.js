@@ -4,7 +4,10 @@ import Debug from "debug";
 
 const debug = Debug("redisDAL");
 
+// The maximum amount of time to wait until a request fails due to not having a connection
 const TIMEOUT_WAIT = 3000;
+const asyncSetTimeout = promisify(setTimeout);
+
 let REDIS_HOST = "localhost";
 if (process.env.IN_DOCKER_CONTAINER) {
   debug("Find redis inside docker container");
@@ -22,7 +25,6 @@ const asyncZRANGE = promisify(client.ZRANGE).bind(client);
 const asyncHMSET = promisify(client.HMSET).bind(client);
 const asyncDEL = promisify(client.DEL).bind(client);
 const asyncHGETALL = promisify(client.HGETALL).bind(client);
-const asyncSetTimeout = promisify(setTimeout);
 
 // Function to return a new light object with default values
 const getNewRedisLight = id => [
@@ -89,7 +91,7 @@ class Light {
     if (!this.isConnected) {
       await asyncSetTimeout(TIMEOUT_WAIT);
       if (!this.isConnected) {
-        throw new Error("Can not get all lights. Not connected to Redis");
+        throw new Error("Can not get lights. Not connected to Redis");
       }
     }
 
@@ -122,7 +124,7 @@ class Light {
     if (!this.isConnected) {
       await asyncSetTimeout(TIMEOUT_WAIT);
       if (!this.isConnected) {
-        throw new Error(`Can not get light: ${id}. Not connected to Redis`);
+        throw new Error(`Can not get "${id}". Not connected to Redis`);
       }
     }
     let lightData, lightEffect;
@@ -204,7 +206,7 @@ class Light {
     if (!this.isConnected) {
       await asyncSetTimeout(TIMEOUT_WAIT);
       if (!this.isConnected) {
-        throw new Error(`Can not add light: ${id}. Not connected to Redis`);
+        throw new Error(`Can not add "${id}". Not connected to Redis`);
       }
     }
     let lightScore, addLightKeyResponse, addLightDataResponse;
@@ -266,7 +268,7 @@ class Light {
     if (!this.isConnected) {
       await asyncSetTimeout(TIMEOUT_WAIT);
       if (!this.isConnected) {
-        throw new Error(`Can not remove light: ${id}. Not connected to Redis`);
+        throw new Error(`Can't remove "${id}". Not connected to redis`);
       }
     }
     let removeKeyResponse, deleteLightResponse;

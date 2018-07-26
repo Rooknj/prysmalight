@@ -34,7 +34,7 @@ const mqttClient = MQTT.connect(MQTT_BROKER, {
 // Subscribe to the light and return 1 if successful
 const subscribeTo = async topic => {
   try {
-    const { granted } = await mqttClient.subscribe(topic);
+    const granted = await mqttClient.subscribe(topic);
     debug(`Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`);
     return 1;
   } catch (error) {
@@ -192,13 +192,17 @@ class LightMqttDAL {
         subscribedToEffectList
       ]);
 
+      let failedToSubscribe = false;
       // If any subscription failed, return 0
       subscriptionStatusArray.forEach(subscriptionStatus => {
         if (subscriptionStatus !== 1) {
-          debug("failed subscribing to at least one topic");
-          return 0;
+          failedToSubscribe = true;
         }
       });
+      if (failedToSubscribe) {
+        debug(`Failed to subscribe to at least one topic`);
+        return 0;
+      }
 
       return 1;
     } catch (error) {

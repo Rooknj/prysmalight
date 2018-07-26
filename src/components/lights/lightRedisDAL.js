@@ -151,6 +151,12 @@ class Light {
   }
 
   async setLight(id, lightData) {
+    if (!this.isConnected) {
+      await asyncSetTimeout(TIMEOUT_WAIT);
+      if (!this.isConnected) {
+        throw new Error(`Can not set "${id}". Not connected to Redis`);
+      }
+    }
     // You need an id to set the light
     if (!id) {
       debug("No ID supplied to setLight()");

@@ -1,12 +1,7 @@
 import MQTT from "async-mqtt";
-import { promisify } from "util";
 import Debug from "debug";
 
 const debug = Debug("mqttDAL");
-
-// The maximum amount of time to wait until a request fails due to not having a connection
-const TIMEOUT_WAIT = 3000;
-const asyncSetTimeout = promisify(setTimeout);
 
 // MQTT: client
 let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
@@ -177,11 +172,8 @@ class LightMqttDAL {
   // Returns 1 if successful, 0 if not
   async subscribeToLight(id) {
     if (!this.isConnected) {
-      await asyncSetTimeout(TIMEOUT_WAIT);
-      if (!this.isConnected) {
-        debug("Can't subscribe, not connected to MQTT broker");
-        return 0;
-      }
+      debug("Can't subscribe, not connected to MQTT broker");
+      return 0;
     }
 
     const subscribedToConnected = subscribeTo(
@@ -256,11 +248,8 @@ class LightMqttDAL {
   // Returns 1 if successful, 0 if not
   async publishToLight(id, message) {
     if (!this.isConnected) {
-      await asyncSetTimeout(TIMEOUT_WAIT);
-      if (!this.isConnected) {
-        debug("Message could not be sent. Not connected to MQTT broker");
-        return 0;
-      }
+      debug("Message could not be sent. Not connected to MQTT broker");
+      return 0;
     }
 
     try {

@@ -15,9 +15,9 @@ if (process.env.IN_DOCKER_CONTAINER) {
 }
 const REDIS_PORT = 6379;
 const client = redis.createClient(REDIS_PORT, REDIS_HOST);
+//const asyncSREM = promisify(client.SREM).bind(client);
 const asyncSMEMBERS = promisify(client.SMEMBERS).bind(client);
 const asyncSADD = promisify(client.SADD).bind(client);
-//const asyncSREM = promisify(client.SREM).bind(client);
 const asyncINCR = promisify(client.INCR).bind(client);
 const asyncZADD = promisify(client.ZADD).bind(client);
 const asyncZREM = promisify(client.ZREM).bind(client);
@@ -322,7 +322,6 @@ class Light {
     }
   }
 
-  // TODO: Implement
   async hasLight(id) {
     if (!this.isConnected) {
       await asyncSetTimeout(TIMEOUT_WAIT);

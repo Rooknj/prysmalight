@@ -208,17 +208,16 @@ class LightConnector {
       eventEmitter.on("mutationResponse", handleMutationResponse);
 
       // Publish to the light
-      try {
-        await mqttDAL.publishToLight(id, payload);
-      } catch (error) {
-        debug(`Error setting "${id}"`);
-        reject(error);
+      if (!(await mqttDAL.publishToLight(id, payload))) {
+        reject(new Error(`Failed to publish to "${id}"`));
       }
 
-      // Once message is sent, if the response takes too long, error out
+      // if the response takes too long, error out
       await asyncSetTimeout(TIMEOUT_WAIT);
       eventEmitter.removeListener("mutationResponse", handleMutationResponse);
-      reject(`Response from ${id} took too long to reach the server`);
+      reject(
+        new Error(`Response from ${id} took too long to reach the server`)
+      );
     });
   }
 
@@ -244,12 +243,9 @@ class LightConnector {
     }
 
     // Subscribe to new messages from the new light
-    // TODO: Instead of returning this error, return the light from redis and put it in a queue to resubscribe when MQTT is connected
-    // TODO: This might have to be done in mqttDAL
-    try {
-      await mqttDAL.subscribeToLight(lightId);
-    } catch (error) {
-      return error;
+    // TODO: put light in a queue to resubscribe when MQTT is connected
+    if (!(await mqttDAL.subscribeToLight(lightId))) {
+      debug(`Failed to subscribe to ${lightId}`);
     }
 
     // TODO: Find a way to check if the light is connected
@@ -261,7 +257,6 @@ class LightConnector {
 
   async removeLight(lightId) {
     let lightExists, lightRemoved;
-    // TODO: implmement hasLight
     try {
       lightExists = await lightRedisDAL.hasLight(lightId);
     } catch (error) {
@@ -273,15 +268,13 @@ class LightConnector {
     }
 
     // unsubscribe from the light's messages
-    try {
-      await mqttDAL.unsubscribeFromLight(lightId);
-    } catch (error) {
-      // TODO: If the error is due to MQTT not being connected, that is fine because we are already unsubscribed.
-      // Just remove the light from the db
-      debug("Error unsubscribing light");
-      return error;
+    if (!(await mqttDAL.unsubscribeFromLight(lightId))) {
+      debug(`Could not unsubscribe from ${lightId}`);
+      return new Error(`Could not unsubscribe from ${lightId}`);
     }
 
+    // TODO: Add cleanup here in case we only remove part of the light from redis
+    // TODO: Figure out if we should resubscribe to the light if it wasn't completely removed
     // Remove light from database
     try {
       lightRemoved = await lightRedisDAL.removeLight(lightId);

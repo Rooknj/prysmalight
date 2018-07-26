@@ -45,7 +45,7 @@
     "tagDocker": "node scripts/dockerScripts tag",
     "publishDocker": "node scripts/dockerScripts publish",
     "start": "DEBUG=server,schema,lightController,redisDAL,mqttDAL NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
-    "startLocal": "nodemon src/server.js --exec babel-node",
+    "startLocal": "DEBUG=server,schema,lightController,redisDAL,mqttDAL NODE_ENV=development BABEL_ENV=development MQTT_HOST=localhost nodemon src/server.js --exec babel-node",
     "startMock": "MOCK=true nodemon src/server.js --exec babel-node"
   },
   "babel": {

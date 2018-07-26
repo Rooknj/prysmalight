@@ -155,8 +155,18 @@ class LightConnector {
     return allLights;
   }
 
-  // TODO Add an error message if no light was found
   async getLight(lightId) {
+    let lightExists;
+    try {
+      lightExists = await lightRedisDAL.hasLight(lightId);
+    } catch (error) {
+      return error;
+    }
+
+    if (!lightExists) {
+      return new Error(`"${lightId}" was not added`);
+    }
+
     try {
       const light = await lightRedisDAL.getLight(lightId);
       return light;
@@ -167,7 +177,6 @@ class LightConnector {
   }
 
   // This gets triggered if you call setLight
-  // TODO: Add error handling here
   setLight(light) {
     const { id, state, brightness, color, effect, speed } = light;
 
@@ -215,7 +224,6 @@ class LightConnector {
 
   async addLight(lightId) {
     let lightExists, lightAdded;
-    // TODO: implmement hasLight
     try {
       lightExists = await lightRedisDAL.hasLight(lightId);
     } catch (error) {

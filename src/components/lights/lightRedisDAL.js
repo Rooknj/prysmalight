@@ -21,6 +21,7 @@ const asyncSADD = promisify(client.SADD).bind(client);
 const asyncINCR = promisify(client.INCR).bind(client);
 const asyncZADD = promisify(client.ZADD).bind(client);
 const asyncZREM = promisify(client.ZREM).bind(client);
+const asyncZSCORE = promisify(client.ZSCORE).bind(client);
 const asyncZRANGE = promisify(client.ZRANGE).bind(client);
 const asyncHMSET = promisify(client.HMSET).bind(client);
 const asyncDEL = promisify(client.DEL).bind(client);
@@ -323,10 +324,25 @@ class Light {
 
   // TODO: Implement
   async hasLight(id) {
-    debug(id);
-    return new Error(
-      "hasLight is not implemented yet. You should be catching this error anyway"
-    );
+    if (!this.isConnected) {
+      await asyncSetTimeout(TIMEOUT_WAIT);
+      if (!this.isConnected) {
+        throw new Error(
+          `Can not check if "${id}" was added. Not connected to Redis`
+        );
+      }
+    }
+
+    let lightScore;
+    // May throw an error
+    lightScore = await asyncZSCORE("lightKeys", id);
+
+    // If the light has a score, it exists.
+    if (lightScore) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
 

@@ -214,13 +214,17 @@ class LightConnector {
   }
 
   async addLight(lightId) {
-    let lightAdded;
+    let lightExists, lightAdded;
     // TODO: implmement hasLight
-    // if (await lightRedisDAL.hasLight(lightId)) {
-    //   ChalkConsole.error(`Error adding ${lightId}: Light already exists`);
-    //   // TODO: return actual graphql error message
-    //   return;
-    // }
+    try {
+      lightExists = await lightRedisDAL.hasLight(lightId);
+    } catch (error) {
+      return error;
+    }
+
+    if (lightExists) {
+      return new Error(`"${lightId}" is already added`);
+    }
 
     // Add new light to light database
     try {
@@ -247,13 +251,17 @@ class LightConnector {
   }
 
   async removeLight(lightId) {
-    let lightRemoved;
+    let lightExists, lightRemoved;
     // TODO: implmement hasLight
-    // if (!await lightRedisDAL.hasLight(lightId)) {
-    //   ChalkConsole.error(`Error removing ${lightId}: Light does not exist`);
-    //   // TODO: return actual graphql error message
-    //   return;
-    // }
+    try {
+      lightExists = await lightRedisDAL.hasLight(lightId);
+    } catch (error) {
+      return error;
+    }
+
+    if (!lightExists) {
+      return new Error(`"${lightId}" was already removed`);
+    }
 
     // unsubscribe from the light's messages
     try {

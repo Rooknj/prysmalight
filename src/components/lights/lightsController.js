@@ -229,7 +229,10 @@ class LightConnector {
       debug("Error adding light");
       return error;
     }
+
     // Subscribe to new messages from the new light
+    // TODO: Instead of returning this error, return the light from redis and put it in a queue to resubscribe when MQTT is connected
+    // TODO: This might have to be done in mqttDAL
     try {
       await mqttDAL.subscribeToLight(lightId);
     } catch (error) {
@@ -256,6 +259,8 @@ class LightConnector {
     try {
       await mqttDAL.unsubscribeFromLight(lightId);
     } catch (error) {
+      // TODO: If the error is due to MQTT not being connected, that is fine because we are already unsubscribed.
+      // Just remove the light from the db
       debug("Error unsubscribing light");
       return error;
     }

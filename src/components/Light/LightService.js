@@ -24,6 +24,11 @@ class LightService {
     this.pubSubClient = new PubSub(); // TODO: Convert this to a redis PubSub
     this.eventEmitter = new events.EventEmitter(); // TODO: instead of this, use the PubSub
 
+    // Bind this to handler methods
+    this.handleConnectedMessage.bind(this);
+    this.handleStateMessage.bind(this);
+    this.handleEffectListMessage.bind(this);
+
     this.initLightLink();
   }
 

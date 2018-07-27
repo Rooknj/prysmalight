@@ -17,97 +17,98 @@ const MQTT_LIGHT_STATE_TOPIC = "state";
 const MQTT_LIGHT_COMMAND_TOPIC = "command";
 const MQTT_EFFECT_LIST_TOPIC = "effects";
 
-// Connect to MQTT server
-const mqttClient = MQTT.connect(MQTT_BROKER, {
-  reconnectPeriod: 5000, // Amount of time between reconnection attempts
-  username: "pi",
-  password: "MQTTIsBetterThanUDP"
-});
-
-// Subscribe to the light. Returns error if unsuccessful
-const subscribeTo = async topic => {
-  try {
-    const granted = await mqttClient.subscribe(topic);
-    debug(`Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`);
-    return;
-  } catch (error) {
-    return error;
-  }
-};
-// Publish to the light. Returns error if unsuccessful
-const publishTo = async (topic, payload) => {
-  try {
-    await mqttClient.publish(topic, payload);
-    debug(`Published payload of ${payload} to ${topic}`);
-    return;
-  } catch (error) {
-    return error;
-  }
-};
-// Unsubscribe from the light. Returns error if unsuccessful
-const unsubscribeFrom = async topic => {
-  try {
-    await mqttClient.unsubscribe(topic);
-    debug(`Unsubscribed from ${topic}`);
-    return;
-  } catch (error) {
-    return error;
-  }
-};
-
 class LightLink {
   constructor() {
     this.isConnected = false;
+    this.mqttClient = MQTT.connect(MQTT_BROKER, {
+      reconnectPeriod: 5000, // Amount of time between reconnection attempts
+      username: "pi",
+      password: "MQTTIsBetterThanUDP"
+    });
+
+    // Default connection handlers
     this.defaultConnectHandler = () => (this.isConnected = true);
     this.defaultDisconnectHandler = () => (this.isConnected = false);
 
-    // Default message handlers
-    this.connectionHandler = () => debug("Connection Message");
-    this.effectListHandler = () => debug("Effect List Message");
-    this.stateHandler = () => debug("State Message");
+    // Initialize Message handlers
+    this.connectionHandler = () =>
+      debug("Connection Message Handler wasnt set");
+    this.effectListHandler = () =>
+      debug("Effect List Message Handler wasnt set");
+    this.stateHandler = () => debug("State Message Handler wasnt set");
 
-    mqttClient.on("connect", this.defaultConnectHandler);
-    mqttClient.on("close", this.defaultDisconnectHandler);
+    // Bind this to handler methods
+    this.handleMessage.bind(this);
 
-    // Set up MQTT client to route messages to the appropriate callback handler function
-    mqttClient.on("message", (topic, message) => {
-      // Convert message into a string
-      const data = message.toString();
-      debug(`Received message on topic ${topic} with a payload of ${data}`);
+    this.initLink();
+  }
 
-      // Split the topic into it's individual tokens to evaluate
-      const topicTokens = topic.split("/");
-      // If this mqtt message is not from lightapp2, then ignore it
-      if (topicTokens[0] !== MQTT_LIGHT_TOP_LEVEL) {
-        debug(
-          `Received messsage that belonged to a top level topic we are not supposed to be subscribed to`
-        );
-        return;
-      }
+  handleMessage(topic, message) {
+    // Convert message into a string
+    const data = message.toString();
+    debug(`Received message on topic ${topic} with a payload of ${data}`);
 
-      //TODO: Move this logic out of here and into the controller (maybe pass the lightId to the handler too)
-      // Find the light the message pertains to in our database of lights
-      // const topicLight = light.getLight(topicTokens[1]);
-      // if (!topicLight) {
-      //   ChalkConsole.error(
-      //     `Could not find ${topicTokens[1]} in our database of lights`
-      //   );
-      //   return;
-      // }
+    // Split the topic into it's individual tokens to evaluate
+    const topicTokens = topic.split("/");
+    // If this mqtt message is not from lightapp2, then ignore it
+    if (topicTokens[0] !== MQTT_LIGHT_TOP_LEVEL) {
+      debug(
+        `Received messsage that belonged to a top level topic we are not supposed to be subscribed to`
+      );
+      return;
+    }
 
-      // Parse the JSON into a usable javascript object
-      const messageObject = parseMqttMessage(data);
-      // Route each MQTT message to it's respective message handler depending on topic
-      if (topicTokens[2] === MQTT_LIGHT_CONNECTED_TOPIC) {
-        this.connectionHandler(messageObject);
-      } else if (topicTokens[2] === MQTT_LIGHT_STATE_TOPIC) {
-        this.stateHandler(messageObject);
-      } else if (topicTokens[2] === MQTT_EFFECT_LIST_TOPIC) {
-        this.effectListHandler(messageObject);
-      } else {
-        return;
-      }
-    });
+    // Parse the JSON into a usable javascript object
+    const messageObject = parseMqttMessage(data);
+    // Route each MQTT message to it's respective message handler depending on topic
+    if (topicTokens[2] === MQTT_LIGHT_CONNECTED_TOPIC) {
+      this.connectionHandler(messageObject);
+    } else if (topicTokens[2] === MQTT_LIGHT_STATE_TOPIC) {
+      this.stateHandler(messageObject);
+    } else if (topicTokens[2] === MQTT_EFFECT_LIST_TOPIC) {
+      this.effectListHandler(messageObject);
+    } else {
+      return;
+    }
+  }
+
+  initLink() {
+    this.mqttClient.on("connect", this.defaultConnectHandler);
+    this.mqttClient.on("close", this.defaultDisconnectHandler);
+    this.mqttClient.on("message", this.handleMessage);
+  }
+
+  // Subscribe to the light. Returns error if unsuccessful
+  async subscribeTo(topic) {
+    try {
+      const granted = await this.mqttClient.subscribe(topic);
+      debug(
+        `Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`
+      );
+      return;
+    } catch (error) {
+      return error;
+    }
+  }
+  // Publish to the light. Returns error if unsuccessful
+  async publishTo(topic, payload) {
+    try {
+      await this.mqttClient.publish(topic, payload);
+      debug(`Published payload of ${payload} to ${topic}`);
+      return;
+    } catch (error) {
+      return error;
+    }
+  }
+  // Unsubscribe from the light. Returns error if unsuccessful
+  async unsubscribeFrom(topic) {
+    try {
+      await this.mqttClient.unsubscribe(topic);
+      debug(`Unsubscribed from ${topic}`);
+      return;
+    } catch (error) {
+      return error;
+    }
   }
 
   onConnect(handler) {
@@ -115,7 +116,7 @@ class LightLink {
       this.defaultConnectHandler();
       handler();
     };
-    mqttClient.on("connect", newHandler);
+    this.mqttClient.on("connect", newHandler);
   }
 
   onDisconnect(handler) {
@@ -123,15 +124,15 @@ class LightLink {
       this.defaultDisconnectHandler();
       handler();
     };
-    mqttClient.on("close", newHandler);
+    this.mqttClient.on("close", newHandler);
   }
 
   onReconnect(handler) {
-    mqttClient.on("reconnect", handler);
+    this.mqttClient.on("reconnect", handler);
   }
 
   onError(handler) {
-    mqttClient.on("error", handler);
+    this.mqttClient.on("error", handler);
   }
 
   onConnectionMessage(handler) {
@@ -151,13 +152,13 @@ class LightLink {
       return new Error("Can't subscribe, not connected to MQTT broker");
     }
 
-    const subscribedToConnected = subscribeTo(
+    const subscribedToConnected = this.subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
-    const subscribedToState = subscribeTo(
+    const subscribedToState = this.subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_STATE_TOPIC}`
     );
-    const subscribedToEffectList = subscribeTo(
+    const subscribedToEffectList = this.subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
     );
 
@@ -184,13 +185,13 @@ class LightLink {
       return;
     }
 
-    const unsubscribedFromConnected = unsubscribeFrom(
+    const unsubscribedFromConnected = this.unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
-    const unsubscribedFromState = unsubscribeFrom(
+    const unsubscribedFromState = this.unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_STATE_TOPIC}`
     );
-    const unsubscribedFromEffectList = unsubscribeFrom(
+    const unsubscribedFromEffectList = this.unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
     );
 
@@ -219,7 +220,7 @@ class LightLink {
       );
     }
 
-    return publishTo(
+    return this.publishTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
       Buffer.from(JSON.stringify(message))
     );

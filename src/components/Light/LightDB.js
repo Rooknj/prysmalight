@@ -87,7 +87,6 @@ class LightDB {
   async getAllLights() {
     if (!this.isConnected) {
       return {
-        ok: false,
         error: new Error("Can not get lights. Not connected to Redis")
       };
     }
@@ -97,10 +96,7 @@ class LightDB {
     try {
       lightKeys = await asyncZRANGE("lightKeys", 0, -1);
     } catch (error) {
-      return {
-        ok: false,
-        error
-      };
+      return { error };
     }
 
     // For each light key, get the corresponding light data
@@ -112,21 +108,20 @@ class LightDB {
     const lightsArray = await Promise.all(mapLightPromises);
 
     // Get the data out of our responses
-    let returnObject = { ok: true, error: null, data: null };
-    const data = lightsArray.map(({ ok, error, data }) => {
+    let returnObject = { error: null, lights: null };
+    const lights = lightsArray.map(({ error, light }) => {
       // If a failure already occured, skip any additional logic here
-      if (!returnObject.ok) return;
+      if (returnObject.error) return;
       // If a failure occured in any of the getLight operations, set the failure and error fields in returnObject
-      if (!ok) {
-        returnObject.ok = false;
+      if (error) {
         returnObject.error = error;
         return;
       }
       // If everything went well, just return the data
-      return data;
+      return light;
     });
-    if (returnObject.ok) {
-      returnObject.data = data;
+    if (!returnObject.error) {
+      returnObject.lights = lights;
     }
     return returnObject;
   }
@@ -134,7 +129,6 @@ class LightDB {
   async getLight(id) {
     if (!this.isConnected) {
       return {
-        ok: false,
         error: new Error(`Can not get "${id}". Not connected to Redis`)
       };
     }
@@ -144,41 +138,31 @@ class LightDB {
     try {
       lightData = await asyncHGETALL(id);
     } catch (error) {
-      return {
-        ok: false,
-        error
-      };
+      return { error };
     }
 
     // Get the light's effects
     try {
       lightEffect = await asyncSMEMBERS(lightData.effectsKey);
     } catch (error) {
-      return {
-        ok: false,
-        error
-      };
+      return { error };
     }
 
     // Convert that info into a javascript object
     const lightObject = mapRedisObjectToLightObject(id, lightData, lightEffect);
-    return { ok: true, data: lightObject };
+    return { light: lightObject };
   }
 
   async setLight(id, lightData) {
     if (!this.isConnected) {
       return {
-        ok: false,
         error: new Error(`Can not set "${id}". Not connected to Redis`)
       };
     }
 
     // You need an id to set the light
     if (!id) {
-      return {
-        ok: false,
-        error: new Error("No ID supplied to setLight()")
-      };
+      return { error: new Error("No ID supplied to setLight()") };
     }
     // Populate the redis object with the id of the light as a key
     let redisObject = [id];
@@ -220,10 +204,7 @@ class LightDB {
     try {
       await Promise.all([addLightDataPromise, addEffectsPromise]);
     } catch (error) {
-      return {
-        ok: false,
-        error
-      };
+      return { error };
     }
 
     return this.getLight(id);
@@ -232,7 +213,6 @@ class LightDB {
   async addLight(id) {
     if (!this.isConnected) {
       return {
-        ok: false,
         error: new Error(`Can not add "${id}". Not connected to Redis`)
       };
     }
@@ -242,19 +222,13 @@ class LightDB {
     try {
       lightScore = await asyncINCR("lightScore");
     } catch (error) {
-      return {
-        ok: false,
-        error
-      };
+      return { error };
     }
 
     try {
       addLightKeyResponse = await asyncZADD("lightKeys", lightScore, id);
     } catch (error) {
-      return {
-        ok: false,
-        error
-      };
+      return { error };
     }
 
     switch (addLightKeyResponse) {
@@ -265,15 +239,11 @@ class LightDB {
         try {
           addLightDataResponse = await asyncHMSET(getNewRedisLight(id));
         } catch (error) {
-          return {
-            ok: false,
-            error
-          };
+          return { error };
         }
         break;
       default:
         return {
-          ok: false,
           error: new Error(
             "Could not add light key to redis. returned with response code != 1"
           )
@@ -290,7 +260,6 @@ class LightDB {
         return this.getLight(id);
       default:
         return {
-          ok: false,
           error: new Error(
             'Could not add light key to redis. returned with response code != "OK"'
           )
@@ -301,7 +270,6 @@ class LightDB {
   async removeLight(id) {
     if (!this.isConnected) {
       return {
-        ok: false,
         error: new Error(`Can't remove "${id}". Not connected to redis`)
       };
     }
@@ -311,7 +279,6 @@ class LightDB {
       removeKeyResponse = await asyncZREM("lightKeys", id);
     } catch (error) {
       return {
-        ok: false,
         error
       };
     }
@@ -324,15 +291,11 @@ class LightDB {
         try {
           deleteLightResponse = await asyncDEL(id);
         } catch (error) {
-          return {
-            ok: false,
-            error
-          };
+          return { error };
         }
         break;
       default:
         return {
-          ok: false,
           error: new Error(
             "Could not remove light key from Redis. Response code != 1"
           )
@@ -349,7 +312,6 @@ class LightDB {
         return { id };
       default:
         return {
-          ok: false,
           error: new Error(
             "Could not remove light key from Redis. Response code != 1"
           )
@@ -360,7 +322,6 @@ class LightDB {
   async hasLight(id) {
     if (!this.isConnected) {
       return {
-        ok: false,
         error: new Error(
           `Can not check if "${id}" was added. Not connected to Redis`
         )
@@ -374,13 +335,11 @@ class LightDB {
     // If the light has a score, it exists.
     if (lightScore) {
       return {
-        ok: false,
-        data: true
+        hasLight: true
       };
     } else {
       return {
-        ok: false,
-        data: false
+        hasLight: false
       };
     }
   }

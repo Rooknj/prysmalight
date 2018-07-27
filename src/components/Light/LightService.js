@@ -11,27 +11,29 @@ const debug = Debug("LightService");
 const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 
-const eventEmitter = new events.EventEmitter();
-const pubsub = new PubSub();
-const lightDB = new LightDB();
-const lightLink = new LightLink();
-
 class LightService {
   constructor() {
     // Our mutation number to match each mutation to it's response
     // TODO: Store this in redis
     this.mutationNumber = 0;
+
+    this.lightLink = new LightLink();
+    this.lightDBClient = new LightDB();
+
+    // TODO: In order to scale, these need to be passed to the constructor
+    this.pubSubClient = new PubSub(); // TODO: Convert this to a redis PubSub
+    this.eventEmitter = new events.EventEmitter(); // TODO: instead of this, use the PubSub
     // Start the initialize function
-    this.init();
+    this.initLightLink();
   }
 
-  async init() {
+  async initLightLink() {
     // Set up onConnect callback
-    lightLink.onConnect(async () => {
+    this.lightLink.onConnect(async () => {
       debug(`Connected to MQTT broker`);
 
       // Get the saved lights from redis
-      const { error, lights } = await lightDB.getAllLights();
+      const { error, lights } = await this.lightDBClient.getAllLights();
       if (error) {
         debug(`Error getting all lights ${error}`);
         return;
@@ -39,7 +41,7 @@ class LightService {
 
       // TODO: If you failed to subscribe to a light, find a way to resubscribe
       lights.forEach(light => {
-        const error = lightLink.subscribeToLight(light.id);
+        const error = this.lightLink.subscribeToLight(light.id);
         if (error) {
           debug(`could not subscribe to "${light}". Error: ${error}`);
         }
@@ -59,7 +61,7 @@ class LightService {
         return;
       }
 
-      const { error, light: changedLight } = await lightDB.setLight(
+      const { error, light: changedLight } = await this.lightDBClient.setLight(
         message.name,
         {
           connected: connectionPayload
@@ -70,8 +72,10 @@ class LightService {
         return;
       }
 
-      pubsub.publish(message.name, { lightChanged: changedLight });
-      pubsub.publish("lightsChanged", { lightsChanged: changedLight });
+      this.pubSubClient.publish(message.name, { lightChanged: changedLight });
+      this.pubSubClient.publish("lightsChanged", {
+        lightsChanged: changedLight
+      });
     };
 
     // This gets triggered when the state of the light changes
@@ -85,7 +89,7 @@ class LightService {
       if (effect) newState = { ...newState, effect };
       if (speed) newState = { ...newState, speed };
 
-      const { error, light: changedLight } = await lightDB.setLight(
+      const { error, light: changedLight } = await this.lightDBClient.setLight(
         message.name,
         newState
       );
@@ -94,15 +98,17 @@ class LightService {
         return;
       }
 
-      pubsub.publish(message.name, { lightChanged: changedLight });
-      pubsub.publish("lightsChanged", { lightsChanged: changedLight });
+      this.pubSubClient.publish(message.name, { lightChanged: changedLight });
+      this.pubSubClient.publish("lightsChanged", {
+        lightsChanged: changedLight
+      });
       // Publish to the mutation response event
-      eventEmitter.emit("mutationResponse", mutationId, changedLight);
+      this.eventEmitter.emit("mutationResponse", mutationId, changedLight);
     };
 
     // This gets triggered when the light sends its effect list
     const handleEffectListMessage = async message => {
-      const { error, light: changedLight } = await lightDB.setLight(
+      const { error, light: changedLight } = await this.lightDBClient.setLight(
         message.name,
         {
           supportedEffects: message.effectList
@@ -113,17 +119,19 @@ class LightService {
         return;
       }
 
-      pubsub.publish(message.name, { lightChanged: changedLight });
-      pubsub.publish("lightsChanged", { lightsChanged: changedLight });
+      this.pubSubClient.publish(message.name, { lightChanged: changedLight });
+      this.pubSubClient.publish("lightsChanged", {
+        lightsChanged: changedLight
+      });
     };
 
-    lightLink.onConnectionMessage(handleConnectedMessage);
-    lightLink.onStateMessage(handleStateMessage);
-    lightLink.onEffectListMessage(handleEffectListMessage);
+    this.lightLink.onConnectionMessage(handleConnectedMessage);
+    this.lightLink.onStateMessage(handleStateMessage);
+    this.lightLink.onEffectListMessage(handleEffectListMessage);
   }
 
   async getLights() {
-    const { error, lights } = await lightDB.getAllLights();
+    const { error, lights } = await this.lightDBClient.getAllLights();
     return error ? error : lights;
   }
 
@@ -131,19 +139,19 @@ class LightService {
     let error, hasLight, light;
 
     // If the light was never added, return an error
-    ({ error, hasLight } = await lightDB.hasLight(lightId));
+    ({ error, hasLight } = await this.lightDBClient.hasLight(lightId));
     if (error) return error;
     if (!hasLight) return new Error(`"${lightId}" was not added`);
 
     // Get the light and return the data
-    ({ error, light } = await lightDB.getLight(lightId));
+    ({ error, light } = await this.lightDBClient.getLight(lightId));
     return error ? error : light;
   }
 
   // This gets triggered if you call setLight
   async setLight(light) {
     // Check if the light exists already before doing anything else
-    const { error, hasLight } = await lightDB.hasLight(light.id);
+    const { error, hasLight } = await this.lightDBClient.hasLight(light.id);
     if (error) return error;
     if (!hasLight) return new Error(`"${light.id}" was never added`);
 
@@ -161,7 +169,7 @@ class LightService {
       const handleMutationResponse = (mutationId, changedLight) => {
         if (mutationId === payload.mutationId) {
           // Remove this mutation's event listener
-          eventEmitter.removeListener(
+          this.eventEmitter.removeListener(
             "mutationResponse",
             handleMutationResponse
           );
@@ -172,15 +180,18 @@ class LightService {
       };
 
       // Every time we get a new message from the light, check to see if it has the same mutationId
-      eventEmitter.on("mutationResponse", handleMutationResponse);
+      this.eventEmitter.on("mutationResponse", handleMutationResponse);
 
       // Publish to the light
-      const error = await lightLink.publishToLight(id, payload);
+      const error = await this.lightLink.publishToLight(id, payload);
       if (error) reject(error);
 
       // if the response takes too long, error out
       await asyncSetTimeout(TIMEOUT_WAIT);
-      eventEmitter.removeListener("mutationResponse", handleMutationResponse);
+      this.eventEmitter.removeListener(
+        "mutationResponse",
+        handleMutationResponse
+      );
       reject(new Error(`Response from ${id} timed out`));
     });
   }
@@ -189,23 +200,23 @@ class LightService {
     let error, hasLight, lightAdded;
 
     // Check if the light exists already before doing anything else
-    ({ error, hasLight } = await lightDB.hasLight(lightId));
+    ({ error, hasLight } = await this.lightDBClient.hasLight(lightId));
     if (error) return error;
     if (hasLight) return new Error(`"${lightId}" is already added`);
 
     // Add new light to light database
-    ({ error, light: lightAdded } = await lightDB.addLight(lightId));
+    ({ error, light: lightAdded } = await this.lightDBClient.addLight(lightId));
     if (error) return error;
 
     // Subscribe to new messages from the new light
     // TODO: put light in a queue to resubscribe when MQTT is connected
-    error = await lightLink.subscribeToLight(lightId);
+    error = await this.lightLink.subscribeToLight(lightId);
     if (error) debug(`Failed to subscribe to ${lightId}\n${error}`);
 
     // TODO: Find a way to check if the light is connected
     // If it is connected, return then.
     // Wait a max of .5 seconds?
-    pubsub.publish("lightAdded", { lightAdded });
+    this.pubSubClient.publish("lightAdded", { lightAdded });
     return lightAdded;
   }
 
@@ -213,12 +224,12 @@ class LightService {
     let error, hasLight, lightRemoved;
 
     // Check if the light exists already before doing anything else
-    ({ error, hasLight } = await lightDB.hasLight(lightId));
+    ({ error, hasLight } = await this.lightDBClient.hasLight(lightId));
     if (error) return error;
     if (!hasLight) return new Error(`"${lightId}" was already removed`);
 
     // unsubscribe from the light's messages
-    error = await lightLink.unsubscribeFromLight(lightId);
+    error = await this.lightLink.unsubscribeFromLight(lightId);
     if (error) {
       debug(`Could not unsubscribe from ${lightId}`);
       return new Error(`Could not unsubscribe from ${lightId}`);
@@ -227,32 +238,33 @@ class LightService {
     // TODO: Add cleanup here in case we only remove part of the light from redis
     // TODO: Figure out if we should resubscribe to the light if it wasn't completely removed
     // Remove light from database
-    ({ error, lightRemoved } = lightRemoved = await lightDB.removeLight(
-      lightId
-    ));
+    ({
+      error,
+      lightRemoved
+    } = lightRemoved = await this.lightDBClient.removeLight(lightId));
     if (error) return error;
 
     // Return the removed light
-    pubsub.publish("lightRemoved", { lightRemoved });
+    this.pubSubClient.publish("lightRemoved", { lightRemoved });
     return lightRemoved;
   }
 
   // Subscribe to one specific light's changes
   subscribeToLight(lightId) {
-    return pubsub.asyncIterator(lightId);
+    return this.pubSubClient.asyncIterator(lightId);
   }
 
   // Subscribe to all light's changes
   subscribeToAllLights() {
-    return pubsub.asyncIterator("lightsChanged");
+    return this.pubSubClient.asyncIterator("lightsChanged");
   }
 
   subscribeToLightsAdded() {
-    return pubsub.asyncIterator("lightAdded");
+    return this.pubSubClient.asyncIterator("lightAdded");
   }
 
   subscribeToLightsRemoved() {
-    return pubsub.asyncIterator("lightRemoved");
+    return this.pubSubClient.asyncIterator("lightRemoved");
   }
 }
 

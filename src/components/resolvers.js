@@ -1,36 +1,35 @@
-import LightsController from "./lights/lightsController";
-
-const lightsController = new LightsController();
+import LightService from "./Light/LightService";
+const lightService = new LightService();
 
 const resolvers = {
   Query: {
-    light: (_, { lightId }) => lightsController.getLight(lightId),
-    lights: () => lightsController.getLights()
+    light: (_, { lightId }) => lightService.getLight(lightId),
+    lights: () => lightService.getLights()
   },
   Mutation: {
-    setLight: (_, { light }) => lightsController.setLight(light),
-    addLight: (_, { lightId }) => lightsController.addLight(lightId),
-    removeLight: (_, { lightId }) => lightsController.removeLight(lightId)
+    setLight: (_, { light }) => lightService.setLight(light),
+    addLight: (_, { lightId }) => lightService.addLight(lightId),
+    removeLight: (_, { lightId }) => lightService.removeLight(lightId)
   },
   Subscription: {
     lightChanged: {
       subscribe: (_, { lightId }) => {
-        return lightsController.subscribeLight(lightId);
+        return lightService.subscribeLight(lightId);
       }
     },
     lightsChanged: {
       subscribe: _ => {
-        return lightsController.subscribeAllLights();
+        return lightService.subscribeAllLights();
       }
     },
     lightAdded: {
       subscribe: _ => {
-        return lightsController.subscribeLightAdded();
+        return lightService.subscribeLightAdded();
       }
     },
     lightRemoved: {
       subscribe: _ => {
-        return lightsController.subscribeLightRemoved();
+        return lightService.subscribeLightRemoved();
       }
     }
   }

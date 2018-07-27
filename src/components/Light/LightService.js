@@ -238,20 +238,20 @@ class LightService {
   }
 
   // Subscribe to one specific light's changes
-  subscribeLight(lightId) {
+  subscribeToLight(lightId) {
     return pubsub.asyncIterator(lightId);
   }
 
   // Subscribe to all light's changes
-  subscribeAllLights() {
+  subscribeToAllLights() {
     return pubsub.asyncIterator("lightsChanged");
   }
 
-  subscribeLightAdded() {
+  subscribeToLightsAdded() {
     return pubsub.asyncIterator("lightAdded");
   }
 
-  subscribeLightRemoved() {
+  subscribeToLightsRemoved() {
     return pubsub.asyncIterator("lightRemoved");
   }
 }

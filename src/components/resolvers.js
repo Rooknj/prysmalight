@@ -14,22 +14,22 @@ const resolvers = {
   Subscription: {
     lightChanged: {
       subscribe: (_, { lightId }) => {
-        return lightService.subscribeLight(lightId);
+        return lightService.subscribeToLight(lightId);
       }
     },
     lightsChanged: {
       subscribe: () => {
-        return lightService.subscribeAllLights();
+        return lightService.subscribeToAllLights();
       }
     },
     lightAdded: {
       subscribe: () => {
-        return lightService.subscribeLightAdded();
+        return lightService.subscribeToLightsAdded();
       }
     },
     lightRemoved: {
       subscribe: () => {
-        return lightService.subscribeLightRemoved();
+        return lightService.subscribeToLightsRemoved();
       }
     }
   }

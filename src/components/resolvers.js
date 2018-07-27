@@ -18,17 +18,17 @@ const resolvers = {
       }
     },
     lightsChanged: {
-      subscribe: _ => {
+      subscribe: () => {
         return lightService.subscribeAllLights();
       }
     },
     lightAdded: {
-      subscribe: _ => {
+      subscribe: () => {
         return lightService.subscribeLightAdded();
       }
     },
     lightRemoved: {
-      subscribe: _ => {
+      subscribe: () => {
         return lightService.subscribeLightRemoved();
       }
     }

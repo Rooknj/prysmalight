@@ -86,16 +86,17 @@ class LightDB {
 
   async getAllLights() {
     if (!this.isConnected) {
-      throw new Error("Can not get lights. Not connected to Redis");
+      return {
+        error: new Error("Can not get lights. Not connected to Redis")
+      };
     }
 
     // Get all the light keys from redis
-    let lightKeys, lightsArray;
+    let lightKeys;
     try {
       lightKeys = await asyncZRANGE("lightKeys", 0, -1);
     } catch (error) {
-      debug("Error getting light keys from redis");
-      return error;
+      return { error };
     }
 
     // For each light key, get the corresponding light data
@@ -104,52 +105,64 @@ class LightDB {
     );
 
     // Wait for all of the promises returned by this.getLight to resolve
-    try {
-      lightsArray = await Promise.all(mapLightPromises);
-    } catch (error) {
-      debug("Error getting one of the lights from redis");
-      return error;
-    }
+    const lightsArray = await Promise.all(mapLightPromises);
 
-    return lightsArray;
+    // Get the data out of our responses
+    let returnObject = { error: null, lights: null };
+    const lights = lightsArray.map(({ error, light }) => {
+      // If a failure already occured, skip any additional logic here
+      if (returnObject.error) return;
+      // If a failure occured in any of the getLight operations, set the failure and error fields in returnObject
+      if (error) {
+        returnObject.error = error;
+        return;
+      }
+      // If everything went well, just return the data
+      return light;
+    });
+    if (!returnObject.error) {
+      returnObject.lights = lights;
+    }
+    return returnObject;
   }
 
   async getLight(id) {
     if (!this.isConnected) {
-      throw new Error(`Can not get "${id}". Not connected to Redis`);
+      return {
+        error: new Error(`Can not get "${id}". Not connected to Redis`)
+      };
     }
-    let lightData, lightEffect;
 
+    let lightData, lightEffect;
     // Get data about the light
     try {
       lightData = await asyncHGETALL(id);
     } catch (error) {
-      debug(`Error getting light: ${id}`);
-      return error;
+      return { error };
     }
 
     // Get the light's effects
     try {
       lightEffect = await asyncSMEMBERS(lightData.effectsKey);
     } catch (error) {
-      debug(`Error getting effects for light: ${id}`);
-      return error;
+      return { error };
     }
 
     // Convert that info into a javascript object
     const lightObject = mapRedisObjectToLightObject(id, lightData, lightEffect);
-    return lightObject;
+    return { light: lightObject };
   }
 
   async setLight(id, lightData) {
     if (!this.isConnected) {
-      throw new Error(`Can not set "${id}". Not connected to Redis`);
+      return {
+        error: new Error(`Can not set "${id}". Not connected to Redis`)
+      };
     }
 
     // You need an id to set the light
     if (!id) {
-      debug("No ID supplied to setLight()");
-      return new Error("No ID supplied to setLight()");
+      return { error: new Error("No ID supplied to setLight()") };
     }
     // Populate the redis object with the id of the light as a key
     let redisObject = [id];
@@ -191,15 +204,17 @@ class LightDB {
     try {
       await Promise.all([addLightDataPromise, addEffectsPromise]);
     } catch (error) {
-      debug("Error setting the light to redis database");
-      return error;
+      return { error };
     }
+
     return this.getLight(id);
   }
 
   async addLight(id) {
     if (!this.isConnected) {
-      throw new Error(`Can not add "${id}". Not connected to Redis`);
+      return {
+        error: new Error(`Can not add "${id}". Not connected to Redis`)
+      };
     }
 
     let lightScore, addLightKeyResponse, addLightDataResponse;
@@ -207,15 +222,13 @@ class LightDB {
     try {
       lightScore = await asyncINCR("lightScore");
     } catch (error) {
-      debug("Error incrementing lightScore in redis");
-      return error;
+      return { error };
     }
 
     try {
       addLightKeyResponse = await asyncZADD("lightKeys", lightScore, id);
     } catch (error) {
-      debug("Error adding light key to redis");
-      return error;
+      return { error };
     }
 
     switch (addLightKeyResponse) {
@@ -226,49 +239,46 @@ class LightDB {
         try {
           addLightDataResponse = await asyncHMSET(getNewRedisLight(id));
         } catch (error) {
-          debug("Error adding light to redis");
-          return error;
+          return { error };
         }
         break;
       default:
-        debug(
-          "Could not add light key to redis. returned with response code != 1"
-        );
-        return new Error(
-          "Could not add light key to redis. returned with response code != 1"
-        );
+        return {
+          error: new Error(
+            "Could not add light key to redis. returned with response code != 1"
+          )
+        };
     }
 
     switch (addLightDataResponse) {
       // If the response is OK, then setting the light was successful
       case "OK":
         debug("Light successfully added");
-        // Save the redis database to persistant storave
+        // Save the redis database to persistant storage
         client.BGSAVE();
         // Return the newly added light
         return this.getLight(id);
       default:
-        debug(
-          'Could not add light key to redis. returned with response code != "OK"'
-        );
-        return new Error(
-          'Could not add light key to redis. returned with response code != "OK"'
-        );
+        return {
+          error: new Error(
+            'Could not add light key to redis. returned with response code != "OK"'
+          )
+        };
     }
   }
 
   async removeLight(id) {
     if (!this.isConnected) {
-      throw new Error(`Can't remove "${id}". Not connected to redis`);
+      return {
+        error: new Error(`Can't remove "${id}". Not connected to redis`)
+      };
     }
 
     let removeKeyResponse, deleteLightResponse;
-
     try {
       removeKeyResponse = await asyncZREM("lightKeys", id);
     } catch (error) {
-      debug("Error removing key from redis");
-      return error;
+      return { error };
     }
 
     switch (removeKeyResponse) {
@@ -279,15 +289,15 @@ class LightDB {
         try {
           deleteLightResponse = await asyncDEL(id);
         } catch (error) {
-          debug("Error removing light data from redis");
-          return error;
+          return { error };
         }
         break;
       default:
-        debug("Could not remove light key from Redis. Response code != 1");
-        return new Error(
-          "Could not remove light key from Redis. Response code != 1"
-        );
+        return {
+          error: new Error(
+            "Could not remove light key from Redis. Response code != 1"
+          )
+        };
     }
 
     // If the response is 1, then deleting the light was successful
@@ -297,20 +307,23 @@ class LightDB {
         // Save the redis database to persistant storave
         client.BGSAVE();
         // Return the id of the deleted light
-        return { id };
+        return { lightRemoved: { id } };
       default:
-        debug("Could not remove light data from Redis. Response code != 1");
-        return new Error(
-          "Could not remove light data from Redis. Response code != 1"
-        );
+        return {
+          error: new Error(
+            "Could not remove light key from Redis. Response code != 1"
+          )
+        };
     }
   }
 
   async hasLight(id) {
     if (!this.isConnected) {
-      throw new Error(
-        `Can not check if "${id}" was added. Not connected to Redis`
-      );
+      return {
+        error: new Error(
+          `Can not check if "${id}" was added. Not connected to Redis`
+        )
+      };
     }
 
     let lightScore;
@@ -319,9 +332,13 @@ class LightDB {
 
     // If the light has a score, it exists.
     if (lightScore) {
-      return true;
+      return {
+        hasLight: true
+      };
     } else {
-      return false;
+      return {
+        hasLight: false
+      };
     }
   }
 }

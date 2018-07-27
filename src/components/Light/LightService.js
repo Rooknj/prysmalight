@@ -17,17 +17,94 @@ class LightService {
     // TODO: Store this in redis
     this.mutationNumber = 0;
 
-    this.lightLink = new LightLink();
     this.lightDBClient = new LightDB();
+    this.lightLink = new LightLink();
 
     // TODO: In order to scale, these need to be passed to the constructor
     this.pubSubClient = new PubSub(); // TODO: Convert this to a redis PubSub
     this.eventEmitter = new events.EventEmitter(); // TODO: instead of this, use the PubSub
-    // Start the initialize function
+
     this.initLightLink();
   }
 
-  async initLightLink() {
+  // This gets triggered when the connection of the light changes
+  async handleConnectedMessage(message) {
+    // If the connectionPayload isn't correct, return
+    const connectionPayload = mapConnectionMessageToConnectionPayload(
+      message.connection
+    );
+    if (connectionPayload === -1) {
+      debug(
+        `Received messsage on connected topic that was not in the correct format. Ignoring\nMessage: ${message}`
+      );
+      return;
+    }
+
+    const { error, light: changedLight } = await this.lightDBClient.setLight(
+      message.name,
+      {
+        connected: connectionPayload
+      }
+    );
+    if (error) {
+      debug(error);
+      return;
+    }
+
+    this.pubSubClient.publish(message.name, { lightChanged: changedLight });
+    this.pubSubClient.publish("lightsChanged", {
+      lightsChanged: changedLight
+    });
+  }
+
+  // This gets triggered when the state of the light changes
+  async handleStateMessage(message) {
+    // TODO: add data checking
+    const { mutationId, state, brightness, color, effect, speed } = message;
+    let newState = {};
+    if (state) newState = { ...newState, state };
+    if (brightness) newState = { ...newState, brightness };
+    if (color) newState = { ...newState, color };
+    if (effect) newState = { ...newState, effect };
+    if (speed) newState = { ...newState, speed };
+
+    const { error, light: changedLight } = await this.lightDBClient.setLight(
+      message.name,
+      newState
+    );
+    if (error) {
+      debug(error);
+      return;
+    }
+
+    this.pubSubClient.publish(message.name, { lightChanged: changedLight });
+    this.pubSubClient.publish("lightsChanged", {
+      lightsChanged: changedLight
+    });
+    // Publish to the mutation response event
+    this.eventEmitter.emit("mutationResponse", mutationId, changedLight);
+  }
+
+  // This gets triggered when the light sends its effect list
+  async handleEffectListMessage(message) {
+    const { error, light: changedLight } = await this.lightDBClient.setLight(
+      message.name,
+      {
+        supportedEffects: message.effectList
+      }
+    );
+    if (error) {
+      debug(error);
+      return;
+    }
+
+    this.pubSubClient.publish(message.name, { lightChanged: changedLight });
+    this.pubSubClient.publish("lightsChanged", {
+      lightsChanged: changedLight
+    });
+  }
+
+  initLightLink() {
     // Set up onConnect callback
     this.lightLink.onConnect(async () => {
       debug(`Connected to MQTT broker`);
@@ -47,87 +124,9 @@ class LightService {
         }
       });
     });
-
-    // This gets triggered when the connection of the light changes
-    const handleConnectedMessage = async message => {
-      // If the connectionPayload isn't correct, return
-      const connectionPayload = mapConnectionMessageToConnectionPayload(
-        message.connection
-      );
-      if (connectionPayload === -1) {
-        debug(
-          `Received messsage on connected topic that was not in the correct format. Ignoring\nMessage: ${message}`
-        );
-        return;
-      }
-
-      const { error, light: changedLight } = await this.lightDBClient.setLight(
-        message.name,
-        {
-          connected: connectionPayload
-        }
-      );
-      if (error) {
-        debug(error);
-        return;
-      }
-
-      this.pubSubClient.publish(message.name, { lightChanged: changedLight });
-      this.pubSubClient.publish("lightsChanged", {
-        lightsChanged: changedLight
-      });
-    };
-
-    // This gets triggered when the state of the light changes
-    const handleStateMessage = async message => {
-      // TODO: add data checking
-      const { mutationId, state, brightness, color, effect, speed } = message;
-      let newState = {};
-      if (state) newState = { ...newState, state };
-      if (brightness) newState = { ...newState, brightness };
-      if (color) newState = { ...newState, color };
-      if (effect) newState = { ...newState, effect };
-      if (speed) newState = { ...newState, speed };
-
-      const { error, light: changedLight } = await this.lightDBClient.setLight(
-        message.name,
-        newState
-      );
-      if (error) {
-        debug(error);
-        return;
-      }
-
-      this.pubSubClient.publish(message.name, { lightChanged: changedLight });
-      this.pubSubClient.publish("lightsChanged", {
-        lightsChanged: changedLight
-      });
-      // Publish to the mutation response event
-      this.eventEmitter.emit("mutationResponse", mutationId, changedLight);
-    };
-
-    // This gets triggered when the light sends its effect list
-    const handleEffectListMessage = async message => {
-      const { error, light: changedLight } = await this.lightDBClient.setLight(
-        message.name,
-        {
-          supportedEffects: message.effectList
-        }
-      );
-      if (error) {
-        debug(error);
-        return;
-      }
-
-      this.pubSubClient.publish(message.name, { lightChanged: changedLight });
-      this.pubSubClient.publish("lightsChanged", {
-        lightsChanged: changedLight
-      });
-    };
-
-    this.lightLink.onConnectionMessage(handleConnectedMessage);
-    this.lightLink.onStateMessage(handleStateMessage);
-    this.lightLink.onEffectListMessage(handleEffectListMessage);
+    this.lightLink.onConnectionMessage(this.handleConnectedMessage);
+    this.lightLink.onStateMessage(this.handleStateMessage);
+    this.lightLink.onEffectListMessage(this.handleEffectListMessage);
   }
 
   async getLights() {

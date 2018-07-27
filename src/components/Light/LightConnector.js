@@ -1,7 +1,7 @@
 import MQTT from "async-mqtt";
 import Debug from "debug";
 
-const debug = Debug("mqttDAL");
+const debug = Debug("LightConnector");
 
 // MQTT: client
 let MQTT_BROKER = `tcp://raspberrypi.local:1883`;

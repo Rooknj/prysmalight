@@ -2,11 +2,7 @@ import redis from "redis";
 import { promisify } from "util";
 import Debug from "debug";
 
-const debug = Debug("redisDAL");
-
-// The maximum amount of time to wait until a request fails due to not having a connection
-const TIMEOUT_WAIT = 3000;
-const asyncSetTimeout = promisify(setTimeout);
+const debug = Debug("LightDB");
 
 let REDIS_HOST = "localhost";
 if (process.env.IN_DOCKER_CONTAINER) {
@@ -90,10 +86,7 @@ class Light {
 
   async getAllLights() {
     if (!this.isConnected) {
-      await asyncSetTimeout(TIMEOUT_WAIT);
-      if (!this.isConnected) {
-        throw new Error("Can not get lights. Not connected to Redis");
-      }
+      throw new Error("Can not get lights. Not connected to Redis");
     }
 
     // Get all the light keys from redis
@@ -123,10 +116,7 @@ class Light {
 
   async getLight(id) {
     if (!this.isConnected) {
-      await asyncSetTimeout(TIMEOUT_WAIT);
-      if (!this.isConnected) {
-        throw new Error(`Can not get "${id}". Not connected to Redis`);
-      }
+      throw new Error(`Can not get "${id}". Not connected to Redis`);
     }
     let lightData, lightEffect;
 
@@ -153,11 +143,9 @@ class Light {
 
   async setLight(id, lightData) {
     if (!this.isConnected) {
-      await asyncSetTimeout(TIMEOUT_WAIT);
-      if (!this.isConnected) {
-        throw new Error(`Can not set "${id}". Not connected to Redis`);
-      }
+      throw new Error(`Can not set "${id}". Not connected to Redis`);
     }
+
     // You need an id to set the light
     if (!id) {
       debug("No ID supplied to setLight()");
@@ -211,11 +199,9 @@ class Light {
 
   async addLight(id) {
     if (!this.isConnected) {
-      await asyncSetTimeout(TIMEOUT_WAIT);
-      if (!this.isConnected) {
-        throw new Error(`Can not add "${id}". Not connected to Redis`);
-      }
+      throw new Error(`Can not add "${id}". Not connected to Redis`);
     }
+
     let lightScore, addLightKeyResponse, addLightDataResponse;
 
     try {
@@ -273,11 +259,9 @@ class Light {
 
   async removeLight(id) {
     if (!this.isConnected) {
-      await asyncSetTimeout(TIMEOUT_WAIT);
-      if (!this.isConnected) {
-        throw new Error(`Can't remove "${id}". Not connected to redis`);
-      }
+      throw new Error(`Can't remove "${id}". Not connected to redis`);
     }
+
     let removeKeyResponse, deleteLightResponse;
 
     try {
@@ -324,12 +308,9 @@ class Light {
 
   async hasLight(id) {
     if (!this.isConnected) {
-      await asyncSetTimeout(TIMEOUT_WAIT);
-      if (!this.isConnected) {
-        throw new Error(
-          `Can not check if "${id}" was added. Not connected to Redis`
-        );
-      }
+      throw new Error(
+        `Can not check if "${id}" was added. Not connected to Redis`
+      );
     }
 
     let lightScore;

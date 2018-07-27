@@ -1,19 +1,19 @@
 import { PubSub } from "graphql-subscriptions";
 import events from "events";
-import LightRedisDAL from "./lightRedisDAL";
-import LightMqttDAL from "./lightMqttDAL";
+import LightDB from "./LightDB";
+import LightConnector from "./LightConnector";
 import Debug from "debug";
 import { promisify } from "util";
 
-const debug = Debug("lightController");
+const debug = Debug("LightService");
 
-const TIMEOUT_WAIT = 10000;
+const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 
-const lightRedisDAL = new LightRedisDAL();
-const mqttDAL = new LightMqttDAL();
 const eventEmitter = new events.EventEmitter();
 const pubsub = new PubSub();
+const lightDB = new LightDB();
+const lightConnector = new LightConnector();
 
 // MQTT: payloads by default
 const LIGHT_CONNECTED = 2;
@@ -30,7 +30,7 @@ const mapConnectionMessageToConnectionPayload = connectionMessage => {
   return connectionString;
 };
 
-class LightConnector {
+class LightService {
   constructor() {
     // Our mutation number to match each mutation to it's response
     // TODO: Store this in redis
@@ -41,14 +41,14 @@ class LightConnector {
 
   async init() {
     // Set up onConnect callback
-    mqttDAL.onConnect(async () => {
+    lightConnector.onConnect(async () => {
       let lights;
 
       debug(`Connected to MQTT broker`);
 
       // Get the saved lights from redis
       try {
-        lights = await lightRedisDAL.getAllLights();
+        lights = await lightDB.getAllLights();
       } catch (error) {
         debug(error);
         return;
@@ -56,7 +56,7 @@ class LightConnector {
 
       lights.forEach(light => {
         try {
-          mqttDAL.subscribeToLight(light.id);
+          lightConnector.subscribeToLight(light.id);
         } catch (error) {
           debug(`could not subscribe to "${light}". Error: ${error}`);
         }
@@ -79,7 +79,7 @@ class LightConnector {
       }
 
       try {
-        changedLight = await lightRedisDAL.setLight(message.name, {
+        changedLight = await lightDB.setLight(message.name, {
           connected: connectionPayload
         });
       } catch (error) {
@@ -109,7 +109,7 @@ class LightConnector {
       if (speed) newState = { ...newState, speed };
 
       try {
-        changedLight = await lightRedisDAL.setLight(message.name, newState);
+        changedLight = await lightDB.setLight(message.name, newState);
       } catch (error) {
         debug(`Error changing "${message.name}" state in Redis. ${error}`);
         return;
@@ -125,7 +125,7 @@ class LightConnector {
       let changedLight;
 
       try {
-        changedLight = await lightRedisDAL.setLight(message.name, {
+        changedLight = await lightDB.setLight(message.name, {
           supportedEffects: message.effectList
         });
       } catch (error) {
@@ -139,15 +139,15 @@ class LightConnector {
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
 
-    mqttDAL.onConnectionMessage(handleConnectedMessage);
-    mqttDAL.onStateMessage(handleStateMessage);
-    mqttDAL.onEffectListMessage(handleEffectListMessage);
+    lightConnector.onConnectionMessage(handleConnectedMessage);
+    lightConnector.onStateMessage(handleStateMessage);
+    lightConnector.onEffectListMessage(handleEffectListMessage);
   }
 
   async getLights() {
     let allLights;
     try {
-      allLights = await lightRedisDAL.getAllLights();
+      allLights = await lightDB.getAllLights();
     } catch (error) {
       debug("Error getting lights");
       return error;
@@ -158,7 +158,7 @@ class LightConnector {
   async getLight(lightId) {
     let lightExists;
     try {
-      lightExists = await lightRedisDAL.hasLight(lightId);
+      lightExists = await lightDB.hasLight(lightId);
     } catch (error) {
       return error;
     }
@@ -168,7 +168,7 @@ class LightConnector {
     }
 
     try {
-      const light = await lightRedisDAL.getLight(lightId);
+      const light = await lightDB.getLight(lightId);
       return light;
     } catch (error) {
       debug(`Error getting light: ${lightId}`);
@@ -178,6 +178,10 @@ class LightConnector {
 
   // This gets triggered if you call setLight
   setLight(light) {
+    if (!lightDB.isConnected) {
+      return new Error("Can't set light. Not connected to redis");
+    }
+
     const { id, state, brightness, color, effect, speed } = light;
 
     // Initialize the MQTT payload with it's unique mutationId and the id of the light to change
@@ -208,7 +212,7 @@ class LightConnector {
       eventEmitter.on("mutationResponse", handleMutationResponse);
 
       // Publish to the light
-      if (!(await mqttDAL.publishToLight(id, payload))) {
+      if (!(await lightConnector.publishToLight(id, payload))) {
         reject(new Error(`Failed to publish to "${id}"`));
       }
 
@@ -226,7 +230,7 @@ class LightConnector {
 
     // Check if the light exists already before doing anything else
     try {
-      lightExists = await lightRedisDAL.hasLight(lightId);
+      lightExists = await lightDB.hasLight(lightId);
     } catch (error) {
       return error;
     }
@@ -236,7 +240,7 @@ class LightConnector {
 
     // Add new light to light database
     try {
-      lightAdded = await lightRedisDAL.addLight(lightId);
+      lightAdded = await lightDB.addLight(lightId);
     } catch (error) {
       debug("Error adding light");
       return error;
@@ -244,7 +248,7 @@ class LightConnector {
 
     // Subscribe to new messages from the new light
     // TODO: put light in a queue to resubscribe when MQTT is connected
-    if (!(await mqttDAL.subscribeToLight(lightId))) {
+    if (!(await lightConnector.subscribeToLight(lightId))) {
       debug(`Failed to subscribe to ${lightId}`);
     }
 
@@ -258,7 +262,7 @@ class LightConnector {
   async removeLight(lightId) {
     let lightExists, lightRemoved;
     try {
-      lightExists = await lightRedisDAL.hasLight(lightId);
+      lightExists = await lightDB.hasLight(lightId);
     } catch (error) {
       return error;
     }
@@ -268,7 +272,7 @@ class LightConnector {
     }
 
     // unsubscribe from the light's messages
-    if (!(await mqttDAL.unsubscribeFromLight(lightId))) {
+    if (!(await lightConnector.unsubscribeFromLight(lightId))) {
       debug(`Could not unsubscribe from ${lightId}`);
       return new Error(`Could not unsubscribe from ${lightId}`);
     }
@@ -277,7 +281,7 @@ class LightConnector {
     // TODO: Figure out if we should resubscribe to the light if it wasn't completely removed
     // Remove light from database
     try {
-      lightRemoved = await lightRedisDAL.removeLight(lightId);
+      lightRemoved = await lightDB.removeLight(lightId);
     } catch (error) {
       debug("Error removing light from db");
       return error;
@@ -307,4 +311,4 @@ class LightConnector {
   }
 }
 
-export default LightConnector;
+export default LightService;

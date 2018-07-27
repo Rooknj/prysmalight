@@ -1,6 +1,6 @@
 import MQTT from "async-mqtt";
 import Debug from "debug";
-
+import { parseMqttMessage } from "./lightUtil";
 const debug = Debug("LightLink");
 
 // MQTT: client
@@ -53,19 +53,6 @@ const unsubscribeFrom = async topic => {
   } catch (error) {
     return error;
   }
-};
-
-// Utility functions
-const parseMqttMessage = jsonData => {
-  const message = JSON.parse(jsonData);
-
-  if (!message.name) {
-    debug(
-      `Received a messsage that did not have an id. Ignoring\nMessage: ${message}`
-    );
-    return;
-  }
-  return message;
 };
 
 class LightLink {

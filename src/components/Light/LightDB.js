@@ -99,7 +99,7 @@ class LightDB {
     } catch (error) {
       return {
         ok: false,
-        error: error
+        error
       };
     }
 
@@ -114,7 +114,7 @@ class LightDB {
     } catch (error) {
       return {
         ok: false,
-        error: error
+        error
       };
     }
 
@@ -153,7 +153,7 @@ class LightDB {
     } catch (error) {
       return {
         ok: false,
-        error: error
+        error
       };
     }
 
@@ -163,7 +163,7 @@ class LightDB {
     } catch (error) {
       return {
         ok: false,
-        error: error
+        error
       };
     }
 
@@ -229,7 +229,7 @@ class LightDB {
     } catch (error) {
       return {
         ok: false,
-        error: error
+        error
       };
     }
 
@@ -251,7 +251,7 @@ class LightDB {
     } catch (error) {
       return {
         ok: false,
-        error: error
+        error
       };
     }
 
@@ -260,7 +260,7 @@ class LightDB {
     } catch (error) {
       return {
         ok: false,
-        error: error
+        error
       };
     }
 
@@ -274,7 +274,7 @@ class LightDB {
         } catch (error) {
           return {
             ok: false,
-            error: error
+            error
           };
         }
         break;
@@ -319,7 +319,7 @@ class LightDB {
     } catch (error) {
       return {
         ok: false,
-        error: error
+        error
       };
     }
 
@@ -333,7 +333,7 @@ class LightDB {
         } catch (error) {
           return {
             ok: false,
-            error: error
+            error
           };
         }
         break;

@@ -1,7 +1,7 @@
 import MQTT from "async-mqtt";
 import Debug from "debug";
 
-const debug = Debug("LightConnector");
+const debug = Debug("LightLink");
 
 // MQTT: client
 let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
@@ -9,13 +9,6 @@ if (process.env.MQTT_HOST) {
   debug("Adding custom MQTT host:", process.env.MQTT_HOST);
   MQTT_BROKER = `tcp://${process.env.MQTT_HOST}:1883`;
 }
-// if (process.env.MOCK) {
-//   MQTT_CLIENT = "tcp://broker.hivemq.com:1883";
-// } else if (process.env.NODE_ENV == "development") {
-//   MQTT_CLIENT = "tcp://raspberrypi.local:1883";
-// } else {
-//   MQTT_CLIENT = ;
-// }
 
 // MQTT: topics
 const MQTT_LIGHT_TOP_LEVEL = "lightapp2";
@@ -25,12 +18,12 @@ const MQTT_LIGHT_COMMAND_TOPIC = "command";
 const MQTT_EFFECT_LIST_TOPIC = "effects";
 
 // Connect to MQTT server
-// TODO: Might need to move this to the constructor
 const mqttClient = MQTT.connect(MQTT_BROKER, {
   reconnectPeriod: 5000, // Amount of time between reconnection attempts
   username: "pi",
   password: "MQTTIsBetterThanUDP"
 });
+
 // Subscribe to the light and return 1 if successful
 const subscribeTo = async topic => {
   try {
@@ -78,7 +71,7 @@ const parseMqttMessage = jsonData => {
   return message;
 };
 
-class LightMqttDAL {
+class LightLink {
   constructor() {
     this.isConnected = false;
     this.defaultConnectHandler = () => (this.isConnected = true);
@@ -269,4 +262,4 @@ class LightMqttDAL {
   }
 }
 
-export default LightMqttDAL;
+export default LightLink;

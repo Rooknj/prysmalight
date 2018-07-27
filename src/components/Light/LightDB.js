@@ -61,7 +61,7 @@ const mapRedisObjectToLightObject = (id, redisResponse, supportedEffects) => ({
   supportedEffects
 });
 
-class Light {
+class LightDB {
   constructor() {
     this.isConnected = false;
     client.on("connect", () => {
@@ -326,4 +326,4 @@ class Light {
   }
 }
 
-export default Light;
+export default LightDB;

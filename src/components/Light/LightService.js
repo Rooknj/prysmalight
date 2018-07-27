@@ -1,7 +1,7 @@
 import { PubSub } from "graphql-subscriptions";
 import events from "events";
 import LightDB from "./LightDB";
-import LightConnector from "./LightConnector";
+import LightLink from "./LightLink";
 import Debug from "debug";
 import { promisify } from "util";
 
@@ -13,7 +13,7 @@ const asyncSetTimeout = promisify(setTimeout);
 const eventEmitter = new events.EventEmitter();
 const pubsub = new PubSub();
 const lightDB = new LightDB();
-const lightConnector = new LightConnector();
+const lightLink = new LightLink();
 
 // MQTT: payloads by default
 const LIGHT_CONNECTED = 2;
@@ -41,7 +41,7 @@ class LightService {
 
   async init() {
     // Set up onConnect callback
-    lightConnector.onConnect(async () => {
+    lightLink.onConnect(async () => {
       let lights;
 
       debug(`Connected to MQTT broker`);
@@ -56,7 +56,7 @@ class LightService {
 
       lights.forEach(light => {
         try {
-          lightConnector.subscribeToLight(light.id);
+          lightLink.subscribeToLight(light.id);
         } catch (error) {
           debug(`could not subscribe to "${light}". Error: ${error}`);
         }
@@ -139,9 +139,9 @@ class LightService {
       pubsub.publish("lightsChanged", { lightsChanged: changedLight });
     };
 
-    lightConnector.onConnectionMessage(handleConnectedMessage);
-    lightConnector.onStateMessage(handleStateMessage);
-    lightConnector.onEffectListMessage(handleEffectListMessage);
+    lightLink.onConnectionMessage(handleConnectedMessage);
+    lightLink.onStateMessage(handleStateMessage);
+    lightLink.onEffectListMessage(handleEffectListMessage);
   }
 
   async getLights() {
@@ -212,7 +212,7 @@ class LightService {
       eventEmitter.on("mutationResponse", handleMutationResponse);
 
       // Publish to the light
-      if (!(await lightConnector.publishToLight(id, payload))) {
+      if (!(await lightLink.publishToLight(id, payload))) {
         reject(new Error(`Failed to publish to "${id}"`));
       }
 
@@ -248,7 +248,7 @@ class LightService {
 
     // Subscribe to new messages from the new light
     // TODO: put light in a queue to resubscribe when MQTT is connected
-    if (!(await lightConnector.subscribeToLight(lightId))) {
+    if (!(await lightLink.subscribeToLight(lightId))) {
       debug(`Failed to subscribe to ${lightId}`);
     }
 
@@ -272,7 +272,7 @@ class LightService {
     }
 
     // unsubscribe from the light's messages
-    if (!(await lightConnector.unsubscribeFromLight(lightId))) {
+    if (!(await lightLink.unsubscribeFromLight(lightId))) {
       debug(`Could not unsubscribe from ${lightId}`);
       return new Error(`Could not unsubscribe from ${lightId}`);
     }

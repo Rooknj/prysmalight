@@ -155,11 +155,11 @@ class LightService {
   }
 
   // This gets triggered if you call setLight
-  setLight(light) {
-    // TODO: Is this really the best way to handle this?
-    if (!lightDB.isConnected) {
-      return new Error("Can't set light. Not connected to redis");
-    }
+  async setLight(light) {
+    // Check if the light exists already before doing anything else
+    const { error, hasLight } = await lightDB.hasLight(light.id);
+    if (error) return error;
+    if (!hasLight) return new Error(`"${light.id}" was never added`);
 
     // Initialize the MQTT payload with it's unique mutationId and the id of the light to change
     const { id, state, brightness, color, effect, speed } = light;
@@ -241,7 +241,7 @@ class LightService {
     // TODO: Add cleanup here in case we only remove part of the light from redis
     // TODO: Figure out if we should resubscribe to the light if it wasn't completely removed
     // Remove light from database
-    ({ error, light: lightRemoved } = lightRemoved = await lightDB.removeLight(
+    ({ error, lightRemoved } = lightRemoved = await lightDB.removeLight(
       lightId
     ));
     if (error) return error;

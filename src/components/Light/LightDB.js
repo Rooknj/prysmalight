@@ -278,9 +278,7 @@ class LightDB {
     try {
       removeKeyResponse = await asyncZREM("lightKeys", id);
     } catch (error) {
-      return {
-        error
-      };
+      return { error };
     }
 
     switch (removeKeyResponse) {
@@ -309,7 +307,7 @@ class LightDB {
         // Save the redis database to persistant storave
         client.BGSAVE();
         // Return the id of the deleted light
-        return { id };
+        return { lightRemoved: { id } };
       default:
         return {
           error: new Error(

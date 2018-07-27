@@ -93,7 +93,7 @@ class LightDB {
     }
 
     // Get all the light keys from redis
-    let lightKeys, lightsArray;
+    let lightKeys;
     try {
       lightKeys = await asyncZRANGE("lightKeys", 0, -1);
     } catch (error) {
@@ -109,14 +109,7 @@ class LightDB {
     );
 
     // Wait for all of the promises returned by this.getLight to resolve
-    try {
-      lightsArray = await Promise.all(mapLightPromises);
-    } catch (error) {
-      return {
-        ok: false,
-        error
-      };
-    }
+    const lightsArray = await Promise.all(mapLightPromises);
 
     // Get the data out of our responses
     let returnObject = { ok: true, error: null, data: null };

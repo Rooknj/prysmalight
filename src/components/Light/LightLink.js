@@ -24,34 +24,34 @@ const mqttClient = MQTT.connect(MQTT_BROKER, {
   password: "MQTTIsBetterThanUDP"
 });
 
-// Subscribe to the light and return 1 if successful
+// Subscribe to the light. Returns error if unsuccessful
 const subscribeTo = async topic => {
   try {
     const granted = await mqttClient.subscribe(topic);
     debug(`Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`);
-    return { ok: true };
+    return;
   } catch (error) {
-    return { ok: false, error };
+    return error;
   }
 };
-// Publish to the light and return 1 if successful
+// Publish to the light. Returns error if unsuccessful
 const publishTo = async (topic, payload) => {
   try {
     await mqttClient.publish(topic, payload);
     debug(`Published payload of ${payload} to ${topic}`);
-    return { ok: true };
+    return;
   } catch (error) {
-    return { ok: false, error };
+    return error;
   }
 };
-// Unsubscribe from the light and return 1 if successful
+// Unsubscribe from the light. Returns error if unsuccessful
 const unsubscribeFrom = async topic => {
   try {
     await mqttClient.unsubscribe(topic);
     debug(`Unsubscribed from ${topic}`);
-    return { ok: true };
+    return;
   } catch (error) {
-    return { ok: false, error };
+    return error;
   }
 };
 
@@ -159,13 +159,9 @@ class LightLink {
     this.effectListHandler = handler;
   }
 
-  // Returns 1 if successful, 0 if not
   async subscribeToLight(id) {
     if (!this.isConnected) {
-      return {
-        ok: false,
-        error: new Error("Can't subscribe, not connected to MQTT broker")
-      };
+      return new Error("Can't subscribe, not connected to MQTT broker");
     }
 
     const subscribedToConnected = subscribeTo(
@@ -184,26 +180,21 @@ class LightLink {
       subscribedToEffectList
     ]);
 
-    let returnObject = { ok: true, error: null };
+    let returnError;
     // If any subscription failed, return 0
-    subscriptionResponses.forEach(({ ok, error }) => {
+    subscriptionResponses.forEach(error => {
       // if one of the subscriptions already failed, ignore processing on the rest
-      if (!returnObject.ok) return;
-
+      if (returnError) return;
       // If one of the subscriptions failed, set returnObject's error field
-      if (!ok) {
-        returnObject.ok = false;
-        returnObject.error = error;
-      }
+      if (error) returnError = error;
     });
 
-    return returnObject;
+    return returnError;
   }
 
-  // Returns 1 if successful, 0 if not
   async unsubscribeFromLight(id) {
     if (!this.isConnected) {
-      return { ok: true };
+      return;
     }
 
     const unsubscribedFromConnected = unsubscribeFrom(
@@ -222,31 +213,23 @@ class LightLink {
       unsubscribedFromEffectList
     ]);
 
-    let returnObject = { ok: true, error: null };
+    let returnError;
     // If any subscription failed, return 0
-    unsubscriptionResponses.forEach(({ ok, error }) => {
+    unsubscriptionResponses.forEach(error => {
       // if one of the subscriptions already failed, ignore processing on the rest
-      if (!returnObject.ok) return;
-
+      if (returnError) return;
       // If one of the subscriptions failed, set returnObject's error field
-      if (!ok) {
-        returnObject.ok = false;
-        returnObject.error = error;
-      }
+      if (error) returnError = error;
     });
 
-    return returnObject;
+    return returnError;
   }
 
-  // Returns 1 if successful, 0 if not
   async publishToLight(id, message) {
     if (!this.isConnected) {
-      return {
-        ok: false,
-        error: new Error(
-          "Message could not be sent. Not connected to MQTT broker"
-        )
-      };
+      return new Error(
+        "Message could not be sent. Not connected to MQTT broker"
+      );
     }
 
     return publishTo(

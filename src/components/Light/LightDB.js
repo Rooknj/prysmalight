@@ -12,38 +12,46 @@ if (process.env.IN_DOCKER_CONTAINER) {
   REDIS_HOST = "redis";
 }
 const REDIS_PORT = 6379;
-const client = redis.createClient(REDIS_PORT, REDIS_HOST);
-//const asyncSREM = promisify(client.SREM).bind(client);
-const asyncSMEMBERS = promisify(client.SMEMBERS).bind(client);
-const asyncSADD = promisify(client.SADD).bind(client);
-const asyncINCR = promisify(client.INCR).bind(client);
-const asyncZADD = promisify(client.ZADD).bind(client);
-const asyncZREM = promisify(client.ZREM).bind(client);
-const asyncZSCORE = promisify(client.ZSCORE).bind(client);
-const asyncZRANGE = promisify(client.ZRANGE).bind(client);
-const asyncHMSET = promisify(client.HMSET).bind(client);
-const asyncDEL = promisify(client.DEL).bind(client);
-const asyncHGETALL = promisify(client.HGETALL).bind(client);
 
 class LightDB {
   constructor() {
     this.isConnected = false;
-    client.on("connect", () => {
+    this.client = redis.createClient(REDIS_PORT, REDIS_HOST);
+
+    // Promisify all redis client methods
+    this.client.asyncSMEMBERS = promisify(this.client.SMEMBERS).bind(
+      this.client
+    );
+    this.client.asyncSADD = promisify(this.client.SADD).bind(this.client);
+    this.client.asyncINCR = promisify(this.client.INCR).bind(this.client);
+    this.client.asyncZADD = promisify(this.client.ZADD).bind(this.client);
+    this.client.asyncZREM = promisify(this.client.ZREM).bind(this.client);
+    this.client.asyncZSCORE = promisify(this.client.ZSCORE).bind(this.client);
+    this.client.asyncZRANGE = promisify(this.client.ZRANGE).bind(this.client);
+    this.client.asyncHMSET = promisify(this.client.HMSET).bind(this.client);
+    this.client.asyncDEL = promisify(this.client.DEL).bind(this.client);
+    this.client.asyncHGETALL = promisify(this.client.HGETALL).bind(this.client);
+
+    this.initDBWatchers();
+  }
+
+  initDBWatchers() {
+    this.client.on("connect", () => {
       debug("Connected to redis");
       this.isConnected = true;
     });
-    client.on("ready", () => {
+    this.client.on("ready", () => {
       debug("redis is ready");
     });
-    client.on("reconnecting", () => {
+    this.client.on("reconnecting", () => {
       //debug("Attempting to reconnect to redis");
       this.isConnected = false;
     });
-    client.on("error", () => {
+    this.client.on("error", () => {
       // TODO: Figure out which error signifies losing connection
       //debug("redis encountered an error");
     });
-    client.on("end", () => {
+    this.client.on("end", () => {
       debug("redis connection was closed");
     });
   }
@@ -58,7 +66,7 @@ class LightDB {
     // Get all the light keys from redis
     let lightKeys;
     try {
-      lightKeys = await asyncZRANGE("lightKeys", 0, -1);
+      lightKeys = await this.client.asyncZRANGE("lightKeys", 0, -1);
     } catch (error) {
       return { error };
     }
@@ -100,14 +108,14 @@ class LightDB {
     let lightData, lightEffect;
     // Get data about the light
     try {
-      lightData = await asyncHGETALL(id);
+      lightData = await this.client.asyncHGETALL(id);
     } catch (error) {
       return { error };
     }
 
     // Get the light's effects
     try {
-      lightEffect = await asyncSMEMBERS(lightData.effectsKey);
+      lightEffect = await this.client.asyncSMEMBERS(lightData.effectsKey);
     } catch (error) {
       return { error };
     }
@@ -155,14 +163,14 @@ class LightDB {
     let addEffectsPromise = Promise.resolve();
     if (lightData.hasOwnProperty("supportedEffects")) {
       redisObject.push("effectsKey", `${id}:effects`);
-      addEffectsPromise = asyncSADD(
+      addEffectsPromise = this.client.asyncSADD(
         `${id}:effects`,
         lightData.supportedEffects
       );
     }
 
     // Push data object to redis database
-    const addLightDataPromise = asyncHMSET(redisObject);
+    const addLightDataPromise = this.client.asyncHMSET(redisObject);
 
     // Wait until all data is saved
     try {
@@ -184,13 +192,17 @@ class LightDB {
     let lightScore, addLightKeyResponse, addLightDataResponse;
 
     try {
-      lightScore = await asyncINCR("lightScore");
+      lightScore = await this.client.asyncINCR("lightScore");
     } catch (error) {
       return { error };
     }
 
     try {
-      addLightKeyResponse = await asyncZADD("lightKeys", lightScore, id);
+      addLightKeyResponse = await this.client.asyncZADD(
+        "lightKeys",
+        lightScore,
+        id
+      );
     } catch (error) {
       return { error };
     }
@@ -201,7 +213,9 @@ class LightDB {
       case 1:
         debug("successfully added key");
         try {
-          addLightDataResponse = await asyncHMSET(getNewRedisLight(id));
+          addLightDataResponse = await this.client.asyncHMSET(
+            getNewRedisLight(id)
+          );
         } catch (error) {
           return { error };
         }
@@ -219,7 +233,7 @@ class LightDB {
       case "OK":
         debug("Light successfully added");
         // Save the redis database to persistant storage
-        client.BGSAVE();
+        this.client.BGSAVE();
         // Return the newly added light
         return this.getLight(id);
       default:
@@ -240,7 +254,7 @@ class LightDB {
 
     let removeKeyResponse, deleteLightResponse;
     try {
-      removeKeyResponse = await asyncZREM("lightKeys", id);
+      removeKeyResponse = await this.client.asyncZREM("lightKeys", id);
     } catch (error) {
       return { error };
     }
@@ -251,7 +265,7 @@ class LightDB {
       case 1:
         debug("successfully deleted key");
         try {
-          deleteLightResponse = await asyncDEL(id);
+          deleteLightResponse = await this.client.asyncDEL(id);
         } catch (error) {
           return { error };
         }
@@ -269,7 +283,7 @@ class LightDB {
       case 1:
         debug("Light successfully deleted");
         // Save the redis database to persistant storave
-        client.BGSAVE();
+        this.client.BGSAVE();
         // Return the id of the deleted light
         return { lightRemoved: { id } };
       default:
@@ -292,7 +306,7 @@ class LightDB {
 
     let lightScore;
     // May throw an error
-    lightScore = await asyncZSCORE("lightKeys", id);
+    lightScore = await this.client.asyncZSCORE("lightKeys", id);
 
     // If the light has a score, it exists.
     if (lightScore) {

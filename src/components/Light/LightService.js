@@ -4,6 +4,7 @@ import LightDB from "./LightDB";
 import LightLink from "./LightLink";
 import Debug from "debug";
 import { promisify } from "util";
+import { mapConnectionMessageToConnectionPayload } from "./lightUtil";
 
 const debug = Debug("LightService");
 
@@ -14,21 +15,6 @@ const eventEmitter = new events.EventEmitter();
 const pubsub = new PubSub();
 const lightDB = new LightDB();
 const lightLink = new LightLink();
-
-// MQTT: payloads by default
-const LIGHT_CONNECTED = 2;
-const LIGHT_DISCONNECTED = 0;
-
-// Utility functions
-const mapConnectionMessageToConnectionPayload = connectionMessage => {
-  let connectionString = -1;
-  if (Number(connectionMessage) === LIGHT_DISCONNECTED) {
-    connectionString = LIGHT_DISCONNECTED;
-  } else if (Number(connectionMessage) === LIGHT_CONNECTED) {
-    connectionString = LIGHT_CONNECTED;
-  }
-  return connectionString;
-};
 
 class LightService {
   constructor() {

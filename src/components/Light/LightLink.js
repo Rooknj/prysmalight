@@ -20,15 +20,22 @@ const MQTT_EFFECT_LIST_TOPIC = "effects";
 class LightLink {
   constructor() {
     this.isConnected = false;
+
+    // Default connection handlers
+    this.defaultConnectHandler = () => {
+      debug(`Connected to MQTT broker`);
+      this.isConnected = true;
+    };
+    this.defaultDisconnectHandler = () => {
+      debug(`Disconnected from MQTT broker`);
+      this.isConnected = false;
+    };
+
     this.mqttClient = MQTT.connect(MQTT_BROKER, {
       reconnectPeriod: 5000, // Amount of time between reconnection attempts
       username: "pi",
       password: "MQTTIsBetterThanUDP"
     });
-
-    // Default connection handlers
-    this.defaultConnectHandler = () => (this.isConnected = true);
-    this.defaultDisconnectHandler = () => (this.isConnected = false);
 
     // Initialize Message handlers
     this.connectionHandler = () =>
@@ -37,10 +44,7 @@ class LightLink {
       debug("Effect List Message Handler wasnt set");
     this.stateHandler = () => debug("State Message Handler wasnt set");
 
-    // Bind this to handler methods
-    this.handleMessage.bind(this);
-
-    this.initLink();
+    this.initWatchers();
   }
 
   handleMessage(topic, message) {
@@ -72,10 +76,10 @@ class LightLink {
     }
   }
 
-  initLink() {
+  initWatchers() {
     this.mqttClient.on("connect", this.defaultConnectHandler);
     this.mqttClient.on("close", this.defaultDisconnectHandler);
-    this.mqttClient.on("message", this.handleMessage);
+    this.mqttClient.on("message", this.handleMessage.bind(this));
   }
 
   // Subscribe to the light. Returns error if unsuccessful
@@ -112,19 +116,11 @@ class LightLink {
   }
 
   onConnect(handler) {
-    const newHandler = () => {
-      this.defaultConnectHandler();
-      handler();
-    };
-    this.mqttClient.on("connect", newHandler);
+    this.mqttClient.on("connect", handler);
   }
 
   onDisconnect(handler) {
-    const newHandler = () => {
-      this.defaultDisconnectHandler();
-      handler();
-    };
-    this.mqttClient.on("close", newHandler);
+    this.mqttClient.on("close", handler);
   }
 
   onReconnect(handler) {

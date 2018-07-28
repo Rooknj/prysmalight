@@ -17,19 +17,61 @@ class LightService {
     // TODO: Store this in redis
     this.mutationNumber = 0;
 
+    this.isLinked = false;
+
     this.lightDBClient = new LightDB();
     this.lightLink = new LightLink();
-
     // TODO: In order to scale, these need to be passed to the constructor
     this.pubSubClient = new PubSub(); // TODO: Convert this to a redis PubSub
     this.eventEmitter = new events.EventEmitter(); // TODO: instead of this, use the PubSub
 
-    // Bind this to handler methods
-    this.handleConnectedMessage.bind(this);
-    this.handleStateMessage.bind(this);
-    this.handleEffectListMessage.bind(this);
+    this.initWatchers();
+  }
 
-    this.initLightLink();
+  initWatchers() {
+    this.lightLink.onConnect(this.handleLinkLights.bind(this));
+    this.lightLink.onDisconnect(this.handleUnlinkLights.bind(this));
+    this.lightLink.onConnectionMessage(this.handleConnectedMessage.bind(this));
+    this.lightLink.onStateMessage(this.handleStateMessage.bind(this));
+    this.lightLink.onEffectListMessage(this.handleEffectListMessage.bind(this));
+
+    this.lightDBClient.onConnect(this.handleLinkLights.bind(this));
+  }
+
+  async handleLinkLights() {
+    // If we are already linked, return
+    if (this.isLinked) return;
+
+    // Get the saved lights from redis
+    const { error, lights } = await this.lightDBClient.getAllLights();
+    if (error) {
+      debug(`Error getting all lights ${error}`);
+      return;
+    }
+
+    // TODO: If you failed to subscribe to a light, find a way to resubscribe
+    // Subscribe to all lights and put their responses into an array
+    const subscriptionPromises = lights.map(light =>
+      this.lightLink.subscribeToLight(light.id)
+    );
+
+    // Wait for all subscriptions to resolve then check for errors
+    let didError = false;
+    const errors = await Promise.all(subscriptionPromises);
+    errors.forEach(error => {
+      if (didError) return;
+      if (error) {
+        debug("Error subscribing to at least one light");
+        didError = true;
+      }
+    });
+
+    if (!didError) this.isLinked = true;
+  }
+
+  handleUnlinkLights() {
+    debug("unLink Lights");
+    this.isLinked = false;
   }
 
   // This gets triggered when the connection of the light changes
@@ -107,31 +149,6 @@ class LightService {
     this.pubSubClient.publish("lightsChanged", {
       lightsChanged: changedLight
     });
-  }
-
-  initLightLink() {
-    // Set up onConnect callback
-    this.lightLink.onConnect(async () => {
-      debug(`Connected to MQTT broker`);
-
-      // Get the saved lights from redis
-      const { error, lights } = await this.lightDBClient.getAllLights();
-      if (error) {
-        debug(`Error getting all lights ${error}`);
-        return;
-      }
-
-      // TODO: If you failed to subscribe to a light, find a way to resubscribe
-      lights.forEach(light => {
-        const error = this.lightLink.subscribeToLight(light.id);
-        if (error) {
-          debug(`could not subscribe to "${light}". Error: ${error}`);
-        }
-      });
-    });
-    this.lightLink.onConnectionMessage(this.handleConnectedMessage);
-    this.lightLink.onStateMessage(this.handleStateMessage);
-    this.lightLink.onEffectListMessage(this.handleEffectListMessage);
   }
 
   async getLights() {

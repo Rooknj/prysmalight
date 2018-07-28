@@ -16,6 +16,17 @@ const REDIS_PORT = 6379;
 class LightDB {
   constructor() {
     this.isConnected = false;
+
+    // Default connection handlers
+    this.defaultConnectHandler = () => {
+      debug("Connected to redis");
+      this.isConnected = true;
+    };
+    this.defaultDisconnectHandler = () => {
+      debug("redis connection was closed");
+      this.isConnected = false;
+    };
+
     this.client = redis.createClient(REDIS_PORT, REDIS_HOST);
 
     // Promisify all redis client methods
@@ -36,24 +47,21 @@ class LightDB {
   }
 
   initDBWatchers() {
-    this.client.on("connect", () => {
-      debug("Connected to redis");
-      this.isConnected = true;
-    });
+    this.client.on("connect", this.defaultConnectHandler);
+    this.client.on("end", this.defaultDisconnectHandler);
     this.client.on("ready", () => {
       debug("redis is ready");
     });
-    this.client.on("reconnecting", () => {
-      //debug("Attempting to reconnect to redis");
-      this.isConnected = false;
-    });
-    this.client.on("error", () => {
-      // TODO: Figure out which error signifies losing connection
-      //debug("redis encountered an error");
-    });
-    this.client.on("end", () => {
-      debug("redis connection was closed");
-    });
+    // TODO: Add logging on errors here
+    this.client.on("error", () => {});
+  }
+
+  onConnect(handler) {
+    this.client.on("connect", handler);
+  }
+
+  onDisconnect(handler) {
+    this.client.on("end", handler);
   }
 
   async getAllLights() {

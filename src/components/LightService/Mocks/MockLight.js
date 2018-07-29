@@ -12,14 +12,14 @@ const MQTT_LIGHT_COMMAND_TOPIC = "command";
 const MQTT_EFFECT_LIST_TOPIC = "effects";
 
 class MockLight {
-  constructor() {
+  constructor(lightId) {
     this.mqttClient = MQTT.connect(getMqttHost(), {
       reconnectPeriod: 5000, // Amount of time between reconnection attempts
       username: "pi",
       password: "MQTTIsBetterThanUDP"
     });
 
-    this.lightId = "TEST";
+    this.lightId = lightId;
     this.state = {
       state: "OFF",
       color: { r: 255, g: 100, b: 0 },
@@ -29,8 +29,6 @@ class MockLight {
     };
 
     this.initWatchers();
-    this.subscribeToCommands();
-    this.publishInitial();
   }
 
   initWatchers() {
@@ -40,7 +38,7 @@ class MockLight {
   // Publish to the light. Returns error if unsuccessful
   async publishTo(topic, payload) {
     try {
-      await this.mqttClient.publish(topic, payload);
+      await this.mqttClient.publish(topic, payload, { retain: true });
       debug(`Published payload of ${payload} to ${topic}`);
       return;
     } catch (error) {
@@ -49,23 +47,23 @@ class MockLight {
     }
   }
 
-  publishState(id, state) {
+  publishState(state) {
     return this.publishTo(
-      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_STATE_TOPIC}`,
+      `${MQTT_LIGHT_TOP_LEVEL}/${this.lightId}/${MQTT_LIGHT_STATE_TOPIC}`,
       Buffer.from(JSON.stringify(state))
     );
   }
 
-  publishEffectList(id, effectList) {
-    this.publishTo(
-      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`,
+  publishEffectList(effectList) {
+    return this.publishTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/${this.lightId}/${MQTT_EFFECT_LIST_TOPIC}`,
       Buffer.from(JSON.stringify(effectList))
     );
   }
 
-  publishConnected(id, connectedStatus) {
-    this.publishTo(
-      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`,
+  publishConnected(connectedStatus) {
+    return this.publishTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/${this.lightId}/${MQTT_LIGHT_CONNECTED_TOPIC}`,
       Buffer.from(JSON.stringify(connectedStatus))
     );
   }
@@ -84,11 +82,10 @@ class MockLight {
     }
   }
 
-  subscribeToCommands(id) {
-    this.subscribeTo(
-      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`
+  subscribeToCommands() {
+    return this.subscribeTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/${this.lightId}/${MQTT_LIGHT_COMMAND_TOPIC}`
     );
-    this.lightId = id;
   }
 
   handleMessage(topic, message) {
@@ -98,7 +95,14 @@ class MockLight {
     debug(`Received message on topic ${topic} with a payload of ${data}`);
 
     // Parse the JSON into a usable javascript object
-    const { state, color, brightness, effect, speed } = parseMqttMessage(data);
+    const {
+      mutationId,
+      state,
+      color,
+      brightness,
+      effect,
+      speed
+    } = parseMqttMessage(data);
 
     // Set the new state
     if (state) this.state.state = state;
@@ -107,8 +111,8 @@ class MockLight {
     if (effect) this.state.effect = effect;
     if (speed) this.state.speed = speed;
 
-    const response = { name: this.lightId, ...this.state };
-    this.publishState(this.lightId, response);
+    const response = { name: this.lightId, mutationId, ...this.state };
+    this.publishState(response);
   }
 }
 

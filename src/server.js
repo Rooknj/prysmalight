@@ -8,6 +8,7 @@ import bodyParser from "body-parser"; // Parses HTTP requests
 import { SubscriptionServer } from "subscriptions-transport-ws";
 import { execute, subscribe } from "graphql";
 import schema from "./components/schema";
+import MockLight from "./components/LightService/Mocks/MockLight";
 import Debug from "debug";
 
 const debug = Debug("server");
@@ -43,3 +44,23 @@ graphQLServer.listen(GRAPHQL_PORT, () => {
     `GraphQL Subscription Server is now running on ws://localhost:${GRAPHQL_PORT}/subscriptions`
   );
 });
+
+if (process.env.MOCK) {
+  debug("Starting Mock Light");
+  const TEST_ID = "Test Light";
+  const mockLight = new MockLight(TEST_ID);
+  mockLight.subscribeToCommands();
+  mockLight.publishConnected({ name: TEST_ID, connection: 2 });
+  mockLight.publishEffectList({
+    name: TEST_ID,
+    effectList: ["Test 1", "Test 2", "Test 3"]
+  });
+  mockLight.publishState({
+    name: TEST_ID,
+    state: "OFF",
+    color: { r: 255, g: 100, b: 0 },
+    brightness: 100,
+    effect: "None",
+    speed: 4
+  });
+}

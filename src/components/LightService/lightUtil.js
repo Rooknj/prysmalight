@@ -71,3 +71,12 @@ export const mapRedisObjectToLightObject = (
   speed: parseInt(redisResponse.speed),
   supportedEffects
 });
+
+export const getMqttHost = () => {
+  let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
+  if (process.env.MQTT_HOST) {
+    debug("Adding custom MQTT host:", process.env.MQTT_HOST);
+    MQTT_BROKER = `tcp://${process.env.MQTT_HOST}:1883`;
+  }
+  return MQTT_BROKER;
+};

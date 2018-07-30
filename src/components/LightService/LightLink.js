@@ -1,14 +1,7 @@
 import MQTT from "async-mqtt";
 import Debug from "debug";
-import { parseMqttMessage } from "./lightUtil";
+import { parseMqttMessage, getMqttHost } from "./lightUtil";
 const debug = Debug("LightLink");
-
-// MQTT: client
-let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
-if (process.env.MQTT_HOST) {
-  debug("Adding custom MQTT host:", process.env.MQTT_HOST);
-  MQTT_BROKER = `tcp://${process.env.MQTT_HOST}:1883`;
-}
 
 // MQTT: topics
 const MQTT_LIGHT_TOP_LEVEL = "lightapp2";
@@ -31,7 +24,7 @@ class LightLink {
       this.isConnected = false;
     };
 
-    this.mqttClient = MQTT.connect(MQTT_BROKER, {
+    this.mqttClient = MQTT.connect(getMqttHost(), {
       reconnectPeriod: 5000, // Amount of time between reconnection attempts
       username: "pi",
       password: "MQTTIsBetterThanUDP"

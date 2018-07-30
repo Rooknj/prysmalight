@@ -27,6 +27,7 @@
   "devDependencies": {
     "eslint": "^5.2.0",
     "husky": "^0.14.3",
+    "jest": "^23.4.2",
     "lint-staged": "^7.0.0",
     "prettier": "^1.11.1"
   },
@@ -38,14 +39,14 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "test": "echo test",
+    "test": "jest",
     "build": "babel src --out-dir lib --copy-files",
     "buildDocker": "node scripts/dockerScripts build",
     "tagDocker": "node scripts/dockerScripts tag",
     "publishDocker": "node scripts/dockerScripts publish",
     "start": "DEBUG=server,schema,LightService,LightDB,LightLink,LightUtil NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
-    "startLocal": "DEBUG=server,schema,LightService,LightDB,LightLink,LightUtil NODE_ENV=development BABEL_ENV=development MQTT_HOST=localhost nodemon src/server.js --exec babel-node",
-    "startMock": "MOCK=true nodemon src/server.js --exec babel-node"
+    "startLocal": "MQTT_HOST=localhost DEBUG=server,schema,LightService,LightDB,LightLink,LightUtil NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
+    "startMock": "MOCK=true MQTT_HOST=localhost DEBUG=server,schema,LightService,LightDB,LightLink,LightUtil,MockLight NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node"
   },
   "babel": {
     "presets": [

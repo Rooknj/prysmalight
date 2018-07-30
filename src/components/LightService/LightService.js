@@ -12,15 +12,15 @@ const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 
 class LightService {
-  constructor() {
+  constructor(database, link) {
     // Our mutation number to match each mutation to it's response
     // TODO: Store this in redis
     this.mutationNumber = 0;
 
     this.isLinked = false;
 
-    this.lightDBClient = new LightDB();
-    this.lightLink = new LightLink();
+    this.lightDBClient = database || new LightDB();
+    this.lightLink = link || new LightLink();
     // TODO: In order to scale, these need to be passed to the constructor
     this.pubSubClient = new PubSub(); // TODO: Convert this to a redis PubSub
     this.eventEmitter = new events.EventEmitter(); // TODO: instead of this, use the PubSub

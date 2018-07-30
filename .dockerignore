@@ -27,7 +27,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Compiled folder
-lib
+dist
 
 # Etc.
 Sample Files

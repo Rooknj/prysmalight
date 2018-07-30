@@ -23,8 +23,6 @@ RUN yarn test
 RUN yarn build
 RUN pkg . --targets node8-linux-x64
 
-CMD ["yarn", "prodServer"]
-
 ## Prod Environment
 FROM node:carbon
 

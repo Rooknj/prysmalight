@@ -6,11 +6,6 @@
   "dependencies": {
     "apollo-server-express": "^1.3.0",
     "async-mqtt": "^1.0.1",
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-class-properties": "^6.24.1",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-runtime": "^6.23.0",
-    "babel-preset-env": "^1.6.1",
     "body-parser": "^1.18.2",
     "compression": "^1.7.3",
     "cors": "^2.8.4",
@@ -25,9 +20,18 @@
     "subscriptions-transport-ws": "^0.9.7"
   },
   "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
+    "babel-preset-env": "^1.7.0",
     "eslint": "^5.2.0",
     "gulp": "^3.9.1",
+    "gulp-babel": "^7.0.1",
+    "gulp-env": "^0.4.0",
     "gulp-eslint": "^5.0.0",
+    "gulp-if": "^2.0.2",
+    "gulp-nodemon": "^2.2.1",
     "husky": "^0.14.3",
     "jest": "^23.4.2",
     "lint-staged": "^7.0.0",
@@ -42,36 +46,19 @@
   "scripts": {
     "precommit": "lint-staged",
     "test": "jest",
-    "build": "babel src --out-dir lib --copy-files",
+    "build": "gulp babel",
     "buildDocker": "node scripts/dockerScripts build",
     "tagDocker": "node scripts/dockerScripts tag",
     "publishDocker": "node scripts/dockerScripts publish",
-    "start": "DEBUG=server,schema,LightService,LightDB,LightLink,LightUtil NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
+    "start": "gulp start",
     "startLocal": "MQTT_HOST=localhost DEBUG=server,schema,LightService,LightDB,LightLink,LightUtil NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
     "startMock": "MOCK=true MQTT_HOST=localhost DEBUG=server,schema,LightService,LightDB,LightLink,LightUtil,MockLight NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node"
   },
-  "babel": {
-    "presets": [
-      [
-        "env",
-        {
-          "targets": {
-            "node": "8.11.3"
-          }
-        }
-      ]
-    ],
-    "plugins": [
-      "transform-class-properties",
-      "transform-object-rest-spread",
-      "transform-runtime"
-    ]
-  },
   "bin": {
-    "prod-server": "lib/server.js"
+    "prod-server": "dist/server.js"
   },
   "pkg": {
-    "assets": "lib/components/typeDefs.graphql"
+    "assets": "dist/components/typeDefs.graphql"
   },
-  "main": "lib/server.js"
+  "main": "dist/server.js"
 }

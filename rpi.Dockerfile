@@ -27,8 +27,6 @@ RUN yarn test
 RUN yarn build
 RUN pkg . --targets node8-linux-armv7
 
-CMD ["yarn", "prodServer"]
-
 ## Prod Environment
 FROM resin/raspberrypi3-debian:jessie
 

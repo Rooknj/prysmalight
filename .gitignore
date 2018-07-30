@@ -8,7 +8,10 @@ node_modules
 /coverage
 
 # production
-/lib
+/dist
+
+# gulp cache
+.gulp-cache
 
 # databases
 *.sqlite

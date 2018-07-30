@@ -45,9 +45,10 @@ graphQLServer.listen(GRAPHQL_PORT, () => {
   );
 });
 
+// Set up the mock light if the environment dictates it
 if (process.env.MOCK) {
   debug("Starting Mock Light");
-  const TEST_ID = "Test Light";
+  const TEST_ID = "Mock Light";
   const mockLight = new MockLight(TEST_ID);
   mockLight.subscribeToCommands();
   mockLight.publishConnected({ name: TEST_ID, connection: 2 });

@@ -9,8 +9,6 @@ cache:
   directories:
     - node_modules
 install: true
-before_script:
-  - yarn global add minimist
 script:
   - yarn buildDocker
 before_deploy:

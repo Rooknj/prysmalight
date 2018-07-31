@@ -2719,6 +2719,13 @@ gulp-if@^2.0.2:
     ternary-stream "^2.0.1"
     through2 "^2.0.1"
 
+gulp-jest@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/gulp-jest/-/gulp-jest-4.0.2.tgz#cc20e3c2c23c4fc81c3e92ca2dec24c2098fc0c9"
+  dependencies:
+    plugin-error "^1.0.1"
+    through2 "^2.0.1"
+
 gulp-match@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/gulp-match/-/gulp-match-1.0.3.tgz#91c7c0d7f29becd6606d57d80a7f8776a87aba8e"

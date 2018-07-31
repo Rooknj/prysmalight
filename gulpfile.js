@@ -4,11 +4,12 @@ const gulp = require("gulp"),
   env = require("gulp-env"),
   nodemon = require("gulp-nodemon"),
   eslint = require("gulp-eslint"),
-  run = require("gulp-run-command").default;
+  run = require("gulp-run-command").default,
+  jest = require("gulp-jest").default;
 
-gulp.task("clean", run(["rm -rf dist", "docker-compose down"]));
+gulp.task("clean", run(["rm -rf dist lightapp2-server", "docker-compose down"]));
 
-const lint = () => {
+const runLinter = () => {
   const stream = gulp
     .src(["**/*.js", "!node_modules/**"])
     .pipe(eslint())
@@ -17,7 +18,7 @@ const lint = () => {
 
   return stream;
 };
-gulp.task("lint", lint);
+gulp.task("lint", runLinter);
 
 const transpile = () => {
   // Can re-enable caching if transpile time becomes too slow (put these outside)
@@ -41,11 +42,29 @@ gulp.task("set-debug", async () => {
   });
 });
 
-gulp.task("set-development", async () => {
+gulp.task("set-develop", async () => {
   await env({
     vars: {
       NODE_ENV: "development",
       BABEL_ENV: "development"
+    }
+  });
+});
+
+gulp.task("set-test", async () => {
+  await env({
+    vars: {
+      NODE_ENV: "test",
+      BABEL_ENV: "test"
+    }
+  });
+});
+
+gulp.task("set-prod", async () => {
+  await env({
+    vars: {
+      NODE_ENV: "production",
+      BABEL_ENV: "production"
     }
   });
 });
@@ -83,7 +102,7 @@ const start = function(done) {
 gulp.task(
   "start",
   gulp.series(
-    gulp.parallel("babel", "set-development", "set-debug", "startRedis"),
+    gulp.parallel("babel", "set-develop", "set-debug", "startRedis"),
     start
   )
 );
@@ -96,7 +115,20 @@ gulp.task(
   )
 );
 
-gulp.task("test", function() {});
+const runIntegrationTests = () => {
+  return gulp.src("test/**/*.test.js").pipe(
+    jest({
+      preprocessorIgnorePatterns: [
+        "<rootDir>/dist/",
+        "<rootDir>/node_modules/"
+      ],
+      automock: false,
+      browser: false,
+      testEnvironment: "node"
+    })
+  );
+};
+gulp.task("test", gulp.series("set-test", runIntegrationTests, "lint"));
 
 const makePkg = async () => {
   let target;
@@ -121,6 +153,6 @@ const makePkg = async () => {
 
   await run("pkg . --targets " + target)();
 };
-gulp.task("build", gulp.series("babel", makePkg));
+gulp.task("build", gulp.series("set-prod", "babel", makePkg));
 
 gulp.task("default", gulp.series("lint", "babel"));

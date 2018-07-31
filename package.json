@@ -31,11 +31,13 @@
     "gulp-env": "^0.4.0",
     "gulp-eslint": "^5.0.0",
     "gulp-if": "^2.0.2",
+    "gulp-jest": "^4.0.2",
     "gulp-nodemon": "^2.2.1",
     "gulp-run-command": "^0.0.9",
     "husky": "^0.14.3",
     "jest": "^23.4.2",
     "lint-staged": "^7.0.0",
+    "minimist": "^1.2.0",
     "prettier": "^1.11.1"
   },
   "lint-staged": {

@@ -26,7 +26,7 @@ FROM node:carbon
 
 WORKDIR /usr/src/app
 
-COPY --from=builder /usr/src/app/lightapp2-server /usr/src/app
+COPY --from=builder /usr/src/app/build/lightapp2-server /usr/src/app
 
 # Make port 4001 available to the world outside this container
 EXPOSE 4001

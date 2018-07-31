@@ -8,7 +8,7 @@ const gulp = require("gulp"),
   jest = require("gulp-jest").default;
 
 // CLEAN: Delete all generated files and bring down any docker containers
-gulp.task("clean", run(["rm -rf dist lightapp2-server", "docker-compose down"]));
+gulp.task("clean", run(["rm -rf dist build", "docker-compose down"]));
 
 // LINT: Run the linter and display the output
 const runLinter = () => {
@@ -166,7 +166,7 @@ const makePkg = async () => {
     }
   }
 
-  await run("pkg . --targets " + target)();
+  await run(`pkg . --targets ${target} --output ./build/lightapp2-server`)();
 };
 gulp.task("build", gulp.series("set-prod", "babel", makePkg));
 

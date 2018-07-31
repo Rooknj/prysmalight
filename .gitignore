@@ -9,6 +9,7 @@ node_modules
 
 # production
 /dist
+/build
 lightapp2-server
 
 # gulp cache

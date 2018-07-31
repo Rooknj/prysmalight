@@ -3,11 +3,10 @@ const gulp = require("gulp"),
   babel = require("gulp-babel"),
   env = require("gulp-env"),
   nodemon = require("gulp-nodemon"),
-  eslint = require("gulp-eslint");
+  eslint = require("gulp-eslint"),
+  run = require("gulp-run-command").default;
 
-gulp.task("default", function() {
-  // place code for your default task here
-});
+gulp.task("clean", run(["rm -rf dist", "docker-compose down"]));
 
 gulp.task("lint", function() {
   const stream = gulp
@@ -32,23 +31,70 @@ gulp.task("babel", function() {
   return stream; // important for gulp-nodemon to wait for completion
 });
 
-gulp.task("start", ["babel"], function(done) {
-  // Set up environment variables
+gulp.task("set-debug", function(done) {
   env({
     vars: {
-      NODE_ENV: "development",
-      BABEL_ENV: "development",
       DEBUG: "server,schema,LightService,LightDB,LightLink,LightUtil"
     }
   });
-
-  // Run nodemon
-  const stream = nodemon({
-    script: "dist/server.js", // run transpiled code
-    watch: "src", // watch src code
-    tasks: ["babel"], // compile synchronously onChange
-    done: done
-  });
-
-  return stream;
+  done();
 });
+
+gulp.task("set-development", function(done) {
+  env({
+    vars: {
+      NODE_ENV: "development",
+      BABEL_ENV: "development"
+    }
+  });
+  done();
+});
+
+gulp.task("set-mock", function(done) {
+  env({
+    vars: {
+      MOCK: true
+    }
+  });
+  done();
+});
+
+gulp.task("set-mqtt-host", function(done) {
+  env({
+    vars: {
+      MQTT_HOST: "localhost"
+    }
+  });
+  done();
+});
+
+gulp.task("startRedis", run("docker-compose up -d redis"));
+
+gulp.task(
+  "startBroker",
+  gulp.series("set-mqtt-host", run("docker-compose up -d broker"))
+);
+
+gulp.task(
+  "start",
+  gulp.series(
+    gulp.parallel("babel", "set-development", "set-debug", "startRedis"),
+    function(done) {
+      const stream = nodemon({
+        script: "dist/server.js", // run transpiled code
+        watch: "src", // watch src code
+        tasks: ["babel"], // compile synchronously onChange
+        done: done
+      });
+
+      return stream;
+    }
+  )
+);
+
+gulp.task(
+  "startMock",
+  gulp.series(gulp.parallel("set-mock", "startBroker"), "start")
+);
+
+gulp.task("default", gulp.series("lint", "babel"));

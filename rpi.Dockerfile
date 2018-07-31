@@ -5,8 +5,7 @@ FROM resin/raspberrypi3-node:8.11.3-slim as builder
 # Create app directory
 WORKDIR /usr/src/app
 
-ENV NODE_ENV="production"
-ENV BABEL_ENV="production"
+ENV PKG_TARGET="node8-linux-armv7"
 
 # Add app
 COPY . .
@@ -25,7 +24,6 @@ RUN yarn test
 
 # Build app
 RUN yarn build
-RUN pkg . --targets node8-linux-armv7
 
 ## Prod Environment
 FROM resin/raspberrypi3-debian:jessie

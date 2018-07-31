@@ -45,23 +45,25 @@ graphQLServer.listen(GRAPHQL_PORT, () => {
   );
 });
 
-// Set up the mock light if the environment dictates it
-if (process.env.MOCK) {
-  debug("Starting Mock Light");
-  const TEST_ID = "Mock Light";
-  const mockLight = new MockLight(TEST_ID);
-  mockLight.subscribeToCommands();
-  mockLight.publishConnected({ name: TEST_ID, connection: 2 });
-  mockLight.publishEffectList({
-    name: TEST_ID,
-    effectList: ["Test 1", "Test 2", "Test 3"]
-  });
-  mockLight.publishState({
-    name: TEST_ID,
-    state: "OFF",
-    color: { r: 255, g: 100, b: 0 },
-    brightness: 100,
-    effect: "None",
-    speed: 4
+// Set up the mock lights if the environment dictates it
+if (process.env.MOCKS) {
+  const mockArray = process.env.MOCKS.split(",");
+  mockArray.forEach(mock => {
+    debug(`Starting ${mock} as a mock light`);
+    const mockLight = new MockLight(mock);
+    mockLight.subscribeToCommands();
+    mockLight.publishConnected({ name: mock, connection: 2 });
+    mockLight.publishEffectList({
+      name: mock,
+      effectList: ["Test 1", "Test 2", "Test 3"]
+    });
+    mockLight.publishState({
+      name: mock,
+      state: "OFF",
+      color: { r: 255, g: 100, b: 0 },
+      brightness: 100,
+      effect: "None",
+      speed: 4
+    });
   });
 }

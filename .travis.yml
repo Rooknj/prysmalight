@@ -9,16 +9,14 @@ cache:
   directories:
     - node_modules
 install: true
-before_script:
-  - yarn global add minimist
 script:
-  - yarn buildDocker
+  - node scripts/dockerScripts build
 before_deploy:
   - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
   skip_cleanup: true
-  script: yarn tagDocker && yarn publishDocker
+  script: node scripts/dockerScripts tag && node scripts/dockerScripts publish
   on:
     all_branches: true
 env:

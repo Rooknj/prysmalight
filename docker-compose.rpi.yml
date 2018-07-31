@@ -5,9 +5,24 @@ services:
       context: .
       dockerfile: rpi.Dockerfile
     image: lightapp2-server-rpi
+    ports:
+      - "4001:4001"
     environment:
-      - IN_DOCKER_CONTAINER=true
+      - REDIS_HOST=redis
+      - MOCK=true
+      - MQTT_HOST=localhost
   redis:
     image: redis:latest
     ports:
       - "6379:6379"
+    volumes:
+      - ./redisData:/data
+  broker:
+      image: eclipse-mosquitto:latest
+      ports:
+        - "1883:1883"
+        - "9001:9001"
+      volumes:
+        - ./mqttConfig:/mosquitto/config
+        - /mosquitto/data
+        - /mosquitto/log

@@ -170,9 +170,5 @@ const makePkg = async () => {
 };
 gulp.task("build", gulp.series("set-prod", "babel", makePkg));
 
-gulp.task("buildDockerImage", run("node scripts/dockerScripts build"))
-
-gulp.task("publishDockerImage", run(["node scripts/dockerScripts tag", "node scripts/dockerScripts publish"]))
-
 // DEFAULT: TBD
 gulp.task("default", gulp.series("lint", "babel"));

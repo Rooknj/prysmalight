@@ -10,7 +10,7 @@ services:
     environment:
       - REDIS_HOST=redis
       - MOCK=true
-      - MQTT_HOST=localhost
+      - MQTT_HOST=broker
   redis:
     image: redis:latest
     ports:

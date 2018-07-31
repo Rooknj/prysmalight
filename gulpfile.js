@@ -80,7 +80,7 @@ gulp.task("set-prod", async () => {
 gulp.task("set-mock", async () => {
   await env({
     vars: {
-      MOCK: true
+      MOCKS: "Mock 1,Mock 2,Mock 3"
     }
   });
 });

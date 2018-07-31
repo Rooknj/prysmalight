@@ -7,8 +7,10 @@ const gulp = require("gulp"),
   run = require("gulp-run-command").default,
   jest = require("gulp-jest").default;
 
+// CLEAN: Delete all generated files and bring down any docker containers
 gulp.task("clean", run(["rm -rf dist lightapp2-server", "docker-compose down"]));
 
+// LINT: Run the linter and display the output
 const runLinter = () => {
   const stream = gulp
     .src(["**/*.js", "!node_modules/**"])
@@ -20,6 +22,7 @@ const runLinter = () => {
 };
 gulp.task("lint", runLinter);
 
+// BABEL: Transpile javascript code so it works on node 8
 const transpile = () => {
   // Can re-enable caching if transpile time becomes too slow (put these outside)
   //const Cache = require("gulp-file-cache");
@@ -34,6 +37,7 @@ const transpile = () => {
 };
 gulp.task("babel", transpile);
 
+// SET-DEBUG: Set the debug environment variable so that we can see debug messages
 gulp.task("set-debug", async () => {
   await env({
     vars: {
@@ -42,6 +46,7 @@ gulp.task("set-debug", async () => {
   });
 });
 
+// SET-DEVELOP: Set node_env to development
 gulp.task("set-develop", async () => {
   await env({
     vars: {
@@ -51,6 +56,7 @@ gulp.task("set-develop", async () => {
   });
 });
 
+// SET-TEST: Set node_env to test
 gulp.task("set-test", async () => {
   await env({
     vars: {
@@ -60,6 +66,7 @@ gulp.task("set-test", async () => {
   });
 });
 
+// SET-PROD: Set node_env to production
 gulp.task("set-prod", async () => {
   await env({
     vars: {
@@ -69,6 +76,7 @@ gulp.task("set-prod", async () => {
   });
 });
 
+// SET-MOCK: set the MOCK env to true to start a mock light on startup
 gulp.task("set-mock", async () => {
   await env({
     vars: {
@@ -77,6 +85,7 @@ gulp.task("set-mock", async () => {
   });
 });
 
+// SET-MQTT-HOST: set the environment variable to enable using a local MQTT broker
 gulp.task("set-mqtt-host", async () => {
   await env({
     vars: {
@@ -85,10 +94,13 @@ gulp.task("set-mqtt-host", async () => {
   });
 });
 
-gulp.task("startRedis", run("docker-compose up -d redis"));
+// START-REDIS: Start the Redis docker container
+gulp.task("start-redis", run("docker-compose up -d redis"));
 
-gulp.task("startBroker", run("docker-compose up -d broker"));
+// START-BROKER: Start the Mosquitto docker container
+gulp.task("start-broker", run("docker-compose up -d broker"));
 
+// START: Start the development node server
 const start = function(done) {
   const stream = nodemon({
     script: "dist/server.js", // run transpiled code
@@ -102,19 +114,21 @@ const start = function(done) {
 gulp.task(
   "start",
   gulp.series(
-    gulp.parallel("babel", "set-develop", "set-debug", "startRedis"),
+    gulp.parallel("babel", "set-develop", "set-debug", "start-redis"),
     start
   )
 );
 
+// STARTMOCK: Start the development node server with a mock light
 gulp.task(
   "startMock",
   gulp.series(
-    gulp.parallel("set-mock", "set-mqtt-host", "startBroker"),
+    gulp.parallel("set-mock", "set-mqtt-host", "start-broker"),
     "start"
   )
 );
 
+// TEST: Run all tests
 const runIntegrationTests = () => {
   return gulp.src("test/**/*.test.js").pipe(
     jest({
@@ -130,6 +144,7 @@ const runIntegrationTests = () => {
 };
 gulp.task("test", gulp.series("set-test", runIntegrationTests, "lint"));
 
+// BUILD: Build an executable with pkg
 const makePkg = async () => {
   let target;
   if (process.env.PKG_TARGET) {
@@ -155,4 +170,5 @@ const makePkg = async () => {
 };
 gulp.task("build", gulp.series("set-prod", "babel", makePkg));
 
+// DEFAULT: TBD
 gulp.task("default", gulp.series("lint", "babel"));

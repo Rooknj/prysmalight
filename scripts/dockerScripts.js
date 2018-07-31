@@ -33,32 +33,32 @@ const buildDockerImage = async dockerComposeFile => {
   const command = `docker-compose${
     dockerComposeFile ? ` -f ${dockerComposeFile} ` : " "
   }build`;
-  console.log(`Executing: ${command}\n`);
+  console.log(`Executing: ${command}`);
   const { stdout, stderr } = await exec(command);
-  console.log("STDOUT:", stdout || "None", "\n");
-  console.log("STDERR:", stderr || "None", "\n");
-  console.log(`Finished: ${command}\n`);
+  console.log(`Finished: ${command}`);
+  console.log("STDOUT:\n", stdout || "None");
+  console.log("STDERR:\n", stderr || "None");
   return;
 };
 
 // Tag the docker image
 const tagDockerImage = async (dockerImageName, dockerTag) => {
   const command = `docker tag ${dockerImageName} ${dockerTag}`;
-  console.log(`Executing: ${command}\n`);
+  console.log(`Executing: ${command}`);
   const { stdout, stderr } = await exec(command);
-  console.log("STDOUT:", stdout || "None", "\n");
-  console.log("STDERR:", stderr || "None", "\n");
-  console.log(`Finished: ${command}\n`);
+  console.log(`Finished: ${command}`);
+  console.log("STDOUT:\n", stdout || "None");
+  console.log("STDERR:\n", stderr || "None");
 };
 
 // Publish the docker image
 const publishDockerImage = async dockerTag => {
   const command = `docker push ${dockerTag}`;
-  console.log(`Executing: ${command}\n`);
+  console.log(`Executing: ${command}`);
   const { stdout, stderr } = await exec(command);
-  console.log("STDOUT:", stdout || "None", "\n");
-  console.log("STDERR:", stderr || "None"), "\n";
-  console.log(`Finished: ${command}\n`);
+  console.log(`Finished: ${command}`);
+  console.log("STDOUT:\n", stdout || "None");
+  console.log("STDERR:\n", stderr || "None");
 };
 
 // Create the tag for the docker image

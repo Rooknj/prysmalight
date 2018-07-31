@@ -50,9 +50,8 @@
     "precommit": "lint-staged",
     "test": "gulp test",
     "build": "gulp build",
-    "buildDocker": "node scripts/dockerScripts build",
-    "tagDocker": "node scripts/dockerScripts tag",
-    "publishDocker": "node scripts/dockerScripts publish",
+    "buildDockerImage": "gulp buildDockerImage",
+    "publishDockerImage": "gulp publishDockerImage",
     "start": "gulp start",
     "startMock": "gulp startMock"
   },

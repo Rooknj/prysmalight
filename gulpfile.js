@@ -72,7 +72,7 @@ gulp.task("startRedis", run("docker-compose up -d redis"));
 
 gulp.task(
   "startBroker",
-  gulp.series("set-mqtt-host", run("docker-compose up -d broker"))
+  run("docker-compose up -d broker")
 );
 
 gulp.task(
@@ -94,7 +94,7 @@ gulp.task(
 
 gulp.task(
   "startMock",
-  gulp.series(gulp.parallel("set-mock", "startBroker"), "start")
+  gulp.series(gulp.parallel("set-mock", "set-mqtt-host", "startBroker"), "start")
 );
 
 gulp.task("default", gulp.series("lint", "babel"));

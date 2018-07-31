@@ -52,8 +52,7 @@
     "tagDocker": "node scripts/dockerScripts tag",
     "publishDocker": "node scripts/dockerScripts publish",
     "start": "gulp start",
-    "startLocal": "MQTT_HOST=localhost DEBUG=server,schema,LightService,LightDB,LightLink,LightUtil NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node",
-    "startMock": "MOCK=true MQTT_HOST=localhost DEBUG=server,schema,LightService,LightDB,LightLink,LightUtil,MockLight NODE_ENV=development BABEL_ENV=development nodemon src/server.js --exec babel-node"
+    "startMock": "gulp startMock"
   },
   "bin": {
     "prod-server": "dist/server.js"

@@ -8,7 +8,12 @@ node_modules
 /coverage
 
 # production
-/lib
+/dist
+/build
+lightapp2-server
+
+# gulp cache
+.gulp-cache
 
 # databases
 *.sqlite

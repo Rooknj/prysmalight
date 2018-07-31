@@ -1,16 +1,16 @@
 import redis from "redis";
 import { promisify } from "util";
-import { getNewRedisLight, mapRedisObjectToLightObject } from "./lightUtil";
+import {
+  getRedisHost,
+  getNewRedisLight,
+  mapRedisObjectToLightObject
+} from "./lightUtil";
 
 import Debug from "debug";
 
 const debug = Debug("LightDB");
 
-let REDIS_HOST = "localhost";
-if (process.env.IN_DOCKER_CONTAINER) {
-  debug("Find redis inside docker container");
-  REDIS_HOST = "redis";
-}
+const REDIS_HOST = getRedisHost();
 const REDIS_PORT = 6379;
 
 class LightDB {

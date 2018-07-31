@@ -8,7 +8,9 @@ services:
     ports:
       - "4001:4001"
     environment:
-      - IN_DOCKER_CONTAINER=true
+      - REDIS_HOST=redis
+      - MOCKS="Mock 1,Mock 2,Mock 3"
+      - MQTT_HOST=broker
   redis:
     image: redis:latest
     ports:

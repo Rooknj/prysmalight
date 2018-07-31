@@ -48,7 +48,7 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "test": "echo test",
+    "test": "gulp test",
     "build": "gulp build",
     "buildDocker": "node scripts/dockerScripts build",
     "tagDocker": "node scripts/dockerScripts tag",

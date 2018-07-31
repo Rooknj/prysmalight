@@ -13,13 +13,27 @@ const MQTT_EFFECT_LIST_TOPIC = "effects";
 
 class MockLight {
   constructor(lightId) {
-    this.mqttClient = MQTT.connect(getMqttHost(), {
-      reconnectPeriod: 5000, // Amount of time between reconnection attempts
-      username: "pi",
-      password: "MQTTIsBetterThanUDP"
-    });
-
     this.lightId = lightId;
+
+    this.mqttClient = MQTT.connect(
+      getMqttHost(),
+      {
+        reconnectPeriod: 5000, // Amount of time between reconnection attempts
+        username: "pi",
+        password: "MQTTIsBetterThanUDP",
+        will: {
+          topic: `${MQTT_LIGHT_TOP_LEVEL}/${
+            this.lightId
+          }/${MQTT_LIGHT_CONNECTED_TOPIC}`,
+          payload: Buffer.from(
+            JSON.stringify({ name: this.lightId, connection: 0 })
+          ),
+          qos: 0,
+          retain: true
+        }
+      }
+    );
+
     this.state = {
       state: "OFF",
       color: { r: 255, g: 100, b: 0 },
@@ -106,9 +120,17 @@ class MockLight {
 
     // Set the new state
     if (state) this.state.state = state;
-    if (color) this.state.color = color;
+    if (color) {
+      this.state.effect = "None";
+      this.state.color = color;
+      this.state.state = "ON";
+    }
     if (brightness) this.state.brightness = brightness;
-    if (effect) this.state.effect = effect;
+    if (effect) {
+      this.state.effect = effect;
+      this.state.color = { r: 0, g: 0, b: 0 };
+      this.state.state = "ON";
+    }
     if (speed) this.state.speed = speed;
 
     const response = { name: this.lightId, mutationId, ...this.state };

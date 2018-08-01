@@ -155,7 +155,7 @@ const runIntegrationTests = () => {
 };
 gulp.task(
   "integrationTest",
-  gulp.series("set-test", "start-server", runIntegrationTests)
+  gulp.series("set-test", "start-server", runIntegrationTests, "clean")
 );
 
 // BUILD: Build an executable with pkg

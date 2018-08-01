@@ -100,6 +100,9 @@ gulp.task("start-redis", run("docker-compose up -d redis"));
 // START-BROKER: Start the Mosquitto docker container
 gulp.task("start-broker", run("docker-compose up -d broker"));
 
+// START-BROKER: Start the Mosquitto docker container
+gulp.task("start-server", run("docker-compose up -d"));
+
 // START: Start the development node server
 const start = function(done) {
   const stream = nodemon({
@@ -129,8 +132,20 @@ gulp.task(
 );
 
 // TEST: Run all tests
+const runUnitTests = () => {
+  return gulp.src("src/**/*.best.js").pipe(
+    jest({
+      automock: false,
+      browser: false,
+      testEnvironment: "node"
+    })
+  );
+};
+gulp.task("test", gulp.series("set-test", runUnitTests, "lint"));
+
+// TEST: Run all tests
 const runIntegrationTests = () => {
-  return gulp.src("test/**/*.test.js").pipe(
+  return gulp.src("test/integration/*.test.js").pipe(
     jest({
       preprocessorIgnorePatterns: [
         "<rootDir>/dist/",
@@ -142,7 +157,10 @@ const runIntegrationTests = () => {
     })
   );
 };
-gulp.task("test", gulp.series("set-test", runIntegrationTests, "lint"));
+gulp.task(
+  "integrationTest",
+  gulp.series("set-test", "start-server", runIntegrationTests)
+);
 
 // BUILD: Build an executable with pkg
 const makePkg = async () => {

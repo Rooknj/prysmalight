@@ -12,6 +12,8 @@ import MockLight from "./components/LightService/Mocks/MockLight";
 import Debug from "debug";
 
 const debug = Debug("server");
+console.log("TODO: Upgrade to Apollo Server 2.0");
+console.log("TODO: Upgrade to use ReactiveX JS");
 
 const GRAPHQL_PORT = 4001;
 

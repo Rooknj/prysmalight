@@ -131,31 +131,27 @@ gulp.task(
   )
 );
 
-// TEST: Run all tests
+// TEST: Run all unit tests
+const UNIT_TEST_OPTIONS = {
+  testPathDirs: ["src"],
+  automock: false,
+  browser: false,
+  testEnvironment: "node"
+};
 const runUnitTests = () => {
-  return gulp.src("src/**/*.best.js").pipe(
-    jest({
-      automock: false,
-      browser: false,
-      testEnvironment: "node"
-    })
-  );
+  return gulp.src(".").pipe(jest(UNIT_TEST_OPTIONS));
 };
 gulp.task("test", gulp.series("set-test", runUnitTests, "lint"));
 
-// TEST: Run all tests
+// TEST: Run all integration tests
+const INTEGRATION_TEST_OPTIONS = {
+  testPathDirs: ["test/integration"],
+  automock: false,
+  browser: false,
+  testEnvironment: "node"
+};
 const runIntegrationTests = () => {
-  return gulp.src("test/integration/*.test.js").pipe(
-    jest({
-      preprocessorIgnorePatterns: [
-        "<rootDir>/dist/",
-        "<rootDir>/node_modules/"
-      ],
-      automock: false,
-      browser: false,
-      testEnvironment: "node"
-    })
-  );
+  return gulp.src(".").pipe(jest(INTEGRATION_TEST_OPTIONS));
 };
 gulp.task(
   "integrationTest",

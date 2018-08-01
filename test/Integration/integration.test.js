@@ -1,4 +1,5 @@
-beforeAll(async () => {});
+const { getApolloClient } = require("../testUtil");
+beforeAll(() => {});
 
 afterAll(() => {});
 
@@ -6,6 +7,7 @@ beforeEach(() => {});
 
 afterEach(() => {});
 
+const apolloClient = getApolloClient();
 // These are all API tests
 // We need to somehow start the lightapp2 server with mocks
 // We need to query those mocks and get back responses

@@ -1,4 +1,4 @@
-import { PubSub } from "graphql-subscriptions";
+const { PubSub } = require("apollo-server");
 import events from "events";
 import LightDB from "./LightDB";
 import LightLink from "./LightLink";

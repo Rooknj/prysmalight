@@ -5,22 +5,15 @@
   "description": "GraphQL Server for Lightapp2.",
   "dependencies": {
     "apollo-server": "^2.0.0",
-    "apollo-server-express": "^1.3.0",
+    "apollo-server-express": "^2.0.0-rc.12",
     "async-mqtt": "^1.0.1",
-    "body-parser": "^1.18.2",
     "compression": "^1.7.3",
     "cors": "^2.8.4",
     "debug": "^3.1.0",
     "express": "^4.16.2",
-    "graphql": "^0.11.7",
-    "graphql-import": "^0.4.5",
-    "graphql-subscriptions": "^0.5.8",
-    "graphql-tools": "^2.13.0",
+    "graphql": "^0.13.2",
     "helmet": "^3.12.1",
-    "node-fetch": "^2.2.0",
-    "redis": "^2.8.0",
-    "subscriptions-transport-ws": "^0.9.7",
-    "ws": "^6.0.0"
+    "redis": "^2.8.0"
   },
   "devDependencies": {
     "apollo-cache-inmemory": "^1.3.0-beta.6",
@@ -46,7 +39,9 @@
     "jest": "^23.4.2",
     "lint-staged": "^7.0.0",
     "minimist": "^1.2.0",
-    "prettier": "^1.11.1"
+    "node-fetch": "^2.2.0",
+    "prettier": "^1.11.1",
+    "ws": "^6.0.0"
   },
   "lint-staged": {
     "src/**/*.{js,json,graphql}": [
@@ -66,7 +61,7 @@
     "prod-server": "dist/server.js"
   },
   "pkg": {
-    "assets": "dist/components/typeDefs.graphql"
+    "assets": "node_modules/casual/src/providers/*"
   },
   "main": "dist/server.js"
 }

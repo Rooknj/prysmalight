@@ -1,4 +1,4 @@
-import LightService from "./LightService/LightService";
+import LightService from "./components/LightService/LightService";
 const lightService = new LightService();
 
 const resolvers = {

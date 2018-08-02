@@ -22,7 +22,7 @@ const getApolloClient = () => {
 
   // Create a WebSocket link:
   const wsLink = new WebSocketLink({
-    uri: `ws://${serverName}:4001/subscriptions`,
+    uri: "ws://" + serverName + ":4001/graphql",
     webSocketImpl: ws,
     options: {
       lazy: true, // This will make sure the websocket does not connect until a subscription is started

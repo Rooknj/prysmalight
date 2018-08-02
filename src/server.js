@@ -1,52 +1,44 @@
-import express from "express"; // NodeJS Web Server
+const typeDefs = require("./typeDefs").default;
+const resolvers = require("./resolvers").default;
+import MockLight from "./components/LightService/Mocks/MockLight";
+import Debug from "debug";
+const { ApolloServer } = require("apollo-server-express");
+const http = require("http"); // Library to create an http server
+const express = require("express"); // NodeJS Web Server
 import cors from "cors"; // Cross Origin Resource Sharing Middleware
 import helmet from "helmet"; // Security Middleware
 import compression from "compression"; // Compression Middleware
-import { graphqlExpress, graphiqlExpress } from "apollo-server-express"; // Hook up graphQL to express middleware
-import { createServer } from "http"; // Library to create an http server
-import bodyParser from "body-parser"; // Parses HTTP requests
-import { SubscriptionServer } from "subscriptions-transport-ws";
-import { execute, subscribe } from "graphql";
-import schema from "./components/schema";
-import MockLight from "./components/LightService/Mocks/MockLight";
-import Debug from "debug";
 
-const debug = Debug("server");
-console.log("TODO: Upgrade to Apollo Server 2.0");
 console.log("TODO: Upgrade to use ReactiveX JS");
+const debug = Debug("server");
 
-const GRAPHQL_PORT = 4001;
+const GRAPHQL_PORT = 4001; // Default Server Port
+const app = express(); // Express App
+const server = new ApolloServer({ typeDefs, resolvers }); // Apollo Server Constructor
 
-const app = express();
-
+// Apply middleware to Express app
 app.use("*", cors());
 app.use(helmet());
 app.use(compression());
-app.use("/graphql", bodyParser.json(), graphqlExpress({ schema }));
-app.use(
-  "/graphiql",
-  graphiqlExpress({
-    endpointURL: "/graphql",
-    subscriptionsEndpoint: `ws://localhost:${GRAPHQL_PORT}/subscriptions`
-  })
-);
+server.applyMiddleware({ app });
 
-// Create the Web Server from our express object and listen on the correct port
-const graphQLServer = createServer(app);
-graphQLServer.listen(GRAPHQL_PORT, () => {
-  // Start the GraphQL Subscriptions server
-  new SubscriptionServer(
-    { execute, subscribe, schema },
-    { server: graphQLServer, path: "/subscriptions" }
-  );
+// Create the httpServer and add subscriptions
+const httpServer = http.createServer(app);
+server.installSubscriptionHandlers(httpServer);
 
-  debug(`GraphiQL is now running on http://localhost:${GRAPHQL_PORT}/graphiql`);
-  debug(`GraphQL Server is now running on http://localhost:${GRAPHQL_PORT}`);
+// Start the httpServer
+httpServer.listen(GRAPHQL_PORT, () => {
   debug(
-    `GraphQL Subscription Server is now running on ws://localhost:${GRAPHQL_PORT}/subscriptions`
+    `🚀 Server ready at http://localhost:${GRAPHQL_PORT}${server.graphqlPath}`
+  );
+  debug(
+    `🚀 Subscriptions ready at ws://localhost:${GRAPHQL_PORT}${
+      server.subscriptionsPath
+    }`
   );
 });
 
+// TODO: add to util file
 const createMockLight = mockName => {
   debug(`Starting ${mockName} as a mock light`);
   const mockLight = new MockLight(mockName);

@@ -135,11 +135,11 @@ gulp.task(
 );
 
 // TEST: Run all unit tests
-gulp.task("test", gulp.series("set-test", run("jest src/")));
+gulp.task("test", gulp.series("set-test", run("jest ./src/")));
 
 gulp.task(
   "testIntegration",
-  gulp.series("set-test", "cleanDocker", "cleanRedis", "start-server", run("jest test/integration"), "cleanDocker")
+  gulp.series("set-test", "cleanDocker", "cleanRedis", "start-server", run("jest ./test/integration"), "cleanDocker")
 );
 
 // BUILD: Build an executable with pkg

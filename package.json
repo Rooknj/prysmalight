@@ -61,7 +61,7 @@
     "prod-server": "dist/server.js"
   },
   "pkg": {
-    "assets": "dist/components/typeDefs.graphql"
+    "assets": "node_modules/casual/src/providers/*"
   },
   "main": "dist/server.js"
 }

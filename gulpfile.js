@@ -7,8 +7,12 @@ const gulp = require("gulp"),
   run = require("gulp-run-command").default,
   jest = require("gulp-jest").default;
 
+gulp.task("cleanDocker", run("docker-compose down"));
+
+gulp.task("cleanRedis", run("rm -rf redisData"))
+
 // CLEAN: Delete all generated files and bring down any docker containers
-gulp.task("clean", run(["rm -rf dist build", "docker-compose down"]));
+gulp.task("clean", gulp.parallel(run(["rm -rf dist build"]), "cleanDocker"));
 
 // LINT: Run the linter and display the output
 const runLinter = () => {
@@ -154,8 +158,8 @@ const runIntegrationTests = () => {
   return gulp.src(".").pipe(jest(INTEGRATION_TEST_OPTIONS));
 };
 gulp.task(
-  "integrationTest",
-  gulp.series("set-test", "start-server", runIntegrationTests, "clean")
+  "testIntegration",
+  gulp.series("set-test", "cleanDocker", "cleanRedis", "start-server", runIntegrationTests, "cleanDocker")
 );
 
 // BUILD: Build an executable with pkg

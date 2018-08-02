@@ -3,7 +3,9 @@ const { ApolloClient } = require("apollo-client"); // Base Apollo
 const { InMemoryCache } = require("apollo-cache-inmemory"); // Local Cache Storage
 const { ApolloLink, split } = require("apollo-link"); // Handles and manages the differnet apollo-link packages
 const { getMainDefinition } = require("apollo-utilities"); // Aids with splitting links
+const fetch = require('node-fetch').default; // Required for HttpLink to work in node
 const { HttpLink } = require("apollo-link-http"); // Use Apollo Over HTTP (Queries, Mutations)
+const ws = require('ws'); // Required for WebSocketLink to work in node
 const { WebSocketLink } = require("apollo-link-ws"); // Use Apollo Over Websockets (Subscriptions)
 
 const getApolloClient = () => {
@@ -14,14 +16,17 @@ const getApolloClient = () => {
 
   // Create an http link:
   const httpLink = new HttpLink({
-    uri: "http://" + serverName + ":4001/graphql"
+    uri: "http://" + serverName + ":4001/graphql",
+    fetch
   });
 
   // Create a WebSocket link:
   const wsLink = new WebSocketLink({
     uri: `ws://${serverName}:4001/subscriptions`,
+    webSocketImpl: ws,
     options: {
-      reconnect: true
+      lazy: true, // This will make sure the websocket does not connect until a subscription is started
+      timeout: 5000 // This will make sure to disconnect the websocket connection after 5 seconds of inactivity, thus ending the test
     }
   });
 

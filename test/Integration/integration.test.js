@@ -1,4 +1,14 @@
-const { getApolloClient } = require("../testUtil");
+const { getApolloClient } = require("../util/testUtil");
+const {
+  LIGHT_ADDED,
+  LIGHT_REMOVED,
+  LIGHTS_CHANGED,
+  GET_LIGHTS,
+  SET_LIGHT,
+  ADD_LIGHT,
+  REMOVE_LIGHT
+} = require("../util/GraphQLConstants");
+
 beforeAll(() => {});
 
 afterAll(() => {});
@@ -7,7 +17,7 @@ beforeEach(() => {});
 
 afterEach(() => {});
 
-const apolloClient = getApolloClient();
+const client = getApolloClient();
 // These are all API tests
 // We need to somehow start the lightapp2 server with mocks
 // We need to query those mocks and get back responses
@@ -15,7 +25,17 @@ const apolloClient = getApolloClient();
 // client = new ApolloClient()
 // client.query({query: gql`stuff`})
 // https://github.com/apollographql/apollo-client#usage
-test("You can add a light", async () => {});
+test("You can add a light", async () => {
+  const LIGHT_NAME = "Test Add Light";
+  const { data } = await client.mutate({
+    mutation: ADD_LIGHT,
+    variables: {
+      lightId: LIGHT_NAME
+    }
+  });
+  expect(data.addLight).not.toBeNull();
+  expect(data.addLight.id).toBe(LIGHT_NAME);
+});
 
 test("You can not add a light twice", async () => {});
 

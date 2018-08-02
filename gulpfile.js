@@ -137,7 +137,7 @@ gulp.task(
 
 // TEST: Run all unit tests
 const UNIT_TEST_OPTIONS = {
-  testPathDirs: ["src"],
+  testPathDirs: ["<rootDir>/src"],
   automock: false,
   browser: false,
   testEnvironment: "node"
@@ -145,17 +145,17 @@ const UNIT_TEST_OPTIONS = {
 const runUnitTests = () => {
   return gulp.src(".").pipe(jest(UNIT_TEST_OPTIONS));
 };
-gulp.task("test", gulp.series("set-test", runUnitTests, "lint"));
+gulp.task("test", gulp.series("set-test", runUnitTests));
 
 // TEST: Run all integration tests
 const INTEGRATION_TEST_OPTIONS = {
-  testPathDirs: ["test/integration"],
+  testPathDirs: ["<rootDir>/test/integration"],
   automock: false,
   browser: false,
   testEnvironment: "node"
 };
 const runIntegrationTests = () => {
-  return jest(INTEGRATION_TEST_OPTIONS);
+  return gulp.src(".").pipe(jest(INTEGRATION_TEST_OPTIONS));
 };
 gulp.task(
   "testIntegration",

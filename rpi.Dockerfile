@@ -28,7 +28,7 @@ RUN yarn build
 ## Prod Environment
 FROM resin/raspberrypi3-debian:jessie
 
-WORKDIR /usr/src/app
+WORKDIR /usr/app
 
 COPY --from=builder /usr/app/build/lightapp2-server /usr/app
 

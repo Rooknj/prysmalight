@@ -10,14 +10,6 @@ const {
   REMOVE_LIGHT
 } = require("../util/GraphQLConstants");
 
-beforeAll(() => {});
-
-afterAll(() => {});
-
-beforeEach(() => {});
-
-afterEach(() => {});
-
 const client = getApolloClient();
 // These are all API tests
 // We need to somehow start the lightapp2 server with mocks
@@ -155,9 +147,101 @@ test("You can not get a light that was not added", async () => {
   expect(getLightError).toBeInstanceOf(Error);
 });
 
-test("You can change a light", async () => {});
+test("You can change a light", async () => {
+  let data;
+  const LIGHT_NAME = "Default Mock"; // This is one of our mock lights we created when spinning up the mock test server
+  const LIGHT_STATE = "ON";
+  const LIGHT_BRIGHTNESS = 40;
+  const LIGHT_COLOR = { r: 3, g: 6, b: 9 };
+  const LIGHT_EFFECT = "Test 1";
+  const LIGHT_SPEED = 2;
 
-test("You can not change a light that was not added", async () => {});
+  // Add the mock light
+  await client.mutate({
+    mutation: ADD_LIGHT,
+    variables: {
+      lightId: LIGHT_NAME
+    }
+  });
+
+  // Test changing the state
+  ({ data } = await client.mutate({
+    mutation: SET_LIGHT,
+    variables: {
+      light: { id: LIGHT_NAME, state: LIGHT_STATE }
+    }
+  }));
+  expect(data.setLight).toBeDefined();
+  expect(data.setLight).not.toBeNull();
+  expect(data.setLight.id).toBe(LIGHT_NAME);
+  expect(data.setLight.state).toBe(LIGHT_STATE);
+
+  // Test changing the brightness
+  ({ data } = await client.mutate({
+    mutation: SET_LIGHT,
+    variables: {
+      light: { id: LIGHT_NAME, brightness: LIGHT_BRIGHTNESS }
+    }
+  }));
+  expect(data.setLight).toBeDefined();
+  expect(data.setLight).not.toBeNull();
+  expect(data.setLight.id).toBe(LIGHT_NAME);
+  expect(data.setLight.brightness).toBe(LIGHT_BRIGHTNESS);
+
+  // Test changing the color
+  ({ data } = await client.mutate({
+    mutation: SET_LIGHT,
+    variables: {
+      light: { id: LIGHT_NAME, color: LIGHT_COLOR }
+    }
+  }));
+  expect(data.setLight).toBeDefined();
+  expect(data.setLight).not.toBeNull();
+  expect(data.setLight.id).toBe(LIGHT_NAME);
+  expect(data.setLight.color).toMatchObject(LIGHT_COLOR);
+
+  // Test changing the effect
+  ({ data } = await client.mutate({
+    mutation: SET_LIGHT,
+    variables: {
+      light: { id: LIGHT_NAME, effect: LIGHT_EFFECT }
+    }
+  }));
+  expect(data.setLight).toBeDefined();
+  expect(data.setLight).not.toBeNull();
+  expect(data.setLight.id).toBe(LIGHT_NAME);
+  expect(data.setLight.effect).toBe(LIGHT_EFFECT);
+
+  // Test changing the speed
+  ({ data } = await client.mutate({
+    mutation: SET_LIGHT,
+    variables: {
+      light: { id: LIGHT_NAME, speed: LIGHT_SPEED }
+    }
+  }));
+  expect(data.setLight).toBeDefined();
+  expect(data.setLight).not.toBeNull();
+  expect(data.setLight.id).toBe(LIGHT_NAME);
+  expect(data.setLight.speed).toBe(LIGHT_SPEED);
+});
+
+test("You can not change a light that was not added", async () => {
+  let setLightError = null;
+  const LIGHT_NAME = "Test Change Not Added"; // This is one of our mock lights we created when spinning up the mock test server
+  const LIGHT_BRIGHTNESS = 40;
+  try {
+    await client.mutate({
+      mutation: SET_LIGHT,
+      variables: {
+        light: { id: LIGHT_NAME, brightness: LIGHT_BRIGHTNESS }
+      }
+    });
+  } catch (error) {
+    setLightError = error;
+  }
+  expect(setLightError).not.toBeNull();
+  expect(setLightError).toBeInstanceOf(Error);
+});
 
 test("You can be notified when a light was added", async () => {});
 

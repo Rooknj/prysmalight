@@ -137,6 +137,7 @@ gulp.task(
 // TEST: Run all unit tests
 gulp.task("test", gulp.series("set-test", run("jest ./src/")));
 
+// TESTINTEGRATION: Run integration tests
 gulp.task(
   "testIntegration",
   gulp.series("set-test", "cleanDocker", "cleanRedis", "start-server", run("jest ./test/integration"), "cleanDocker")

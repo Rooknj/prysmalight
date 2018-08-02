@@ -155,7 +155,7 @@ const INTEGRATION_TEST_OPTIONS = {
   testEnvironment: "node"
 };
 const runIntegrationTests = () => {
-  return gulp.src(".").pipe(jest(INTEGRATION_TEST_OPTIONS));
+  return jest(INTEGRATION_TEST_OPTIONS);
 };
 gulp.task(
   "testIntegration",

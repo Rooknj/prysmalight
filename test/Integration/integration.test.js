@@ -244,6 +244,7 @@ test("You can not change a light that was not added", async () => {
   expect(setLightError).toBeInstanceOf(Error);
 });
 
+// TODO: Figure out how to terminate the client.subscription feature
 test("You can be notified when a light was added", async () => {});
 
 test("You can be notified when a light was removed", async () => {});

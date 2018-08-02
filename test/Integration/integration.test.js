@@ -37,7 +37,27 @@ test("You can add a light", async () => {
   expect(data.addLight.id).toBe(LIGHT_NAME);
 });
 
-test("You can not add a light twice", async () => {});
+test("You can not add a light twice", async () => {
+  const LIGHT_NAME = "Test Add Light Twice";
+  await client.mutate({
+    mutation: ADD_LIGHT,
+    variables: {
+      lightId: LIGHT_NAME
+    }
+  });
+  try {
+    await client.mutate({
+      mutation: ADD_LIGHT,
+      variables: {
+        lightId: LIGHT_NAME
+      }
+    });
+    expect(true).toBe(false) // If the above command succeeds, fail the test
+  } catch(error) {
+    expect(error).toBeInstanceOf(Error)
+  }
+
+});
 
 test("You can remove a light", async () => {});
 

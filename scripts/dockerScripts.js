@@ -28,37 +28,45 @@ Commands:
     `);
 };
 
+const executeCommand = async command => {
+  console.log(`Executing: ${command}`);
+  try {
+    const { stdout, stderr } = await exec(command);
+    console.log(`Finished: ${command}`);
+    console.log("STDOUT:");
+    console.log(stdout || "None");
+    console.log("STDERR:");
+    console.log(stderr || "None");
+  } catch (error) {
+    console.log("Error executing", command);
+    console.log("STDOUT:");
+    console.log(error.stdout || "None");
+    console.log("STDERR:");
+    console.log(error.stderr || "None");
+    process.exit(1);
+  }
+  return;
+}
+
 // Build a docker image
 const buildDockerImage = async dockerComposeFile => {
   const command = `docker-compose${
     dockerComposeFile ? ` -f ${dockerComposeFile} ` : " "
   }build`;
-  console.log(`Executing: ${command}`);
-  const { stdout, stderr } = await exec(command);
-  console.log(`Finished: ${command}`);
-  console.log("STDOUT:\n", stdout || "None");
-  console.log("STDERR:\n", stderr || "None");
+  await executeCommand(command);
   return;
 };
 
 // Tag the docker image
 const tagDockerImage = async (dockerImageName, dockerTag) => {
   const command = `docker tag ${dockerImageName} ${dockerTag}`;
-  console.log(`Executing: ${command}`);
-  const { stdout, stderr } = await exec(command);
-  console.log(`Finished: ${command}`);
-  console.log("STDOUT:\n", stdout || "None");
-  console.log("STDERR:\n", stderr || "None");
+  await executeCommand(command);
 };
 
 // Publish the docker image
 const publishDockerImage = async dockerTag => {
   const command = `docker push ${dockerTag}`;
-  console.log(`Executing: ${command}`);
-  const { stdout, stderr } = await exec(command);
-  console.log(`Finished: ${command}`);
-  console.log("STDOUT:\n", stdout || "None");
-  console.log("STDERR:\n", stderr || "None");
+  await executeCommand(command);
 };
 
 // Create the tag for the docker image
@@ -74,7 +82,7 @@ const getTag = tag => {
   if (tag) return tag;
   const travisTag = process.env.TRAVIS_TAG;
   if (travisTag) {
-    return travisTag
+    return travisTag;
   }
 
   const branchName = process.env.TRAVIS_BRANCH;
@@ -107,7 +115,7 @@ const processArgs = args => {
 
   // Get the tag
   const tag = getTag(args.t);
-  if(!tag) {
+  if (!tag) {
     console.log("No tag was provided and you are not in CI pipeline. Aborting");
     return;
   }

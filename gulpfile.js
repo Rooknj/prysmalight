@@ -4,11 +4,14 @@ const gulp = require("gulp"),
   env = require("gulp-env"),
   nodemon = require("gulp-nodemon"),
   eslint = require("gulp-eslint"),
-  run = require("gulp-run-command").default,
-  jest = require("gulp-jest").default;
+  run = require("gulp-run-command").default
+
+gulp.task("cleanDocker", run("docker-compose down"));
+
+gulp.task("cleanRedis", run("rm -rf redisData"))
 
 // CLEAN: Delete all generated files and bring down any docker containers
-gulp.task("clean", run(["rm -rf dist build", "docker-compose down"]));
+gulp.task("clean", gulp.parallel(run(["rm -rf dist build"]), "cleanDocker"));
 
 // LINT: Run the linter and display the output
 const runLinter = () => {
@@ -100,6 +103,9 @@ gulp.task("start-redis", run("docker-compose up -d redis"));
 // START-BROKER: Start the Mosquitto docker container
 gulp.task("start-broker", run("docker-compose up -d broker"));
 
+// START-BROKER: Start the Mosquitto docker container
+gulp.task("start-server", run("docker-compose up -d"));
+
 // START: Start the development node server
 const start = function(done) {
   const stream = nodemon({
@@ -128,21 +134,14 @@ gulp.task(
   )
 );
 
-// TEST: Run all tests
-const runIntegrationTests = () => {
-  return gulp.src("test/**/*.test.js").pipe(
-    jest({
-      preprocessorIgnorePatterns: [
-        "<rootDir>/dist/",
-        "<rootDir>/node_modules/"
-      ],
-      automock: false,
-      browser: false,
-      testEnvironment: "node"
-    })
-  );
-};
-gulp.task("test", gulp.series("set-test", runIntegrationTests, "lint"));
+// TEST: Run all unit tests
+gulp.task("test", gulp.series("set-test", run("jest ./src/")));
+
+// TESTINTEGRATION: Run integration tests
+gulp.task(
+  "testIntegration",
+  gulp.series("set-test", "cleanDocker", "cleanRedis", "start-server", run("jest ./test/integration"), "cleanDocker")
+);
 
 // BUILD: Build an executable with pkg
 const makePkg = async () => {

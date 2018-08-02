@@ -3,7 +3,7 @@
 FROM node:carbon-alpine as builder
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /usr/app
 
 ENV PKG_TARGET="node8-linux-x64"
 
@@ -24,9 +24,9 @@ RUN yarn build
 ## Prod Environment
 FROM node:carbon
 
-WORKDIR /usr/src/app
+WORKDIR /usr/app
 
-COPY --from=builder /usr/src/app/build/lightapp2-server /usr/src/app
+COPY --from=builder /usr/app/build/lightapp2-server /usr/app
 
 # Make port 4001 available to the world outside this container
 EXPOSE 4001

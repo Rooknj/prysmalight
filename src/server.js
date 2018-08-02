@@ -12,6 +12,8 @@ import MockLight from "./components/LightService/Mocks/MockLight";
 import Debug from "debug";
 
 const debug = Debug("server");
+console.log("TODO: Upgrade to Apollo Server 2.0");
+console.log("TODO: Upgrade to use ReactiveX JS");
 
 const GRAPHQL_PORT = 4001;
 
@@ -45,25 +47,30 @@ graphQLServer.listen(GRAPHQL_PORT, () => {
   );
 });
 
-// Set up the mock lights if the environment dictates it
+const createMockLight = mockName => {
+  debug(`Starting ${mockName} as a mock light`);
+  const mockLight = new MockLight(mockName);
+  mockLight.subscribeToCommands();
+  mockLight.publishConnected({ name: mockName, connection: 2 });
+  mockLight.publishEffectList({
+    name: mockName,
+    effectList: ["Test 1", "Test 2", "Test 3"]
+  });
+  mockLight.publishState({
+    name: mockName,
+    state: "OFF",
+    color: { r: 255, g: 100, b: 0 },
+    brightness: 100,
+    effect: "None",
+    speed: 4
+  });
+};
+
+// Create one default mock light
+createMockLight("Default Mock");
+
+// Set up any extra mock lights if the environment dictates it
 if (process.env.MOCKS) {
   const mockArray = process.env.MOCKS.split(",");
-  mockArray.forEach(mock => {
-    debug(`Starting ${mock} as a mock light`);
-    const mockLight = new MockLight(mock);
-    mockLight.subscribeToCommands();
-    mockLight.publishConnected({ name: mock, connection: 2 });
-    mockLight.publishEffectList({
-      name: mock,
-      effectList: ["Test 1", "Test 2", "Test 3"]
-    });
-    mockLight.publishState({
-      name: mock,
-      state: "OFF",
-      color: { r: 255, g: 100, b: 0 },
-      brightness: 100,
-      effect: "None",
-      speed: 4
-    });
-  });
+  mockArray.forEach(createMockLight);
 }

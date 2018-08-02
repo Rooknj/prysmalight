@@ -38,6 +38,7 @@ test("You can add a light", async () => {
 });
 
 test("You can not add a light twice", async () => {
+  let addLightError = null;
   const LIGHT_NAME = "Test Add Light Twice";
   await client.mutate({
     mutation: ADD_LIGHT,
@@ -52,16 +53,47 @@ test("You can not add a light twice", async () => {
         lightId: LIGHT_NAME
       }
     });
-    expect(true).toBe(false) // If the above command succeeds, fail the test
   } catch(error) {
-    expect(error).toBeInstanceOf(Error)
+    addLightError = error;
   }
-
+  expect(addLightError).not.toBeNull
+  expect(addLightError).toBeInstanceOf(Error)
 });
 
-test("You can remove a light", async () => {});
+test("You can remove a light", async () => {
+  const LIGHT_NAME = "Test Remove Light";
+  await client.mutate({
+    mutation: ADD_LIGHT,
+    variables: {
+      lightId: LIGHT_NAME
+    }
+  });
+  const { data } = await client.mutate({
+    mutation: REMOVE_LIGHT,
+    variables: {
+      lightId: LIGHT_NAME
+    }
+  });
+  expect(data.removeLight).not.toBeNull();
+  expect(data.removeLight.id).toBe(LIGHT_NAME);
+});
 
-test("You can not remove a light twice", async () => {});
+test("You can not remove a light twice", async () => {
+  let removeLightError = null;
+  const LIGHT_NAME = "Test Remove Unadded Light";
+  try {
+    await client.mutate({
+      mutation: REMOVE_LIGHT,
+      variables: {
+        lightId: LIGHT_NAME
+      }
+    });
+  } catch(error) {
+    removeLightError = error;
+  }
+  expect(removeLightError).not.toBeNull
+  expect(removeLightError).toBeInstanceOf(Error)
+});
 
 test("You can get an array of all added lights", async () => {});
 

@@ -4,8 +4,7 @@ const gulp = require("gulp"),
   env = require("gulp-env"),
   nodemon = require("gulp-nodemon"),
   eslint = require("gulp-eslint"),
-  run = require("gulp-run-command").default,
-  jest = require("gulp-jest").default;
+  run = require("gulp-run-command").default
 
 gulp.task("cleanDocker", run("docker-compose down"));
 
@@ -136,30 +135,11 @@ gulp.task(
 );
 
 // TEST: Run all unit tests
-const UNIT_TEST_OPTIONS = {
-  testPathDirs: ["<rootDir>/src"],
-  automock: false,
-  browser: false,
-  testEnvironment: "node"
-};
-const runUnitTests = () => {
-  return gulp.src(".").pipe(jest(UNIT_TEST_OPTIONS));
-};
-gulp.task("test", gulp.series("set-test", runUnitTests));
+gulp.task("test", gulp.series("set-test", run("jest src/")));
 
-// TEST: Run all integration tests
-const INTEGRATION_TEST_OPTIONS = {
-  testPathDirs: ["<rootDir>/test/integration"],
-  automock: false,
-  browser: false,
-  testEnvironment: "node"
-};
-const runIntegrationTests = () => {
-  return gulp.src(".").pipe(jest(INTEGRATION_TEST_OPTIONS));
-};
 gulp.task(
   "testIntegration",
-  gulp.series("set-test", "cleanDocker", "cleanRedis", "start-server", runIntegrationTests, "cleanDocker")
+  gulp.series("set-test", "cleanDocker", "cleanRedis", "start-server", run("jest test/integration"), "cleanDocker")
 );
 
 // BUILD: Build an executable with pkg

@@ -53,11 +53,11 @@ test("You can not add a light twice", async () => {
         lightId: LIGHT_NAME
       }
     });
-  } catch(error) {
+  } catch (error) {
     addLightError = error;
   }
-  expect(addLightError).not.toBeNull
-  expect(addLightError).toBeInstanceOf(Error)
+  expect(addLightError).not.toBeNull;
+  expect(addLightError).toBeInstanceOf(Error);
 });
 
 test("You can remove a light", async () => {
@@ -88,14 +88,35 @@ test("You can not remove a light twice", async () => {
         lightId: LIGHT_NAME
       }
     });
-  } catch(error) {
+  } catch (error) {
     removeLightError = error;
   }
-  expect(removeLightError).not.toBeNull
-  expect(removeLightError).toBeInstanceOf(Error)
+  expect(removeLightError).not.toBeNull;
+  expect(removeLightError).toBeInstanceOf(Error);
 });
 
-test("You can get an array of all added lights", async () => {});
+test("You can get an array of all added lights", async () => {
+  const LIGHT_NAME1 = "Test Get Lights 1";
+  await client.mutate({
+    mutation: ADD_LIGHT,
+    variables: {
+      lightId: LIGHT_NAME1
+    }
+  });
+  const LIGHT_NAME2 = "Test Get Lights 2";
+  await client.mutate({
+    mutation: ADD_LIGHT,
+    variables: {
+      lightId: LIGHT_NAME2
+    }
+  });
+  const { data } = await client.query({
+    query: GET_LIGHTS
+  });
+  expect(data.lights).toBeInstanceOf(Array);
+  expect(data.lights.find(light => light.id === LIGHT_NAME1)).toBeDefined()
+  expect(data.lights.find(light => light.id === LIGHT_NAME2)).toBeDefined()
+});
 
 test("You can get one light", async () => {});
 

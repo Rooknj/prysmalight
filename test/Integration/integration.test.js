@@ -3,6 +3,7 @@ const {
   LIGHT_ADDED,
   LIGHT_REMOVED,
   LIGHTS_CHANGED,
+  GET_LIGHT,
   GET_LIGHTS,
   SET_LIGHT,
   ADD_LIGHT,
@@ -56,7 +57,7 @@ test("You can not add a light twice", async () => {
   } catch (error) {
     addLightError = error;
   }
-  expect(addLightError).not.toBeNull;
+  expect(addLightError).not.toBeNull();
   expect(addLightError).toBeInstanceOf(Error);
 });
 
@@ -91,7 +92,7 @@ test("You can not remove a light twice", async () => {
   } catch (error) {
     removeLightError = error;
   }
-  expect(removeLightError).not.toBeNull;
+  expect(removeLightError).not.toBeNull();
   expect(removeLightError).toBeInstanceOf(Error);
 });
 
@@ -114,13 +115,45 @@ test("You can get an array of all added lights", async () => {
     query: GET_LIGHTS
   });
   expect(data.lights).toBeInstanceOf(Array);
-  expect(data.lights.find(light => light.id === LIGHT_NAME1)).toBeDefined()
-  expect(data.lights.find(light => light.id === LIGHT_NAME2)).toBeDefined()
+  expect(data.lights.find(light => light.id === LIGHT_NAME1)).toBeDefined();
+  expect(data.lights.find(light => light.id === LIGHT_NAME2)).toBeDefined();
 });
 
-test("You can get one light", async () => {});
+test("You can get one light", async () => {
+  const LIGHT_NAME = "Test Get Light";
+  await client.mutate({
+    mutation: ADD_LIGHT,
+    variables: {
+      lightId: LIGHT_NAME
+    }
+  });
+  const { data } = await client.query({
+    query: GET_LIGHT,
+    variables: {
+      lightId: LIGHT_NAME
+    }
+  });
+  expect(data.light).toBeDefined;
+  expect(data.light).not.toBeNull;
+  expect(data.light.id).toBe(LIGHT_NAME);
+});
 
-test("You can not get a light that was not added", async () => {});
+test("You can not get a light that was not added", async () => {
+  let getLightError = null;
+  const LIGHT_NAME = "Test Get Unadded Light";
+  try {
+    await client.query({
+      query: GET_LIGHT,
+      variables: {
+        lightId: LIGHT_NAME
+      }
+    });
+  } catch (error) {
+    getLightError = error;
+  }
+  expect(getLightError).not.toBeNull();
+  expect(getLightError).toBeInstanceOf(Error);
+});
 
 test("You can change a light", async () => {});
 

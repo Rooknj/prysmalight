@@ -43,6 +43,15 @@ const LIGHTS_CHANGED = gql`
   ${LIGHT_DATA}
 `;
 
+const GET_LIGHT = gql`
+  query getLight($lightId: String!) {
+    light(lightId: $lightId) {
+      ...lightData
+    }
+  }
+  ${LIGHT_DATA}
+`;
+
 const GET_LIGHTS = gql`
   query getLights {
     lights {
@@ -83,6 +92,7 @@ module.exports = {
   LIGHT_ADDED,
   LIGHT_REMOVED,
   LIGHTS_CHANGED,
+  GET_LIGHT,
   GET_LIGHTS,
   SET_LIGHT,
   ADD_LIGHT,

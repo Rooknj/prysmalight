@@ -15,7 +15,6 @@ install:
   - yarn install --silent
 script:
   - node scripts/dockerScripts build
-  - yarn testIntegration --rpi # You need to test the raspberry pi first or else it will error (socket hangup)
   - yarn testIntegration
 before_deploy:
   - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin

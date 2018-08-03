@@ -20,8 +20,16 @@ let argv = process.argv.slice(2);
 argv.unshift("test/integration/");
 
 // Bring up server, redis, and broker
-console.log("Bringing up server, broker, and redis");
-execSync("docker-compose up -d");
+
+if (argv.indexOf("--rpi") >= 0) {
+  argv.splice(argv.indexOf("--rpi"), 1); // Remove rpi option from argv so jest doesnt screw up
+  console.log("Bringing up Raspberry Pi server, broker, and redis");
+  execSync("docker-compose -f docker-compose.rpi.yml up -d");
+} else {
+  console.log("Bringing up server, broker, and redis");
+  execSync("docker-compose up -d");
+}
+
 execSync("redis-cli flushall");
 jest.run(argv);
 

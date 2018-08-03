@@ -30,4 +30,5 @@ if (argv.indexOf("--local") >= 0) {
 console.log("Spinning up Local Redis Server");
 execSync("docker-compose up -d redis");
 
-nodemon(". --exitcrash");
+// TODO: Figure out how to get rid of that error that pops up.
+nodemon(".");

@@ -9,6 +9,11 @@ const {
 
 const client = getApolloClient();
 
+
+beforeAll((done) => {
+  console.log("Waiting 2 seconds")
+  setTimeout(done, 2000);
+})
 // These are all API tests
 // Uses an instance of apollo-client in order to do this
 test("You can add a light", async () => {

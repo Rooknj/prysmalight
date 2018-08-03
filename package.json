@@ -45,7 +45,8 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "test": "gulp test",
+    "test": "node scripts/test src/",
+    "testNoWatch": "CI=true node scripts/test src/",
     "testIntegration": "gulp testIntegration",
     "build": "gulp build",
     "start": "gulp start",

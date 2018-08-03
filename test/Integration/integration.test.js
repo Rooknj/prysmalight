@@ -1,7 +1,6 @@
 const { getApolloClient } = require("../util/testUtil");
 const redis = require("redis");
 const { promisify } = require("util");
-const exec = promisify(require("child_process").exec);
 const asyncSetTimeout = promisify(setTimeout);
 
 const REDIS_HOST = "localhost";
@@ -18,41 +17,24 @@ const {
 } = require("../util/GraphQLConstants");
 
 const client = getApolloClient();
-let redisClient;
+const redisClient = redis.createClient(REDIS_PORT, REDIS_HOST);
+const asyncFLUSHALL = promisify(redisClient.FLUSHALL).bind(redisClient);
 
 beforeAll(async () => {
-  // Bring up server, redis, and broker
-  const command = "docker-compose up -d";
-  await exec(command);
-
-  // Connect to redis
-  redisClient = redis.createClient(REDIS_PORT, REDIS_HOST);
-  redisClient.asyncFLUSHALL = promisify(redisClient.FLUSHALL).bind(redisClient);
-
   // Await the redis connection for 3 seconds max
   await new Promise(async (resolve, reject) => {
     redisClient.on("ready", () => resolve());
     await asyncSetTimeout(3000);
     reject(new Error("Redis took longer than 3 seconds to connect"));
   });
-
   // Clear the redis database
-  await redisClient.asyncFLUSHALL();
-  return asyncSetTimeout(3000)
+  await asyncFLUSHALL();
+  return asyncSetTimeout(3000);
 });
-
-// Let this test timeout after 30 seconds because docker-compose down takes a while for some reason
-afterAll(() => {
-  console.log("after", redisClient)
-  if(redisClient) redisClient.quit();
-  const command = "docker-compose down";
-  return exec(command);
-}, 30000);
-
 
 afterEach(async () => {
   // Clear the redis database
-  return redisClient.asyncFLUSHALL();
+  return asyncFLUSHALL();
 });
 
 // /// BEGIN TESTS ////////////////////////////////////////

@@ -8,9 +8,10 @@ process.env.NODE_ENV = "test";
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
 process.on("unhandledRejection", err => {
-  //throw err;
+  throw err;
 });
 
+const { execSync } = require("child_process");
 const jest = require("jest");
 let argv = process.argv.slice(2);
 
@@ -23,4 +24,10 @@ if (!process.env.CI && argv.indexOf("--coverage") < 0) {
   argv.push("--watch");
 }
 
+// Bring up server, redis, and broker
+console.log("Bringing up server, broker, and redis")
+execSync("docker-compose up -d");
+
 jest.run(argv);
+
+execSync("docker-compose down");

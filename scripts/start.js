@@ -12,8 +12,7 @@ process.on("unhandledRejection", err => {
   throw err;
 });
 
-const util = require("util");
-const exec = util.promisify(require("child_process").exec);
+const { execSync } = require("child_process");
 const nodemon = require("nodemon");
 
 let argv = process.argv.slice(2);
@@ -23,12 +22,13 @@ if (argv.indexOf("--mock") >= 0) {
 }
 
 if (argv.indexOf("--local") >= 0) {
-  console.log("Running Local MQTT broker");
-  exec("docker-compose up -d broker");
+  console.log("Spinning up Local MQTT broker");
   process.env.MQTT_HOST = "localhost";
+  execSync("docker-compose up -d broker");
 }
 
-exec("docker-compose up -d redis");
+console.log("Spinning up Local Redis Server");
+execSync("docker-compose up -d redis");
 
 nodemon
   .on("start", function() {

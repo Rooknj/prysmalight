@@ -13,7 +13,7 @@ process.on("unhandledRejection", err => {
 });
 
 const { execSync } = require("child_process");
-const nodemon = require("nodemon");
+const nodemon = require('nodemon');
 
 let argv = process.argv.slice(2);
 
@@ -30,19 +30,4 @@ if (argv.indexOf("--local") >= 0) {
 console.log("Spinning up Local Redis Server");
 execSync("docker-compose up -d redis");
 
-nodemon
-  .on("start", function() {
-    console.log("Server has started");
-  })
-  .on("quit", function() {
-    console.log("Server has quit");
-    process.exit();
-  })
-  .on("restart", function(files) {
-    console.log("Server restarted due to: ", files);
-  });
-
-nodemon({
-  script: "src/server.js",
-  ext: "js json"
-});
+nodemon(". --exitcrash");

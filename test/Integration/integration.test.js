@@ -1,10 +1,5 @@
+const { execSync } = require("child_process");
 const { getApolloClient } = require("../util/testUtil");
-const redis = require("redis");
-const { promisify } = require("util");
-const asyncSetTimeout = promisify(setTimeout);
-
-const REDIS_HOST = "localhost";
-const REDIS_PORT = 6379;
 const {
   LIGHT_ADDED,
   LIGHT_REMOVED,
@@ -17,27 +12,14 @@ const {
 } = require("../util/GraphQLConstants");
 
 const client = getApolloClient();
-const redisClient = redis.createClient(REDIS_PORT, REDIS_HOST);
-const asyncFLUSHALL = promisify(redisClient.FLUSHALL).bind(redisClient);
 
-beforeAll(async () => {
-  // Await the redis connection for 3 seconds max
-  await new Promise(async (resolve, reject) => {
-    redisClient.on("ready", () => resolve());
-    await asyncSetTimeout(3000);
-    reject(new Error("Redis took longer than 3 seconds to connect"));
-  });
-  // Clear the redis database
-  await asyncFLUSHALL();
-  return asyncSetTimeout(3000);
-});
+beforeAll(() => {
+  execSync("redis-cli flushall")
+})
 
-afterEach(async () => {
-  // Clear the redis database
-  return asyncFLUSHALL();
-});
-
-// /// BEGIN TESTS ////////////////////////////////////////
+afterEach(() => {
+  execSync("redis-cli flushall")
+})
 
 // These are all API tests
 // Uses an instance of apollo-client in order to do this

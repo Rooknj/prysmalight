@@ -1,5 +1,11 @@
 const { getApolloClient } = require("../util/testUtil");
+const redis = require("redis");
+const { promisify } = require("util");
+const exec = promisify(require("child_process").exec);
+const asyncSetTimeout = promisify(setTimeout);
 
+const REDIS_HOST = "localhost";
+const REDIS_PORT = 6379;
 const {
   LIGHT_ADDED,
   LIGHT_REMOVED,
@@ -12,13 +18,45 @@ const {
 } = require("../util/GraphQLConstants");
 
 const client = getApolloClient();
+let redisClient;
+
+beforeAll(async () => {
+  // Bring up server, redis, and broker
+  const command = "docker-compose up -d";
+  await exec(command);
+
+  // Connect to redis
+  redisClient = redis.createClient(REDIS_PORT, REDIS_HOST);
+  redisClient.asyncFLUSHALL = promisify(redisClient.FLUSHALL).bind(redisClient);
+
+  // Await the redis connection for 3 seconds max
+  await new Promise(async (resolve, reject) => {
+    redisClient.on("connect", () => resolve());
+    await asyncSetTimeout(3000);
+    reject(new Error("Redis took longer than 3 seconds to connect"));
+  });
+
+  // Clear the redis database
+  await redisClient.asyncFLUSHALL();
+  return asyncSetTimeout(1000)
+});
+
+afterEach(async () => {
+  // Clear the redis database
+  return redisClient.asyncFLUSHALL();
+});
+
+// Let this test timeout after 30 seconds because docker-compose down takes a while for some reason
+afterAll(() => {
+  const command = "docker-compose down";
+  redisClient.quit();
+  return exec(command);
+}, 30000);
+
+// /// BEGIN TESTS ////////////////////////////////////////
+
 // These are all API tests
-// We need to somehow start the lightapp2 server with mocks
-// We need to query those mocks and get back responses
-// Use an instance of apollo-client in order to do this
-// client = new ApolloClient()
-// client.query({query: gql`stuff`})
-// https://github.com/apollographql/apollo-client#usage
+// Uses an instance of apollo-client in order to do this
 test("You can add a light", async () => {
   const LIGHT_NAME = "Test Add Light";
   const { data } = await client.mutate({

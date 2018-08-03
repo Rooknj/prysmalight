@@ -42,26 +42,6 @@ gulp.task("set-develop", async () => {
   });
 });
 
-// SET-TEST: Set node_env to test
-gulp.task("set-test", async () => {
-  await env({
-    vars: {
-      NODE_ENV: "test",
-      BABEL_ENV: "test"
-    }
-  });
-});
-
-// SET-PROD: Set node_env to production
-gulp.task("set-prod", async () => {
-  await env({
-    vars: {
-      NODE_ENV: "production",
-      BABEL_ENV: "production"
-    }
-  });
-});
-
 // SET-MOCK: set the MOCK env to true to start a mock light on startup
 gulp.task("set-mock", async () => {
   await env({
@@ -116,40 +96,11 @@ gulp.task(
   )
 );
 
-// TEST: Run all unit tests
-gulp.task("test", gulp.series("set-test", run("jest ./src/")));
-
 // TESTINTEGRATION: Run integration tests
 gulp.task(
   "testIntegration",
   gulp.series("set-test", "cleanDocker", "start-server", "cleanRedis", run("jest ./test/integration"), "cleanDocker")
 );
-
-// BUILD: Build an executable with pkg
-const makePkg = async () => {
-  let target;
-  if (process.env.PKG_TARGET) {
-    // Run pkg with this target
-    target = process.env.PKG_TARGET;
-  } else {
-    switch (process.platform) {
-      case "darwin": // mac
-        target = "node8-macos-x64";
-        break;
-      case "win32": // windows
-        target = "node8-win-x64";
-        break;
-      case "linux": // linux
-        target = "node8-linux-x64";
-        break;
-      default:
-        return new Error("No target specified");
-    }
-  }
-
-  await run(`pkg . --targets ${target} --output ./build/lightapp2-server`)();
-};
-gulp.task("build", gulp.series("set-prod", makePkg));
 
 // DEFAULT: TBD
 gulp.task("default", gulp.series("lint"));

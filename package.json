@@ -41,6 +41,7 @@
     "minimist": "^1.2.0",
     "node-fetch": "^2.2.0",
     "prettier": "^1.11.1",
+    "redis-cli": "^1.0.2",
     "ws": "^6.0.0"
   },
   "lint-staged": {

@@ -4,10 +4,6 @@ const gulp = require("gulp"),
   eslint = require("gulp-eslint"),
   run = require("gulp-run-command").default
 
-gulp.task("cleanDocker", run("docker-compose down"));
-
-gulp.task("cleanRedis", run("redis-cli flushall"))
-
 // CLEAN: Delete all generated files and bring down any docker containers
 gulp.task("clean", gulp.parallel(run(["rm -rf build"]), "cleanDocker"));
 
@@ -94,12 +90,6 @@ gulp.task(
     gulp.parallel("set-mock", "set-mqtt-host", "start-broker"),
     "start"
   )
-);
-
-// TESTINTEGRATION: Run integration tests
-gulp.task(
-  "testIntegration",
-  gulp.series("set-test", "cleanDocker", "start-server", "cleanRedis", run("jest ./test/integration"), "cleanDocker")
 );
 
 // DEFAULT: TBD

@@ -48,8 +48,8 @@ afterEach(async () => {
 
 // Let this test timeout after 30 seconds because docker-compose down takes a while for some reason
 afterAll(() => {
+  if(redisClient) redisClient.quit();
   const command = "docker-compose down";
-  redisClient.quit();
   return exec(command);
 }, 30000);
 

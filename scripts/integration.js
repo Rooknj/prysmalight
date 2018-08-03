@@ -19,15 +19,9 @@ let argv = process.argv.slice(2);
 // Makes jest only run the unit tests inside of the src/ folder
 argv.unshift("test/integration/");
 
-// Watch unless on CI or in coverage mode
-if (!process.env.CI && argv.indexOf("--coverage") < 0) {
-  argv.push("--watch");
-}
-
 // Bring up server, redis, and broker
-console.log("Bringing up server, broker, and redis")
+console.log("Bringing up server, broker, and redis");
 execSync("docker-compose up -d");
-
+execSync("redis-cli flushall");
 jest.run(argv);
 
-execSync("docker-compose down");

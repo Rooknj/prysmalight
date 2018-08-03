@@ -1,13 +1,13 @@
 const typeDefs = require("./typeDefs").default;
 const resolvers = require("./resolvers").default;
-import MockLight from "./components/LightService/Mocks/MockLight";
-import Debug from "debug";
+const MockLight = require("./components/LightService/Mocks/MockLight").default;
+const Debug = require("debug").default;
 const { ApolloServer } = require("apollo-server-express");
 const http = require("http"); // Library to create an http server
 const express = require("express"); // NodeJS Web Server
-import cors from "cors"; // Cross Origin Resource Sharing Middleware
-import helmet from "helmet"; // Security Middleware
-import compression from "compression"; // Compression Middleware
+const cors = require("cors"); // Cross Origin Resource Sharing Middleware
+const helmet = require("helmet"); // Security Middleware
+const compression = require("compression"); // Compression Middleware
 
 console.log("TODO: Upgrade to use ReactiveX JS");
 const debug = Debug("server");

@@ -1,4 +1,4 @@
-import Debug from "debug";
+const Debug = require("debug").default;
 
 const debug = Debug("LightUtil");
 
@@ -7,7 +7,7 @@ const LIGHT_CONNECTED = 2;
 const LIGHT_DISCONNECTED = 0;
 
 // Utility functions
-export const mapConnectionMessageToConnectionPayload = connectionMessage => {
+const mapConnectionMessageToConnectionPayload = connectionMessage => {
   let connectionString = -1;
   if (Number(connectionMessage) === LIGHT_DISCONNECTED) {
     connectionString = LIGHT_DISCONNECTED;
@@ -18,7 +18,7 @@ export const mapConnectionMessageToConnectionPayload = connectionMessage => {
 };
 
 // Utility functions
-export const parseMqttMessage = jsonData => {
+const parseMqttMessage = jsonData => {
   const message = JSON.parse(jsonData);
 
   if (!message.name) {
@@ -31,7 +31,7 @@ export const parseMqttMessage = jsonData => {
 };
 
 // Function to return a new light object with default values
-export const getNewRedisLight = id => [
+const getNewRedisLight = id => [
   id,
   "connected",
   0,
@@ -53,11 +53,7 @@ export const getNewRedisLight = id => [
   `${id}:effects`
 ];
 
-export const mapRedisObjectToLightObject = (
-  id,
-  redisResponse,
-  supportedEffects
-) => ({
+const mapRedisObjectToLightObject = (id, redisResponse, supportedEffects) => ({
   id,
   connected: redisResponse.connected,
   state: redisResponse.state,
@@ -72,7 +68,7 @@ export const mapRedisObjectToLightObject = (
   supportedEffects
 });
 
-export const getMqttHost = () => {
+const getMqttHost = () => {
   let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
   if (process.env.MQTT_HOST) {
     debug(`Adding custom MQTT host: ${process.env.MQTT_HOST}`);
@@ -81,11 +77,20 @@ export const getMqttHost = () => {
   return MQTT_BROKER;
 };
 
-export const getRedisHost = () => {
+const getRedisHost = () => {
   let REDIS_HOST = "localhost";
   if (process.env.REDIS_HOST) {
     debug(`Adding custom Redis Host: ${process.env.REDIS_HOST}`);
     REDIS_HOST = process.env.REDIS_HOST;
   }
   return REDIS_HOST;
+};
+
+module.exports = {
+  mapConnectionMessageToConnectionPayload,
+  parseMqttMessage,
+  getNewRedisLight,
+  mapRedisObjectToLightObject,
+  getMqttHost,
+  getRedisHost
 };

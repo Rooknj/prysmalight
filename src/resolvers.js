@@ -1,4 +1,5 @@
-import LightService from "./components/LightService/LightService";
+const LightService = require("./components/LightService/LightService").default;
+
 const lightService = new LightService();
 
 const resolvers = {
@@ -35,4 +36,4 @@ const resolvers = {
   }
 };
 
-export default resolvers;
+module.exports = { default: resolvers };

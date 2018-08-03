@@ -1,6 +1,6 @@
-import MQTT from "async-mqtt";
-import Debug from "debug";
-import { parseMqttMessage, getMqttHost } from "../lightUtil";
+const MQTT = require("async-mqtt");
+const Debug = require("debug").default;
+const { parseMqttMessage, getMqttHost } = require("../lightUtil");
 
 const debug = Debug("MockLight");
 
@@ -138,4 +138,4 @@ class MockLight {
   }
 }
 
-export default MockLight;
+module.exports = { default: MockLight };

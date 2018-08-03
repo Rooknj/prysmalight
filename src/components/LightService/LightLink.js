@@ -1,6 +1,6 @@
-import MQTT from "async-mqtt";
-import Debug from "debug";
-import { parseMqttMessage, getMqttHost } from "./lightUtil";
+const MQTT = require("async-mqtt");
+const Debug = require("debug").default;
+const { parseMqttMessage, getMqttHost } = require("./lightUtil");
 const debug = Debug("LightLink");
 
 // MQTT: topics
@@ -24,11 +24,14 @@ class LightLink {
       this.isConnected = false;
     };
 
-    this.mqttClient = MQTT.connect(getMqttHost(), {
-      reconnectPeriod: 5000, // Amount of time between reconnection attempts
-      username: "pi",
-      password: "MQTTIsBetterThanUDP"
-    });
+    this.mqttClient = MQTT.connect(
+      getMqttHost(),
+      {
+        reconnectPeriod: 5000, // Amount of time between reconnection attempts
+        username: "pi",
+        password: "MQTTIsBetterThanUDP"
+      }
+    );
 
     // Initialize Message handlers
     this.connectionHandler = () =>
@@ -216,4 +219,4 @@ class LightLink {
   }
 }
 
-export default LightLink;
+module.exports = { default: LightLink };

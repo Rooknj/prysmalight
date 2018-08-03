@@ -1,6 +1,4 @@
 const gulp = require("gulp"),
-  gulpif = require("gulp-if"),
-  babel = require("gulp-babel"),
   env = require("gulp-env"),
   nodemon = require("gulp-nodemon"),
   eslint = require("gulp-eslint"),
@@ -11,7 +9,7 @@ gulp.task("cleanDocker", run("docker-compose down"));
 gulp.task("cleanRedis", run("redis-cli flushall"))
 
 // CLEAN: Delete all generated files and bring down any docker containers
-gulp.task("clean", gulp.parallel(run(["rm -rf dist build"]), "cleanDocker"));
+gulp.task("clean", gulp.parallel(run(["rm -rf build"]), "cleanDocker"));
 
 // LINT: Run the linter and display the output
 const runLinter = () => {
@@ -24,21 +22,6 @@ const runLinter = () => {
   return stream;
 };
 gulp.task("lint", runLinter);
-
-// BABEL: Transpile javascript code so it works on node 8
-const transpile = () => {
-  // Can re-enable caching if transpile time becomes too slow (put these outside)
-  //const Cache = require("gulp-file-cache");
-  //const cache = new Cache();
-  const stream = gulp
-    .src("src/**/*") // Get all files under the src directory
-    //.pipe(cache.filter()) // remember files
-    .pipe(gulpif("*.js", babel())) // transpile any javascript files, forward others
-    //.pipe(cache.cache()) // cache them
-    .pipe(gulp.dest("./dist")); // write files
-  return stream; // important for gulp-nodemon to wait for completion
-};
-gulp.task("babel", transpile);
 
 // SET-DEBUG: Set the debug environment variable so that we can see debug messages
 gulp.task("set-debug", async () => {
@@ -109,9 +92,8 @@ gulp.task("start-server", run("docker-compose up -d"));
 // START: Start the development node server
 const start = function(done) {
   const stream = nodemon({
-    script: "dist/server.js", // run transpiled code
+    script: "src/server.js", // run transpiled code
     watch: "src", // watch src code
-    tasks: ["babel"], // compile synchronously onChange
     done: done
   });
 
@@ -120,7 +102,7 @@ const start = function(done) {
 gulp.task(
   "start",
   gulp.series(
-    gulp.parallel("babel", "set-develop", "set-debug", "start-redis"),
+    gulp.parallel("set-develop", "set-debug", "start-redis"),
     start
   )
 );
@@ -167,7 +149,7 @@ const makePkg = async () => {
 
   await run(`pkg . --targets ${target} --output ./build/lightapp2-server`)();
 };
-gulp.task("build", gulp.series("set-prod", "babel", makePkg));
+gulp.task("build", gulp.series("set-prod", makePkg));
 
 // DEFAULT: TBD
-gulp.task("default", gulp.series("lint", "babel"));
+gulp.task("default", gulp.series("lint"));

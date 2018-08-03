@@ -1,12 +1,11 @@
-import redis from "redis";
-import { promisify } from "util";
-import {
+const redis = require("redis");
+const { promisify } = require("util");
+const {
   getRedisHost,
   getNewRedisLight,
   mapRedisObjectToLightObject
-} from "./lightUtil";
-
-import Debug from "debug";
+} = require("./lightUtil");
+const Debug = require("debug").default;
 
 const debug = Debug("LightDB");
 
@@ -329,4 +328,4 @@ class LightDB {
   }
 }
 
-export default LightDB;
+module.exports = { default: LightDB };

@@ -1,10 +1,10 @@
 const { PubSub } = require("apollo-server");
-import events from "events";
-import LightDB from "./LightDB";
-import LightLink from "./LightLink";
-import Debug from "debug";
-import { promisify } from "util";
-import { mapConnectionMessageToConnectionPayload } from "./lightUtil";
+const events = require("events");
+const LightDB = require("./LightDB").default;
+const LightLink = require("./LightLink").default;
+const Debug = require("debug").default;
+const { promisify } = require("util");
+const { mapConnectionMessageToConnectionPayload } = require("./lightUtil");
 
 const debug = Debug("LightService");
 
@@ -289,4 +289,4 @@ class LightService {
   }
 }
 
-export default LightService;
+module.exports = { default: LightService };

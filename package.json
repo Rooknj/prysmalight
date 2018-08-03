@@ -33,6 +33,7 @@
     "lint-staged": "^7.0.0",
     "minimist": "^1.2.0",
     "node-fetch": "^2.2.0",
+    "nodemon": "^1.18.3",
     "pkg": "^4.3.3",
     "prettier": "^1.11.1",
     "redis-cli": "^1.0.2",
@@ -50,7 +51,7 @@
     "testNoWatch": "CI=true node scripts/test",
     "testIntegration": "node scripts/integration",
     "build": "node scripts/build",
-    "start": "gulp start",
+    "start": "node scripts/start",
     "startMock": "gulp startMock"
   },
   "bin": {

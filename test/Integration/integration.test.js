@@ -31,27 +31,29 @@ beforeAll(async () => {
 
   // Await the redis connection for 3 seconds max
   await new Promise(async (resolve, reject) => {
-    redisClient.on("connect", () => resolve());
+    redisClient.on("ready", () => resolve());
     await asyncSetTimeout(3000);
     reject(new Error("Redis took longer than 3 seconds to connect"));
   });
 
   // Clear the redis database
   await redisClient.asyncFLUSHALL();
-  return asyncSetTimeout(1000)
+  return asyncSetTimeout(3000)
 });
+
+// Let this test timeout after 30 seconds because docker-compose down takes a while for some reason
+afterAll(() => {
+  console.log("after", redisClient)
+  if(redisClient) redisClient.quit();
+  const command = "docker-compose down";
+  return exec(command);
+}, 30000);
+
 
 afterEach(async () => {
   // Clear the redis database
   return redisClient.asyncFLUSHALL();
 });
-
-// Let this test timeout after 30 seconds because docker-compose down takes a while for some reason
-afterAll(() => {
-  if(redisClient) redisClient.quit();
-  const command = "docker-compose down";
-  return exec(command);
-}, 30000);
 
 // /// BEGIN TESTS ////////////////////////////////////////
 

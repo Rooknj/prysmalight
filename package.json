@@ -33,6 +33,7 @@
     "lint-staged": "^7.0.0",
     "minimist": "^1.2.0",
     "node-fetch": "^2.2.0",
+    "pkg": "^4.3.3",
     "prettier": "^1.11.1",
     "redis-cli": "^1.0.2",
     "ws": "^6.0.0"
@@ -45,10 +46,10 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "test": "node scripts/test src/",
-    "testNoWatch": "CI=true node scripts/test src/",
-    "testIntegration": "gulp testIntegration",
-    "build": "gulp build",
+    "test": "node scripts/test",
+    "testNoWatch": "CI=true node scripts/test",
+    "testIntegration": "node scripts/integration",
+    "build": "node scripts/build",
     "start": "gulp start",
     "startMock": "gulp startMock"
   },

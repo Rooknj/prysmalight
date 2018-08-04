@@ -1,9 +1,5 @@
 const { getApolloClient } = require("../util/testUtil");
-
 const {
-  LIGHT_ADDED,
-  LIGHT_REMOVED,
-  LIGHTS_CHANGED,
   GET_LIGHT,
   GET_LIGHTS,
   SET_LIGHT,
@@ -12,13 +8,9 @@ const {
 } = require("../util/GraphQLConstants");
 
 const client = getApolloClient();
+
 // These are all API tests
-// We need to somehow start the lightapp2 server with mocks
-// We need to query those mocks and get back responses
-// Use an instance of apollo-client in order to do this
-// client = new ApolloClient()
-// client.query({query: gql`stuff`})
-// https://github.com/apollographql/apollo-client#usage
+// Uses an instance of apollo-client in order to do this
 test("You can add a light", async () => {
   const LIGHT_NAME = "Test Add Light";
   const { data } = await client.mutate({
@@ -245,10 +237,3 @@ test("You can not change a light that was not added", async () => {
 });
 
 // TODO: Figure out how to terminate the client.subscription feature
-test("You can be notified when a light was added", async () => {});
-
-test("You can be notified when a light was removed", async () => {});
-
-test("You can be notified when a specific light was changed", async () => {});
-
-test("You can be notified when any light was changed", async () => {});

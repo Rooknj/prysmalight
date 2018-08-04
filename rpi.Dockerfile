@@ -20,7 +20,7 @@ RUN yarn global add pkg
 # Install app dependencies
 RUN yarn install --silent
  # Test app
-RUN yarn test
+RUN yarn testNoWatch
 
 # Build app
 RUN yarn build

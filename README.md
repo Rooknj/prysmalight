@@ -6,10 +6,6 @@
 - Yarn
 - Docker
 - Docker-Compose
-- gulp-cli
+- redis-cli
 - pkg
-
-## Optional Globally Installed Tools:
-- jest-cli
-- nodemon
-- eslint
+- node.js v8.11.3

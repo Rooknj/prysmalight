@@ -43,7 +43,7 @@
   "scripts": {
     "precommit": "lint-staged",
     "test": "node scripts/test",
-    "testNoWatch": "CI=true node scripts/test",
+    "testNoWatch": "node scripts/test --no-watch",
     "testIntegration": "node scripts/integration",
     "build": "node scripts/build",
     "start": "node scripts/start",

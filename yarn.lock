@@ -238,20 +238,7 @@ anymatch@^2.0.0:
     micromatch "^3.1.4"
     normalize-path "^2.1.1"
 
-apollo-boost@^0.1.4:
-  version "0.1.10"
-  resolved "https://registry.yarnpkg.com/apollo-boost/-/apollo-boost-0.1.10.tgz#154bc7ef71ae2e46e16800bd756c4c9dc8fd5998"
-  dependencies:
-    apollo-cache "^1.1.12"
-    apollo-cache-inmemory "^1.2.5"
-    apollo-client "^2.3.5"
-    apollo-link "^1.0.6"
-    apollo-link-error "^1.0.3"
-    apollo-link-http "^1.3.1"
-    apollo-link-state "^0.4.0"
-    graphql-tag "^2.4.2"
-
-apollo-cache-inmemory@^1.1.12, apollo-cache-inmemory@^1.2.5:
+apollo-cache-inmemory@^1.1.12:
   version "1.2.5"
   resolved "https://registry.yarnpkg.com/apollo-cache-inmemory/-/apollo-cache-inmemory-1.2.5.tgz#b57951947b1db486a60db11c7dcfc6b112e5abe9"
   dependencies:
@@ -265,7 +252,7 @@ apollo-cache@^1.1.12:
   dependencies:
     apollo-utilities "^1.0.16"
 
-apollo-client@^2.2.8, apollo-client@^2.3.5:
+apollo-client@^2.2.8:
   version "2.3.5"
   resolved "https://registry.yarnpkg.com/apollo-client/-/apollo-client-2.3.5.tgz#74b62bd7e7bd7030d01c35e2e221ed65a807af23"
   dependencies:
@@ -279,27 +266,13 @@ apollo-client@^2.2.8, apollo-client@^2.3.5:
   optionalDependencies:
     "@types/async" "2.0.49"
 
-apollo-link-batch-http@^1.2.1:
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/apollo-link-batch-http/-/apollo-link-batch-http-1.2.2.tgz#4dc98e16dca063cc66db3311cc71a855a4bac9c9"
-  dependencies:
-    apollo-link "^1.2.2"
-    apollo-link-batch "^1.1.3"
-    apollo-link-http-common "^0.2.4"
-
-apollo-link-batch@^1.1.3:
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/apollo-link-batch/-/apollo-link-batch-1.1.3.tgz#c1d04256ef41af43e23854fab72cd3986a7648ad"
-  dependencies:
-    apollo-link "^1.2.2"
-
 apollo-link-dedup@^1.0.0:
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/apollo-link-dedup/-/apollo-link-dedup-1.0.9.tgz#3c4e4af88ef027cbddfdb857c043fd0574051dad"
   dependencies:
     apollo-link "^1.2.2"
 
-apollo-link-error@^1.0.3:
+apollo-link-error@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/apollo-link-error/-/apollo-link-error-1.1.0.tgz#ef8a64411361314364db40c1d4023b987a84860f"
   dependencies:
@@ -311,19 +284,12 @@ apollo-link-http-common@^0.2.4:
   dependencies:
     apollo-link "^1.2.2"
 
-apollo-link-http@^1.3.1, apollo-link-http@^1.5.3:
+apollo-link-http@^1.5.3:
   version "1.5.4"
   resolved "https://registry.yarnpkg.com/apollo-link-http/-/apollo-link-http-1.5.4.tgz#b80b7b4b342c655b6a5614624b076a36be368f43"
   dependencies:
     apollo-link "^1.2.2"
     apollo-link-http-common "^0.2.4"
-
-apollo-link-state@^0.4.0:
-  version "0.4.1"
-  resolved "https://registry.yarnpkg.com/apollo-link-state/-/apollo-link-state-0.4.1.tgz#65e9e0e12c67936b8c4b12b8438434f393104579"
-  dependencies:
-    apollo-utilities "^1.0.8"
-    graphql-anywhere "^4.1.0-alpha.0"
 
 apollo-link-ws@^1.0.7:
   version "1.0.8"
@@ -331,7 +297,7 @@ apollo-link-ws@^1.0.7:
   dependencies:
     apollo-link "^1.2.2"
 
-apollo-link@^1.0.0, apollo-link@^1.0.6, apollo-link@^1.2.2:
+apollo-link@^1.0.0, apollo-link@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/apollo-link/-/apollo-link-1.2.2.tgz#54c84199b18ac1af8d63553a68ca389c05217a03"
   dependencies:
@@ -339,7 +305,7 @@ apollo-link@^1.0.0, apollo-link@^1.0.6, apollo-link@^1.2.2:
     apollo-utilities "^1.0.0"
     zen-observable-ts "^0.8.9"
 
-apollo-utilities@^1.0.0, apollo-utilities@^1.0.16, apollo-utilities@^1.0.8:
+apollo-utilities@^1.0.0, apollo-utilities@^1.0.16:
   version "1.0.16"
   resolved "https://registry.yarnpkg.com/apollo-utilities/-/apollo-utilities-1.0.16.tgz#787310df4c3900a68c0beb3d351c59725a588cdb"
   dependencies:
@@ -1981,6 +1947,16 @@ cross-spawn@5.1.0, cross-spawn@^5.0.1, cross-spawn@^5.1.0:
     shebang-command "^1.2.0"
     which "^1.2.9"
 
+cross-spawn@^6.0.5:
+  version "6.0.5"
+  resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-6.0.5.tgz#4a5ec7c64dfae22c3a14124dbacdee846d80cbc4"
+  dependencies:
+    nice-try "^1.0.4"
+    path-key "^2.0.1"
+    semver "^5.5.0"
+    shebang-command "^1.2.0"
+    which "^1.2.9"
+
 crypto-browserify@^3.11.0:
   version "3.12.0"
   resolved "https://registry.yarnpkg.com/crypto-browserify/-/crypto-browserify-3.12.0.tgz#396cf9f3137f03e4b8e532c58f698254e00f80ec"
@@ -3429,13 +3405,13 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.1.9:
   version "4.1.11"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
 
-graphql-anywhere@^4.1.0-alpha.0, graphql-anywhere@^4.1.14:
+graphql-anywhere@^4.1.14:
   version "4.1.14"
   resolved "https://registry.yarnpkg.com/graphql-anywhere/-/graphql-anywhere-4.1.14.tgz#89664cb885faaec1cbc66905351fadae8cc85a04"
   dependencies:
     apollo-utilities "^1.0.16"
 
-graphql-tag@^2.4.2, graphql-tag@^2.8.0:
+graphql-tag@^2.8.0:
   version "2.9.2"
   resolved "https://registry.yarnpkg.com/graphql-tag/-/graphql-tag-2.9.2.tgz#2f60a5a981375f430bf1e6e95992427dc18af686"
 
@@ -5290,6 +5266,10 @@ next-tick@1:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.0.0.tgz#ca86d1fe8828169b0120208e3dc8424b9db8342c"
 
+nice-try@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.4.tgz#d93962f6c52f2c1558c0fbda6d512819f1efe1c4"
+
 no-case@^2.2.0:
   version "2.3.2"
   resolved "https://registry.yarnpkg.com/no-case/-/no-case-2.3.2.tgz#60b813396be39b3f1288a4c1ed5d1e7d28b464ac"
@@ -5780,7 +5760,7 @@ path-is-inside@^1.0.1, path-is-inside@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/path-is-inside/-/path-is-inside-1.0.2.tgz#365417dede44430d1c11af61027facf074bdfc53"
 
-path-key@^2.0.0:
+path-key@^2.0.0, path-key@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/path-key/-/path-key-2.0.1.tgz#411cadb574c5a140d3a4b1910d40d80cc9f40b40"
 
@@ -6383,14 +6363,6 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-adopt@^0.6.0:
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/react-adopt/-/react-adopt-0.6.0.tgz#e5ff903a655d3082217f82bc9d5033a4b64fafad"
-  dependencies:
-    hoist-non-react-statics "^2.5.0"
-    react "^16.3.2"
-    react-display-name "^0.2.4"
-
 react-apollo@^2.1.1:
   version "2.1.9"
   resolved "https://registry.yarnpkg.com/react-apollo/-/react-apollo-2.1.9.tgz#1fd30ea2116375197bd53daa725e6fb8ab43ab80"
@@ -6433,10 +6405,6 @@ react-dev-utils@^5.0.0:
     sockjs-client "1.1.4"
     strip-ansi "3.0.1"
     text-table "0.2.0"
-
-react-display-name@^0.2.4:
-  version "0.2.4"
-  resolved "https://registry.yarnpkg.com/react-display-name/-/react-display-name-0.2.4.tgz#e2a670b81d79a2204335510c01246f4c92ff12cf"
 
 react-dom@^16.2.0:
   version "16.4.1"
@@ -6980,7 +6948,7 @@ semver-diff@^2.0.0:
   dependencies:
     semver "^5.0.3"
 
-"semver@2 || 3 || 4 || 5", semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.4.1:
+"semver@2 || 3 || 4 || 5", semver@^5.0.3, semver@^5.1.0, semver@^5.3.0, semver@^5.4.1, semver@^5.5.0:
   version "5.5.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-5.5.0.tgz#dc4bbc7a6ca9d916dee5d43516f0092b58f7b8ab"
 
@@ -7201,6 +7169,10 @@ source-map@^0.4.4:
 source-map@^0.6.1, source-map@~0.6.1:
   version "0.6.1"
   resolved "https://registry.yarnpkg.com/source-map/-/source-map-0.6.1.tgz#74722af32e9614e9c287a8d0bbde48b5e2f1a263"
+
+spawn-args@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/spawn-args/-/spawn-args-0.2.0.tgz#fb7d0bd1d70fd4316bd9e3dec389e65f9d6361bb"
 
 spdx-correct@^3.0.0:
   version "3.0.0"

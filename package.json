@@ -6,10 +6,9 @@
     "@material-ui/core": "^1.4.0",
     "@material-ui/icons": "^1.1.0",
     "@material-ui/lab": "^1.0.0-alpha.6",
-    "apollo-boost": "^0.1.4",
     "apollo-cache-inmemory": "^1.1.12",
     "apollo-client": "^2.2.8",
-    "apollo-link-batch-http": "^1.2.1",
+    "apollo-link-error": "^1.1.0",
     "apollo-link-http": "^1.5.3",
     "apollo-link-ws": "^1.0.7",
     "graphql": "^0.13.2",
@@ -17,22 +16,23 @@
     "lodash": "^4.17.10",
     "prop-types": "^15.6.1",
     "react": "^16.3.2",
-    "react-adopt": "^0.6.0",
     "react-apollo": "^2.1.1",
     "react-color": "^2.14.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.2",
-    "react-test-renderer": "^16.3.2",
     "styled-components": "^3.3.3",
-    "subscriptions-transport-ws": "^0.9.7",
-    "waait": "^1.0.2"
+    "subscriptions-transport-ws": "^0.9.7"
   },
   "devDependencies": {
+    "cross-spawn": "^6.0.5",
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "husky": "^0.14.3",
     "lint-staged": "^7.0.0",
-    "prettier": "^1.11.1"
+    "prettier": "^1.11.1",
+    "react-test-renderer": "^16.3.2",
+    "spawn-args": "^0.2.0",
+    "waait": "^1.0.2"
   },
   "lint-staged": {
     "src/**/*.{js,jsx,json,css}": [
@@ -42,14 +42,14 @@
   },
   "scripts": {
     "precommit": "lint-staged",
-    "start": "react-scripts start",
-    "startLocal": "REACT_APP_ENV=local react-scripts start",
+    "start": "node scripts/start",
+    "startLocal": "node scripts/start --local",
     "build": "react-scripts build",
     "buildDocker": "node scripts/dockerScripts build",
     "tagDocker": "node scripts/dockerScripts tag",
     "publishDocker": "node scripts/dockerScripts publish",
-    "test": "REACT_APP_ENV=test react-scripts test --env=jsdom",
-    "testNoWatch": "CI=true REACT_APP_ENV=test react-scripts test --env=jsdom",
+    "test": "node scripts/test",
+    "testNoWatch": "node scripts/test --no-watch",
     "eject": "react-scripts eject"
   }
 }

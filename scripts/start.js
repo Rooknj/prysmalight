@@ -7,13 +7,29 @@ process.on("unhandledRejection", err => {
   throw err;
 });
 
-const { execSync } = require("child_process");
+//const spawnSync = require("child_process").spawnSync;
+const spawn = require("cross-spawn");
+const spawnArgs = require("spawn-args");
+const { delimiter } = require("path");
+const pathResolve = require("path").resolve;
 
 let argv = process.argv.slice(2);
 
 if (argv.indexOf("--local") >= 0) {
   console.log("Using Local Server");
-  process.env.REACT_APP_ENV="local";
+  process.env.REACT_APP_ENV = "local";
 }
 
-// TODO: Run react scripts start
+const args = spawnArgs("react-scripts start", { removequotes: "always" });
+
+const result = spawn.sync(args.shift(), args, {
+  stdio: ["ignore", "inherit", "inherit"],
+  cwd: process.cwd(),
+  env: Object.assign({}, process.env, {
+    PATH:
+      process.env.PATH +
+      delimiter +
+      pathResolve(process.cwd(), "node_modules", ".bin")
+  })
+});
+

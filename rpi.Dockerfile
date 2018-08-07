@@ -16,7 +16,7 @@ RUN yarn install --silent
 RUN yarn global add react-scripts@1.1.2 --silent
 
 COPY . /usr/src/app
-RUN yarn testNoWatch
+RUN yarn test --no-watch
 RUN yarn build
 
 # production environment

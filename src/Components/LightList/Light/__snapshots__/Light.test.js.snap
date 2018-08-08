@@ -1,0 +1,1281 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches mounted snapshot 1`] = `
+<div
+  className="sc-htoDjs blpmZX"
+>
+  <div
+    className="MuiPaper-root-2 MuiPaper-elevation1-5 MuiPaper-rounded-3 MuiCard-root-1"
+  >
+    <div
+      className="MuiGrid-container-29 MuiGrid-align-items-xs-center-37"
+    >
+      <div
+        className="MuiGrid-item-30 MuiGrid-grid-xs-7-63"
+      >
+        <div
+          className="MuiCardHeader-root-125"
+        >
+          <div
+            className="MuiCardHeader-avatar-126"
+          >
+            <div
+              aria-label="Light"
+              className="MuiAvatar-root-131 MuiAvatar-colorDefault-132 sc-bdVaJa krrbta"
+            >
+              <svg
+                aria-hidden="true"
+                className="MuiSvgIcon-root-134"
+                color="rgb(0,0,0)"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <g>
+                  <path
+                    d="M6 14l3 3v5h6v-5l3-3V9H6zm5-12h2v3h-2zM3.5 5.875L4.914 4.46l2.12 2.122L5.62 7.997zm13.46.71l2.123-2.12 1.414 1.414L18.375 8z"
+                  />
+                </g>
+              </svg>
+            </div>
+          </div>
+          <div
+            className="MuiCardHeader-content-128"
+          >
+            <span
+              className="MuiTypography-root-141 MuiTypography-body2-149 MuiCardHeader-title-129"
+            />
+            <span
+              className="MuiTypography-root-141 MuiTypography-body2-149 MuiTypography-colorTextSecondary-163 MuiCardHeader-subheader-130"
+            >
+              Disonnected
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        className="MuiGrid-item-30 MuiGrid-grid-xs-5-61"
+      >
+        <div
+          className="MuiGrid-container-29 MuiGrid-justify-xs-flex-end-47"
+        >
+          <div
+            className="MuiGrid-item-30"
+          />
+          <div
+            className="MuiGrid-item-30"
+          >
+            <span
+              className="MuiSwitch-root-165"
+            >
+              <span
+                className="MuiButtonBase-root-184 MuiButtonBase-disabled-185 MuiIconButton-root-178 MuiIconButton-disabled-182 MuiSwitchBase-root-174 MuiSwitch-switchBase-168 MuiSwitch-colorPrimary-170 MuiSwitchBase-disabled-176 MuiSwitch-disabled-172"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                onKeyDown={[Function]}
+                onKeyUp={[Function]}
+                onMouseDown={[Function]}
+                onMouseLeave={[Function]}
+                onMouseUp={[Function]}
+                onTouchEnd={[Function]}
+                onTouchMove={[Function]}
+                onTouchStart={[Function]}
+                tabIndex="-1"
+              >
+                <span
+                  className="MuiIconButton-label-183"
+                >
+                  <span
+                    className="MuiSwitch-icon-166"
+                  />
+                  <input
+                    checked={false}
+                    className="MuiSwitchBase-input-177"
+                    disabled={true}
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                </span>
+              </span>
+              <span
+                className="MuiSwitch-bar-173"
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="MuiCardContent-root-187"
+    >
+      <div
+        className="MuiGrid-container-29 MuiGrid-spacing-xs-16-51 MuiGrid-align-items-xs-center-37 MuiGrid-justify-xs-center-46"
+      >
+        <div
+          className="MuiGrid-item-30 MuiGrid-grid-xs-12-68"
+        >
+          <aside
+            className="MuiTypography-root-141 MuiTypography-body2-149"
+          >
+            Brightness
+          </aside>
+        </div>
+        <div
+          className="MuiGrid-item-30 MuiGrid-grid-xs-12-68"
+        >
+          <div
+            aria-orientation="horizontal"
+            aria-valuemax={100}
+            aria-valuemin={0}
+            aria-valuenow={0}
+            className="MuiSlider-root-188 MuiSlider-disabled-196"
+            onChange={[Function]}
+            onClick={[Function]}
+            onMouseDown={[Function]}
+            onTouchMove={[Function]}
+            onTouchStartCapture={[Function]}
+            role="slider"
+            step={1}
+          >
+            <div
+              className="MuiSlider-container-189"
+            >
+              <div
+                className="MuiSlider-track-190 MuiSlider-trackBefore-191 MuiSlider-disabled-196"
+                style={
+                  Object {
+                    "width": "calc(0% - 6px)",
+                  }
+                }
+              />
+              <button
+                className="MuiButtonBase-root-184 MuiSlider-thumb-193 MuiSlider-disabled-196 MuiSlider-zero-197"
+                onBlur={[Function]}
+                onFocus={[Function]}
+                onKeyDown={[Function]}
+                onKeyUp={[Function]}
+                onMouseDown={[Function]}
+                onMouseLeave={[Function]}
+                onMouseUp={[Function]}
+                onTouchEnd={[Function]}
+                onTouchMove={[Function]}
+                onTouchStart={[Function]}
+                onTouchStartCapture={[Function]}
+                style={
+                  Object {
+                    "left": "0%",
+                  }
+                }
+                tabIndex="0"
+                type="button"
+              />
+              <div
+                className="MuiSlider-track-190 MuiSlider-trackAfter-192 MuiSlider-disabled-196"
+                style={
+                  Object {
+                    "width": "calc(100% - 6px)",
+                  }
+                }
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="MuiGrid-container-29 MuiGrid-spacing-xs-16-51 MuiGrid-align-items-xs-center-37 MuiGrid-justify-xs-center-46"
+      >
+        <div
+          className="MuiGrid-item-30 MuiGrid-grid-xs-12-68"
+        >
+          <aside
+            className="MuiTypography-root-141 MuiTypography-body2-149"
+          >
+            Color
+          </aside>
+        </div>
+        <div
+          className="MuiGrid-item-30 MuiGrid-grid-xs-12-68"
+        >
+          <div
+            className="hue-picker sc-EHOje cudeWN"
+            style={
+              Object {
+                "height": "16px",
+                "position": "relative",
+                "width": "316px",
+              }
+            }
+          >
+            <div
+              style={
+                Object {
+                  "MozBorderRadius": "2px",
+                  "MozBoxShadow": undefined,
+                  "OBorderRadius": "2px",
+                  "OBoxShadow": undefined,
+                  "WebkitBorderRadius": "2px",
+                  "WebkitBoxShadow": undefined,
+                  "borderRadius": "2px",
+                  "bottom": "0px",
+                  "boxShadow": undefined,
+                  "left": "0px",
+                  "msBorderRadius": "2px",
+                  "msBoxShadow": undefined,
+                  "position": "absolute",
+                  "right": "0px",
+                  "top": "0px",
+                }
+              }
+            >
+              <div
+                className="hue-horizontal"
+                onMouseDown={[Function]}
+                onTouchMove={[Function]}
+                onTouchStart={[Function]}
+                style={
+                  Object {
+                    "MozBorderRadius": "2px",
+                    "OBorderRadius": "2px",
+                    "WebkitBorderRadius": "2px",
+                    "borderRadius": "2px",
+                    "height": "100%",
+                    "msBorderRadius": "2px",
+                    "padding": "0 2px",
+                    "position": "relative",
+                  }
+                }
+              >
+                <style>
+                  
+                              .hue-horizontal {
+                                background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0
+                                  33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+                                background: -webkit-linear-gradient(to right, #f00 0%, #ff0
+                                  17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+                              }
+                  
+                              .hue-vertical {
+                                background: linear-gradient(to top, #f00 0%, #ff0 17%, #0f0 33%,
+                                  #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+                                background: -webkit-linear-gradient(to top, #f00 0%, #ff0 17%,
+                                  #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+                              }
+                            
+                </style>
+                <div
+                  style={
+                    Object {
+                      "left": "0%",
+                      "position": "absolute",
+                    }
+                  }
+                >
+                  <div
+                    style={
+                      Object {
+                        "MozBorderRadius": "50%",
+                        "MozBoxShadow": "0 1px 4px 0 rgba(0, 0, 0, 0.37)",
+                        "MozTransform": "translate(-9px, -1px)",
+                        "OBorderRadius": "50%",
+                        "OBoxShadow": "0 1px 4px 0 rgba(0, 0, 0, 0.37)",
+                        "OTransform": "translate(-9px, -1px)",
+                        "WebkitBorderRadius": "50%",
+                        "WebkitBoxShadow": "0 1px 4px 0 rgba(0, 0, 0, 0.37)",
+                        "WebkitTransform": "translate(-9px, -1px)",
+                        "backgroundColor": "rgb(248, 248, 248)",
+                        "borderRadius": "50%",
+                        "boxShadow": "0 1px 4px 0 rgba(0, 0, 0, 0.37)",
+                        "height": "18px",
+                        "msBorderRadius": "50%",
+                        "msBoxShadow": "0 1px 4px 0 rgba(0, 0, 0, 0.37)",
+                        "msTransform": "translate(-9px, -1px)",
+                        "transform": "translate(-9px, -1px)",
+                        "width": "18px",
+                      }
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="MuiGrid-container-29"
+        >
+          <div
+            className="MuiGrid-item-30 MuiGrid-grid-xs-6-62"
+          >
+            <div
+              className="circle-picker sc-bwzfXH bKiefj"
+              style={
+                Object {
+                  "display": "flex",
+                  "flexWrap": "wrap",
+                  "marginBottom": -14,
+                  "marginRight": -14,
+                  "width": 252,
+                }
+              }
+            >
+              <span
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  style={
+                    Object {
+                      "MozTransform": "scale(1)",
+                      "MozTransition": "100ms transform ease",
+                      "OTransform": "scale(1)",
+                      "OTransition": "100ms transform ease",
+                      "WebkitTransform": "scale(1)",
+                      "WebkitTransition": "100ms transform ease",
+                      "height": 28,
+                      "marginBottom": 14,
+                      "marginRight": 14,
+                      "msTransform": "scale(1)",
+                      "msTransition": "100ms transform ease",
+                      "transform": "scale(1)",
+                      "transition": "100ms transform ease",
+                      "width": 28,
+                    }
+                  }
+                >
+                  <span
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <div
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      style={
+                        Object {
+                          "MozBorderRadius": "50%",
+                          "MozBoxShadow": "inset 0 0 0 14px #FF0000",
+                          "MozTransition": "100ms box-shadow ease",
+                          "OBorderRadius": "50%",
+                          "OBoxShadow": "inset 0 0 0 14px #FF0000",
+                          "OTransition": "100ms box-shadow ease",
+                          "WebkitBorderRadius": "50%",
+                          "WebkitBoxShadow": "inset 0 0 0 14px #FF0000",
+                          "WebkitTransition": "100ms box-shadow ease",
+                          "background": "transparent",
+                          "borderRadius": "50%",
+                          "boxShadow": "inset 0 0 0 14px #FF0000",
+                          "cursor": "pointer",
+                          "height": "100%",
+                          "msBorderRadius": "50%",
+                          "msBoxShadow": "inset 0 0 0 14px #FF0000",
+                          "msTransition": "100ms box-shadow ease",
+                          "outline": "none",
+                          "position": "relative",
+                          "transition": "100ms box-shadow ease",
+                          "width": "100%",
+                        }
+                      }
+                      tabIndex={0}
+                      title="#FF0000"
+                    />
+                  </span>
+                </div>
+              </span>
+              <span
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  style={
+                    Object {
+                      "MozTransform": "scale(1)",
+                      "MozTransition": "100ms transform ease",
+                      "OTransform": "scale(1)",
+                      "OTransition": "100ms transform ease",
+                      "WebkitTransform": "scale(1)",
+                      "WebkitTransition": "100ms transform ease",
+                      "height": 28,
+                      "marginBottom": 14,
+                      "marginRight": 14,
+                      "msTransform": "scale(1)",
+                      "msTransition": "100ms transform ease",
+                      "transform": "scale(1)",
+                      "transition": "100ms transform ease",
+                      "width": 28,
+                    }
+                  }
+                >
+                  <span
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <div
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      style={
+                        Object {
+                          "MozBorderRadius": "50%",
+                          "MozBoxShadow": "inset 0 0 0 14px #FFA500",
+                          "MozTransition": "100ms box-shadow ease",
+                          "OBorderRadius": "50%",
+                          "OBoxShadow": "inset 0 0 0 14px #FFA500",
+                          "OTransition": "100ms box-shadow ease",
+                          "WebkitBorderRadius": "50%",
+                          "WebkitBoxShadow": "inset 0 0 0 14px #FFA500",
+                          "WebkitTransition": "100ms box-shadow ease",
+                          "background": "transparent",
+                          "borderRadius": "50%",
+                          "boxShadow": "inset 0 0 0 14px #FFA500",
+                          "cursor": "pointer",
+                          "height": "100%",
+                          "msBorderRadius": "50%",
+                          "msBoxShadow": "inset 0 0 0 14px #FFA500",
+                          "msTransition": "100ms box-shadow ease",
+                          "outline": "none",
+                          "position": "relative",
+                          "transition": "100ms box-shadow ease",
+                          "width": "100%",
+                        }
+                      }
+                      tabIndex={0}
+                      title="#FFA500"
+                    />
+                  </span>
+                </div>
+              </span>
+              <span
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  style={
+                    Object {
+                      "MozTransform": "scale(1)",
+                      "MozTransition": "100ms transform ease",
+                      "OTransform": "scale(1)",
+                      "OTransition": "100ms transform ease",
+                      "WebkitTransform": "scale(1)",
+                      "WebkitTransition": "100ms transform ease",
+                      "height": 28,
+                      "marginBottom": 14,
+                      "marginRight": 14,
+                      "msTransform": "scale(1)",
+                      "msTransition": "100ms transform ease",
+                      "transform": "scale(1)",
+                      "transition": "100ms transform ease",
+                      "width": 28,
+                    }
+                  }
+                >
+                  <span
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <div
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      style={
+                        Object {
+                          "MozBorderRadius": "50%",
+                          "MozBoxShadow": "inset 0 0 0 14px #FFFF00",
+                          "MozTransition": "100ms box-shadow ease",
+                          "OBorderRadius": "50%",
+                          "OBoxShadow": "inset 0 0 0 14px #FFFF00",
+                          "OTransition": "100ms box-shadow ease",
+                          "WebkitBorderRadius": "50%",
+                          "WebkitBoxShadow": "inset 0 0 0 14px #FFFF00",
+                          "WebkitTransition": "100ms box-shadow ease",
+                          "background": "transparent",
+                          "borderRadius": "50%",
+                          "boxShadow": "inset 0 0 0 14px #FFFF00",
+                          "cursor": "pointer",
+                          "height": "100%",
+                          "msBorderRadius": "50%",
+                          "msBoxShadow": "inset 0 0 0 14px #FFFF00",
+                          "msTransition": "100ms box-shadow ease",
+                          "outline": "none",
+                          "position": "relative",
+                          "transition": "100ms box-shadow ease",
+                          "width": "100%",
+                        }
+                      }
+                      tabIndex={0}
+                      title="#FFFF00"
+                    />
+                  </span>
+                </div>
+              </span>
+              <span
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  style={
+                    Object {
+                      "MozTransform": "scale(1)",
+                      "MozTransition": "100ms transform ease",
+                      "OTransform": "scale(1)",
+                      "OTransition": "100ms transform ease",
+                      "WebkitTransform": "scale(1)",
+                      "WebkitTransition": "100ms transform ease",
+                      "height": 28,
+                      "marginBottom": 14,
+                      "marginRight": 14,
+                      "msTransform": "scale(1)",
+                      "msTransition": "100ms transform ease",
+                      "transform": "scale(1)",
+                      "transition": "100ms transform ease",
+                      "width": 28,
+                    }
+                  }
+                >
+                  <span
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <div
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      style={
+                        Object {
+                          "MozBorderRadius": "50%",
+                          "MozBoxShadow": "inset 0 0 0 14px #00FF00",
+                          "MozTransition": "100ms box-shadow ease",
+                          "OBorderRadius": "50%",
+                          "OBoxShadow": "inset 0 0 0 14px #00FF00",
+                          "OTransition": "100ms box-shadow ease",
+                          "WebkitBorderRadius": "50%",
+                          "WebkitBoxShadow": "inset 0 0 0 14px #00FF00",
+                          "WebkitTransition": "100ms box-shadow ease",
+                          "background": "transparent",
+                          "borderRadius": "50%",
+                          "boxShadow": "inset 0 0 0 14px #00FF00",
+                          "cursor": "pointer",
+                          "height": "100%",
+                          "msBorderRadius": "50%",
+                          "msBoxShadow": "inset 0 0 0 14px #00FF00",
+                          "msTransition": "100ms box-shadow ease",
+                          "outline": "none",
+                          "position": "relative",
+                          "transition": "100ms box-shadow ease",
+                          "width": "100%",
+                        }
+                      }
+                      tabIndex={0}
+                      title="#00FF00"
+                    />
+                  </span>
+                </div>
+              </span>
+              <span
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  style={
+                    Object {
+                      "MozTransform": "scale(1)",
+                      "MozTransition": "100ms transform ease",
+                      "OTransform": "scale(1)",
+                      "OTransition": "100ms transform ease",
+                      "WebkitTransform": "scale(1)",
+                      "WebkitTransition": "100ms transform ease",
+                      "height": 28,
+                      "marginBottom": 14,
+                      "marginRight": 14,
+                      "msTransform": "scale(1)",
+                      "msTransition": "100ms transform ease",
+                      "transform": "scale(1)",
+                      "transition": "100ms transform ease",
+                      "width": 28,
+                    }
+                  }
+                >
+                  <span
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <div
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      style={
+                        Object {
+                          "MozBorderRadius": "50%",
+                          "MozBoxShadow": "inset 0 0 0 14px #00FFFF",
+                          "MozTransition": "100ms box-shadow ease",
+                          "OBorderRadius": "50%",
+                          "OBoxShadow": "inset 0 0 0 14px #00FFFF",
+                          "OTransition": "100ms box-shadow ease",
+                          "WebkitBorderRadius": "50%",
+                          "WebkitBoxShadow": "inset 0 0 0 14px #00FFFF",
+                          "WebkitTransition": "100ms box-shadow ease",
+                          "background": "transparent",
+                          "borderRadius": "50%",
+                          "boxShadow": "inset 0 0 0 14px #00FFFF",
+                          "cursor": "pointer",
+                          "height": "100%",
+                          "msBorderRadius": "50%",
+                          "msBoxShadow": "inset 0 0 0 14px #00FFFF",
+                          "msTransition": "100ms box-shadow ease",
+                          "outline": "none",
+                          "position": "relative",
+                          "transition": "100ms box-shadow ease",
+                          "width": "100%",
+                        }
+                      }
+                      tabIndex={0}
+                      title="#00FFFF"
+                    />
+                  </span>
+                </div>
+              </span>
+              <span
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  style={
+                    Object {
+                      "MozTransform": "scale(1)",
+                      "MozTransition": "100ms transform ease",
+                      "OTransform": "scale(1)",
+                      "OTransition": "100ms transform ease",
+                      "WebkitTransform": "scale(1)",
+                      "WebkitTransition": "100ms transform ease",
+                      "height": 28,
+                      "marginBottom": 14,
+                      "marginRight": 14,
+                      "msTransform": "scale(1)",
+                      "msTransition": "100ms transform ease",
+                      "transform": "scale(1)",
+                      "transition": "100ms transform ease",
+                      "width": 28,
+                    }
+                  }
+                >
+                  <span
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <div
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      style={
+                        Object {
+                          "MozBorderRadius": "50%",
+                          "MozBoxShadow": "inset 0 0 0 14px #0000FF",
+                          "MozTransition": "100ms box-shadow ease",
+                          "OBorderRadius": "50%",
+                          "OBoxShadow": "inset 0 0 0 14px #0000FF",
+                          "OTransition": "100ms box-shadow ease",
+                          "WebkitBorderRadius": "50%",
+                          "WebkitBoxShadow": "inset 0 0 0 14px #0000FF",
+                          "WebkitTransition": "100ms box-shadow ease",
+                          "background": "transparent",
+                          "borderRadius": "50%",
+                          "boxShadow": "inset 0 0 0 14px #0000FF",
+                          "cursor": "pointer",
+                          "height": "100%",
+                          "msBorderRadius": "50%",
+                          "msBoxShadow": "inset 0 0 0 14px #0000FF",
+                          "msTransition": "100ms box-shadow ease",
+                          "outline": "none",
+                          "position": "relative",
+                          "transition": "100ms box-shadow ease",
+                          "width": "100%",
+                        }
+                      }
+                      tabIndex={0}
+                      title="#0000FF"
+                    />
+                  </span>
+                </div>
+              </span>
+              <span
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  style={
+                    Object {
+                      "MozTransform": "scale(1)",
+                      "MozTransition": "100ms transform ease",
+                      "OTransform": "scale(1)",
+                      "OTransition": "100ms transform ease",
+                      "WebkitTransform": "scale(1)",
+                      "WebkitTransition": "100ms transform ease",
+                      "height": 28,
+                      "marginBottom": 14,
+                      "marginRight": 14,
+                      "msTransform": "scale(1)",
+                      "msTransition": "100ms transform ease",
+                      "transform": "scale(1)",
+                      "transition": "100ms transform ease",
+                      "width": 28,
+                    }
+                  }
+                >
+                  <span
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <div
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      style={
+                        Object {
+                          "MozBorderRadius": "50%",
+                          "MozBoxShadow": "inset 0 0 0 14px #A500FF",
+                          "MozTransition": "100ms box-shadow ease",
+                          "OBorderRadius": "50%",
+                          "OBoxShadow": "inset 0 0 0 14px #A500FF",
+                          "OTransition": "100ms box-shadow ease",
+                          "WebkitBorderRadius": "50%",
+                          "WebkitBoxShadow": "inset 0 0 0 14px #A500FF",
+                          "WebkitTransition": "100ms box-shadow ease",
+                          "background": "transparent",
+                          "borderRadius": "50%",
+                          "boxShadow": "inset 0 0 0 14px #A500FF",
+                          "cursor": "pointer",
+                          "height": "100%",
+                          "msBorderRadius": "50%",
+                          "msBoxShadow": "inset 0 0 0 14px #A500FF",
+                          "msTransition": "100ms box-shadow ease",
+                          "outline": "none",
+                          "position": "relative",
+                          "transition": "100ms box-shadow ease",
+                          "width": "100%",
+                        }
+                      }
+                      tabIndex={0}
+                      title="#A500FF"
+                    />
+                  </span>
+                </div>
+              </span>
+              <span
+                onMouseOut={[Function]}
+                onMouseOver={[Function]}
+              >
+                <div
+                  style={
+                    Object {
+                      "MozTransform": "scale(1)",
+                      "MozTransition": "100ms transform ease",
+                      "OTransform": "scale(1)",
+                      "OTransition": "100ms transform ease",
+                      "WebkitTransform": "scale(1)",
+                      "WebkitTransition": "100ms transform ease",
+                      "height": 28,
+                      "marginBottom": 14,
+                      "marginRight": 14,
+                      "msTransform": "scale(1)",
+                      "msTransition": "100ms transform ease",
+                      "transform": "scale(1)",
+                      "transition": "100ms transform ease",
+                      "width": 28,
+                    }
+                  }
+                >
+                  <span
+                    onBlur={[Function]}
+                    onFocus={[Function]}
+                  >
+                    <div
+                      onClick={[Function]}
+                      onKeyDown={[Function]}
+                      style={
+                        Object {
+                          "MozBorderRadius": "50%",
+                          "MozBoxShadow": "inset 0 0 0 14px #FF00FF",
+                          "MozTransition": "100ms box-shadow ease",
+                          "OBorderRadius": "50%",
+                          "OBoxShadow": "inset 0 0 0 14px #FF00FF",
+                          "OTransition": "100ms box-shadow ease",
+                          "WebkitBorderRadius": "50%",
+                          "WebkitBoxShadow": "inset 0 0 0 14px #FF00FF",
+                          "WebkitTransition": "100ms box-shadow ease",
+                          "background": "transparent",
+                          "borderRadius": "50%",
+                          "boxShadow": "inset 0 0 0 14px #FF00FF",
+                          "cursor": "pointer",
+                          "height": "100%",
+                          "msBorderRadius": "50%",
+                          "msBoxShadow": "inset 0 0 0 14px #FF00FF",
+                          "msTransition": "100ms box-shadow ease",
+                          "outline": "none",
+                          "position": "relative",
+                          "transition": "100ms box-shadow ease",
+                          "width": "100%",
+                        }
+                      }
+                      tabIndex={0}
+                      title="#FF00FF"
+                    />
+                  </span>
+                </div>
+              </span>
+            </div>
+          </div>
+          <div
+            className="MuiGrid-item-30 MuiGrid-grid-xs-6-62 sc-bxivhb ezGQPs"
+          >
+            <div
+              className="sc-ifAKCX jZIqjm"
+            >
+              <div
+                style={
+                  Object {
+                    "display": "inline-block",
+                    "position": "relative",
+                  }
+                }
+              >
+                <div
+                  style={
+                    Object {
+                      "MozBorderRadius": 2,
+                      "MozBoxShadow": "0 2px 10px rgba(0,0,0,.12), 0 2px 5px rgba(0,0,0,.16)",
+                      "OBorderRadius": 2,
+                      "OBoxShadow": "0 2px 10px rgba(0,0,0,.12), 0 2px 5px rgba(0,0,0,.16)",
+                      "WebkitBorderRadius": 2,
+                      "WebkitBoxShadow": "0 2px 10px rgba(0,0,0,.12), 0 2px 5px rgba(0,0,0,.16)",
+                      "background": "#fff",
+                      "borderRadius": 2,
+                      "bottom": "0px",
+                      "boxShadow": "0 2px 10px rgba(0,0,0,.12), 0 2px 5px rgba(0,0,0,.16)",
+                      "left": "0px",
+                      "msBorderRadius": 2,
+                      "msBoxShadow": "0 2px 10px rgba(0,0,0,.12), 0 2px 5px rgba(0,0,0,.16)",
+                      "position": "absolute",
+                      "right": "0px",
+                      "top": "0px",
+                    }
+                  }
+                />
+                <div
+                  style={
+                    Object {
+                      "position": "relative",
+                    }
+                  }
+                >
+                  <div
+                    className="material-picker sc-htpNat hMhoRF"
+                    style={
+                      Object {
+                        "fontFamily": "Roboto",
+                        "height": "98px",
+                        "padding": "16px",
+                        "width": "98px",
+                      }
+                    }
+                  >
+                    <div
+                      style={
+                        Object {
+                          "position": "relative",
+                        }
+                      }
+                    >
+                      <input
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onKeyDown={[Function]}
+                        spellCheck="false"
+                        style={
+                          Object {
+                            "border": "0px",
+                            "borderBottom": "2px solid #000000",
+                            "color": "#333",
+                            "fontSize": "15px",
+                            "height": "30px",
+                            "marginTop": "12px",
+                            "outline": "none",
+                            "padding": "0px",
+                            "width": "100%",
+                          }
+                        }
+                        value="#000000"
+                      />
+                      <span
+                        onMouseDown={[Function]}
+                        style={
+                          Object {
+                            "color": "#999999",
+                            "fontSize": "11px",
+                            "left": "0px",
+                            "position": "absolute",
+                            "textTransform": "capitalize",
+                            "top": "0px",
+                          }
+                        }
+                      >
+                        hex
+                      </span>
+                    </div>
+                    <div
+                      className="flexbox-fix"
+                      style={
+                        Object {
+                          "display": "flex",
+                          "marginRight": "-10px",
+                          "paddingTop": "11px",
+                        }
+                      }
+                    >
+                      <div
+                        style={
+                          Object {
+                            "MozBoxFlex": "1",
+                            "WebkitBoxFlex": "1",
+                            "WebkitFlex": "1",
+                            "flex": "1",
+                            "msFlex": "1",
+                            "paddingRight": "10px",
+                          }
+                        }
+                      >
+                        <div
+                          style={
+                            Object {
+                              "position": "relative",
+                            }
+                          }
+                        >
+                          <input
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onKeyDown={[Function]}
+                            spellCheck="false"
+                            style={
+                              Object {
+                                "border": "0px",
+                                "borderBottom": "1px solid #eee",
+                                "color": "#333",
+                                "fontSize": "15px",
+                                "height": "30px",
+                                "marginTop": "12px",
+                                "outline": "none",
+                                "padding": "0px",
+                                "width": "100%",
+                              }
+                            }
+                            value="0"
+                          />
+                          <span
+                            onMouseDown={[Function]}
+                            style={
+                              Object {
+                                "color": "#999999",
+                                "fontSize": "11px",
+                                "left": "0px",
+                                "position": "absolute",
+                                "textTransform": "capitalize",
+                                "top": "0px",
+                              }
+                            }
+                          >
+                            r
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        style={
+                          Object {
+                            "MozBoxFlex": "1",
+                            "WebkitBoxFlex": "1",
+                            "WebkitFlex": "1",
+                            "flex": "1",
+                            "msFlex": "1",
+                            "paddingRight": "10px",
+                          }
+                        }
+                      >
+                        <div
+                          style={
+                            Object {
+                              "position": "relative",
+                            }
+                          }
+                        >
+                          <input
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onKeyDown={[Function]}
+                            spellCheck="false"
+                            style={
+                              Object {
+                                "border": "0px",
+                                "borderBottom": "1px solid #eee",
+                                "color": "#333",
+                                "fontSize": "15px",
+                                "height": "30px",
+                                "marginTop": "12px",
+                                "outline": "none",
+                                "padding": "0px",
+                                "width": "100%",
+                              }
+                            }
+                            value="0"
+                          />
+                          <span
+                            onMouseDown={[Function]}
+                            style={
+                              Object {
+                                "color": "#999999",
+                                "fontSize": "11px",
+                                "left": "0px",
+                                "position": "absolute",
+                                "textTransform": "capitalize",
+                                "top": "0px",
+                              }
+                            }
+                          >
+                            g
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        style={
+                          Object {
+                            "MozBoxFlex": "1",
+                            "WebkitBoxFlex": "1",
+                            "WebkitFlex": "1",
+                            "flex": "1",
+                            "msFlex": "1",
+                            "paddingRight": "10px",
+                          }
+                        }
+                      >
+                        <div
+                          style={
+                            Object {
+                              "position": "relative",
+                            }
+                          }
+                        >
+                          <input
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onKeyDown={[Function]}
+                            spellCheck="false"
+                            style={
+                              Object {
+                                "border": "0px",
+                                "borderBottom": "1px solid #eee",
+                                "color": "#333",
+                                "fontSize": "15px",
+                                "height": "30px",
+                                "marginTop": "12px",
+                                "outline": "none",
+                                "padding": "0px",
+                                "width": "100%",
+                              }
+                            }
+                            value="0"
+                          />
+                          <span
+                            onMouseDown={[Function]}
+                            style={
+                              Object {
+                                "color": "#999999",
+                                "fontSize": "11px",
+                                "left": "0px",
+                                "position": "absolute",
+                                "textTransform": "capitalize",
+                                "top": "0px",
+                              }
+                            }
+                          >
+                            b
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="MuiGrid-container-29 MuiGrid-spacing-xs-16-51 MuiGrid-align-items-xs-center-37 MuiGrid-justify-xs-space-between-48"
+      >
+        <div
+          className="MuiGrid-item-30 MuiGrid-grid-xs-12-68"
+        >
+          <aside
+            className="MuiTypography-root-141 MuiTypography-body2-149"
+          >
+            Animations
+          </aside>
+        </div>
+        <div
+          className="MuiGrid-item-30 MuiGrid-grid-xs-6-62"
+        >
+          <div
+            className="MuiFormControl-root-201 sc-gzVnrw kYktvQ"
+          >
+            <label
+              className="MuiFormLabel-root-210 MuiInputLabel-root-205 MuiInputLabel-formControl-206 MuiInputLabel-animated-209 MuiInputLabel-shrink-208"
+              data-shrink={true}
+              htmlFor="effect"
+            >
+              Effect
+            </label>
+            <div
+              className="MuiInput-root-220 MuiInput-formControl-221 MuiInput-underline-224 sc-bZQynM UCDeG"
+            >
+              <div
+                className="MuiSelect-root-215"
+              >
+                <div
+                  aria-haspopup="true"
+                  aria-owns={null}
+                  aria-pressed="false"
+                  className="MuiSelect-select-216 MuiSelect-selectMenu-217 MuiInput-input-228"
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
+                >
+                  <span
+                    dangerouslySetInnerHTML={
+                      Object {
+                        "__html": "&#8203;",
+                      }
+                    }
+                  />
+                </div>
+                <input
+                  id="effect"
+                  name="effect"
+                  type="hidden"
+                  value="None"
+                />
+                <svg
+                  aria-hidden="true"
+                  className="MuiSvgIcon-root-134 MuiSelect-icon-219"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M7 10l5 5 5-5z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="MuiGrid-item-30 MuiGrid-grid-xs-6-62"
+          style={
+            Object {
+              "display": "flex",
+              "justifyContent": "flex-end",
+            }
+          }
+        >
+          <div
+            className="MuiFormControl-root-201 sc-gzVnrw kYktvQ"
+          >
+            <label
+              className="MuiFormLabel-root-210 MuiInputLabel-root-205 MuiInputLabel-formControl-206 MuiInputLabel-animated-209 MuiInputLabel-shrink-208"
+              data-shrink={true}
+              htmlFor="speed"
+            >
+              Speed
+            </label>
+            <div
+              className="MuiInput-root-220 MuiInput-formControl-221 MuiInput-underline-224 sc-bZQynM UCDeG"
+            >
+              <div
+                className="MuiSelect-root-215"
+              >
+                <div
+                  aria-haspopup="true"
+                  aria-owns={null}
+                  aria-pressed="false"
+                  className="MuiSelect-select-216 MuiSelect-selectMenu-217 MuiInput-input-228"
+                  onBlur={[Function]}
+                  onClick={[Function]}
+                  onFocus={[Function]}
+                  onKeyDown={[Function]}
+                  role="button"
+                  tabIndex={0}
+                >
+                  4
+                </div>
+                <input
+                  id="speed"
+                  name="speed"
+                  type="hidden"
+                  value={4}
+                />
+                <svg
+                  aria-hidden="true"
+                  className="MuiSvgIcon-root-134 MuiSelect-icon-219"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M7 10l5 5 5-5z"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`matches shallow snapshot 1`] = `
+<styled.div>
+  <WithStyles(Card)>
+    <LightHeader
+      color={
+        Object {
+          "b": 0,
+          "g": 0,
+          "r": 0,
+        }
+      }
+      connected={0}
+      id=""
+      onChange={[Function]}
+      state="OFF"
+      waiting={false}
+    />
+    <LightContent
+      brightness={0}
+      color={
+        Object {
+          "b": 0,
+          "g": 0,
+          "r": 0,
+        }
+      }
+      colors={
+        Array [
+          "#FF0000",
+          "#FFA500",
+          "#FFFF00",
+          "#00FF00",
+          "#00FFFF",
+          "#0000FF",
+          "#A500FF",
+          "#FF00FF",
+        ]
+      }
+      connected={0}
+      onBrightnessChange={[Function]}
+      onColorChange={[Function]}
+      onInputChange={[Function]}
+    />
+  </WithStyles(Card)>
+</styled.div>
+`;

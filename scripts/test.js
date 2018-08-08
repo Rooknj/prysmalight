@@ -19,9 +19,14 @@ let argv = process.argv.slice(2);
 argv.unshift("src/")
 
 // Watch unless on CI or in coverage mode
+if (argv.indexOf("--no-watch") >= 0) {
+  process.env.CI = "true";
+  argv.splice(argv.indexOf("--no-watch"), 1); // Remove no-watch option from argv so jest doesnt screw up
+}
+
+// Watch unless on CI or in coverage mode
 if (!process.env.CI && argv.indexOf('--coverage') < 0) {
   argv.push('--watch');
 }
-
 
 jest.run(argv);

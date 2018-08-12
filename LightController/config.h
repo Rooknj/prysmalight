@@ -3,16 +3,16 @@
 #define CONFIG_DEBUG true
 
 // The unique name of the light (must be less than 16 characters)
-#define CONFIG_NAME "Light 2"
+#define CONFIG_NAME "Light 1"
 
 // the maximum value you can set brightness to out of 255 
 #define CONFIG_MAX_BRIGHTNESS 255
 
 // pin used for the rgb led strip (PWM)
-#define CONFIG_DATA_PIN 3 // This is pin D3 on the NodeMCU ESP8266
+#define CONFIG_DATA_PIN 5 // This is pin D3 on the NodeMCU ESP8266
 
 // how many leds in your strip?
-#define CONFIG_NUM_LEDS 150
+#define CONFIG_NUM_LEDS 60
 
 // Which LED strip are you using?
 #define CONFIG_CHIPSET WS2812B

@@ -18,6 +18,7 @@
 #include <ArduinoOTA.h>           // Update ESP8266 over wifi
 #include <WiFiManager.h>          // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <PubSubClient.h>         // MQTT client library
+#define FASTLED_ESP8266_DMA // better control for ESP8266 will output or RX pin requires fork https://github.com/coryking/FastLED
 #include "FastLED.h"              // LED strip control library
 #include <ArduinoJson.h>          // Parse JSON
 

@@ -83,6 +83,9 @@ int animationSpeed = 4;
 String currentEffect = NO_EFFECT;
 char* effects[] = {"Flash", "Fade", "Rainbow", "Cylon", "Sinelon", "Confetti", "BPM", "Juggle"}; // Change to add effect
 int numEffects = 8; // Change to add effect
+unsigned int mutationId;
+bool mutationIdWasChanged = false;
+
 // define the array of leds
 CRGB leds[CONFIG_NUM_LEDS];
 
@@ -264,6 +267,13 @@ bool processJson(char* message) {
       animationSpeed = (int)root["speed"];
     }
   }
+
+  if (root.containsKey("mutationId")) {
+    if (root["mutationId"] != mutationId) {
+      mutationId = root["mutationId"];
+      mutationIdWasChanged = true;
+    }
+  }
   
   return true;
 }
@@ -366,6 +376,11 @@ void sendState() {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
 
   JsonObject& root = jsonBuffer.createObject();
+
+  // populate payload with mutationId if one was sent
+  if(mutationIdWasChanged) {
+    root["mutationId"] = mutationId;
+  }
 
   // populate payload with name
   root["name"] = CONFIG_NAME;

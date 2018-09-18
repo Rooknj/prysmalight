@@ -18,6 +18,7 @@
 #include <ArduinoOTA.h>           // Update ESP8266 over wifi
 #include <WiFiManager.h>          // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <PubSubClient.h>         // MQTT client library
+#define FASTLED_ESP8266_DMA // better control for ESP8266 will output or RX pin requires fork https://github.com/coryking/FastLED
 #include "FastLED.h"              // LED strip control library
 #include <ArduinoJson.h>          // Parse JSON
 
@@ -81,8 +82,8 @@ uint8_t blue = 0;
 int animationSpeed = 4;
 #define NO_EFFECT "None"
 String currentEffect = NO_EFFECT;
-char* effects[] = {"Flash", "Fade", "Rainbow", "Cylon", "Sinelon", "Confetti", "BPM", "Juggle"}; // Change to add effect
-int numEffects = 8; // Change to add effect
+char* effects[] = {"Flash", "Fade", "Rainbow", "Cylon", "Sinelon", "Confetti", "BPM", "Juggle", "Visualize"}; // Change to add effect
+int numEffects = 9; // Change to add effect
 unsigned int mutationId;
 bool mutationIdWasChanged = false;
 
@@ -124,7 +125,11 @@ byte gHue = 0;
 int LED = 0;
 bool forward = true;
 
-// Change to add effect
+// Visualize
+const int udp_port = 7778;
+WiFiUDP port;
+
+// Change to add effect ^^^^^
 
 
 
@@ -257,6 +262,13 @@ bool processJson(char* message) {
           blue = 0;
         }
         currentEffect = root["effect"].asString();
+        
+        // Clear current lights when Visualize effect is chosen
+        if (strcmp(root["effect"], "Visualize") == 0) {
+          Serial.println("INFO: Clearing light for visualization");
+          setRGB(0, 0, 0);
+        }
+        
         break;
       }
     }
@@ -523,6 +535,18 @@ boolean reconnect() {
 void setupWifi() {
   // Autoconnect to Wifi
   WiFiManager wifiManager;
+
+  // Set static IP address if one is provided
+  #ifdef STATIC_IP  
+    Serial.print("INFO: adding static IP ");
+    Serial.println(STATIC_IP);
+    IPAddress _ip,_gw,_sn;
+    _ip.fromString(STATIC_IP);
+    _gw.fromString(STATIC_GW);
+    _sn.fromString(STATIC_SN);
+    wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
+  #endif 
+  
   if (!wifiManager.autoConnect(CONFIG_NAME, CONFIG_WIFI_MANAGER_PW)) {
     // (AP-Name, Password)
     Serial.println("ERROR: failed to connect to Wifi");
@@ -634,6 +658,9 @@ void setup() {
   // init the MQTT connection
   client.setServer(MQTT_SERVER_IP, MQTT_SERVER_PORT);
   client.setCallback(callback);
+
+  // init the UDP port
+  port.begin(udp_port);
 }
 
 
@@ -721,6 +748,9 @@ void loop() {
   // Handles crossfading between colors/setting the color through the colorpicker
   handleColorChange();
 
+  // Handle parsing the UDP packets for visualizations
+  int packetSize = port.parsePacket(); // Read data over socket
+
   // Handle the current effect
   if (currentEffect == NO_EFFECT || stateOn == false){ // Change to add effect
     // do nothing
@@ -740,6 +770,8 @@ void loop() {
     handleBPM();
   } else if (currentEffect == "Sinelon") {
     handleSinelon();
+  } else if (currentEffect == "Visualize") {
+    handleVisualize(packetSize);
   }
 }
 
@@ -960,6 +992,17 @@ void handleSinelon() {
     int pos = beatsin16( (int)(getBPM()/5), 0, CONFIG_NUM_LEDS-1 );
     leds[pos] += CHSV( gHue, 255, 192);
     FastLED.show();
+  }
+}
+
+void handleVisualize(int packetSize) {
+  if (packetSize == sizeof(leds)) {
+    port.read((char*)leds, sizeof(leds));
+    FastLED.show();
+  } else if (packetSize) {
+    Serial.printf("Invalid packet size: %u (expected %u)\n", packetSize, sizeof(leds));
+    port.flush();
+    return;
   }
 }
 

@@ -9,10 +9,10 @@
 #define CONFIG_MAX_BRIGHTNESS 255
 
 // pin used for the rgb led strip (PWM)
-#define CONFIG_DATA_PIN 3 // This is pin D3 on the NodeMCU ESP8266
+#define CONFIG_DATA_PIN 5 // This is pin D3 on the NodeMCU ESP8266
 
 // how many leds in your strip?
-#define CONFIG_NUM_LEDS 150
+#define CONFIG_NUM_LEDS 60
 
 // Which LED strip are you using?
 #define CONFIG_CHIPSET WS2812B
@@ -34,6 +34,9 @@
 
 // Wifi manager access point config
 #define CONFIG_WIFI_MANAGER_PW "991f76a6ab"
+#define STATIC_IP "10.0.0.201"
+#define STATIC_GW "10.0.0.1"
+#define STATIC_SN "255.255.252.0"
 
 // MDNS config
 #define CONFIG_MDNS_HOSTNAME "raspberrypi"

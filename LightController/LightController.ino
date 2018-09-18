@@ -129,7 +129,7 @@ bool forward = true;
 const int udp_port = 7778;
 WiFiUDP port;
 
-// Change to add effect
+// Change to add effect ^^^^^
 
 
 
@@ -748,6 +748,9 @@ void loop() {
   // Handles crossfading between colors/setting the color through the colorpicker
   handleColorChange();
 
+  // Handle parsing the UDP packets for visualizations
+  int packetSize = port.parsePacket(); // Read data over socket
+
   // Handle the current effect
   if (currentEffect == NO_EFFECT || stateOn == false){ // Change to add effect
     // do nothing
@@ -768,7 +771,7 @@ void loop() {
   } else if (currentEffect == "Sinelon") {
     handleSinelon();
   } else if (currentEffect == "Visualize") {
-    handleVisualize();
+    handleVisualize(packetSize);
   }
 }
 
@@ -992,9 +995,7 @@ void handleSinelon() {
   }
 }
 
-void handleVisualize() {
-  // Handle UDP data
-  int packetSize = port.parsePacket();
+void handleVisualize(packetSize) {
   if (packetSize == sizeof(leds)) {
     port.read((char*)leds, sizeof(leds));
     FastLED.show();

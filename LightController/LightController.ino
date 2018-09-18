@@ -82,8 +82,8 @@ uint8_t blue = 0;
 int animationSpeed = 4;
 #define NO_EFFECT "None"
 String currentEffect = NO_EFFECT;
-char* effects[] = {"Flash", "Fade", "Rainbow", "Cylon", "Sinelon", "Confetti", "BPM", "Juggle"}; // Change to add effect
-int numEffects = 8; // Change to add effect
+char* effects[] = {"Flash", "Fade", "Rainbow", "Cylon", "Sinelon", "Confetti", "BPM", "Juggle", "Visualize"}; // Change to add effect
+int numEffects = 9; // Change to add effect
 unsigned int mutationId;
 bool mutationIdWasChanged = false;
 
@@ -124,6 +124,10 @@ byte gHue = 0;
 // Cylon
 int LED = 0;
 bool forward = true;
+
+// Visualize
+const int udp_port = 7778;
+WiFiUDP port;
 
 // Change to add effect
 
@@ -258,6 +262,13 @@ bool processJson(char* message) {
           blue = 0;
         }
         currentEffect = root["effect"].asString();
+        
+        // Clear current lights when Visualize effect is chosen
+        if (strcmp(root["effect"], "Visualize") == 0) {
+          Serial.println("INFO: Clearing light for visualization");
+          setRGB(0, 0, 0);
+        }
+        
         break;
       }
     }
@@ -524,6 +535,18 @@ boolean reconnect() {
 void setupWifi() {
   // Autoconnect to Wifi
   WiFiManager wifiManager;
+
+  // Set static IP address if one is provided
+  #ifdef STATIC_IP  
+    Serial.print("INFO: adding static IP ");
+    Serial.println(STATIC_IP);
+    IPAddress _ip,_gw,_sn;
+    _ip.fromString(STATIC_IP);
+    _gw.fromString(STATIC_GW);
+    _sn.fromString(STATIC_SN);
+    wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
+  #endif 
+  
   if (!wifiManager.autoConnect(CONFIG_NAME, CONFIG_WIFI_MANAGER_PW)) {
     // (AP-Name, Password)
     Serial.println("ERROR: failed to connect to Wifi");
@@ -635,6 +658,9 @@ void setup() {
   // init the MQTT connection
   client.setServer(MQTT_SERVER_IP, MQTT_SERVER_PORT);
   client.setCallback(callback);
+
+  // init the UDP port
+  port.begin(udp_port);
 }
 
 
@@ -741,6 +767,8 @@ void loop() {
     handleBPM();
   } else if (currentEffect == "Sinelon") {
     handleSinelon();
+  } else if (currentEffect == "Visualize") {
+    handleVisualize();
   }
 }
 
@@ -961,6 +989,19 @@ void handleSinelon() {
     int pos = beatsin16( (int)(getBPM()/5), 0, CONFIG_NUM_LEDS-1 );
     leds[pos] += CHSV( gHue, 255, 192);
     FastLED.show();
+  }
+}
+
+void handleVisualize() {
+  // Handle UDP data
+  int packetSize = port.parsePacket();
+  if (packetSize == sizeof(leds)) {
+    port.read((char*)leds, sizeof(leds));
+    FastLED.show();
+  } else if (packetSize) {
+    Serial.printf("Invalid packet size: %u (expected %u)\n", packetSize, sizeof(leds));
+    port.flush();
+    return;
   }
 }
 

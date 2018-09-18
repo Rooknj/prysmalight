@@ -3,7 +3,7 @@
 #define CONFIG_DEBUG true
 
 // The unique name of the light (must be less than 16 characters)
-#define CONFIG_NAME "Light 1"
+#define CONFIG_NAME "Light 2"
 
 // the maximum value you can set brightness to out of 255 
 #define CONFIG_MAX_BRIGHTNESS 255
@@ -34,6 +34,9 @@
 
 // Wifi manager access point config
 #define CONFIG_WIFI_MANAGER_PW "991f76a6ab"
+#define STATIC_IP "10.0.0.201"
+#define STATIC_GW "10.0.0.1"
+#define STATIC_SN "255.255.252.0"
 
 // MDNS config
 #define CONFIG_MDNS_HOSTNAME "raspberrypi"

@@ -995,7 +995,7 @@ void handleSinelon() {
   }
 }
 
-void handleVisualize(packetSize) {
+void handleVisualize(int packetSize) {
   if (packetSize == sizeof(leds)) {
     port.read((char*)leds, sizeof(leds));
     FastLED.show();

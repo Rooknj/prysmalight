@@ -218,7 +218,7 @@ class LightService {
   }
 
   async addLight(lightId) {
-    let error, hasLight, lightAdded;
+    let error, hasLight;
 
     // Check if the light exists already before doing anything else
     ({ error, hasLight } = await this.lightDBClient.hasLight(lightId));
@@ -226,7 +226,7 @@ class LightService {
     if (hasLight) return new Error(`"${lightId}" is already added`);
 
     // Add new light to light database
-    ({ error, light: lightAdded } = await this.lightDBClient.addLight(lightId));
+    ({ error } = await this.lightDBClient.addLight(lightId));
     if (error) return error;
 
     // Subscribe to new messages from the new light
@@ -234,9 +234,10 @@ class LightService {
     error = await this.lightLink.subscribeToLight(lightId);
     if (error) debug(`Failed to subscribe to ${lightId}\n${error}`);
 
-    // TODO: Find a way to check if the light is connected
-    // If it is connected, return then.
-    // Wait a max of .5 seconds?
+    // Wait .5 seconds for light data to be populated in database
+    // TODO: Find a way to check if the light is connected instead of setTimeout
+    //await asyncSetTimeout(100);
+    const lightAdded = await this.getLight(lightId);
     this.pubSubClient.publish("lightAdded", { lightAdded });
     return lightAdded;
   }

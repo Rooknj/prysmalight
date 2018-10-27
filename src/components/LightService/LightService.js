@@ -1,7 +1,7 @@
 const { PubSub } = require("apollo-server");
 const events = require("events");
-const LightDB = require("./LightDB").default;
-const LightLink = require("./LightLink").default;
+const LightDB = require("./LightDB");
+const LightLink = require("./LightLink");
 const Debug = require("debug").default;
 const { promisify } = require("util");
 const { mapConnectionMessageToConnectionPayload } = require("./lightUtil");

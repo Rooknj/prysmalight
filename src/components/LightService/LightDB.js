@@ -328,4 +328,4 @@ class LightDB {
   }
 }
 
-module.exports = { default: LightDB };
+module.exports = LightDB;

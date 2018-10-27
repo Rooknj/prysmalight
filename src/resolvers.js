@@ -37,4 +37,4 @@ const resolvers = {
   }
 };
 
-module.exports = { default: resolvers };
+module.exports = resolvers;

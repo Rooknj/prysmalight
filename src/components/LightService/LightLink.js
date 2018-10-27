@@ -219,4 +219,4 @@ class LightLink {
   }
 }
 
-module.exports = { default: LightLink };
+module.exports = LightLink;

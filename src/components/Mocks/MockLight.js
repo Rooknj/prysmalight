@@ -138,4 +138,4 @@ class MockLight {
   }
 }
 
-module.exports = { default: MockLight };
+module.exports = MockLight;

@@ -290,4 +290,4 @@ class LightService {
   }
 }
 
-module.exports = { default: LightService };
+module.exports = LightService;

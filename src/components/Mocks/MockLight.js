@@ -1,6 +1,6 @@
 const MQTT = require("async-mqtt");
 const Debug = require("debug").default;
-const { parseMqttMessage, getMqttHost } = require("../lightUtil");
+const { parseMqttMessage, getMqttHost } = require("../LightService/lightUtil");
 
 const debug = Debug("MockLight");
 

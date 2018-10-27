@@ -1,6 +1,6 @@
 const typeDefs = require("./typeDefs").default;
 const resolvers = require("./resolvers").default;
-const MockLight = require("./components/LightService/Mocks/MockLight").default;
+const MockLight = require("./components/Mocks/MockLight").default;
 const Debug = require("debug").default;
 const { ApolloServer } = require("apollo-server-express");
 const http = require("http"); // Library to create an http server

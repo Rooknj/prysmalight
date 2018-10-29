@@ -49,10 +49,10 @@
     "clean": "node scripts/clean"
   },
   "bin": {
-    "prod-server": "src/server.js"
+    "prod-server": "src/index.js"
   },
   "pkg": {
     "assets": "node_modules/casual/src/providers/*"
   },
-  "main": "src/server.js"
+  "main": "src/index.js"
 }

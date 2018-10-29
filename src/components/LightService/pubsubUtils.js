@@ -1,6 +1,4 @@
-const MQTT = require("async-mqtt");
 const Debug = require("debug").default;
-const { parseMqttMessage } = require("./lightUtil");
 const debug = Debug("pubsubUtils");
 
 // MQTT: topics

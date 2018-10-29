@@ -4,7 +4,7 @@ const MockLight = require("./components/Mocks/MockLight");
 const Debug = require("debug").default;
 const debug = Debug("main");
 //const repository = require('./repository/repository')
-//const config = require('./config/')
+const config = require("./config/config");
 //const mediator = new EventEmitter()
 
 debug("--- Light Service ---");
@@ -17,13 +17,11 @@ process.on("uncaughtRejection", err => {
   debug("Unhandled Rejection", err);
 });
 
-const GRAPHQL_PORT = 4001; // Default Server Port
-
 // Start the server
 debug("Starting Server");
 server
   .start({
-    port: GRAPHQL_PORT
+    port: config.serverSettings.port
   })
   .then(app => {
     app.on("close", () => {

@@ -1,6 +1,5 @@
 const typeDefs = require("./typeDefs");
 const resolvers = require("./resolvers");
-const MockLight = require("../components/Mocks/MockLight");
 const Debug = require("debug").default;
 const { ApolloServer } = require("apollo-server-express");
 const http = require("http"); // Library to create an http server
@@ -8,8 +7,6 @@ const express = require("express"); // NodeJS Web Server
 const cors = require("cors"); // Cross Origin Resource Sharing Middleware
 const helmet = require("helmet"); // Security Middleware
 const compression = require("compression"); // Compression Middleware
-
-console.log("TODO: Upgrade to use ReactiveX JS");
 const debug = Debug("server");
 
 const start = options => {
@@ -46,35 +43,6 @@ const start = options => {
 
       resolve(server);
     });
-
-    // TODO: add to util file
-    const createMockLight = mockName => {
-      debug(`Starting ${mockName} as a mock light`);
-      const mockLight = new MockLight(mockName);
-      mockLight.subscribeToCommands();
-      mockLight.publishConnected({ name: mockName, connection: 2 });
-      mockLight.publishEffectList({
-        name: mockName,
-        effectList: ["Test 1", "Test 2", "Test 3"]
-      });
-      mockLight.publishState({
-        name: mockName,
-        state: "OFF",
-        color: { r: 255, g: 100, b: 0 },
-        brightness: 100,
-        effect: "None",
-        speed: 4
-      });
-    };
-
-    // Create one default mock light
-    createMockLight("Default Mock");
-
-    // Set up any extra mock lights if the environment dictates it
-    if (process.env.MOCKS) {
-      const mockArray = process.env.MOCKS.split(",");
-      mockArray.forEach(createMockLight);
-    }
   });
 };
 

@@ -1,26 +1,26 @@
 const MQTT = require("async-mqtt");
 const Debug = require("debug").default;
-const { parseMqttMessage, getMqttHost } = require("../service/lightUtil");
-
+const { parseMqttMessage } = require("../service/lightUtil");
 const debug = Debug("MockLight");
+const { mqttSettings } = require("../config/config");
 
 // MQTT: topics
-const MQTT_LIGHT_TOP_LEVEL = "lightapp2";
-const MQTT_LIGHT_CONNECTED_TOPIC = "connected";
-const MQTT_LIGHT_STATE_TOPIC = "state";
-const MQTT_LIGHT_COMMAND_TOPIC = "command";
-const MQTT_EFFECT_LIST_TOPIC = "effects";
+const MQTT_LIGHT_TOP_LEVEL = mqttSettings.MQTT_LIGHT_TOP_LEVEL;
+const MQTT_LIGHT_CONNECTED_TOPIC = mqttSettings.MQTT_LIGHT_CONNECTED_TOPIC;
+const MQTT_LIGHT_STATE_TOPIC = mqttSettings.MQTT_LIGHT_STATE_TOPIC;
+const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
+const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
 
 class MockLight {
   constructor(lightId) {
     this.lightId = lightId;
 
     this.mqttClient = MQTT.connect(
-      getMqttHost(),
+      mqttSettings.host,
       {
-        reconnectPeriod: 5000, // Amount of time between reconnection attempts
-        username: "pi",
-        password: "MQTTIsBetterThanUDP",
+        reconnectPeriod: mqttSettings.reconnectPeriod, // Amount of time between reconnection attempts
+        username: mqttSettings.username,
+        password: mqttSettings.password,
         will: {
           topic: `${MQTT_LIGHT_TOP_LEVEL}/${
             this.lightId

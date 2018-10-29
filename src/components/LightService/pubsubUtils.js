@@ -6,8 +6,8 @@ const { parseMqttMessage } = require("./lightUtil");
 const debug = Debug("pubsubUtils");
 
 /**
- * Factory which returns an object with all database methods
- * @param {object} client - The Redis client
+ * Factory which returns an object with all mqtt methods
+ * @param {object} client - The MQTT client
  */
 const pubsubUtilsFactory = client => {
   return Object.create({});

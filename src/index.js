@@ -1,6 +1,6 @@
 //const {EventEmitter} = require('events')
 const server = require("./server/server");
-const MockLight = require("./components/Mocks/MockLight");
+const MockLight = require("./mock/MockLight");
 const Debug = require("debug").default;
 const debug = Debug("main");
 //const repository = require('./repository/repository')

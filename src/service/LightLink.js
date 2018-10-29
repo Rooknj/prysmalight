@@ -2,7 +2,7 @@ const MQTT = require("async-mqtt");
 const Debug = require("debug").default;
 const { parseMqttMessage } = require("./lightUtil");
 const debug = Debug("LightLink");
-const { mqttSettings } = require("../../config/config");
+const { mqttSettings } = require("../config/config");
 
 // MQTT: topics
 const MQTT_LIGHT_TOP_LEVEL = mqttSettings.MQTT_LIGHT_TOP_LEVEL;

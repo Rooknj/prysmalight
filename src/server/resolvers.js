@@ -1,5 +1,5 @@
-const LightService = require("../components/LightService/LightService");
-const mockService = require("../components/Mocks/MockService");
+const LightService = require("../service/LightService");
+const mockService = require("../mock/MockService");
 
 const lightService = process.env.MOCK ? mockService : new LightService();
 

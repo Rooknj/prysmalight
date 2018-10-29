@@ -5,7 +5,7 @@ const {
   mapRedisObjectToLightObject
 } = require("./lightUtil");
 const Debug = require("debug").default;
-const { redisSettings } = require("../../config/config");
+const { redisSettings } = require("../config/config");
 const debug = Debug("LightDB");
 
 const REDIS_HOST = redisSettings.host;

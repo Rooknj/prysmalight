@@ -1,6 +1,6 @@
 const Debug = require("debug").default;
 const debug = Debug("pubsubUtils");
-const { mqttSettings } = require("../../config/config");
+const { mqttSettings } = require("../config/config");
 
 // MQTT: topics
 const MQTT_LIGHT_TOP_LEVEL = mqttSettings.MQTT_LIGHT_TOP_LEVEL;

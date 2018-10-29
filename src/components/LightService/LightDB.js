@@ -1,16 +1,15 @@
 const redis = require("redis");
 const { promisify } = require("util");
 const {
-  getRedisHost,
   getNewRedisLight,
   mapRedisObjectToLightObject
 } = require("./lightUtil");
 const Debug = require("debug").default;
-
+const { redisSettings } = require("../../config/config");
 const debug = Debug("LightDB");
 
-const REDIS_HOST = getRedisHost();
-const REDIS_PORT = 6379;
+const REDIS_HOST = redisSettings.host;
+const REDIS_PORT = redisSettings.port;
 
 class LightDB {
   constructor() {

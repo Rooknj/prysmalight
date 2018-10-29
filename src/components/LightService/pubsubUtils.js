@@ -1,12 +1,13 @@
 const Debug = require("debug").default;
 const debug = Debug("pubsubUtils");
+const { mqttSettings } = require("../../config/config");
 
 // MQTT: topics
-const MQTT_LIGHT_TOP_LEVEL = "lightapp2";
-const MQTT_LIGHT_CONNECTED_TOPIC = "connected";
-const MQTT_LIGHT_STATE_TOPIC = "state";
-const MQTT_LIGHT_COMMAND_TOPIC = "command";
-const MQTT_EFFECT_LIST_TOPIC = "effects";
+const MQTT_LIGHT_TOP_LEVEL = mqttSettings.MQTT_LIGHT_TOP_LEVEL;
+const MQTT_LIGHT_CONNECTED_TOPIC = mqttSettings.MQTT_LIGHT_CONNECTED_TOPIC;
+const MQTT_LIGHT_STATE_TOPIC = mqttSettings.MQTT_LIGHT_STATE_TOPIC;
+const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
+const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
 
 /**
  * Factory which returns an object with all mqtt methods.

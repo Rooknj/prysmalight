@@ -1,13 +1,10 @@
-const typeDefs = require("./typeDefs");
-const resolvers = require("./resolvers");
 const Debug = require("debug").default;
-const { ApolloServer } = require("apollo-server-express");
-const http = require("http"); // Library to create an http server
 const express = require("express"); // NodeJS Web Server
 const cors = require("cors"); // Cross Origin Resource Sharing Middleware
 const helmet = require("helmet"); // Security Middleware
 const compression = require("compression"); // Compression Middleware
 const debug = Debug("server");
+const { makeApolloServer } = require("../api/api");
 
 const start = options => {
   return new Promise((resolve, reject) => {
@@ -16,20 +13,17 @@ const start = options => {
     }
 
     const app = express();
-    const apolloServer = new ApolloServer({ typeDefs, resolvers });
 
     // Apply middleware to Express app
     app.use("*", cors());
     app.use(helmet());
     app.use(compression());
-    apolloServer.applyMiddleware({ app });
 
-    // Create the httpServer and add subscriptions
-    const httpServer = http.createServer(app);
-    apolloServer.installSubscriptionHandlers(httpServer);
+    // Make the apollo server
+    const apolloServer = makeApolloServer(app);
 
     // Start the httpServer
-    const server = httpServer.listen(options.port, () => {
+    const serverConnection = apolloServer.listen(options.port, () => {
       debug(
         `🚀 Server ready at http://localhost:${options.port}${
           apolloServer.graphqlPath
@@ -41,7 +35,7 @@ const start = options => {
         }`
       );
 
-      resolve(server);
+      resolve(serverConnection);
     });
   });
 };

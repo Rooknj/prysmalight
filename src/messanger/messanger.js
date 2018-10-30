@@ -176,4 +176,4 @@ const connect = client => {
   });
 };
 
-module.exports = connect;
+module.exports = Object.assign({}, { connect });

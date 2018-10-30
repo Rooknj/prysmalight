@@ -1,11 +1,10 @@
-//const {EventEmitter} = require('events')
+const { EventEmitter } = require("events");
 const server = require("./server/server");
 const MockLight = require("./mock/MockLight");
 const Debug = require("debug").default;
-const debug = Debug("main");
-//const repository = require('./repository/repository')
 const config = require("./config/config");
-//const mediator = new EventEmitter()
+const debug = Debug("main");
+const mediator = new EventEmitter();
 
 debug("--- Light Service ---");
 
@@ -16,6 +15,10 @@ process.on("uncaughtException", err => {
 process.on("uncaughtRejection", err => {
   debug("Unhandled Rejection", err);
 });
+
+// TODO: Only start the server when the db and pubsub are ready
+//mediator.on("db.ready", db => {});
+//mediator.on("pubsub.ready", pubsub => {});
 
 // Start the server
 debug("Starting Server");
@@ -57,4 +60,4 @@ if (process.env.MOCKS) {
   mockArray.forEach(createMockLight);
 }
 
-//mediator.emit('boot.ready')
+mediator.emit("boot.ready");

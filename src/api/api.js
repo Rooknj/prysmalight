@@ -4,8 +4,6 @@ const typeDefs = require("./typeDefs");
 const resolvers = require("./resolvers");
 
 const makeApolloServer = (app, options) => {
-  console.log(options.repo.getLight);
-  console.log(options.msgr.subscribeToLight);
   // Generate the apolloServer and apply the middleware to the express app
   const apolloServer = new ApolloServer({ typeDefs, resolvers });
   apolloServer.applyMiddleware({ app });

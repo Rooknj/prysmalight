@@ -20,7 +20,7 @@ const start = options => {
     app.use(compression());
 
     // Make the apollo server
-    const apolloServer = makeApolloServer(app, options);
+    const apolloServer = makeApolloServer(app);
 
     // Start the httpServer
     const serverConnection = apolloServer.listen(options.port, () => {

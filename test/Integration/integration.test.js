@@ -89,19 +89,19 @@ test("You can get an array of all added lights", async () => {
       lightId: LIGHT_NAME1
     }
   });
-  // const LIGHT_NAME2 = "Test Get Lights 2";
-  // await client.mutate({
-  //   mutation: ADD_LIGHT,
-  //   variables: {
-  //     lightId: LIGHT_NAME2
-  //   }
-  // });
+  const LIGHT_NAME2 = "Test Get Lights 2";
+  await client.mutate({
+    mutation: ADD_LIGHT,
+    variables: {
+      lightId: LIGHT_NAME2
+    }
+  });
   const { data } = await client.query({
     query: GET_LIGHTS
   });
   expect(data.lights).toBeInstanceOf(Array);
   expect(data.lights.find(light => light.id === LIGHT_NAME1)).toBeDefined();
-  //expect(data.lights.find(light => light.id === LIGHT_NAME2)).toBeDefined();
+  expect(data.lights.find(light => light.id === LIGHT_NAME2)).toBeDefined();
 });
 
 test("You can get one light", async () => {

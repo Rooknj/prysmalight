@@ -23,16 +23,18 @@ module.exports = ({ dbClient, pubsubClient }) => {
   const pubsub = pubsubFactory(pubsubClient);
 
   db.connections.subscribe(() => debug("db client connected"));
-  db.disconnections.subscribe(() => console.log("db client disconnected"));
+  db.disconnections.subscribe(() => debug("db client disconnected"));
   pubsub.connections.subscribe(() => {
     debug("pubsub client connected");
-    setTimeout(() => pubsub.subscribeToLight("Default Mock"), 3000);
+    pubsub.subscribeToLight("Default Mock");
   });
-  pubsub.disconnections.subscribe(() =>
-    console.log("pubsub client disconnected")
-  );
+  pubsub.disconnections.subscribe(() => debug("pubsub client disconnected"));
   pubsub.messages.subscribe(message =>
-    console.log("pubsub client got message", message)
+    debug(
+      "pubsub client got message on topic",
+      message[0],
+      message[1].toString()
+    )
   );
 
   const getLight = () => mockLight;

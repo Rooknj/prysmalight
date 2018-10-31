@@ -2,6 +2,7 @@ const Debug = require("debug").default;
 const debug = Debug("pubsub");
 const { mqttSettings } = require("../config/config");
 const { fromEvent } = require("rxjs");
+const { filter, map } = require("rxjs/operators");
 
 // MQTT: topics
 const MQTT_LIGHT_TOP_LEVEL = mqttSettings.MQTT_LIGHT_TOP_LEVEL;
@@ -9,6 +10,14 @@ const MQTT_LIGHT_CONNECTED_TOPIC = mqttSettings.MQTT_LIGHT_CONNECTED_TOPIC;
 const MQTT_LIGHT_STATE_TOPIC = mqttSettings.MQTT_LIGHT_STATE_TOPIC;
 const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
 const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
+
+const getMessageType = msg => msg[0].split("/")[2];
+const getMessageSender = msg => msg[0].split("/")[1];
+const getMessageData = msg => JSON.parse(msg[1].toString());
+const toMessageObject = msg => ({
+  sender: getMessageSender(msg),
+  data: getMessageData(msg)
+});
 
 /**
  * Factory which returns an object with all mqtt methods.
@@ -26,9 +35,33 @@ const pubsubFactory = client => {
   const disconnections = fromEvent(client, "close");
 
   /**
-   * An observable of all the times the client disconnects
+   * An observable of all messages received by the client
    */
-  const messages = fromEvent(client, "message");
+  const allMessages = fromEvent(client, "message");
+
+  /**
+   * An observable of all light connection status messages received by the client
+   */
+  const connectMessages = allMessages.pipe(
+    filter(msg => getMessageType(msg) === MQTT_LIGHT_CONNECTED_TOPIC),
+    map(toMessageObject)
+  );
+
+  /**
+   * An observable of all light state messages received by the client
+   */
+  const stateMessages = allMessages.pipe(
+    filter(msg => getMessageType(msg) === MQTT_LIGHT_STATE_TOPIC),
+    map(toMessageObject)
+  );
+
+  /**
+   * An observable of all light effect list messages received by the client
+   */
+  const effectMessages = allMessages.pipe(
+    filter(msg => getMessageType(msg) === MQTT_EFFECT_LIST_TOPIC),
+    map(toMessageObject)
+  );
 
   /**
    * Subscribes to an MQTT topic.
@@ -161,7 +194,10 @@ const pubsubFactory = client => {
   return Object.create({
     connections,
     disconnections,
-    messages,
+    allMessages,
+    connectMessages,
+    stateMessages,
+    effectMessages,
     subscribeToLight,
     unsubscribeFromLight,
     publishToLight

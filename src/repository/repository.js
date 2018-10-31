@@ -29,13 +29,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
     pubsub.subscribeToLight("Default Mock");
   });
   pubsub.disconnections.subscribe(() => debug("pubsub client disconnected"));
-  pubsub.messages.subscribe(message =>
-    debug(
-      "pubsub client got message on topic",
-      message[0],
-      message[1].toString()
-    )
-  );
+  pubsub.connectMessages.subscribe(message => debug(message));
 
   const getLight = () => mockLight;
   const getLights = () => [mockLight, mockLight, mockLight];

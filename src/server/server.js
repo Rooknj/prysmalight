@@ -1,5 +1,5 @@
 const typeDefs = require("./typeDefs");
-const resolvers = require("./resolvers");
+const resolversFactory = require("./resolversFactory");
 const Debug = require("debug").default;
 const { ApolloServer } = require("apollo-server-express");
 const http = require("http"); // Library to create an http server
@@ -15,7 +15,14 @@ const start = options => {
       reject(new Error("The server must be started with an available port"));
     }
 
+    if (!options.repo) {
+      reject(
+        new Error("The server must be started with a connected Repository")
+      );
+    }
+
     const app = express();
+    const resolvers = resolversFactory(options.repo);
     const apolloServer = new ApolloServer({ typeDefs, resolvers });
 
     // Apply middleware to Express app

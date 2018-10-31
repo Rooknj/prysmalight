@@ -10,7 +10,7 @@ const debug = Debug("dbUtils");
  * Factory which returns an object with all database methods
  * @param {object} client - The Redis client
  */
-const dbUtilsFactory = client => {
+const dbFactory = client => {
   // Promisify all client methods
   const asyncSMEMBERS = promisify(client.SMEMBERS).bind(client),
     asyncSADD = promisify(client.SADD).bind(client),
@@ -328,17 +328,4 @@ const dbUtilsFactory = client => {
   });
 };
 
-/**
- * Checks to make sure a client was provided. If not, rejects with an error
- * @param {object} client - The Redis client
- */
-const connect = client => {
-  return new Promise((resolve, reject) => {
-    if (!client) {
-      reject(new Error("Client not supplied!"));
-    }
-    resolve(dbUtilsFactory(client));
-  });
-};
-
-module.exports = connect;
+module.exports = dbFactory;

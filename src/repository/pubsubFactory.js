@@ -1,6 +1,7 @@
 const Debug = require("debug").default;
-const debug = Debug("pubsubUtils");
+const debug = Debug("pubsub");
 const { mqttSettings } = require("../config/config");
+const { fromEvent } = require("rxjs");
 
 // MQTT: topics
 const MQTT_LIGHT_TOP_LEVEL = mqttSettings.MQTT_LIGHT_TOP_LEVEL;
@@ -14,6 +15,21 @@ const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
  * @param {object} client - The MQTT client
  */
 const pubsubFactory = client => {
+  /**
+   * An observable of all the times the client connects
+   */
+  const connections = fromEvent(client, "connect");
+
+  /**
+   * An observable of all the times the client disconnects
+   */
+  const disconnections = fromEvent(client, "close");
+
+  /**
+   * An observable of all the times the client disconnects
+   */
+  const messages = fromEvent(client, "message");
+
   /**
    * Subscribes to an MQTT topic.
    * Returns an error if unsuccessful.
@@ -68,10 +84,6 @@ const pubsubFactory = client => {
    * @param {string} id
    */
   const subscribeToLight = async id => {
-    if (!client.connected) {
-      return new Error("Can't subscribe, not connected to MQTT broker");
-    }
-
     const subscribedToConnected = subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -106,10 +118,6 @@ const pubsubFactory = client => {
    * @param {string} id
    */
   const unsubscribeFromLight = async id => {
-    if (!client.connected) {
-      return;
-    }
-
     const unsubscribedFromConnected = unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -144,12 +152,6 @@ const pubsubFactory = client => {
    * @param {string} message
    */
   const publishToLight = async (id, message) => {
-    if (!client.connected) {
-      return new Error(
-        "Message could not be sent. Not connected to MQTT broker"
-      );
-    }
-
     return publishTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
       Buffer.from(JSON.stringify(message))
@@ -157,6 +159,9 @@ const pubsubFactory = client => {
   };
 
   return Object.create({
+    connections,
+    disconnections,
+    messages,
     subscribeToLight,
     unsubscribeFromLight,
     publishToLight

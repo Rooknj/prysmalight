@@ -4,7 +4,8 @@ const {
   getNewRedisLight,
   mapRedisObjectToLightObject
 } = require("./lightUtil");
-const debug = Debug("dbUtils");
+const debug = Debug("db");
+const { fromEvent } = require("rxjs");
 
 /**
  * Factory which returns an object with all database methods
@@ -22,6 +23,16 @@ const dbFactory = client => {
     asyncHMSET = promisify(client.HMSET).bind(client),
     asyncDEL = promisify(client.DEL).bind(client),
     asyncHGETALL = promisify(client.HGETALL).bind(client);
+
+  /**
+   * An observable of all the times the client connects
+   */
+  const connections = fromEvent(client, "connect");
+
+  /**
+   * An observable of all the times the client disconnects
+   */
+  const disconnections = fromEvent(client, "end");
 
   /**
    * Get the light with the specific id from the database.
@@ -319,6 +330,8 @@ const dbFactory = client => {
   };
 
   return Object.create({
+    connections,
+    disconnections,
     getAllLights,
     getLight,
     setLight,

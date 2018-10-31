@@ -7,7 +7,7 @@ const LIGHT_CONNECTED = 2;
 const LIGHT_DISCONNECTED = 0;
 
 // Utility functions
-const mapConnectionMessageToConnectionPayload = connectionMessage => {
+const toConnectionString = connectionMessage => {
   let connectionString = -1;
   if (Number(connectionMessage) === LIGHT_DISCONNECTED) {
     connectionString = LIGHT_DISCONNECTED;
@@ -87,7 +87,7 @@ const getRedisHost = () => {
 };
 
 module.exports = {
-  mapConnectionMessageToConnectionPayload,
+  toConnectionString,
   parseMqttMessage,
   getNewRedisLight,
   mapRedisObjectToLightObject,

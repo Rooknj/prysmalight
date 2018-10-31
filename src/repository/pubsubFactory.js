@@ -11,13 +11,10 @@ const MQTT_LIGHT_STATE_TOPIC = mqttSettings.MQTT_LIGHT_STATE_TOPIC;
 const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
 const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
 
+// TODO: Move these functions to a testable area
 const getMessageType = msg => msg[0].split("/")[2];
-const getMessageSender = msg => msg[0].split("/")[1];
-const getMessageData = msg => JSON.parse(msg[1].toString());
-const toMessageObject = msg => ({
-  sender: getMessageSender(msg),
-  data: getMessageData(msg)
-});
+// TODO: Add error handling if the message is not in JSON format
+const toMessageObject = msg => JSON.parse(msg[1].toString());
 
 /**
  * Factory which returns an object with all mqtt methods.

@@ -17,7 +17,7 @@ let mutationNumber = 0;
 // TODO: Find a better way to do this
 const events = require("events");
 const { promisify } = require("util");
-const TIMEOUT_WAIT = 2000;
+const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 const eventEmitter = new events.EventEmitter();
 
@@ -244,7 +244,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
    * Sends a message to the specified light with a list of state changes.
    * @param {Object} light
    */
-  const setLight2 = async light => {
+  const setLight = async light => {
     // Check if the light exists already before doing anything else
     const { error, hasLight } = await db.hasLight(light.id);
     if (error) return error;
@@ -287,17 +287,6 @@ module.exports = ({ dbClient, pubsubClient }) => {
       reject(new Error(`Response from ${id} timed out`));
     });
   };
-
-  const setLight = () => ({
-    id: "Mock Service Light 1",
-    connected: true,
-    state: "ON",
-    brightness: 72,
-    color: { r: 0, g: 127, b: 255 },
-    effect: "None",
-    speed: 3,
-    supportedEffects: ["Effect 1", "Effect 2", "Effect 3"]
-  });
 
   /**
    * Subscribes to the changes of a specific light.

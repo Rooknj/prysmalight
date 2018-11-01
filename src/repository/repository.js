@@ -24,7 +24,7 @@ const eventEmitter = new events.EventEmitter();
 module.exports = ({ dbClient, pubsubClient }) => {
   // Create our db and pubsub with the provided clients
   const DB = require("../service/LightDB");
-  const db2 = new DB();
+  const db = new DB();
   //const db = dbFactory(dbClient);
   const pubsub = pubsubFactory(pubsubClient);
 
@@ -36,7 +36,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
     if (listeningToAllLights) return;
 
     // Get the saved lights from redis
-    const { error, lights } = await db2.getAllLights();
+    const { error, lights } = await db.getAllLights();
     if (error) {
       debug(`Error getting all lights during subscribeToAllLights ${error}`);
       return;
@@ -79,7 +79,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
     }
 
     // Update the light's connection data in the db
-    const { error, light: changedLight } = await db2.setLight(message.name, {
+    const { error, light: changedLight } = await db.setLight(message.name, {
       connected: connectionString
     });
     if (error) {
@@ -111,7 +111,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
     if (speed) newState = { ...newState, speed };
 
     // Update the light's state data in the db
-    const { error, light: changedLight } = await db2.setLight(
+    const { error, light: changedLight } = await db.setLight(
       message.name,
       newState
     );
@@ -136,7 +136,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
    */
   const handleEffectListMessage = async message => {
     // Update the light's effect list in the db
-    const { error, light: changedLight } = await db2.setLight(message.name, {
+    const { error, light: changedLight } = await db.setLight(message.name, {
       supportedEffects: message.effectList
     });
     if (error) {
@@ -165,12 +165,12 @@ module.exports = ({ dbClient, pubsubClient }) => {
     let error, hasLight, light;
 
     // If the light was never added, return an error
-    ({ error, hasLight } = await db2.hasLight(lightId));
+    ({ error, hasLight } = await db.hasLight(lightId));
     if (error) return error;
     if (!hasLight) return new Error(`"${lightId}" was not added`);
 
     // Get the light and return the data
-    ({ error, light } = await db2.getLight(lightId));
+    ({ error, light } = await db.getLight(lightId));
     return error ? error : light;
   };
 
@@ -178,7 +178,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
    * Get all lights currently added to the db.
    */
   const getLights = async () => {
-    const { error, lights } = await db2.getAllLights();
+    const { error, lights } = await db.getAllLights();
     return error ? error : lights;
   };
 
@@ -191,12 +191,12 @@ module.exports = ({ dbClient, pubsubClient }) => {
     let error, hasLight;
 
     // Check if the light exists already before doing anything else
-    ({ error, hasLight } = await db2.hasLight(lightId));
+    ({ error, hasLight } = await db.hasLight(lightId));
     if (error) return error;
     if (hasLight) return new Error(`"${lightId}" is already added`);
 
     // Add new light to light database
-    ({ error } = await db2.addLight(lightId));
+    ({ error } = await db.addLight(lightId));
     if (error) return error;
 
     // Subscribe to new messages from the new light
@@ -220,7 +220,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
     let error, hasLight, lightRemoved;
 
     // Check if the light exists already before doing anything else
-    ({ error, hasLight } = await db2.hasLight(lightId));
+    ({ error, hasLight } = await db.hasLight(lightId));
     if (error) return error;
     if (!hasLight) return new Error(`"${lightId}" is not currently added`);
 
@@ -234,7 +234,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
     // TODO: Add cleanup here in case we only remove part of the light from redis
     // TODO: Figure out if we should resubscribe to the light if it wasn't completely removed
     // Remove light from database
-    ({ error, lightRemoved } = await db2.removeLight(lightId));
+    ({ error, lightRemoved } = await db.removeLight(lightId));
     if (error) return error;
 
     // Return the removed light and notify the subscribers
@@ -248,7 +248,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
    */
   const setLight = async light => {
     // Check if the light exists already before doing anything else
-    const { error, hasLight } = await db2.hasLight(light.id);
+    const { error, hasLight } = await db.hasLight(light.id);
     if (error) return error;
     if (!hasLight) return new Error(`"${light.id}" was never added`);
 

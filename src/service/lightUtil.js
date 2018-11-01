@@ -1,6 +1,6 @@
 const Debug = require("debug").default;
 
-const debug = Debug("LightUtil");
+const debug = Debug("lightUtil");
 
 // MQTT: payloads by default
 const LIGHT_CONNECTED = 2;

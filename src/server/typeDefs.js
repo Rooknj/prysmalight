@@ -74,4 +74,4 @@ const typeDefs = [
   ColorInput
 ];
 
-module.exports = { default: typeDefs };
+module.exports = typeDefs;

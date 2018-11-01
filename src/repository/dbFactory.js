@@ -12,6 +12,13 @@ const { fromEvent } = require("rxjs");
  * @param {object} client - The Redis client
  */
 const dbFactory = client => {
+  // TODO: Find a better way to handle errors
+  client.on("error", err => debug(err));
+  // TODO: Find a way safely call BGSAVE when you are making a bunch of addLight requests in rapid succession
+  // { ReplyError: ERR Background save already in progress
+  //   at parseError (/snapshot/app/node_modules/redis-parser/lib/parser.js:193:12)
+  //   at parseType (/snapshot/app/node_modules/redis-parser/lib/parser.js:303:14) command: 'BGSAVE', code: 'ERR' }
+
   // Promisify all client methods
   const asyncSMEMBERS = promisify(client.SMEMBERS).bind(client),
     asyncSADD = promisify(client.SADD).bind(client),

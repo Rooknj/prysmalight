@@ -23,7 +23,9 @@ const eventEmitter = new events.EventEmitter();
 
 module.exports = ({ dbClient, pubsubClient }) => {
   // Create our db and pubsub with the provided clients
-  const db = dbFactory(dbClient);
+  const DB = require("../service/LightDB");
+  const db = new DB();
+  //const db = dbFactory(dbClient);
   const pubsub = pubsubFactory(pubsubClient);
 
   // TODO: Find a better way to do this
@@ -59,7 +61,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
 
     if (!didError) listeningToAllLights = true;
   };
-  db.connections.subscribe(listenToAllLights);
+  //db.connections.subscribe(listenToAllLights);
   pubsub.connections.subscribe(listenToAllLights);
   pubsub.disconnections.subscribe(() => (listeningToAllLights = false));
 

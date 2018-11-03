@@ -15,7 +15,7 @@ describe("redisSettings", () => {
     expect(config.redisSettings.host).toBeDefined();
   });
 });
-//tcp://raspberrypi.local:1883
+
 describe("mqttSettings", () => {
   test("has a host defined", () => {
     expect(config.mqttSettings.host).toBeDefined();

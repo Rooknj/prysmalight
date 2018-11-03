@@ -7,6 +7,10 @@ services:
     image: lightapp2-server-rpi
     ports:
       - "4001:4001"
+    environment:
+      - REDIS_HOST=redis
+      - MOCKS="Mock 1,Mock 2,Mock 3"
+      - MQTT_HOST=broker
   redis:
     image: redis:latest
     ports:

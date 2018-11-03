@@ -1,13 +1,42 @@
 const dbFactory = require("./dbFactory");
+const { isObservable } = require("rxjs");
+
+const mockClient = {
+  on: () => {},
+  SMEMBERS: () => {},
+  SADD: () => {},
+  INCR: () => {},
+  ZADD: () => {},
+  ZREM: () => {},
+  ZSCORE: () => {},
+  ZRANGE: () => {},
+  HMSET: () => {},
+  DEL: () => {},
+  HGETALL: () => {}
+};
 
 describe("connections", () => {
-  test("has a port defined", () => {});
+  test("is defined", () => {
+    const db = dbFactory(mockClient);
+    expect(db.connections).toBeDefined();
+  });
+
+  test("is an observable", () => {
+    const db = dbFactory(mockClient);
+    expect(isObservable(db.connections)).toBe(true);
+  });
 });
 
 describe("disconnections", () => {
-  test("has a port defined", () => {});
+  test("is defined", () => {
+    const db = dbFactory(mockClient);
+    expect(db.disconnections).toBeDefined();
+  });
 
-  test("has a host defined", () => {});
+  test("is an observable", () => {
+    const db = dbFactory(mockClient);
+    expect(isObservable(db.disconnections)).toBe(true);
+  });
 });
 
 describe("getLight", () => {

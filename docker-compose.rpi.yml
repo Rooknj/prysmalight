@@ -8,9 +8,8 @@ services:
     ports:
       - "4001:4001"
     environment:
-      - REDIS_HOST=redis
-      - MOCKS="Mock 1,Mock 2,Mock 3"
-      - MQTT_HOST=broker
+      - REDIS_HOST=redis # DO NOT delete this because travis needs it for some reason
+      - MQTT_HOST=broker # DO NOT delete this because travis needs it for some reason
   redis:
     image: redis:latest
     ports:

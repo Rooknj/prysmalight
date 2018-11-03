@@ -1,23 +1,23 @@
 const config = require("./config");
 
 describe("serverSettings", () => {
-  test("has a default port of 4001", () => {
-    expect(config.serverSettings.port).toBe(4001);
+  test("has a port defined", () => {
+    expect(config.serverSettings.port).toBeDefined();
   });
 });
 
 describe("redisSettings", () => {
-  test("has a default port of 6379", () => {
-    expect(config.redisSettings.port).toBe(6379);
+  test("has a port defined", () => {
+    expect(config.redisSettings.port).toBeDefined();
   });
 
-  test("has a default host of localhost", () => {
-    expect(config.redisSettings.host).toBe("localhost");
+  test("has a host defined", () => {
+    expect(config.redisSettings.host).toBeDefined();
   });
 });
 //tcp://raspberrypi.local:1883
 describe("mqttSettings", () => {
-  test("has a default host of tcp://raspberrypi.local:1883", () => {
-    expect(config.mqttSettings.host).toBe("tcp://raspberrypi.local:1883");
+  test("has a host defined", () => {
+    expect(config.mqttSettings.host).toBeDefined();
   });
 });

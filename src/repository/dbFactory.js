@@ -47,12 +47,6 @@ const dbFactory = client => {
    * @param {string} id
    */
   const getLight = async id => {
-    if (!client.connected) {
-      return {
-        error: new Error(`Can not get "${id}". Not connected to Redis`)
-      };
-    }
-
     let lightData, lightEffect;
     // Get data about the light
     try {
@@ -77,12 +71,6 @@ const dbFactory = client => {
    * Get all added lights from the database.
    */
   const getAllLights = async () => {
-    if (!client.connected) {
-      return {
-        error: new Error("Can not get lights. Not connected to Redis")
-      };
-    }
-
     // Get all the light keys from redis
     let lightKeys;
     try {
@@ -126,12 +114,6 @@ const dbFactory = client => {
    * @param {object} lightData
    */
   const setLight = async (id, lightData) => {
-    if (!client.connected) {
-      return {
-        error: new Error(`Can not set "${id}". Not connected to Redis`)
-      };
-    }
-
     // You need an id to set the light
     if (!id) {
       return { error: new Error("No ID supplied to setLight()") };
@@ -188,12 +170,6 @@ const dbFactory = client => {
    * @param {string} id
    */
   const addLight = async id => {
-    if (!client.connected) {
-      return {
-        error: new Error(`Can not add "${id}". Not connected to Redis`)
-      };
-    }
-
     let lightScore, addLightKeyResponse, addLightDataResponse;
 
     // TODO: Figure out what i am doing here
@@ -255,12 +231,6 @@ const dbFactory = client => {
    * @param {string} id
    */
   const removeLight = async id => {
-    if (!client.connected) {
-      return {
-        error: new Error(`Can't remove "${id}". Not connected to redis`)
-      };
-    }
-
     let removeKeyResponse, deleteLightResponse;
 
     // TODO: Figure out what I am doing here
@@ -312,14 +282,6 @@ const dbFactory = client => {
    * @param {string} id
    */
   const hasLight = async id => {
-    if (!client.connected) {
-      return {
-        error: new Error(
-          `Can not check if "${id}" was added. Not connected to Redis`
-        )
-      };
-    }
-
     let lightScore;
     // May throw an error
     lightScore = await asyncZSCORE("lightKeys", id);

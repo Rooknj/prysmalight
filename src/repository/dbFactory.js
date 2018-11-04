@@ -213,6 +213,8 @@ const dbFactory = client => {
     }
 
     // Add the light id to an ordered set
+    // If the response is 1, then adding the light was successful
+    // If 0, it was unsuccessful
     try {
       addLightKeyResponse = await asyncZADD("lightKeys", lightScore, id);
     } catch (error) {
@@ -220,14 +222,13 @@ const dbFactory = client => {
     }
 
     // Check to make sure that the light id was successfully added.
-    // If the response is 1, then adding the light was successful
-    // If 0, it was unsuccessful
     switch (addLightKeyResponse) {
       // Add the light data if successful
       case 1:
         debug("successfully added key");
         try {
           // Set the light to it's default value with the provided light id
+          // If the response is OK, then setting the light was successful
           addLightDataResponse = await asyncHMSET([
             id,
             "connected",
@@ -262,9 +263,8 @@ const dbFactory = client => {
         };
     }
 
-    // TODO: Figure out what i am doing here
+    // Check to make sure the light data was successfully added
     switch (addLightDataResponse) {
-      // If the response is OK, then setting the light was successful
       case "OK":
         debug("Light successfully added");
         // Save the redis database to persistant storage
@@ -295,17 +295,17 @@ const dbFactory = client => {
 
     let removeKeyResponse, deleteLightResponse;
 
-    // TODO: Figure out what I am doing here
+    // Remove the light keyF
+    // If the response is 1, then deleting the lightKey was successful
+    // If 0, it was unsuccessful
     try {
       removeKeyResponse = await asyncZREM("lightKeys", id);
     } catch (error) {
       return { error };
     }
 
-    // TODO: Figure out what I am doing here
+    // Remove the light data
     switch (removeKeyResponse) {
-      // If the response is 1, then deleting the lightKey was successful
-      // If 0, it was unsuccessful
       case 1:
         debug("successfully deleted key");
         try {

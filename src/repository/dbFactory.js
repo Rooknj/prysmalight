@@ -1,6 +1,5 @@
 const { promisify } = require("util");
 const Debug = require("debug").default;
-const { getNewRedisLight } = require("./lightUtil");
 const debug = Debug("db");
 const { fromEvent } = require("rxjs");
 
@@ -206,32 +205,55 @@ const dbFactory = client => {
 
     let lightScore, addLightKeyResponse, addLightDataResponse;
 
-    // TODO: Figure out what i am doing here
+    // Increment the light score so that each light has a higher score than the previous
     try {
       lightScore = await asyncINCR("lightScore");
     } catch (error) {
       return { error };
     }
 
-    // TODO: Figure out what i am doing here
+    // Add the light id to an ordered set
     try {
       addLightKeyResponse = await asyncZADD("lightKeys", lightScore, id);
     } catch (error) {
       return { error };
     }
 
-    // TODO: Figure out what i am doing here
+    // Check to make sure that the light id was successfully added.
+    // If the response is 1, then adding the light was successful
+    // If 0, it was unsuccessful
     switch (addLightKeyResponse) {
-      // If the response is 1, then adding the light was successful
-      // If 0, it was unsuccessful
+      // Add the light data if successful
       case 1:
         debug("successfully added key");
         try {
-          addLightDataResponse = await asyncHMSET(getNewRedisLight(id));
+          // Set the light to it's default value with the provided light id
+          addLightDataResponse = await asyncHMSET([
+            id,
+            "connected",
+            0,
+            "state",
+            "OFF",
+            "brightness",
+            100,
+            "color:red",
+            255,
+            "color:green",
+            0,
+            "color:blue",
+            0,
+            "effect",
+            "None",
+            "speed",
+            4,
+            "effectsKey",
+            `${id}:effects`
+          ]);
         } catch (error) {
           return { error };
         }
         break;
+      // Return an error if not successful
       default:
         return {
           error: new Error(

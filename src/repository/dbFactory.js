@@ -1,9 +1,6 @@
 const { promisify } = require("util");
 const Debug = require("debug").default;
-const {
-  getNewRedisLight,
-  mapRedisObjectToLightObject
-} = require("./lightUtil");
+const { getNewRedisLight } = require("./lightUtil");
 const debug = Debug("db");
 const { fromEvent } = require("rxjs");
 
@@ -69,7 +66,20 @@ const dbFactory = client => {
     }
 
     // Convert that info into a javascript object
-    const lightObject = mapRedisObjectToLightObject(id, lightData, lightEffect);
+    const lightObject = {
+      id,
+      connected: lightData.connected,
+      state: lightData.state,
+      brightness: parseInt(lightData.brightness),
+      color: {
+        r: parseInt(lightData["color:red"]),
+        g: parseInt(lightData["color:green"]),
+        b: parseInt(lightData["color:blue"])
+      },
+      effect: lightData.effect,
+      speed: parseInt(lightData.speed),
+      supportedEffects: lightEffect
+    };
     return { light: lightObject };
   };
 

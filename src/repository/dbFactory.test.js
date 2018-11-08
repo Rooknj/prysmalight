@@ -341,23 +341,87 @@ describe("getAllLights", () => {
 
     // Mock out db's getLight method
     // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.getLight = jest.fn(id => ({ light: { id } }));
+    db.__proto__.getLight = jest.fn(id => ({ error: null, light: { id } }));
 
     // Call getAllLights
     const { error, lights } = await db.getAllLights();
 
     // Check to make sure there were no errors and lights is what we expect it to be
     expect(error).toBeNull();
-    expect(lights).toEqual(LIGHTKEYS);
+    expect(lights).toEqual(LIGHTKEYS.map(key => ({ id: key })));
   });
-  test("returns an array containing all lights in the database (Example 2)", () => {});
-  test("returns an empty array there are no lights in the database", () => {});
+  test("returns an array containing all lights in the database (Example 2)", async () => {
+    // Create mocks and db
+    const LIGHTKEYS = ["Test A", "Test B", "Test C"];
+    let mockClient = createMockClient();
+    mockClient.ZRANGE = jest.fn((key, low, high, cb) => cb(null, LIGHTKEYS));
+    const db = dbFactory(mockClient);
+
+    // Mock out db's getLight method
+    // Note: You have to change the prototype method because we are creating the object using Object.create()
+    db.__proto__.getLight = jest.fn(id => ({ error: null, light: { id } }));
+
+    // Call getAllLights
+    const { error, lights } = await db.getAllLights();
+
+    // Check to make sure there were no errors and lights is what we expect it to be
+    expect(error).toBeNull();
+    expect(lights).toEqual(LIGHTKEYS.map(key => ({ id: key })));
+  });
+  test("returns an empty array there are no lights in the database", async () => {
+    // Create mocks and db
+    const LIGHTKEYS = [];
+    let mockClient = createMockClient();
+    mockClient.ZRANGE = jest.fn((key, low, high, cb) => cb(null, LIGHTKEYS));
+    const db = dbFactory(mockClient);
+
+    // Mock out db's getLight method
+    // Note: You have to change the prototype method because we are creating the object using Object.create()
+    db.__proto__.getLight = jest.fn(id => ({ error: null, light: { id } }));
+
+    // Call getAllLights
+    const { error, lights } = await db.getAllLights();
+
+    // Check to make sure there were no errors and lights is what we expect it to be
+    expect(error).toBeNull();
+    expect(lights).toEqual([]);
+  });
+  test("returns an error if at least one of the lights was not able to be fetched", async () => {
+    // Create mocks and db
+    const LIGHTKEYS = ["Test A", "Test B", "Test C"];
+    let mockClient = createMockClient();
+    mockClient.ZRANGE = jest.fn((key, low, high, cb) => cb(null, LIGHTKEYS));
+    const db = dbFactory(mockClient);
+
+    // Mock out db's getLight method so it returns an error
+    // Note: You have to change the prototype method because we are creating the object using Object.create()
+    db.__proto__.getLight = jest.fn(() => ({ error: new Error("Test Error") }));
+
+    // Call getAllLights
+    const { error } = await db.getAllLights();
+
+    // Check to make sure there was an error returned
+    expect(error).toBeInstanceOf(Error);
+  });
   test("returns an error if the redis client is not connected", async () => {
     let mockClient = createMockClient();
     const db = dbFactory(mockClient);
     mockClient.connected = false;
     const { error } = await db.getAllLights();
-    expect(error).toBeDefined();
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("returns an error if it fails to get the light keys (ZRANGE)", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    mockClient.ZRANGE = jest.fn((key, low, high, cb) =>
+      cb(new Error("Test Error"))
+    );
+    const db = dbFactory(mockClient);
+
+    // Call getAllLights
+    const { error } = await db.getAllLights();
+
+    // Check to make sure there was an error returned
     expect(error).toBeInstanceOf(Error);
   });
   test("calls ZRANGE with the correct parameters", async () => {
@@ -373,8 +437,6 @@ describe("getAllLights", () => {
       expect.anything()
     );
   });
-  test("returns an error if it fails to get the light keys (ZRANGE)", async () => {});
-  test("returns an error if one of the lights was not able to be fetched", () => {});
 });
 
 describe("setLight", () => {

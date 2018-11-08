@@ -439,7 +439,7 @@ describe("getAllLights", () => {
   });
 });
 
-describe("setLight", () => {
+describe.skip("setLight", () => {
   test("returns an error if the redis client is not connected", () => {});
   test("returns an error if no id is provided", () => {});
   test("returns an error if it fails to set the Effect List (SADD)", () => {});
@@ -456,7 +456,7 @@ describe("setLight", () => {
   test("does not change data that isn't provided", () => {});
 });
 
-describe("addLight", () => {
+describe.skip("addLight", () => {
   test("returns an error if the redis client is not connected", () => {});
   test("returns an error if updating the light order throws an error (INCR)", () => {});
   test("returns an error if the light id was already added", () => {});
@@ -472,7 +472,7 @@ describe("addLight", () => {
   test("returns the newly added light", () => {});
 });
 
-describe("removeLight", () => {
+describe.skip("removeLight", () => {
   test("returns an error if the redis client is not connected", () => {});
   test("returns successfully if the light id was already removed or not present", () => {});
   test("returns an error if removing the light id throws an error (ZREM)", () => {});
@@ -486,7 +486,7 @@ describe("removeLight", () => {
   test("returns the id of the removed light", () => {});
 });
 
-describe("hasLight", () => {
+describe.skip("hasLight", () => {
   test("returns an error if the redis client is not connected", () => {});
   test("returns an error if getting the light id throws an error (ZSCORE)", () => {});
   test("returns true ig the light id is in the database", () => {});

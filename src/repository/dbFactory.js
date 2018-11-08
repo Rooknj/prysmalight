@@ -27,6 +27,10 @@ const dbFactory = client => {
     asyncDEL = promisify(client.DEL).bind(client),
     asyncHGETALL = promisify(client.HGETALL).bind(client);
 
+  // Initializing the self object which enables us to call sibiling methods
+  //(ex: getAllLights calls self.getLight() instead of just getLight())
+  let self = {};
+
   /**
    * An observable of all the times the client connects
    */
@@ -79,7 +83,7 @@ const dbFactory = client => {
       speed: parseInt(lightData.speed),
       supportedEffects: lightEffect
     };
-    return { light: lightObject };
+    return { error: null, light: lightObject };
   };
 
   /**
@@ -102,7 +106,7 @@ const dbFactory = client => {
 
     // For each light key, get the corresponding light data
     const mapLightPromises = lightKeys.map(async lightKey =>
-      getLight(lightKey)
+      self.getLight(lightKey)
     );
 
     // Wait for all of the promises returned by getLight to resolve
@@ -188,7 +192,7 @@ const dbFactory = client => {
       return { error };
     }
 
-    return getLight(id);
+    return self.getLight(id);
   };
 
   /**
@@ -270,7 +274,7 @@ const dbFactory = client => {
         // Save the redis database to persistant storage
         client.BGSAVE();
         // Return the newly added light
-        return getLight(id);
+        return self.getLight(id);
       default:
         return {
           error: new Error(
@@ -329,7 +333,7 @@ const dbFactory = client => {
         // Save the redis database to persistant storage
         client.BGSAVE();
         // Return the id of the deleted light
-        return { lightRemoved: { id } };
+        return { error: null, lightRemoved: { id } };
       default:
         return {
           error: new Error(
@@ -359,16 +363,18 @@ const dbFactory = client => {
     // If the light has a score, it exists.
     if (lightScore) {
       return {
+        error: null,
         hasLight: true
       };
     } else {
       return {
+        error: null,
         hasLight: false
       };
     }
   };
 
-  return Object.create({
+  self = {
     connections,
     disconnections,
     getAllLights,
@@ -377,7 +383,9 @@ const dbFactory = client => {
     addLight,
     removeLight,
     hasLight
-  });
+  };
+
+  return Object.create(self);
 };
 
 module.exports = dbFactory;

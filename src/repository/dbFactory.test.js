@@ -136,20 +136,22 @@ describe("getLight", () => {
     const { error, light } = await db.getLight(ID);
     expect(error).toBeUndefined();
     expect(light).toBeDefined();
-    expect(light).toEqual({
-      id: ID,
-      connected: CONNECTED,
-      state: STATE,
-      brightness: parseInt(BRIGHTNESS),
-      color: {
-        r: parseInt(RED),
-        g: parseInt(GREEN),
-        b: parseInt(BLUE)
-      },
-      effect: EFFECT,
-      speed: parseInt(SPEED),
-      supportedEffects: EFFECTSLIST
-    });
+    expect(light).toEqual(
+      expect.objectContaining({
+        id: ID,
+        connected: CONNECTED,
+        state: STATE,
+        brightness: parseInt(BRIGHTNESS),
+        color: {
+          r: parseInt(RED),
+          g: parseInt(GREEN),
+          b: parseInt(BLUE)
+        },
+        effect: EFFECT,
+        speed: parseInt(SPEED),
+        supportedEffects: EFFECTSLIST
+      })
+    );
   });
   test("returns the correct state", async () => {
     let mockClient = createMockClient();

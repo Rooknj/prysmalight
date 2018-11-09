@@ -76,10 +76,18 @@ module.exports = ({ dbClient, pubsubClient }) => {
       return;
     }
 
+    let error, changedLight;
+
     // Update the light's connection data in the db
-    const { error, light: changedLight } = await db.setLight(message.name, {
+    error = await db.setLight(message.name, {
       connected: connectionString
     });
+    if (error) {
+      debug(error);
+      return;
+    }
+
+    ({ error, light: changedLight } = await db.getLight(message.name));
     if (error) {
       debug(error);
       return;
@@ -108,16 +116,19 @@ module.exports = ({ dbClient, pubsubClient }) => {
     if (effect) newState = { ...newState, effect };
     if (speed) newState = { ...newState, speed };
 
+    let error, changedLight;
     // Update the light's state data in the db
-    const { error, light: changedLight } = await db.setLight(
-      message.name,
-      newState
-    );
+    error = await db.setLight(message.name, newState);
     if (error) {
       debug(error);
       return;
     }
 
+    ({ error, light: changedLight } = await db.getLight(message.name));
+    if (error) {
+      debug(error);
+      return;
+    }
     // Notify subscribers of change in state
     badPubSub.publish(message.name, { lightChanged: changedLight });
     badPubSub.publish("lightsChanged", {
@@ -133,10 +144,18 @@ module.exports = ({ dbClient, pubsubClient }) => {
    * @param {object} message - the effect list message of a light
    */
   const handleEffectListMessage = async message => {
+    let error, changedLight;
+
     // Update the light's effect list in the db
-    const { error, light: changedLight } = await db.setLight(message.name, {
+    error = await db.setLight(message.name, {
       supportedEffects: message.effectList
     });
+    if (error) {
+      debug(error);
+      return;
+    }
+
+    ({ error, light: changedLight } = db.getLight(message.name));
     if (error) {
       debug(error);
       return;

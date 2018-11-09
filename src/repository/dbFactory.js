@@ -147,8 +147,14 @@ const dbFactory = client => {
 
     // You need an id to set the light
     if (!id) {
-      return { error: new Error("No ID supplied to setLight()") };
+      return new Error("No ID supplied to setLight()");
     }
+
+    // You need data to set the light
+    if (!lightData) {
+      return new Error("No data supplied to setLight()");
+    }
+
     // Populate the redis object with the id of the light as a key
     let redisObject = [id];
     // Add the connected data
@@ -182,6 +188,11 @@ const dbFactory = client => {
       );
     }
 
+    // If none of the provided lightData was relavent, return an error
+    if (redisObject.length < 2) {
+      return new Error("The Data Supplied to setLight() was not light data");
+    }
+
     // Push data object to redis database
     const addLightDataPromise = asyncHMSET(redisObject);
 
@@ -189,10 +200,10 @@ const dbFactory = client => {
     try {
       await Promise.all([addLightDataPromise, addEffectsPromise]);
     } catch (error) {
-      return { error };
+      return error;
     }
 
-    return self.getLight(id);
+    return null;
   };
 
   /**

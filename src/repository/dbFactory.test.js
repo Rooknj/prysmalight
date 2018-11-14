@@ -439,21 +439,265 @@ describe("getAllLights", () => {
   });
 });
 
-describe.skip("setLight", () => {
-  test("returns an error if the redis client is not connected", () => {});
-  test("returns an error if no id is provided", () => {});
-  test("returns an error if it fails to set the Effect List (SADD)", () => {});
-  test("returns an error if it fails to set the light data (HMSET)", () => {});
-  test("calls SADD with the correct parameters", () => {});
-  test("calls HMSET with the correct parameters", () => {});
-  test("correctly sets the light connection status", () => {});
-  test("correctly sets the light state", () => {});
-  test("correctly sets the light brightness", () => {});
-  test("correctly sets the light effect", () => {});
-  test("correctly sets the light speed", () => {});
-  test("correctly sets the light color", () => {});
-  test("correctly sets the light effect list in the correct order", () => {});
-  test("does not change data that isn't provided", () => {});
+describe("setLight", () => {
+  test("correctly sets the light and returns no error (Example 1)", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test A",
+      CONNECTED = "2",
+      STATE = "OFF",
+      BRIGHTNESS = "100",
+      RED = "165",
+      GREEN = "0",
+      BLUE = "255",
+      EFFECT = "None",
+      SPEED = "4",
+      EFFECTSLIST = ["Test 1", "Test 2", "Test 3"];
+    const lightData = {
+      connected: CONNECTED,
+      state: STATE,
+      brightness: BRIGHTNESS,
+      color: { r: RED, g: GREEN, b: BLUE },
+      effect: EFFECT,
+      speed: SPEED,
+      supportedEffects: EFFECTSLIST
+    };
+    const db = dbFactory(mockClient);
+
+    // Call setLight
+    const error = await db.setLight(ID, lightData);
+
+    // Check to make sure no error was returned and that light contains the correct data
+    expect(error).toBeNull();
+    expect(mockClient.SADD).toHaveBeenCalled();
+    expect(mockClient.SADD).toHaveBeenCalledWith(
+      `${ID}:effects`,
+      EFFECTSLIST,
+      expect.anything()
+    );
+    expect(mockClient.HMSET).toHaveBeenCalled();
+    expect(mockClient.HMSET).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        ID,
+        "connected",
+        CONNECTED,
+        "state",
+        STATE,
+        "brightness",
+        BRIGHTNESS,
+        "effect",
+        EFFECT,
+        "speed",
+        SPEED,
+        "color:red",
+        RED,
+        "color:green",
+        GREEN,
+        "color:blue",
+        BLUE,
+        "effectsKey",
+        `${ID}:effects`
+      ]),
+      expect.anything()
+    );
+  });
+  test("correctly sets the light and returns no error (Example 2)", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test B",
+      CONNECTED = "0",
+      STATE = "ON",
+      BRIGHTNESS = "30",
+      RED = "0",
+      GREEN = "255",
+      BLUE = "142",
+      EFFECT = "Test Effect",
+      SPEED = "7",
+      EFFECTSLIST = ["Test A", "Test B", "Test C"];
+    const lightData = {
+      connected: CONNECTED,
+      state: STATE,
+      brightness: BRIGHTNESS,
+      color: { r: RED, g: GREEN, b: BLUE },
+      effect: EFFECT,
+      speed: SPEED,
+      supportedEffects: EFFECTSLIST
+    };
+    const db = dbFactory(mockClient);
+
+    // Call setLight
+    const error = await db.setLight(ID, lightData);
+
+    // Check to make sure no error was returned and that light contains the correct data
+    expect(error).toBeNull();
+    expect(mockClient.SADD).toHaveBeenCalled();
+    expect(mockClient.SADD).toHaveBeenCalledWith(
+      `${ID}:effects`,
+      EFFECTSLIST,
+      expect.anything()
+    );
+    expect(mockClient.HMSET).toHaveBeenCalled();
+    expect(mockClient.HMSET).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        ID,
+        "connected",
+        CONNECTED,
+        "state",
+        STATE,
+        "brightness",
+        BRIGHTNESS,
+        "effect",
+        EFFECT,
+        "speed",
+        SPEED,
+        "color:red",
+        RED,
+        "color:green",
+        GREEN,
+        "color:blue",
+        BLUE,
+        "effectsKey",
+        `${ID}:effects`
+      ]),
+      expect.anything()
+    );
+  });
+  test("does not change data that isn't provided", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test Not",
+      STATE = "ON",
+      EFFECT = "Test Effect";
+    const lightData = {
+      state: STATE,
+      effect: EFFECT
+    };
+    const db = dbFactory(mockClient);
+
+    // Call setLight
+    const error = await db.setLight(ID, lightData);
+
+    // Check to make sure no error was returned and that light contains the correct data and does not contain extra data
+    expect(error).toBeNull();
+    expect(mockClient.SADD).not.toHaveBeenCalled();
+    expect(mockClient.HMSET).toHaveBeenCalled();
+    expect(mockClient.HMSET).toHaveBeenCalledWith(
+      [ID, "state", STATE, "effect", EFFECT],
+      expect.anything()
+    );
+  });
+  test("ignores provided data that is not light data", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test B",
+      CONNECTED = "0",
+      RANDOM = "QWERTY";
+    const lightData = {
+      connected: CONNECTED,
+      random: RANDOM
+    };
+    const db = dbFactory(mockClient);
+
+    // Call setLight
+    const error = await db.setLight(ID, lightData);
+
+    // Check to make sure no error was returned and that light contains the correct data and does not contain the random data
+    expect(error).toBeNull();
+    expect(mockClient.HMSET).toHaveBeenCalled();
+    expect(mockClient.HMSET).toHaveBeenCalledWith(
+      [ID, "connected", CONNECTED],
+      expect.anything()
+    );
+  });
+  test("returns an error if the redis client is not connected", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    const ID = "Test B",
+      CONNECTED = "0";
+    const lightData = {
+      connected: CONNECTED
+    };
+    mockClient.connected = false;
+    const error = await db.setLight(ID, lightData);
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("returns an error if no id is provided", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    mockClient.connected = false;
+    const error = await db.setLight();
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("returns an error if no data to set is provided", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    const ID = "Test B";
+    const error = await db.setLight(ID);
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("returns an error if none of the provided data was light data", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    const ID = "Test B",
+      RANDOM1 = "QWERTY",
+      RANDOM2 = "UIOP",
+      RANDOM3 = "ASDF";
+    const lightData = {
+      random1: RANDOM1,
+      random2: RANDOM2,
+      random3: RANDOM3
+    };
+    const error = await db.setLight(ID, lightData);
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("returns an error if it fails to set the Effect List (SADD)", async () => {
+    let mockClient = createMockClient();
+    mockClient.SADD = jest.fn((key, val, cb) => cb(new Error()));
+    const db = dbFactory(mockClient);
+    const ID = "Test B",
+      EFFECTSLIST = ["Test 1", "Test 2", "Test 3"];
+    const lightData = {
+      supportedEffects: EFFECTSLIST
+    };
+    const error = await db.setLight(ID, lightData);
+    expect(mockClient.SADD).toHaveBeenCalled();
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("returns an error if it fails to set the light data (HMSET)", async () => {
+    let mockClient = createMockClient();
+    mockClient.HMSET = jest.fn((key, val, cb) => cb(new Error()));
+    const db = dbFactory(mockClient);
+    const ID = "Test B",
+      CONNECTED = "ON";
+    const lightData = {
+      connected: CONNECTED
+    };
+    const error = await db.setLight(ID, lightData);
+    expect(mockClient.HMSET).toHaveBeenCalled();
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("correctly sets the light effect list in the correct order", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test A",
+      EFFECTSLIST = ["Test 1", "Test 2", "Test 3"];
+    const lightData = {
+      supportedEffects: EFFECTSLIST
+    };
+    const db = dbFactory(mockClient);
+
+    // Call setLight
+    const error = await db.setLight(ID, lightData);
+
+    // Check to make sure no error was returned and that light contains the correct data
+    expect(error).toBeNull();
+    expect(mockClient.SADD).toHaveBeenCalled();
+    expect(mockClient.SADD).toHaveBeenCalledWith(
+      `${ID}:effects`,
+      EFFECTSLIST,
+      expect.anything()
+    );
+  });
 });
 
 describe.skip("addLight", () => {

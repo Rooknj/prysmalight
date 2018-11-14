@@ -140,9 +140,7 @@ const dbFactory = client => {
    */
   const setLight = async (id, lightData) => {
     if (!client.connected) {
-      return {
-        error: new Error(`Can not set "${id}". Not connected to Redis`)
-      };
+      return new Error(`Can not set "${id}". Not connected to Redis`);
     }
 
     // You need an id to set the light

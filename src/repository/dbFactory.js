@@ -207,13 +207,17 @@ const dbFactory = client => {
   /**
    * Add a new light with the specified id.
    * Default values are provided
+   * May return an error
    * @param {string} id
    */
   const addLight = async id => {
     if (!client.connected) {
-      return {
-        error: new Error(`Can not add "${id}". Not connected to Redis`)
-      };
+      return new Error(`Can not add "${id}". Not connected to Redis`);
+    }
+
+    // Check to make sure the light wasnt already added
+    if (self.hasLight(id)) {
+      return new Error(`The light with the id ${id} was already added`);
     }
 
     let lightScore, addLightKeyResponse, addLightDataResponse;
@@ -222,7 +226,7 @@ const dbFactory = client => {
     try {
       lightScore = await asyncINCR("lightScore");
     } catch (error) {
-      return { error };
+      return error;
     }
 
     // Add the light id to an ordered set
@@ -231,7 +235,7 @@ const dbFactory = client => {
     try {
       addLightKeyResponse = await asyncZADD("lightKeys", lightScore, id);
     } catch (error) {
-      return { error };
+      return error;
     }
 
     // Check to make sure that the light id was successfully added.
@@ -264,16 +268,14 @@ const dbFactory = client => {
             `${id}:effects`
           ]);
         } catch (error) {
-          return { error };
+          return error;
         }
         break;
       // Return an error if not successful
       default:
-        return {
-          error: new Error(
-            "Could not add light key to redis. returned with response code != 1"
-          )
-        };
+        return new Error(
+          "Could not add light key to redis. returned with response code != 1"
+        );
     }
 
     // Check to make sure the light data was successfully added
@@ -282,14 +284,12 @@ const dbFactory = client => {
         debug("Light successfully added");
         // Save the redis database to persistant storage
         client.BGSAVE();
-        // Return the newly added light
-        return self.getLight(id);
+        // Return null as the error
+        return null;
       default:
-        return {
-          error: new Error(
-            'Could not add light key to redis. returned with response code != "OK"'
-          )
-        };
+        return new Error(
+          'Could not add light key to redis. returned with response code != "OK"'
+        );
     }
   };
 

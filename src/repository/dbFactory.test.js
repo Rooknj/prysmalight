@@ -10,14 +10,15 @@ const createMockClient = () => {
     on: jest.fn(() => {}),
     SMEMBERS: jest.fn((key, cb) => cb(err, result)),
     SADD: jest.fn((key, val, cb) => cb(err, result)),
-    INCR: jest.fn((key, cb) => cb(err, result)),
-    ZADD: jest.fn((key, score, val, cb) => cb(err, result)),
+    INCR: jest.fn((key, cb) => cb(err, 2)),
+    ZADD: jest.fn((key, score, val, cb) => cb(err, 1)),
     ZREM: jest.fn((key, val, cb) => cb(err, result)),
     ZSCORE: jest.fn((key, val, cb) => cb(err, result)),
     ZRANGE: jest.fn((key, low, high, cb) => cb(err, [])),
-    HMSET: jest.fn((arr, cb) => cb(err, result)),
+    HMSET: jest.fn((arr, cb) => cb(err, "OK")),
     DEL: jest.fn((key, cb) => cb(err, result)),
     HGETALL: jest.fn((key, cb) => cb(err, result)),
+    BGSAVE: jest.fn(),
     connected: true
   };
 };
@@ -700,9 +701,145 @@ describe("setLight", () => {
   });
 });
 
-describe.skip("addLight", () => {
-  test("returns an error if the redis client is not connected", () => {});
-  test("returns an error if updating the light order throws an error (INCR)", () => {});
+describe("addLight", () => {
+  test("correctly adds the light and returns no error (Example 1)", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test A";
+    const LIGHTSCORE = 5;
+    mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
+    const db = dbFactory(mockClient);
+
+    // Mock out db's hasLight method
+    // Note: You have to change the prototype method because we are creating the object using Object.create()
+    db.__proto__.hasLight = jest.fn(() => false);
+
+    // Call addLight
+    const error = await db.addLight(ID);
+
+    // Check to make sure no error was returned and that redis was backed up to persistent storage
+    expect(error).toBeNull();
+    expect(mockClient.INCR).toHaveBeenCalled();
+    expect(mockClient.INCR).toHaveBeenCalledWith(
+      "lightScore",
+      expect.anything()
+    );
+    expect(mockClient.ZADD).toHaveBeenCalled();
+    expect(mockClient.ZADD).toHaveBeenCalledWith(
+      "lightKeys",
+      LIGHTSCORE,
+      ID,
+      expect.anything()
+    );
+    expect(mockClient.HMSET).toHaveBeenCalled();
+    expect(mockClient.HMSET).toHaveBeenCalledWith(
+      [
+        ID,
+        "connected",
+        0,
+        "state",
+        "OFF",
+        "brightness",
+        100,
+        "color:red",
+        255,
+        "color:green",
+        0,
+        "color:blue",
+        0,
+        "effect",
+        "None",
+        "speed",
+        4,
+        "effectsKey",
+        `${ID}:effects`
+      ],
+      expect.anything()
+    );
+    expect(mockClient.BGSAVE).toHaveBeenCalled();
+  });
+  test("correctly adds the light and returns no error (Example 2)", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test B";
+    const LIGHTSCORE = 8;
+    mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
+    const db = dbFactory(mockClient);
+
+    // Mock out db's hasLight method
+    // Note: You have to change the prototype method because we are creating the object using Object.create()
+    db.__proto__.hasLight = jest.fn(() => false);
+
+    // Call addLight
+    const error = await db.addLight(ID);
+
+    // Check to make sure no error was returned and that redis was backed up to persistent storage
+    expect(error).toBeNull();
+    expect(mockClient.INCR).toHaveBeenCalled();
+    expect(mockClient.INCR).toHaveBeenCalledWith(
+      "lightScore",
+      expect.anything()
+    );
+    expect(mockClient.ZADD).toHaveBeenCalled();
+    expect(mockClient.ZADD).toHaveBeenCalledWith(
+      "lightKeys",
+      LIGHTSCORE,
+      ID,
+      expect.anything()
+    );
+    expect(mockClient.HMSET).toHaveBeenCalled();
+    expect(mockClient.HMSET).toHaveBeenCalledWith(
+      [
+        ID,
+        "connected",
+        0,
+        "state",
+        "OFF",
+        "brightness",
+        100,
+        "color:red",
+        255,
+        "color:green",
+        0,
+        "color:blue",
+        0,
+        "effect",
+        "None",
+        "speed",
+        4,
+        "effectsKey",
+        `${ID}:effects`
+      ],
+      expect.anything()
+    );
+    expect(mockClient.BGSAVE).toHaveBeenCalled();
+  });
+  test("returns an error if the redis client is not connected", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    const ID = "Test B";
+    mockClient.connected = false;
+    const error = await db.addLight(ID);
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("returns an error if updating the light order fails (INCR)", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test A";
+    mockClient.INCR = jest.fn((key, cb) => cb(new Error()));
+    const db = dbFactory(mockClient);
+
+    // Mock out db's hasLight method
+    // Note: You have to change the prototype method because we are creating the object using Object.create()
+    db.__proto__.hasLight = jest.fn(() => false);
+
+    // Call setLight
+    const error = await db.addLight(ID);
+
+    // Check to make sure an error was returned
+    expect(mockClient.INCR).toHaveBeenCalled();
+    expect(error).toBeInstanceOf(Error);
+  });
   test("returns an error if the light id was already added", () => {});
   test("returns an error if adding the light id throws an error (ZADD)", () => {});
   test("returns an error if adding the light id was unsuccessful (ZADD)", () => {});
@@ -713,7 +850,6 @@ describe.skip("addLight", () => {
   test("calls INCR with the correct parameters", () => {});
   test("calls ZADD with the correct parameters", () => {});
   test("calls HMSET with the correct parameters", () => {});
-  test("returns the newly added light", () => {});
 });
 
 describe.skip("removeLight", () => {

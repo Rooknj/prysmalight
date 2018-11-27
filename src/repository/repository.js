@@ -205,12 +205,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
    * @param {string} lightId
    */
   const addLight = async lightId => {
-    let error, hasLight;
-
-    // Check if the light exists already before doing anything else
-    ({ error, hasLight } = await db.hasLight(lightId));
-    if (error) return error;
-    if (hasLight) return new Error(`"${lightId}" is already added`);
+    let error;
 
     // Add new light to light database
     error = await db.addLight(lightId);

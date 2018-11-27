@@ -216,7 +216,9 @@ const dbFactory = client => {
     }
 
     // Check to make sure the light wasnt already added
-    if (self.hasLight(id)) {
+    const { error: err, hasLight } = await self.hasLight(id);
+    if (err) return { error: err };
+    if (hasLight) {
       return new Error(`The light with the id ${id} was already added`);
     }
 

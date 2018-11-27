@@ -213,7 +213,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
     if (hasLight) return new Error(`"${lightId}" is already added`);
 
     // Add new light to light database
-    ({ error } = await db.addLight(lightId));
+    error = await db.addLight(lightId);
     if (error) return error;
 
     // Subscribe to new messages from the new light

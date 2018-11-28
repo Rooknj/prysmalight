@@ -255,7 +255,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
     error = await db.removeLight(lightId);
     if (error) return error;
 
-    const lightRemoved = { lightId };
+    const lightRemoved = { id: lightId };
     // Return the removed light and notify the subscribers
     badPubSub.publish("lightRemoved", { lightRemoved });
     return lightRemoved;

@@ -13,11 +13,11 @@ const createMockClient = () => {
     SADD: jest.fn((key, val, cb) => cb(err, result)),
     INCR: jest.fn((key, cb) => cb(err, 2)),
     ZADD: jest.fn((key, score, val, cb) => cb(err, 1)),
-    ZREM: jest.fn((key, val, cb) => cb(err, result)),
+    ZREM: jest.fn((key, val, cb) => cb(err, 1)),
     ZSCORE: jest.fn((key, val, cb) => cb(err, result)),
     ZRANGE: jest.fn((key, low, high, cb) => cb(err, [])),
     HMSET: jest.fn((arr, cb) => cb(err, "OK")),
-    DEL: jest.fn((key, cb) => cb(err, result)),
+    DEL: jest.fn((key, cb) => cb(err, 1)),
     HGETALL: jest.fn((key, cb) => cb(err, result)),
     BGSAVE: jest.fn(),
     connected: true
@@ -723,10 +723,6 @@ describe("addLight", () => {
     mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
     const db = dbFactory(mockClient);
 
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
-
     // Call addLight
     const error = await db.addLight(ID);
 
@@ -778,10 +774,6 @@ describe("addLight", () => {
     const LIGHTSCORE = 8;
     mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
     const db = dbFactory(mockClient);
-
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
 
     // Call addLight
     const error = await db.addLight(ID);
@@ -842,10 +834,6 @@ describe("addLight", () => {
     mockClient.INCR = jest.fn((key, cb) => cb(new Error()));
     const db = dbFactory(mockClient);
 
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
-
     // Call setLight
     const error = await db.addLight(ID);
 
@@ -861,10 +849,6 @@ describe("addLight", () => {
     mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
     mockClient.ZADD = jest.fn((key, score, val, cb) => cb(new error()));
     const db = dbFactory(mockClient);
-
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
 
     // Call addLight
     const error = await db.addLight(ID);
@@ -882,10 +866,6 @@ describe("addLight", () => {
     mockClient.ZADD = jest.fn((key, score, val, cb) => cb(null, 0));
     const db = dbFactory(mockClient);
 
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
-
     // Call addLight
     const error = await db.addLight(ID);
 
@@ -902,10 +882,6 @@ describe("addLight", () => {
     mockClient.ZADD = jest.fn((key, score, val, cb) => cb(null, 1));
     const db = dbFactory(mockClient);
 
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
-
     // Call addLight
     await db.addLight(ID);
 
@@ -920,10 +896,6 @@ describe("addLight", () => {
     mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
     mockClient.HMSET = jest.fn((arr, cb) => cb(new Error()));
     const db = dbFactory(mockClient);
-
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
 
     // Call addLight
     const error = await db.addLight(ID);
@@ -941,10 +913,6 @@ describe("addLight", () => {
     mockClient.HMSET = jest.fn((arr, cb) => cb(null, "OK"));
     const db = dbFactory(mockClient);
 
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
-
     // Call addLight
     await db.addLight(ID);
 
@@ -960,10 +928,6 @@ describe("addLight", () => {
     mockClient.HMSET = jest.fn((arr, cb) => cb(null, null));
     const db = dbFactory(mockClient);
 
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
-
     // Call addLight
     const error = await db.addLight(ID);
 
@@ -978,10 +942,6 @@ describe("addLight", () => {
     const LIGHTSCORE = 9;
     mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
     const db = dbFactory(mockClient);
-
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
 
     // Call addLight
     await db.addLight(ID);
@@ -1001,10 +961,6 @@ describe("addLight", () => {
     mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
     const db = dbFactory(mockClient);
 
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
-
     // Call addLight
     await db.addLight(ID);
 
@@ -1022,10 +978,6 @@ describe("addLight", () => {
     let mockClient = createMockClient();
     const ID = "Test ARQS";
     const db = dbFactory(mockClient);
-
-    // Mock out db's hasLight method
-    // Note: You have to change the prototype method because we are creating the object using Object.create()
-    db.__proto__.hasLight = jest.fn(() => false);
 
     // Call addLight
     await db.addLight(ID);
@@ -1059,18 +1011,43 @@ describe("addLight", () => {
   });
 });
 
-describe.skip("removeLight", () => {
-  test("returns an error if the redis client is not connected", () => {});
-  test("returns successfully if the light id was already removed or not present", () => {});
-  test("returns an error if removing the light id throws an error (ZREM)", () => {});
-  test("returns an error if removing the light id was unsuccessful (ZREM)", () => {});
-  test("removes the light data if removing the light id was successful (ZREM)", () => {});
-  test("returns an error if removing the light data throws an error (DEL)", () => {});
-  test("saves the redis data to persistant storage if removing the light data was successful (DEL)", () => {});
-  test("returns an error if removing the light data was unsuccessful (DEL)", () => {});
-  test("calls ZREM with the correct parameters", () => {});
-  test("calls DEL with the correct parameters", () => {});
-  test("returns the id of the removed light", () => {});
+describe("removeLight", () => {
+  test("correctly removes the light and returns no error (Example 1)", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test A";
+    const db = dbFactory(mockClient);
+
+    // Call addLight
+    const error = await db.removeLight(ID);
+
+    // Check to make sure no error was returned and that redis was backed up to persistent storage
+    expect(error).toBeNull();
+    expect(mockClient.ZREM).toHaveBeenCalled();
+    expect(mockClient.ZREM).toHaveBeenCalledWith(
+      "lightKeys",
+      ID,
+      expect.anything()
+    );
+    expect(mockClient.DEL).toHaveBeenCalledTimes(2);
+    expect(mockClient.DEL).toHaveBeenCalledWith(
+      `${ID}:effects`,
+      expect.anything()
+    );
+    expect(mockClient.DEL).toHaveBeenCalledWith(ID, expect.anything());
+    expect(mockClient.BGSAVE).toHaveBeenCalled();
+  });
+  test("returns an error if the redis client is not connected", async () => {});
+  test("returns successfully if the light id was already removed or not present", async () => {});
+  test("returns an error if removing the light id throws an error (ZREM)", async () => {});
+  test("returns an error if removing the light id was unsuccessful (ZREM)", async () => {});
+  test("removes the light data if removing the light id was successful (ZREM)", async () => {});
+  test("returns an error if removing the light data throws an error (DEL)", async () => {});
+  test("saves the redis data to persistant storage if removing the light data was successful (DEL)", async () => {});
+  test("returns an error if removing the light data was unsuccessful (DEL)", async () => {});
+  test("calls ZREM with the correct parameters", async () => {});
+  test("calls DEL with the correct parameters", async () => {});
+  test("returns the id of the removed light", async () => {});
 });
 
 describe.skip("hasLight", () => {

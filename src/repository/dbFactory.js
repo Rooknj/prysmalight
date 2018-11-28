@@ -302,52 +302,29 @@ const dbFactory = client => {
       return new Error(`Can't remove "${id}". Not connected to redis`);
     }
 
-    let removeKeyResponse, deleteLightResponse;
-
+    // Delete the light's effect list
     try {
       await asyncDEL(`${id}:effects`);
     } catch (error) {
       return error;
     }
 
-    // Remove the light key from the db
-    // If the response is 1, then deleting the lightKey was successful
-    // If 0, it was unsuccessful
+    // Delete the light's data
     try {
-      removeKeyResponse = await asyncZREM("lightKeys", id);
+      await asyncDEL(id);
     } catch (error) {
       return error;
     }
 
-    // Delete the light data
-    switch (removeKeyResponse) {
-      case 1:
-        debug("successfully deleted key");
-        try {
-          deleteLightResponse = await asyncDEL(id);
-        } catch (error) {
-          return error;
-        }
-        break;
-      default:
-        return new Error(
-          "Could not remove light key from Redis. Response code != 1"
-        );
+    // Remove the light's id from the list of lights
+    try {
+      await asyncZREM("lightKeys", id);
+    } catch (error) {
+      return error;
     }
 
-    // If the response is 1, then deleting the light was successful
-    switch (deleteLightResponse) {
-      case 1:
-        debug("Light successfully deleted");
-        // Save the redis database to persistant storage
-        client.BGSAVE();
-        // Return the id of the deleted light
-        return null;
-      default:
-        return new Error(
-          "Could not remove light key from Redis. Response code != 1"
-        );
-    }
+    client.BGSAVE();
+    return null;
   };
 
   /**

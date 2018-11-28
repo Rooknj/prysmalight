@@ -49,28 +49,34 @@ const dbFactory = client => {
   const getLight = async id => {
     if (!client.connected) {
       return {
-        error: new Error(`Can not get "${id}". Not connected to Redis`)
+        error: new Error(`Can not get "${id}". Not connected to Redis`),
+        light: null
       };
     }
 
-    if (!id) return new Error("You must provide an Id to getLight");
+    if (!id)
+      return {
+        error: new Error("You must provide an Id to getLight"),
+        light: null
+      };
 
     let lightData, lightEffect;
     // Get data about the light
     try {
       lightData = await asyncHGETALL(id);
     } catch (error) {
-      return { error };
+      return { error, light: null };
     }
 
     // If the data returned is null, that means it was not added
-    if (!lightData) return { error: new Error(`"${id}" had no data`) };
+    if (!lightData)
+      return { error: new Error(`"${id}" had no data`), light: null };
 
     // Get the light's effects
     try {
       lightEffect = await asyncSMEMBERS(lightData.effectsKey);
     } catch (error) {
-      return { error };
+      return { error, light: null };
     }
 
     // Convert that info into a javascript object
@@ -97,7 +103,8 @@ const dbFactory = client => {
   const getAllLights = async () => {
     if (!client.connected) {
       return {
-        error: new Error("Can not get lights. Not connected to Redis")
+        error: new Error("Can not get lights. Not connected to Redis"),
+        lights: null
       };
     }
 
@@ -106,7 +113,7 @@ const dbFactory = client => {
     try {
       lightKeys = await asyncZRANGE("lightKeys", 0, -1);
     } catch (error) {
-      return { error };
+      return { error, lights: null };
     }
 
     // For each light key, get the corresponding light data
@@ -320,11 +327,16 @@ const dbFactory = client => {
       return {
         error: new Error(
           `Can not check if "${id}" was added. Not connected to Redis`
-        )
+        ),
+        hasLight: null
       };
     }
 
-    if (!id) return new Error("You must provide an Id to hasLight");
+    if (!id)
+      return {
+        error: new Error("You must provide an Id to hasLight"),
+        hasLight: null
+      };
 
     let lightScore;
     // May throw an error

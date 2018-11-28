@@ -172,6 +172,12 @@ describe("getLight", () => {
     // Check that the error is returned
     expect(error).toBeInstanceOf(Error);
   });
+  test("returns an error if no id was provided", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    const error = await db.getLight();
+    expect(error).toBeInstanceOf(Error);
+  });
   test("returns an error if it fails to get the light data (HGETALL)", async () => {
     // Create mocks and db
     let mockClient = createMockClient();
@@ -827,6 +833,12 @@ describe("addLight", () => {
     const error = await db.addLight(ID);
     expect(error).toBeInstanceOf(Error);
   });
+  test("returns an error if no id was provided", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    const error = await db.addLight();
+    expect(error).toBeInstanceOf(Error);
+  });
   test("returns an error if updating the light order fails (INCR)", async () => {
     // Create mocks and db
     let mockClient = createMockClient();
@@ -956,7 +968,7 @@ describe("removeLight", () => {
     const ID = "Test A";
     const db = dbFactory(mockClient);
 
-    // Call addLight
+    // Call removeLight
     const error = await db.removeLight(ID);
 
     // Check to make sure no error was returned and that redis was backed up to persistent storage
@@ -975,21 +987,105 @@ describe("removeLight", () => {
     expect(mockClient.DEL).toHaveBeenCalledWith(ID, expect.anything());
     expect(mockClient.BGSAVE).toHaveBeenCalled();
   });
-  test("returns an error if the redis client is not connected", async () => {});
-  test("returns successfully if the light id was already removed or not present", async () => {});
-  test("returns an error if removing the light id throws an error (ZREM)", async () => {});
-  test("returns an error if removing the light id was unsuccessful (ZREM)", async () => {});
-  test("removes the light data if removing the light id was successful (ZREM)", async () => {});
-  test("returns an error if removing the light data throws an error (DEL)", async () => {});
-  test("saves the redis data to persistant storage if removing the light data was successful (DEL)", async () => {});
-  test("returns an error if removing the light data was unsuccessful (DEL)", async () => {});
-  test("calls ZREM with the correct parameters", async () => {});
-  test("calls DEL with the correct parameters", async () => {});
-  test("returns the id of the removed light", async () => {});
+  test("correctly removes the light and returns no error (Example 2)", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test 123";
+    const db = dbFactory(mockClient);
+
+    // Call removeLight
+    const error = await db.removeLight(ID);
+
+    // Check to make sure no error was returned and that redis was backed up to persistent storage
+    expect(error).toBeNull();
+    expect(mockClient.ZREM).toHaveBeenCalled();
+    expect(mockClient.ZREM).toHaveBeenCalledWith(
+      "lightKeys",
+      ID,
+      expect.anything()
+    );
+    expect(mockClient.DEL).toHaveBeenCalledTimes(2);
+    expect(mockClient.DEL).toHaveBeenCalledWith(
+      `${ID}:effects`,
+      expect.anything()
+    );
+    expect(mockClient.DEL).toHaveBeenCalledWith(ID, expect.anything());
+    expect(mockClient.BGSAVE).toHaveBeenCalled();
+  });
+  test("returns an error if the redis client is not connected", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    const ID = "Test B";
+    mockClient.connected = false;
+    const error = await db.removeLight(ID);
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("returns an error if no id was provided", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    const error = await db.removeLight();
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("returns an error if removing the light id throws an error (ZREM)", async () => {
+    let mockClient = createMockClient();
+    mockClient.ZREM = jest.fn((key, val, cb) => cb(new Error()));
+    const db = dbFactory(mockClient);
+    const ID = "Test B";
+    const error = await db.removeLight(ID);
+    expect(mockClient.ZREM).toBeCalled();
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("returns an error if removing the light data or key throws an error (DEL)", async () => {
+    let mockClient = createMockClient();
+    mockClient.DEL = jest.fn((key, cb) => cb(new Error()));
+    const db = dbFactory(mockClient);
+    const ID = "Test B";
+    const error = await db.removeLight(ID);
+    expect(mockClient.DEL).toBeCalled();
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("calls ZREM with the correct parameters", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test 123";
+    const db = dbFactory(mockClient);
+
+    // Call removeLight
+    await db.removeLight(ID);
+
+    expect(mockClient.ZREM).toHaveBeenCalled();
+    expect(mockClient.ZREM).toHaveBeenCalledWith(
+      "lightKeys",
+      ID,
+      expect.anything()
+    );
+  });
+  test("calls DEL twice with the correct parameters", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    const ID = "Test 123";
+    const db = dbFactory(mockClient);
+
+    // Call removeLight
+    await db.removeLight(ID);
+
+    expect(mockClient.DEL).toHaveBeenCalledTimes(2);
+    expect(mockClient.DEL).toHaveBeenCalledWith(
+      `${ID}:effects`,
+      expect.anything()
+    );
+    expect(mockClient.DEL).toHaveBeenCalledWith(ID, expect.anything());
+  });
 });
 
 describe.skip("hasLight", () => {
   test("returns an error if the redis client is not connected", () => {});
+  test("returns an error if no id was provided", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    const error = await db.hasLight();
+    expect(error).toBeInstanceOf(Error);
+  });
   test("returns an error if getting the light id throws an error (ZSCORE)", () => {});
   test("returns true ig the light id is in the database", () => {});
   test("returns true ig the light id is not in the database", () => {});

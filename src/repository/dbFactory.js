@@ -304,7 +304,13 @@ const dbFactory = client => {
 
     let removeKeyResponse, deleteLightResponse;
 
-    // Remove the light keyF
+    try {
+      await asyncDEL(`${id}:effects`);
+    } catch (error) {
+      return error;
+    }
+
+    // Remove the light key from the db
     // If the response is 1, then deleting the lightKey was successful
     // If 0, it was unsuccessful
     try {
@@ -313,7 +319,7 @@ const dbFactory = client => {
       return error;
     }
 
-    // Remove the light data
+    // Delete the light data
     switch (removeKeyResponse) {
       case 1:
         debug("successfully deleted key");

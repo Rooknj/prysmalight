@@ -218,9 +218,8 @@ const dbFactory = client => {
       return new Error(`Can not add "${id}". Not connected to Redis`);
     }
 
-    let lightScore, addLightKeyResponse, addLightDataResponse;
-
     // Increment the light score so that each light has a higher score than the previous
+    let lightScore;
     try {
       lightScore = await asyncINCR("lightScore");
     } catch (error) {
@@ -228,67 +227,44 @@ const dbFactory = client => {
     }
 
     // Add the light id to an ordered set
-    // If the response is 1, then adding the light was successful
-    // If 0, it was unsuccessful
     try {
-      addLightKeyResponse = await asyncZADD("lightKeys", lightScore, id);
+      await asyncZADD("lightKeys", lightScore, id);
     } catch (error) {
       return error;
     }
 
-    // Check to make sure that the light id was successfully added.
-    switch (addLightKeyResponse) {
-      // Add the light data if successful
-      case 1:
-        debug("successfully added key");
-        try {
-          // Set the light to it's default value with the provided light id
-          // If the response is OK, then setting the light was successful
-          addLightDataResponse = await asyncHMSET([
-            id,
-            "connected",
-            0,
-            "state",
-            "OFF",
-            "brightness",
-            100,
-            "color:red",
-            255,
-            "color:green",
-            0,
-            "color:blue",
-            0,
-            "effect",
-            "None",
-            "speed",
-            4,
-            "effectsKey",
-            `${id}:effects`
-          ]);
-        } catch (error) {
-          return error;
-        }
-        break;
-      // Return an error if not successful
-      default:
-        return new Error(
-          "Could not add light key to redis. returned with response code != 1"
-        );
+    // Set the light's data to it's default value
+    try {
+      await asyncHMSET([
+        id,
+        "connected",
+        0,
+        "state",
+        "OFF",
+        "brightness",
+        100,
+        "color:red",
+        255,
+        "color:green",
+        0,
+        "color:blue",
+        0,
+        "effect",
+        "None",
+        "speed",
+        4,
+        "effectsKey",
+        `${id}:effects`
+      ]);
+    } catch (error) {
+      return error;
     }
 
-    // Check to make sure the light data was successfully added
-    switch (addLightDataResponse) {
-      case "OK":
-        debug("Light successfully added");
-        // Save the redis database to persistant storage
-        client.BGSAVE();
-        // Return null as the error
-        return null;
-      default:
-        return new Error(
-          'Could not add light key to redis. returned with response code != "OK"'
-        );
-    }
+    // Save redis cache to persistant storage
+    client.BGSAVE();
+
+    // Return null as the error
+    return null;
   };
 
   /**
@@ -323,7 +299,10 @@ const dbFactory = client => {
       return error;
     }
 
+    // Save redis cache to persistant storage
     client.BGSAVE();
+
+    // Return null as the error
     return null;
   };
 

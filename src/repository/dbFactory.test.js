@@ -857,37 +857,6 @@ describe("addLight", () => {
     expect(mockClient.ZADD).toHaveBeenCalled();
     expect(error).toBeInstanceOf(Error);
   });
-  test("returns an error if adding the light id was unsuccessful (ZADD)", async () => {
-    // Create mocks and db
-    let mockClient = createMockClient();
-    const ID = "Test A";
-    const LIGHTSCORE = 5;
-    mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
-    mockClient.ZADD = jest.fn((key, score, val, cb) => cb(null, 0));
-    const db = dbFactory(mockClient);
-
-    // Call addLight
-    const error = await db.addLight(ID);
-
-    // Check to make sure an error was returned
-    expect(mockClient.ZADD).toHaveBeenCalled();
-    expect(error).toBeInstanceOf(Error);
-  });
-  test("attempts to add the light data if adding the light id was successful (ZADD)", async () => {
-    // Create mocks and db
-    let mockClient = createMockClient();
-    const ID = "Test A";
-    const LIGHTSCORE = 5;
-    mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
-    mockClient.ZADD = jest.fn((key, score, val, cb) => cb(null, 1));
-    const db = dbFactory(mockClient);
-
-    // Call addLight
-    await db.addLight(ID);
-
-    // Check to make sure HMSET was called
-    expect(mockClient.HMSET).toHaveBeenCalled();
-  });
   test("returns an error if adding the light data throws an error (HMSET)", async () => {
     // Create mocks and db
     let mockClient = createMockClient();
@@ -895,37 +864,6 @@ describe("addLight", () => {
     const LIGHTSCORE = 5;
     mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
     mockClient.HMSET = jest.fn((arr, cb) => cb(new Error()));
-    const db = dbFactory(mockClient);
-
-    // Call addLight
-    const error = await db.addLight(ID);
-
-    // Check to make sure an error was returned
-    expect(mockClient.HMSET).toHaveBeenCalled();
-    expect(error).toBeInstanceOf(Error);
-  });
-  test("attempts to save the redis data to persistant storage if adding the light data was successful (HMSET)", async () => {
-    // Create mocks and db
-    let mockClient = createMockClient();
-    const ID = "Test A";
-    const LIGHTSCORE = 5;
-    mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
-    mockClient.HMSET = jest.fn((arr, cb) => cb(null, "OK"));
-    const db = dbFactory(mockClient);
-
-    // Call addLight
-    await db.addLight(ID);
-
-    // Check to make sure BGSAVE was called
-    expect(mockClient.BGSAVE).toHaveBeenCalled();
-  });
-  test("returns an error if adding the light data was unsuccessful (HMSET)", async () => {
-    // Create mocks and db
-    let mockClient = createMockClient();
-    const ID = "Test A";
-    const LIGHTSCORE = 5;
-    mockClient.INCR = jest.fn((key, cb) => cb(null, LIGHTSCORE));
-    mockClient.HMSET = jest.fn((arr, cb) => cb(null, null));
     const db = dbFactory(mockClient);
 
     // Call addLight

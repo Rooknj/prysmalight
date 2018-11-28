@@ -53,6 +53,8 @@ const dbFactory = client => {
       };
     }
 
+    if (!id) return new Error("You must provide an Id to getLight");
+
     let lightData, lightEffect;
     // Get data about the light
     try {
@@ -218,6 +220,8 @@ const dbFactory = client => {
       return new Error(`Can not add "${id}". Not connected to Redis`);
     }
 
+    if (!id) return new Error("You must provide an Id to addLight");
+
     // Increment the light score so that each light has a higher score than the previous
     let lightScore;
     try {
@@ -277,6 +281,8 @@ const dbFactory = client => {
       return new Error(`Can't remove "${id}". Not connected to redis`);
     }
 
+    if (!id) return new Error("You must provide an Id to removeLight");
+
     // Delete the light's effect list
     try {
       await asyncDEL(`${id}:effects`);
@@ -317,6 +323,8 @@ const dbFactory = client => {
         )
       };
     }
+
+    if (!id) return new Error("You must provide an Id to hasLight");
 
     let lightScore;
     // May throw an error

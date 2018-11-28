@@ -8,18 +8,24 @@ const MQTT_LIGHT_CONNECTED_TOPIC = mqttSettings.MQTT_LIGHT_CONNECTED_TOPIC;
 const MQTT_LIGHT_STATE_TOPIC = mqttSettings.MQTT_LIGHT_STATE_TOPIC;
 const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
 const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
-const mockClient = {
-  on: () => {},
-  connected: true
+
+// Creates a mock client which will return successful responses but no data
+const createMockClient = () => {
+  return {
+    on: () => {},
+    connected: true
+  };
 };
 
 describe("connections", () => {
   test("is defined", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(pubsub.connections).toBeDefined();
   });
 
   test("is an observable", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(isObservable(pubsub.connections)).toBe(true);
   });
@@ -27,11 +33,13 @@ describe("connections", () => {
 
 describe("disconnections", () => {
   test("is defined", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(pubsub.disconnections).toBeDefined();
   });
 
   test("is an observable", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(isObservable(pubsub.disconnections)).toBe(true);
   });
@@ -39,11 +47,13 @@ describe("disconnections", () => {
 
 describe("allMessages", () => {
   test("is defined", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(pubsub.allMessages).toBeDefined();
   });
 
   test("is an observable", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(isObservable(pubsub.allMessages)).toBe(true);
   });
@@ -53,11 +63,13 @@ describe("allMessages", () => {
 
 describe("connectMessages", () => {
   test("is defined", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(pubsub.connectMessages).toBeDefined();
   });
 
   test("is an observable", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(isObservable(pubsub.connectMessages)).toBe(true);
   });
@@ -67,11 +79,13 @@ describe("connectMessages", () => {
 
 describe("stateMessages", () => {
   test("is defined", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(pubsub.stateMessages).toBeDefined();
   });
 
   test("is an observable", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(isObservable(pubsub.stateMessages)).toBe(true);
   });
@@ -81,11 +95,13 @@ describe("stateMessages", () => {
 
 describe("effectMessages", () => {
   test("is defined", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(pubsub.effectMessages).toBeDefined();
   });
 
   test("is an observable", () => {
+    let mockClient = createMockClient();
     const pubsub = pubsubFactory(mockClient);
     expect(isObservable(pubsub.effectMessages)).toBe(true);
   });

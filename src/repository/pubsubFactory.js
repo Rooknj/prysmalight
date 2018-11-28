@@ -21,6 +21,20 @@ const toMessageObject = msg => JSON.parse(msg[1].toString());
  * @param {object} client - The MQTT client
  */
 const pubsubFactory = client => {
+  // Initializing the self object which enables us to access connected
+  let self = {};
+
+  // Set the connected status of the client.
+  // We have to do this because client.connected doesnt work for some reason
+  client.on("connect", () => {
+    debug("Connected to MQTT");
+    self.connected = true;
+  });
+  client.on("close", () => {
+    debug("disconnected from MQTT");
+    self.connected = false;
+  });
+
   /**
    * An observable of all the times the client connects
    */
@@ -114,6 +128,11 @@ const pubsubFactory = client => {
    * @param {string} id
    */
   const subscribeToLight = async id => {
+    if (!self.connected)
+      return new Error(
+        `Can not subscribe to (${id}). MQTT client not connected`
+      );
+
     const subscribedToConnected = subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -148,6 +167,11 @@ const pubsubFactory = client => {
    * @param {string} id
    */
   const unsubscribeFromLight = async id => {
+    if (!self.connected)
+      return new Error(
+        `Can not unsubscribe from (${id}). MQTT client not connected`
+      );
+
     const unsubscribedFromConnected = unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -182,13 +206,17 @@ const pubsubFactory = client => {
    * @param {string} message
    */
   const publishToLight = async (id, message) => {
+    if (!self.connected)
+      return new Error(`Can not publish to (${id}). MQTT client not connected`);
+
     return publishTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
       Buffer.from(JSON.stringify(message))
     );
   };
 
-  return Object.create({
+  self = {
+    connected: false,
     connections,
     disconnections,
     allMessages,
@@ -198,7 +226,9 @@ const pubsubFactory = client => {
     subscribeToLight,
     unsubscribeFromLight,
     publishToLight
-  });
+  };
+
+  return Object.create(self);
 };
 
 module.exports = pubsubFactory;

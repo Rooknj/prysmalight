@@ -114,7 +114,6 @@ class MockLight {
   }
 
   handleMessage(topic, message) {
-    // TODO: Implement
     // Convert message into a string
     const data = message.toString();
     debug(`Received message on topic ${topic} with a payload of ${data}`);

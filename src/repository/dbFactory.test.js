@@ -183,6 +183,18 @@ describe("getLight", () => {
     // Check that an error is returned
     expect(error).toBeInstanceOf(Error);
   });
+  test("returns an error if the light has no data associated with it (HGETALL returns null)", async () => {
+    // Create mocks and db
+    let mockClient = createMockClient();
+    mockClient.HGETALL = jest.fn((_, cb) => cb(null, null));
+    const db = dbFactory(mockClient);
+
+    // Call getLight
+    const { error } = await db.getLight("Test A");
+
+    // Check that an error is returned
+    expect(error).toBeInstanceOf(Error);
+  });
   test("returns an error if it fails to get the Effect List (SMEMBERS)", async () => {
     // Create mocks and db
     let mockClient = createMockClient();

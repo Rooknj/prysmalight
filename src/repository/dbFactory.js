@@ -61,6 +61,9 @@ const dbFactory = client => {
       return { error };
     }
 
+    // If the data returned is null, that means it was not added
+    if (!lightData) return { error: new Error(`"${id}" had no data`) };
+
     // Get the light's effects
     try {
       lightEffect = await asyncSMEMBERS(lightData.effectsKey);
@@ -213,13 +216,6 @@ const dbFactory = client => {
   const addLight = async id => {
     if (!client.connected) {
       return new Error(`Can not add "${id}". Not connected to Redis`);
-    }
-
-    // Check to make sure the light wasnt already added
-    const { error: err, hasLight } = await self.hasLight(id);
-    if (err) return { error: err };
-    if (hasLight) {
-      return new Error(`The light with the id ${id} was already added`);
     }
 
     let lightScore, addLightKeyResponse, addLightDataResponse;

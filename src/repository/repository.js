@@ -235,7 +235,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
    * @param {string} lightId
    */
   const removeLight = async lightId => {
-    let error, hasLight, lightRemoved;
+    let error, hasLight;
 
     // Check if the light exists already before doing anything else
     ({ error, hasLight } = await db.hasLight(lightId));
@@ -252,9 +252,10 @@ module.exports = ({ dbClient, pubsubClient }) => {
     // TODO: Add cleanup here in case we only remove part of the light from redis
     // TODO: Figure out if we should resubscribe to the light if it wasn't completely removed
     // Remove light from database
-    ({ error, lightRemoved } = await db.removeLight(lightId));
+    error = await db.removeLight(lightId);
     if (error) return error;
 
+    const lightRemoved = { lightId };
     // Return the removed light and notify the subscribers
     badPubSub.publish("lightRemoved", { lightRemoved });
     return lightRemoved;

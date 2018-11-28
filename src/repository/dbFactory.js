@@ -299,9 +299,7 @@ const dbFactory = client => {
    */
   const removeLight = async id => {
     if (!client.connected) {
-      return {
-        error: new Error(`Can't remove "${id}". Not connected to redis`)
-      };
+      return new Error(`Can't remove "${id}". Not connected to redis`);
     }
 
     let removeKeyResponse, deleteLightResponse;
@@ -312,7 +310,7 @@ const dbFactory = client => {
     try {
       removeKeyResponse = await asyncZREM("lightKeys", id);
     } catch (error) {
-      return { error };
+      return error;
     }
 
     // Remove the light data
@@ -322,15 +320,13 @@ const dbFactory = client => {
         try {
           deleteLightResponse = await asyncDEL(id);
         } catch (error) {
-          return { error };
+          return error;
         }
         break;
       default:
-        return {
-          error: new Error(
-            "Could not remove light key from Redis. Response code != 1"
-          )
-        };
+        return new Error(
+          "Could not remove light key from Redis. Response code != 1"
+        );
     }
 
     // If the response is 1, then deleting the light was successful
@@ -340,13 +336,11 @@ const dbFactory = client => {
         // Save the redis database to persistant storage
         client.BGSAVE();
         // Return the id of the deleted light
-        return { error: null, lightRemoved: { id } };
+        return null;
       default:
-        return {
-          error: new Error(
-            "Could not remove light key from Redis. Response code != 1"
-          )
-        };
+        return new Error(
+          "Could not remove light key from Redis. Response code != 1"
+        );
     }
   };
 

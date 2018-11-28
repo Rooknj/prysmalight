@@ -14,7 +14,7 @@ const createMockClient = () => {
     INCR: jest.fn((key, cb) => cb(err, 2)),
     ZADD: jest.fn((key, score, val, cb) => cb(err, 1)),
     ZREM: jest.fn((key, val, cb) => cb(err, 1)),
-    ZSCORE: jest.fn((key, val, cb) => cb(err, result)),
+    ZSCORE: jest.fn((key, val, cb) => cb(err, 1)),
     ZRANGE: jest.fn((key, low, high, cb) => cb(err, [])),
     HMSET: jest.fn((arr, cb) => cb(err, "OK")),
     DEL: jest.fn((key, cb) => cb(err, 1)),
@@ -175,7 +175,7 @@ describe("getLight", () => {
   test("returns an error if no id was provided", async () => {
     let mockClient = createMockClient();
     const db = dbFactory(mockClient);
-    const error = await db.getLight();
+    const { error } = await db.getLight();
     expect(error).toBeInstanceOf(Error);
   });
   test("returns an error if it fails to get the light data (HGETALL)", async () => {
@@ -1078,16 +1078,47 @@ describe("removeLight", () => {
   });
 });
 
-describe.skip("hasLight", () => {
-  test("returns an error if the redis client is not connected", () => {});
+describe("hasLight", () => {
+  test("returns true if the light id is in the database", async () => {
+    let mockClient = createMockClient();
+    const ID = "Test B";
+    const LIGHTSCORE = 9;
+    mockClient.ZSCORE = jest.fn((key, val, cb) => cb(null, LIGHTSCORE));
+    const db = dbFactory(mockClient);
+    const { error, hasLight } = await db.hasLight(ID);
+    expect(error).toBeNull();
+    expect(hasLight).toBe(true);
+  });
+  test("returns false if the light id is not in the database", async () => {
+    let mockClient = createMockClient();
+    const ID = "Test B";
+    mockClient.ZSCORE = jest.fn((key, val, cb) => cb(null, null));
+    const db = dbFactory(mockClient);
+    const { error, hasLight } = await db.hasLight(ID);
+    expect(error).toBeNull();
+    expect(hasLight).toBe(false);
+  });
+  test("returns an error if the redis client is not connected", async () => {
+    let mockClient = createMockClient();
+    const db = dbFactory(mockClient);
+    const ID = "Test B";
+    mockClient.connected = false;
+    const { error } = await db.hasLight(ID);
+    expect(error).toBeInstanceOf(Error);
+  });
   test("returns an error if no id was provided", async () => {
     let mockClient = createMockClient();
     const db = dbFactory(mockClient);
-    const error = await db.hasLight();
+    const { error } = await db.hasLight();
     expect(error).toBeInstanceOf(Error);
   });
-  test("returns an error if getting the light id throws an error (ZSCORE)", () => {});
-  test("returns true ig the light id is in the database", () => {});
-  test("returns true ig the light id is not in the database", () => {});
-  test("calls ZSCORE with the correct parameters", () => {});
+  test("returns an error if getting the light id throws an error (ZSCORE)", async () => {
+    let mockClient = createMockClient();
+    const ID = "Test B";
+    mockClient.ZSCORE = jest.fn((key, val, cb) => cb(new Error()));
+    const db = dbFactory(mockClient);
+    const { error } = await db.hasLight(ID);
+    expect(error).toBeInstanceOf(Error);
+  });
+  test("calls ZSCORE with the correct parameters", async () => {});
 });

@@ -339,8 +339,16 @@ const dbFactory = client => {
       };
 
     let lightScore;
-    // May throw an error
-    lightScore = await asyncZSCORE("lightKeys", id);
+
+    // Get the score of the light
+    try {
+      lightScore = await asyncZSCORE("lightKeys", id);
+    } catch (error) {
+      return {
+        error: error,
+        hasLight: true
+      };
+    }
 
     // If the light has a score, it exists.
     if (lightScore) {

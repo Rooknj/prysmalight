@@ -269,8 +269,7 @@ const dbFactory = client => {
 
   /**
    * Remove the light with the specified id.
-   * Will return an error if the light does not exist
-   * TODO: Change this function to use hasLight() and return as success if the light does not exist anyway
+   * May return an error
    * @param {string} id
    */
   const removeLight = async id => {

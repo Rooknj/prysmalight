@@ -85,7 +85,7 @@ const pubsubFactory = client => {
       debug(
         `Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`
       );
-      return;
+      return null;
     } catch (error) {
       return error;
     }
@@ -101,7 +101,7 @@ const pubsubFactory = client => {
     try {
       await client.publish(topic, payload);
       debug(`Published payload of ${payload} to ${topic}`);
-      return;
+      return null;
     } catch (error) {
       return error;
     }
@@ -116,7 +116,7 @@ const pubsubFactory = client => {
     try {
       await client.unsubscribe(topic);
       debug(`Unsubscribed from ${topic}`);
-      return;
+      return null;
     } catch (error) {
       return error;
     }
@@ -132,6 +132,8 @@ const pubsubFactory = client => {
       return new Error(
         `Can not subscribe to (${id}). MQTT client not connected`
       );
+
+    if (!id) return new Error("You must provide an id to this function");
 
     const subscribedToConnected = subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
@@ -149,7 +151,7 @@ const pubsubFactory = client => {
       subscribedToEffectList
     ]);
 
-    let returnError;
+    let returnError = null;
     // If any subscription failed, return 0
     subscriptionResponses.forEach(error => {
       // if one of the subscriptions already failed, ignore processing on the rest
@@ -172,6 +174,8 @@ const pubsubFactory = client => {
         `Can not unsubscribe from (${id}). MQTT client not connected`
       );
 
+    if (!id) return new Error("You must provide an id to this function");
+
     const unsubscribedFromConnected = unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -188,7 +192,7 @@ const pubsubFactory = client => {
       unsubscribedFromEffectList
     ]);
 
-    let returnError;
+    let returnError = null;
     // If any subscription failed, return 0
     unsubscriptionResponses.forEach(error => {
       // if one of the subscriptions already failed, ignore processing on the rest
@@ -208,6 +212,10 @@ const pubsubFactory = client => {
   const publishToLight = async (id, message) => {
     if (!self.connected)
       return new Error(`Can not publish to (${id}). MQTT client not connected`);
+
+    if (!id) return new Error("You must provide an id to this function");
+    if (!message)
+      return new Error("You must provide a message to this function");
 
     return publishTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,

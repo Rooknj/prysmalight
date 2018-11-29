@@ -2,9 +2,6 @@ const { toConnectionString } = require("./lightUtil");
 const Debug = require("debug").default;
 const debug = Debug("repo");
 
-//TODO: Include this stuff in deps
-const { PubSub } = require("apollo-server");
-const badPubSub = new PubSub();
 const ALL_LIGHTS_SUBSCRIPTION_TOPIC = "lightsChanged";
 const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
 const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
@@ -19,7 +16,7 @@ const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 const eventEmitter = new events.EventEmitter();
 
-module.exports = ({ db, pubsub }) => {
+module.exports = ({ db, pubsub, gqlPubSub }) => {
   // TODO: Find a better way to do this
   // Subscribe to all lights on startup
   let listeningToAllLights = false;
@@ -88,8 +85,8 @@ module.exports = ({ db, pubsub }) => {
     }
 
     // Notify subscribers of the change in connection status
-    badPubSub.publish(message.name, { lightChanged: changedLight });
-    badPubSub.publish("lightsChanged", {
+    gqlPubSub.publish(message.name, { lightChanged: changedLight });
+    gqlPubSub.publish("lightsChanged", {
       lightsChanged: changedLight
     });
   };
@@ -124,8 +121,8 @@ module.exports = ({ db, pubsub }) => {
       return;
     }
     // Notify subscribers of change in state
-    badPubSub.publish(message.name, { lightChanged: changedLight });
-    badPubSub.publish("lightsChanged", {
+    gqlPubSub.publish(message.name, { lightChanged: changedLight });
+    gqlPubSub.publish("lightsChanged", {
       lightsChanged: changedLight
     });
 
@@ -156,8 +153,8 @@ module.exports = ({ db, pubsub }) => {
     }
 
     // Notify subscribers of the change in the effect list
-    badPubSub.publish(message.name, { lightChanged: changedLight });
-    badPubSub.publish("lightsChanged", {
+    gqlPubSub.publish(message.name, { lightChanged: changedLight });
+    gqlPubSub.publish("lightsChanged", {
       lightsChanged: changedLight
     });
   };
@@ -218,7 +215,7 @@ module.exports = ({ db, pubsub }) => {
 
     // Get the newly added light, notify subscribers, and return it
     const lightAdded = await getLight(lightId);
-    badPubSub.publish("lightAdded", { lightAdded });
+    gqlPubSub.publish("lightAdded", { lightAdded });
     return lightAdded;
   };
 
@@ -251,7 +248,7 @@ module.exports = ({ db, pubsub }) => {
 
     const lightRemoved = { id: lightId };
     // Return the removed light and notify the subscribers
-    badPubSub.publish("lightRemoved", { lightRemoved });
+    gqlPubSub.publish("lightRemoved", { lightRemoved });
     return lightRemoved;
   };
 
@@ -307,25 +304,25 @@ module.exports = ({ db, pubsub }) => {
    * Subscribes to the changes of a specific light.
    * @param {string} lightId
    */
-  const subscribeToLight = lightId => badPubSub.asyncIterator(lightId);
+  const subscribeToLight = lightId => gqlPubSub.asyncIterator(lightId);
 
   /**
    * Subscribes to the changes of all lights.
    */
   const subscribeToAllLights = () =>
-    badPubSub.asyncIterator(ALL_LIGHTS_SUBSCRIPTION_TOPIC);
+    gqlPubSub.asyncIterator(ALL_LIGHTS_SUBSCRIPTION_TOPIC);
 
   /**
    * Subscribes to lights being added.
    */
   const subscribeToLightsAdded = () =>
-    badPubSub.asyncIterator(LIGHT_ADDED_SUBSCRIPTION_TOPIC);
+    gqlPubSub.asyncIterator(LIGHT_ADDED_SUBSCRIPTION_TOPIC);
 
   /**
    * Subscribes to lights being removed.
    */
   const subscribeToLightsRemoved = () =>
-    badPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
+    gqlPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
 
   return Object.create({
     getLight,

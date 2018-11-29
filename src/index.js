@@ -39,12 +39,16 @@ const getRepo = () => {
     }
   );
 
+  //TODO: Include this stuff in deps
+  const { PubSub } = require("apollo-server");
+  const gqlPubSub = new PubSub();
+
   // Create our db and pubsub with the provided clients
   const db = dbFactory(dbClient);
   const pubsub = pubsubFactory(pubsubClient);
 
   // Inject Dependencies
-  return repository({ db, pubsub });
+  return repository({ db, pubsub, gqlPubSub });
 };
 
 // Start the server

@@ -17,13 +17,13 @@ const asyncSetTimeout = promisify(setTimeout);
 const eventEmitter = new events.EventEmitter();
 
 module.exports = ({ db, pubsub, gqlPubSub }) => {
+  // Initializing the self object which enables us to call sibiling methods
+  //(ex: getAllLights calls self.getLight() instead of just getLight())
+  let self = {};
+
   // TODO: Find a better way to do this
   // Subscribe to all lights on startup
-  let listeningToAllLights = false;
   const listenToAllLights = async () => {
-    // If we are already subscribed, return
-    if (listeningToAllLights) return;
-
     // Get the saved lights from redis
     const { error, lights } = await db.getAllLights();
     if (error) {
@@ -48,11 +48,16 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
       }
     });
 
-    if (!didError) listeningToAllLights = true;
+    if (!didError) self.connected = true;
   };
-  db.connections.subscribe(listenToAllLights);
-  pubsub.connections.subscribe(listenToAllLights);
-  pubsub.disconnections.subscribe(() => (listeningToAllLights = false));
+  db.connections.subscribe(() => {
+    if (pubsub.connected) listenToAllLights();
+  });
+  pubsub.connections.subscribe(() => {
+    if (db.connected) listenToAllLights();
+  });
+  pubsub.disconnections.subscribe(() => (self.connected = false));
+  db.disconnections.subscribe(() => (self.connected = false));
 
   /**
    * Updates the db with the connect message data and notifies subscribers.
@@ -324,7 +329,8 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
   const subscribeToLightsRemoved = () =>
     gqlPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
 
-  return Object.create({
+  self = {
+    connected: false,
     getLight,
     getLights,
     setLight,
@@ -334,5 +340,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     subscribeToAllLights,
     subscribeToLightsAdded,
     subscribeToLightsRemoved
-  });
+  };
+
+  return Object.create(self);
 };

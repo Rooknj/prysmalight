@@ -8,13 +8,6 @@ const { fromEvent } = require("rxjs");
  * @param {object} client - The Redis client
  */
 const dbFactory = client => {
-  // TODO: Find a better way to handle errors
-  client.on("error", err => debug(err));
-  // TODO: Find a way safely call BGSAVE when you are making a bunch of addLight requests in rapid succession
-  // { ReplyError: ERR Background save already in progress
-  //   at parseError (/snapshot/app/node_modules/redis-parser/lib/parser.js:193:12)
-  //   at parseType (/snapshot/app/node_modules/redis-parser/lib/parser.js:303:14) command: 'BGSAVE', code: 'ERR' }
-
   // Promisify all client methods
   const asyncSMEMBERS = promisify(client.SMEMBERS).bind(client),
     asyncSADD = promisify(client.SADD).bind(client),
@@ -30,6 +23,24 @@ const dbFactory = client => {
   // Initializing the self object which enables us to call sibiling methods
   //(ex: getAllLights calls self.getLight() instead of just getLight())
   let self = {};
+
+  // Set the connected status of the client.
+  // We have to do this because client.connected doesnt work for some reason
+  client.on("connect", () => {
+    debug("Connected to DB");
+    self.connected = true;
+  });
+  client.on("end", () => {
+    debug("disconnected from DB");
+    self.connected = false;
+  });
+
+  // TODO: Find a better way to handle errors
+  client.on("error", err => debug(err));
+  // TODO: Find a way safely call BGSAVE when you are making a bunch of addLight requests in rapid succession
+  // { ReplyError: ERR Background save already in progress
+  //   at parseError (/snapshot/app/node_modules/redis-parser/lib/parser.js:193:12)
+  //   at parseType (/snapshot/app/node_modules/redis-parser/lib/parser.js:303:14) command: 'BGSAVE', code: 'ERR' }
 
   /**
    * An observable of all the times the client connects
@@ -365,6 +376,7 @@ const dbFactory = client => {
   };
 
   self = {
+    connected: false,
     connections,
     disconnections,
     getAllLights,

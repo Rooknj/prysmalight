@@ -82,9 +82,13 @@ const pubsubFactory = client => {
   const subscribeTo = async topic => {
     try {
       const granted = await client.subscribe(topic);
-      debug(
-        `Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`
-      );
+      if (!granted[0]) {
+        debug(`Already subscribed to ${topic}`);
+      } else {
+        debug(
+          `Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`
+        );
+      }
       return null;
     } catch (error) {
       return error;

@@ -1,5 +1,3 @@
-const dbFactory = require("./dbFactory");
-const pubsubFactory = require("./pubsubFactory");
 const { toConnectionString } = require("./lightUtil");
 const Debug = require("debug").default;
 const debug = Debug("repo");
@@ -21,11 +19,7 @@ const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 const eventEmitter = new events.EventEmitter();
 
-module.exports = ({ dbClient, pubsubClient }) => {
-  // Create our db and pubsub with the provided clients
-  const db = dbFactory(dbClient);
-  const pubsub = pubsubFactory(pubsubClient);
-
+module.exports = ({ db, pubsub }) => {
   // TODO: Find a better way to do this
   // Subscribe to all lights on startup
   let listeningToAllLights = false;

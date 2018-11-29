@@ -1,5 +1,7 @@
 const config = require("./config/config");
 const server = require("./server/server");
+const dbFactory = require("./repository/dbFactory");
+const pubsubFactory = require("./repository/pubsubFactory");
 const repository = require("./repository/repository");
 const MockLight = require("./mock/MockLight");
 const Debug = require("debug").default;
@@ -37,8 +39,12 @@ const getRepo = () => {
     }
   );
 
+  // Create our db and pubsub with the provided clients
+  const db = dbFactory(dbClient);
+  const pubsub = pubsubFactory(pubsubClient);
+
   // Inject Dependencies
-  return repository({ dbClient, pubsubClient });
+  return repository({ db, pubsub });
 };
 
 // Start the server

@@ -17,18 +17,31 @@ const asyncSetTimeout = promisify(setTimeout);
 const eventEmitter = new events.EventEmitter();
 
 module.exports = ({ db, pubsub, gqlPubSub }) => {
-  // Initializing the self object which enables us to call sibiling methods
-  //(ex: getAllLights calls self.getLight() instead of just getLight())
   let self = {};
 
-  // TODO: Find a better way to do this
-  // Subscribe to all lights on startup
-  const listenToAllLights = async () => {
+  /**
+   * Attempts to subscribe to all added lights
+   * Sets the self.connected property to true if successful
+   */
+  const connect = async () => {
+    if (!pubsub.connected) {
+      debug("Cant connect repo, pubsub not connected");
+      return new Error("pubsub not connected");
+    }
+    if (!db.connected) {
+      debug("Cant connect repo, db not connected");
+      return new Error("db not connected");
+    }
+    if (self.connected) {
+      debug("Repository already connected");
+      return null;
+    }
+
     // Get the saved lights from redis
     const { error, lights } = await db.getAllLights();
     if (error) {
       debug(`Error getting all lights during subscribeToAllLights ${error}`);
-      return;
+      return error;
     }
 
     // TODO: If you failed to subscribe to a light, find a way to resubscribe
@@ -38,26 +51,21 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     );
 
     // Wait for all subscriptions to resolve then check for errors
-    let didError = false;
     const errors = await Promise.all(subscriptionPromises);
+    let subscriptionError = null;
     errors.forEach(error => {
-      if (didError) return;
+      if (subscriptionError) return;
       if (error) {
-        debug("Error subscribing to at least one light");
-        didError = true;
+        debug(error);
+        subscriptionError = error;
       }
     });
 
-    if (!didError) self.connected = true;
+    if (subscriptionError) return subscriptionError;
+    // Set connection status to true if there were no errors
+    self.connected = true;
+    return null;
   };
-  db.connections.subscribe(() => {
-    if (pubsub.connected) listenToAllLights();
-  });
-  pubsub.connections.subscribe(() => {
-    if (db.connected) listenToAllLights();
-  });
-  pubsub.disconnections.subscribe(() => (self.connected = false));
-  db.disconnections.subscribe(() => (self.connected = false));
 
   /**
    * Updates the db with the connect message data and notifies subscribers.
@@ -331,6 +339,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
 
   self = {
     connected: false,
+    connect,
     getLight,
     getLights,
     setLight,
@@ -341,6 +350,12 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     subscribeToLightsAdded,
     subscribeToLightsRemoved
   };
+
+  // Subscribe to all lights on startup
+  db.connections.subscribe(self.connect);
+  pubsub.connections.subscribe(self.connect);
+  pubsub.disconnections.subscribe(() => (self.connected = false));
+  db.disconnections.subscribe(() => (self.connected = false));
 
   return Object.create(self);
 };

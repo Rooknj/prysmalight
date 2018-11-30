@@ -69,6 +69,9 @@ describe("repository", () => {
   test.skip("does not attempt to connect if only the pubsub connects", () => {});
   test.skip("sets connected property to false if the db disconnects", () => {});
   test.skip("sets connected property to false if the pubsub disconnects", () => {});
+  test.skip("handles connected messages", () => {});
+  test.skip("handles state messages", () => {});
+  test.skip("handles effect list messages", () => {});
 });
 
 describe("connect", () => {

@@ -172,11 +172,6 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     });
   };
 
-  // Start listening to the messages
-  pubsub.connectMessages.subscribe(handleConnectMessage);
-  pubsub.stateMessages.subscribe(handleStateMessage);
-  pubsub.effectMessages.subscribe(handleEffectListMessage);
-
   /**
    * Get the light with the specified id from the db.
    * Will return an error of the light was not added.
@@ -340,6 +335,9 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
   self = {
     connected: false,
     connect,
+    handleConnectMessage,
+    handleStateMessage,
+    handleEffectListMessage,
     getLight,
     getLights,
     setLight,
@@ -350,6 +348,11 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     subscribeToLightsAdded,
     subscribeToLightsRemoved
   };
+
+  // Start listening to the messages
+  pubsub.connectMessages.subscribe(self.handleConnectMessage);
+  pubsub.stateMessages.subscribe(self.handleStateMessage);
+  pubsub.effectMessages.subscribe(self.handleEffectListMessage);
 
   // Subscribe to all lights on startup
   db.connections.subscribe(self.connect);

@@ -81,17 +81,11 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
    * @param {object} message - the connect status message of a light
    */
   const handleConnectMessage = async message => {
-    // Convert the message to a database string
+    // Validate the message is in the correct format
     const LIGHT_CONNECTED = 2;
     const LIGHT_DISCONNECTED = 0;
-    let connectionString = -1;
-    if (Number(message.connection) === LIGHT_DISCONNECTED) {
-      connectionString = LIGHT_DISCONNECTED;
-    } else if (Number(message.connection) === LIGHT_CONNECTED) {
-      connectionString = LIGHT_CONNECTED;
-    }
-
-    if (connectionString === -1) {
+    let connection = Number(message.connection);
+    if (connection !== LIGHT_DISCONNECTED && connection !== LIGHT_CONNECTED) {
       debug(`Incorrect connection format: ignoring\nMessage: ${message}`);
       return new Error("Incorrect connection format");
     }
@@ -100,7 +94,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
 
     // Update the light's connection data in the db
     error = await db.setLight(message.name, {
-      connected: connectionString
+      connected: connection
     });
     if (error) {
       debug(error);

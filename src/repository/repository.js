@@ -88,7 +88,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     if (Number(message.connection) === LIGHT_DISCONNECTED) {
       connectionString = LIGHT_DISCONNECTED;
     } else if (Number(message.connection) === LIGHT_CONNECTED) {
-      connectionString = message.connection;
+      connectionString = LIGHT_CONNECTED;
     }
 
     if (connectionString === -1) {

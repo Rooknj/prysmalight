@@ -272,18 +272,72 @@ describe.skip("setLight", () => {
   test("Test", async () => {});
 });
 
-describe.skip("subscribeToLight", () => {
-  test("Test", () => {});
+describe("subscribeToLight", () => {
+  test("subscribes to the specified light (Example 1)", () => {
+    let mockDeps = createMockDependencies();
+    const SUBSCRIPTION = "subscription";
+    mockDeps.gqlPubSub.asyncIterator = jest.fn(() => SUBSCRIPTION);
+    const repo = repository(mockDeps);
+
+    const ID = "Test A";
+    const subscription = repo.subscribeToLight(ID);
+
+    expect(mockDeps.gqlPubSub.asyncIterator).toBeCalledWith(ID);
+    expect(subscription).toBe(SUBSCRIPTION);
+  });
+
+  test("subscribes to the specified light (Example 2)", () => {
+    let mockDeps = createMockDependencies();
+    const SUBSCRIPTION = "subscription";
+    mockDeps.gqlPubSub.asyncIterator = jest.fn(() => SUBSCRIPTION);
+    const repo = repository(mockDeps);
+
+    const ID = "Test 123";
+    const subscription = repo.subscribeToLight(ID);
+
+    expect(mockDeps.gqlPubSub.asyncIterator).toBeCalledWith(ID);
+    expect(subscription).toBe(SUBSCRIPTION);
+  });
 });
 
-describe.skip("subscribeToAllLights", () => {
-  test("Test", () => {});
+describe("subscribeToAllLights", () => {
+  test("Subscribes to all lights", () => {
+    let mockDeps = createMockDependencies();
+    const SUBSCRIPTION = "subscription";
+    mockDeps.gqlPubSub.asyncIterator = jest.fn(() => SUBSCRIPTION);
+    const repo = repository(mockDeps);
+
+    const subscription = repo.subscribeToAllLights();
+
+    expect(mockDeps.gqlPubSub.asyncIterator).toBeCalledWith("lightsChanged");
+    expect(subscription).toBe(SUBSCRIPTION);
+  });
 });
 
-describe.skip("subscribeToLightAdded", () => {
-  test("Test", () => {});
+describe("subscribeToLightsAdded", () => {
+  test("Subscribes to lights added", () => {
+    let mockDeps = createMockDependencies();
+    const SUBSCRIPTION = "subscription";
+    mockDeps.gqlPubSub.asyncIterator = jest.fn(() => SUBSCRIPTION);
+    const repo = repository(mockDeps);
+
+    const subscription = repo.subscribeToLightsAdded();
+
+    expect(mockDeps.gqlPubSub.asyncIterator).toBeCalledWith("lightAdded");
+    expect(subscription).toBe(SUBSCRIPTION);
+  });
 });
 
-describe.skip("subscribeToLightRemoved", () => {
-  test("Test", () => {});
+describe("subscribeToLightsRemoved", () => {
+  test("Subscribes to lights removed", () => {
+    let mockDeps = createMockDependencies();
+    const SUBSCRIPTION = "subscription";
+    mockDeps.gqlPubSub.asyncIterator = jest.fn(() => SUBSCRIPTION);
+    const repo = repository(mockDeps);
+
+    const subscription = repo.subscribeToLightsRemoved();
+
+    expect(mockDeps.gqlPubSub.asyncIterator).toBeCalledWith("lightRemoved");
+    expect(subscription).toBe(SUBSCRIPTION);
+  });
 });

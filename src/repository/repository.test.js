@@ -267,7 +267,13 @@ describe("connect", () => {
 });
 
 describe.skip("handleConnectMessage", () => {
-  test("handles the connect message (Example 1)", async () => {});
+  test("handles the connect message (Example 1)", async () => {
+    let mockDeps = createMockDependencies();
+    const MESSAGE = 2;
+    const repo = repository(mockDeps);
+
+    const error = await repo.handleConnectMessage();
+  });
   test("handles the connect message (Example 2)", async () => {});
   test("ignores the message and returns an error if it is not in the correct format", async () => {});
   test("correctly changes the light in the database", async () => {});

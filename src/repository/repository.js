@@ -16,11 +16,8 @@ const asyncSetTimeout = promisify(setTimeout);
 const eventEmitter = new events.EventEmitter();
 
 // TODO: Move this somewhere more appropriate inside a function that uses it
-// MQTT: payloads by default
 const LIGHT_CONNECTED = 2;
 const LIGHT_DISCONNECTED = 0;
-
-// Utility functions
 const toConnectionString = connectionMessage => {
   let connectionString = -1;
   if (Number(connectionMessage) === LIGHT_DISCONNECTED) {

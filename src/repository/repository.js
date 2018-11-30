@@ -45,10 +45,6 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
       debug("Cant connect repo, db not connected");
       return new Error("db not connected");
     }
-    if (self.connected) {
-      debug("Repository already connected");
-      return null;
-    }
 
     // Get the saved lights from redis
     const { error, lights } = await db.getAllLights();
@@ -230,12 +226,11 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     if (error) return error;
 
     // Subscribe to new messages from the new light
-    // TODO: put light in a queue to resubscribe when MQTT is connected
     error = await pubsub.subscribeToLight(lightId);
     if (error) debug(`Failed to subscribe to ${lightId}\n${error}`);
 
     // Get the newly added light, notify subscribers, and return it
-    const lightAdded = await getLight(lightId);
+    const lightAdded = await self.getLight(lightId);
     gqlPubSub.publish("lightAdded", { lightAdded });
     return lightAdded;
   };

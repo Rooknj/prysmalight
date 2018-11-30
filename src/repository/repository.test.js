@@ -1,5 +1,6 @@
 const repository = require("./repository");
 const rxjs = require("rxjs");
+const events = require("events");
 
 const createMockLight = id => ({
   id: id || "Test A",
@@ -50,11 +51,12 @@ const createMockDependencies = () => {
   return { db: mockDB, pubsub: mockPubsub, gqlPubSub: mockGqlPubSub };
 };
 
-describe("repository", () => {
+describe("repository & init", () => {
   test("Subscribes once to all relavent observables upon creation", () => {
     let mockDeps = createMockDependencies();
 
-    repository(mockDeps);
+    let repo = repository(mockDeps);
+    repo.init();
 
     expect(mockDeps.db.connections.subscribe).toBeCalledTimes(1);
     expect(mockDeps.db.disconnections.subscribe).toBeCalledTimes(1);
@@ -64,14 +66,117 @@ describe("repository", () => {
     expect(mockDeps.pubsub.stateMessages.subscribe).toBeCalledTimes(1);
     expect(mockDeps.pubsub.effectMessages.subscribe).toBeCalledTimes(1);
   });
-  test.skip("connects once the db and pubsub are connected", () => {});
-  test.skip("does not attempt to connect if only the db connects", () => {});
-  test.skip("does not attempt to connect if only the pubsub connects", () => {});
-  test.skip("sets connected property to false if the db disconnects", () => {});
-  test.skip("sets connected property to false if the pubsub disconnects", () => {});
-  test.skip("handles connected messages", () => {});
-  test.skip("handles state messages", () => {});
-  test.skip("handles effect list messages", () => {});
+  test("attempts to connect when the db connects", () => {
+    let mockDeps = createMockDependencies();
+    mockDeps.db.connected = false;
+    mockDeps.pubsub.connected = false;
+    const eventEmitter = new events.EventEmitter();
+    mockDeps.db.connections = rxjs.fromEvent(eventEmitter, "dbConnect");
+
+    let repo = repository(mockDeps);
+    repo.__proto__.connect = jest.fn();
+    repo.init();
+
+    eventEmitter.emit("dbConnect");
+
+    expect(repo.connect).toBeCalledTimes(1);
+  });
+  test("attempts to connect when the pubsub connects", () => {
+    let mockDeps = createMockDependencies();
+    mockDeps.db.connected = false;
+    mockDeps.pubsub.connected = false;
+    const eventEmitter = new events.EventEmitter();
+    mockDeps.pubsub.connections = rxjs.fromEvent(eventEmitter, "pubsubConnect");
+
+    let repo = repository(mockDeps);
+    repo.__proto__.connect = jest.fn();
+    repo.init();
+
+    eventEmitter.emit("pubsubConnect");
+
+    expect(repo.connect).toBeCalledTimes(1);
+  });
+  test("sets connected property to false if the db disconnects", () => {
+    let mockDeps = createMockDependencies();
+    const eventEmitter = new events.EventEmitter();
+    mockDeps.pubsub.disconnections = rxjs.fromEvent(
+      eventEmitter,
+      "pubsubDisonnect"
+    );
+
+    let repo = repository(mockDeps);
+    repo.init();
+
+    eventEmitter.emit("pubsubDisonnect");
+
+    expect(repo.connected).toBe(false);
+  });
+  test("sets connected property to false if the pubsub disconnects", () => {
+    let mockDeps = createMockDependencies();
+    const eventEmitter = new events.EventEmitter();
+    mockDeps.db.disconnections = rxjs.fromEvent(eventEmitter, "dbDisonnect");
+
+    let repo = repository(mockDeps);
+    repo.init();
+
+    eventEmitter.emit("dbDisonnect");
+
+    expect(repo.connected).toBe(false);
+  });
+  test("handles connected messages when received", () => {
+    let mockDeps = createMockDependencies();
+    const eventEmitter = new events.EventEmitter();
+    mockDeps.pubsub.connectMessages = rxjs.fromEvent(
+      eventEmitter,
+      "connectMessage"
+    );
+
+    let repo = repository(mockDeps);
+    repo.__proto__.handleConnectMessage = jest.fn();
+    repo.init();
+
+    const MESSAGE = "message";
+    eventEmitter.emit("connectMessage", MESSAGE);
+
+    expect(repo.handleConnectMessage).toBeCalledTimes(1);
+    expect(repo.handleConnectMessage).toBeCalledWith(MESSAGE);
+  });
+  test("handles state messages when received", () => {
+    let mockDeps = createMockDependencies();
+    const eventEmitter = new events.EventEmitter();
+    mockDeps.pubsub.stateMessages = rxjs.fromEvent(
+      eventEmitter,
+      "connectMessage"
+    );
+
+    let repo = repository(mockDeps);
+    repo.__proto__.handleStateMessage = jest.fn();
+    repo.init();
+
+    const MESSAGE = "message";
+    eventEmitter.emit("connectMessage", MESSAGE);
+
+    expect(repo.handleStateMessage).toBeCalledTimes(1);
+    expect(repo.handleStateMessage).toBeCalledWith(MESSAGE);
+  });
+  test("handles effect list messages when received", () => {
+    let mockDeps = createMockDependencies();
+    const eventEmitter = new events.EventEmitter();
+    mockDeps.pubsub.effectMessages = rxjs.fromEvent(
+      eventEmitter,
+      "effectListMessage"
+    );
+
+    let repo = repository(mockDeps);
+    repo.__proto__.handleEffectListMessage = jest.fn();
+    repo.init();
+
+    const MESSAGE = "message";
+    eventEmitter.emit("effectListMessage", MESSAGE);
+
+    expect(repo.handleEffectListMessage).toBeCalledTimes(1);
+    expect(repo.handleEffectListMessage).toBeCalledWith(MESSAGE);
+  });
 });
 
 describe("connect", () => {
@@ -159,6 +264,18 @@ describe("connect", () => {
     expect(mockDeps.pubsub.subscribeToLight).toBeCalled();
     expect(repo.connected).toBe(false);
   });
+});
+
+describe.skip("handleConnectMessage", () => {
+  test("Test", async () => {});
+});
+
+describe.skip("handleStateMessage", () => {
+  test("Test", async () => {});
+});
+
+describe.skip("handleEffectListMessage", () => {
+  test("Test", async () => {});
 });
 
 describe("getLight", () => {

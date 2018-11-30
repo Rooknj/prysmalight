@@ -267,15 +267,40 @@ describe("connect", () => {
 });
 
 describe.skip("handleConnectMessage", () => {
-  test("Test", async () => {});
+  test("handles the connect message (Example 1)", async () => {
+    let mockDeps = createMockDependencies();
+    const MESSAGE = 2;
+    const repo = repository(mockDeps);
+
+    const error = await repo.handleConnectMessage();
+  });
+  test("handles the connect message (Example 2)", async () => {});
+  test("ignores the message and returns an error if it is not in the correct format", async () => {});
+  test("correctly changes the light in the database", async () => {});
+  test("returns an error if it fails to change the light", async () => {});
+  test("Gets the changed light and notifies subscribers", async () => {});
+  test("returns an error if it fails to get the changed light", async () => {});
 });
 
 describe.skip("handleStateMessage", () => {
-  test("Test", async () => {});
+  test("handles the state message (Example 1)", async () => {});
+  test("handles the state message (Example 2)", async () => {});
+  test("ignores the message and returns an error if it is not in the correct format", async () => {});
+  test("correctly changes the light in the database", async () => {});
+  test("returns an error if it fails to change the light", async () => {});
+  test("Gets the changed light and notifies subscribers", async () => {});
+  test("returns an error if it fails to get the changed light", async () => {});
+  test("sends out a mutationResponse event", async () => {});
 });
 
 describe.skip("handleEffectListMessage", () => {
-  test("Test", async () => {});
+  test("handles the effect list message (Example 1)", async () => {});
+  test("handles the effect list message (Example 2)", async () => {});
+  test("ignores the message and returns an error if it is not in the correct format", async () => {});
+  test("correctly changes the light in the database", async () => {});
+  test("returns an error if it fails to change the light", async () => {});
+  test("Gets the changed light and notifies subscribers", async () => {});
+  test("returns an error if it fails to get the changed light", async () => {});
 });
 
 describe("getLight", () => {

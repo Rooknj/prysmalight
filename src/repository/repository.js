@@ -16,19 +16,6 @@ const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 const eventEmitter = new events.EventEmitter();
 
-// TODO: Move this somewhere more appropriate inside a function that uses it
-const LIGHT_CONNECTED = 2;
-const LIGHT_DISCONNECTED = 0;
-const toConnectionString = connectionMessage => {
-  let connectionString = -1;
-  if (Number(connectionMessage) === LIGHT_DISCONNECTED) {
-    connectionString = LIGHT_DISCONNECTED;
-  } else if (Number(connectionMessage) === LIGHT_CONNECTED) {
-    connectionString = LIGHT_CONNECTED;
-  }
-  return connectionString;
-};
-
 module.exports = ({ db, pubsub, gqlPubSub }) => {
   let self = {};
 
@@ -95,28 +82,30 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
    * @param {object} message - the connect status message of a light
    */
   const handleConnectMessage = async message => {
-    // Convert the message to a database string
-    const connectionString = toConnectionString(message.connection);
-    if (connectionString === -1) {
+    // Validate the message is in the correct format
+    const LIGHT_CONNECTED = 2;
+    const LIGHT_DISCONNECTED = 0;
+    let connection = Number(message.connection);
+    if (connection !== LIGHT_DISCONNECTED && connection !== LIGHT_CONNECTED) {
       debug(`Incorrect connection format: ignoring\nMessage: ${message}`);
-      return;
+      return new Error("Incorrect connection format");
     }
 
     let error, changedLight;
 
     // Update the light's connection data in the db
     error = await db.setLight(message.name, {
-      connected: connectionString
+      connected: connection
     });
     if (error) {
       debug(error);
-      return;
+      return error;
     }
 
     ({ error, light: changedLight } = await db.getLight(message.name));
     if (error) {
       debug(error);
-      return;
+      return error;
     }
 
     // Notify subscribers of the change in connection status
@@ -124,6 +113,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     gqlPubSub.publish("lightsChanged", {
       lightsChanged: changedLight
     });
+    return null;
   };
 
   /**
@@ -147,13 +137,13 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     error = await db.setLight(message.name, newState);
     if (error) {
       debug(error);
-      return;
+      return error;
     }
 
     ({ error, light: changedLight } = await db.getLight(message.name));
     if (error) {
       debug(error);
-      return;
+      return error;
     }
     // Notify subscribers of change in state
     gqlPubSub.publish(message.name, { lightChanged: changedLight });
@@ -163,6 +153,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
 
     // Notify setLight of the light's response
     eventEmitter.emit("mutationResponse", mutationId, changedLight);
+    return null;
   };
 
   /**
@@ -178,13 +169,13 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     });
     if (error) {
       debug(error);
-      return;
+      return error;
     }
 
     ({ error, light: changedLight } = db.getLight(message.name));
     if (error) {
       debug(error);
-      return;
+      return error;
     }
 
     // Notify subscribers of the change in the effect list
@@ -192,6 +183,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     gqlPubSub.publish("lightsChanged", {
       lightsChanged: changedLight
     });
+    return null;
   };
 
   /**

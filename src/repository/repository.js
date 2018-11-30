@@ -6,6 +6,7 @@ const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
 const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
 
 // TODO: Add this variable to redis
+// TODO: Create a method in dbFactory called getMutationNumber which returns the incremented value
 let mutationNumber = 0;
 
 // TODO: Find a better way to do this

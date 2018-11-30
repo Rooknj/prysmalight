@@ -1,4 +1,3 @@
-const { toConnectionString } = require("./lightUtil");
 const Debug = require("debug").default;
 const debug = Debug("repo");
 
@@ -15,6 +14,22 @@ const { promisify } = require("util");
 const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 const eventEmitter = new events.EventEmitter();
+
+// TODO: Move this somewhere more appropriate inside a function that uses it
+// MQTT: payloads by default
+const LIGHT_CONNECTED = 2;
+const LIGHT_DISCONNECTED = 0;
+
+// Utility functions
+const toConnectionString = connectionMessage => {
+  let connectionString = -1;
+  if (Number(connectionMessage) === LIGHT_DISCONNECTED) {
+    connectionString = LIGHT_DISCONNECTED;
+  } else if (Number(connectionMessage) === LIGHT_CONNECTED) {
+    connectionString = LIGHT_CONNECTED;
+  }
+  return connectionString;
+};
 
 module.exports = ({ db, pubsub, gqlPubSub }) => {
   let self = {};

@@ -467,8 +467,85 @@ describe("addLight", () => {
   });
 });
 
-describe.skip("removeLight", () => {
-  test("Test", async () => {});
+describe("removeLight", () => {
+  test("removes the light with no errors", async () => {
+    let mockDeps = createMockDependencies();
+    const ID = "Test A";
+    mockDeps.db.removeLight = jest.fn(async () => null);
+    mockDeps.db.hasLight = jest.fn(async () => ({
+      error: null,
+      hasLight: true
+    }));
+    const repo = repository(mockDeps);
+
+    const response = await repo.removeLight(ID);
+
+    expect(response).toEqual({ id: ID });
+    expect(mockDeps.db.removeLight).toBeCalledWith(ID);
+    expect(mockDeps.pubsub.unsubscribeFromLight).toBeCalledWith(ID);
+  });
+  test("notifies subscribers of the removed light", async () => {
+    let mockDeps = createMockDependencies();
+    const ID = "Test A";
+    mockDeps.db.removeLight = jest.fn(async () => null);
+    mockDeps.db.hasLight = jest.fn(async () => ({
+      error: null,
+      hasLight: true
+    }));
+    const repo = repository(mockDeps);
+
+    const response = await repo.removeLight(ID);
+
+    expect(response).toEqual({ id: ID });
+    expect(mockDeps.gqlPubSub.publish).toBeCalledWith("lightRemoved", {
+      lightRemoved: { id: ID }
+    });
+  });
+  test("returns an error if the light was not already added", async () => {
+    let mockDeps = createMockDependencies();
+    const ID = "Test A";
+    mockDeps.db.removeLight = jest.fn(async () => null);
+    mockDeps.db.hasLight = jest.fn(async () => ({
+      error: null,
+      hasLight: false
+    }));
+    const repo = repository(mockDeps);
+
+    const response = await repo.removeLight(ID);
+
+    expect(response).toBeInstanceOf(Error);
+    expect(mockDeps.db.hasLight).toBeCalledWith(ID);
+  });
+  test("returns an error if it failed to check if the light was added", async () => {
+    let mockDeps = createMockDependencies();
+    const ID = "Test A";
+    mockDeps.db.removeLight = jest.fn(async () => null);
+    mockDeps.db.hasLight = jest.fn(async () => ({
+      error: new Error(),
+      hasLight: true
+    }));
+    const repo = repository(mockDeps);
+
+    const response = await repo.removeLight(ID);
+
+    expect(response).toBeInstanceOf(Error);
+    expect(mockDeps.db.hasLight).toBeCalledWith(ID);
+  });
+  test("returns an error if it failed to remove the light to the db", async () => {
+    let mockDeps = createMockDependencies();
+    const ID = "Test A";
+    mockDeps.db.removeLight = jest.fn(async () => new Error());
+    mockDeps.db.hasLight = jest.fn(async () => ({
+      error: null,
+      hasLight: true
+    }));
+    const repo = repository(mockDeps);
+
+    const response = await repo.removeLight(ID);
+
+    expect(response).toBeInstanceOf(Error);
+    expect(mockDeps.db.hasLight).toBeCalledWith(ID);
+  });
 });
 
 describe.skip("setLight", () => {

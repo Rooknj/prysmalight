@@ -53,6 +53,7 @@ const getRepo = () => {
 
 // Start the server
 const repo = getRepo();
+repo.init();
 debug("Starting Server");
 server
   .start({

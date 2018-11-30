@@ -19,6 +19,19 @@ const eventEmitter = new events.EventEmitter();
 module.exports = ({ db, pubsub, gqlPubSub }) => {
   let self = {};
 
+  const init = () => {
+    // Start listening to the messages
+    pubsub.connectMessages.subscribe(self.handleConnectMessage);
+    pubsub.stateMessages.subscribe(self.handleStateMessage);
+    pubsub.effectMessages.subscribe(self.handleEffectListMessage);
+
+    // Subscribe to all lights on startup
+    db.connections.subscribe(self.connect);
+    pubsub.connections.subscribe(self.connect);
+    pubsub.disconnections.subscribe(() => (self.connected = false));
+    db.disconnections.subscribe(() => (self.connected = false));
+  };
+
   /**
    * Attempts to subscribe to all added lights
    * Sets the self.connected property to true if successful
@@ -334,6 +347,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
 
   self = {
     connected: false,
+    init,
     connect,
     handleConnectMessage,
     handleStateMessage,
@@ -348,17 +362,6 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     subscribeToLightsAdded,
     subscribeToLightsRemoved
   };
-
-  // Start listening to the messages
-  pubsub.connectMessages.subscribe(self.handleConnectMessage);
-  pubsub.stateMessages.subscribe(self.handleStateMessage);
-  pubsub.effectMessages.subscribe(self.handleEffectListMessage);
-
-  // Subscribe to all lights on startup
-  db.connections.subscribe(self.connect);
-  pubsub.connections.subscribe(self.connect);
-  pubsub.disconnections.subscribe(() => (self.connected = false));
-  db.disconnections.subscribe(() => (self.connected = false));
 
   return Object.create(self);
 };

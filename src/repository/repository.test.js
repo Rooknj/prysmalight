@@ -902,8 +902,15 @@ describe("removeLight", () => {
   });
 });
 
+// TODO: Figure out how to test with timers and actual event listeners
 describe.skip("setLight", () => {
-  test("Test", async () => {});
+  test("correctly sets the light (Example 1)", async () => {});
+  test("correctly sets the light (Example 2)", async () => {});
+  test("returns an error if the light was not added", async () => {});
+  test("returns an error if it fails to check if the light was added", async () => {});
+  test("returns an error if the light was not added", async () => {});
+  test("returns an error if fails to publish to the light", async () => {});
+  test.skip("returns an error if takes too long for the light to respond", async () => {});
 });
 
 describe("subscribeToLight", () => {

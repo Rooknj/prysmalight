@@ -4,25 +4,38 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
-import { withTheme } from "@material-ui/core/styles";
+import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "styled-components";
+import lime from "@material-ui/core/colors/lime";
 
-const App = ({ theme }) => (
-  <ThemeProvider theme={{ ...theme }}>
-    <CssBaseline>
-      <AppBar position="static" color="default">
-        <Toolbar>
-          <Typography variant="title" color="inherit">
-            Light App 2.0
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <LightTool />
-    </CssBaseline>
-  </ThemeProvider>
+const theme = createMuiTheme({
+  palette: {
+    type: "dark", // Switching the dark mode on is a single property value change.
+    primary: lime
+  },
+  typography: {
+    useNextVariants: true
+  }
+});
+
+const App = () => (
+  <MuiThemeProvider theme={theme}>
+    <ThemeProvider theme={{ ...theme }}>
+      <CssBaseline>
+        <AppBar position="static" color="default">
+          <Toolbar>
+            <Typography variant="h6" color="inherit">
+              Light App 2.0
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <LightTool />
+      </CssBaseline>
+    </ThemeProvider>
+  </MuiThemeProvider>
 );
 
-export default withTheme()(App);
+export default App;
 
 /*
     React Notes!

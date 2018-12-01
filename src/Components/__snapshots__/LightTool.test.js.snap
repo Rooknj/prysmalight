@@ -16,8 +16,8 @@ Array [
 `;
 
 exports[`matches shallow snapshot 1`] = `
-<React.Fragment>
+<Fragment>
   <Component />
   <Component />
-</React.Fragment>
+</Fragment>
 `;

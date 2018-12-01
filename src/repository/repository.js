@@ -10,13 +10,12 @@ const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
 let mutationNumber = 0;
 
 // TODO: Find a better way to do this
-const events = require("events");
+
 const { promisify } = require("util");
 const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
-const eventEmitter = new events.EventEmitter();
 
-module.exports = ({ db, pubsub, gqlPubSub }) => {
+module.exports = ({ db, pubsub, gqlPubSub, event }) => {
   let self = {};
 
   const init = () => {
@@ -82,6 +81,11 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
    * @param {object} message - the connect status message of a light
    */
   const handleConnectMessage = async message => {
+    if (!message.name) {
+      debug("No name in the connect message");
+      return new Error("No name supplied from the message");
+    }
+
     // Validate the message is in the correct format
     const LIGHT_CONNECTED = 2;
     const LIGHT_DISCONNECTED = 0;
@@ -122,6 +126,10 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
    * @param {object} message - the state message of a light
    */
   const handleStateMessage = async message => {
+    if (!message.name) {
+      debug("No name in the state message");
+      return new Error("No name supplied from the message");
+    }
     // Parse the message and generate a newState object
     // TODO: add data checking
     const { mutationId, state, brightness, color, effect, speed } = message;
@@ -131,6 +139,10 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     if (color) newState = { ...newState, color };
     if (effect) newState = { ...newState, effect };
     if (speed) newState = { ...newState, speed };
+
+    // If nothing was added to newState, that means the message was irrelavent data
+    if (Object.keys(newState).length <= 0)
+      return new Error("Message had irrelevant data");
 
     let error, changedLight;
     // Update the light's state data in the db
@@ -152,7 +164,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
     });
 
     // Notify setLight of the light's response
-    eventEmitter.emit("mutationResponse", mutationId, changedLight);
+    event.emit("mutationResponse", mutationId, changedLight);
     return null;
   };
 
@@ -161,8 +173,17 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
    * @param {object} message - the effect list message of a light
    */
   const handleEffectListMessage = async message => {
+    if (!message.name) {
+      debug("No name in the effect list message");
+      return new Error("No name supplied from the message");
+    }
+
     let error, changedLight;
 
+    if (!Array.isArray(message.effectList)) {
+      debug("No effect list supplied in message");
+      return new Error("No effect list supplied in message");
+    }
     // Update the light's effect list in the db
     error = await db.setLight(message.name, {
       supportedEffects: message.effectList
@@ -297,10 +318,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
       const handleMutationResponse = (mutationId, changedLight) => {
         if (mutationId === payload.mutationId) {
           // Remove this mutation's event listener
-          eventEmitter.removeListener(
-            "mutationResponse",
-            handleMutationResponse
-          );
+          event.removeListener("mutationResponse", handleMutationResponse);
 
           // Resolve with the light's response data
           resolve(changedLight);
@@ -308,7 +326,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
       };
 
       // Every time we get a new message from the light, check to see if it has the same mutationId
-      eventEmitter.on("mutationResponse", handleMutationResponse);
+      event.on("mutationResponse", handleMutationResponse);
 
       // Publish to the light
       const error = await pubsub.publishToLight(id, payload);
@@ -316,7 +334,7 @@ module.exports = ({ db, pubsub, gqlPubSub }) => {
 
       // if the response takes too long, error out
       await asyncSetTimeout(TIMEOUT_WAIT);
-      eventEmitter.removeListener("mutationResponse", handleMutationResponse);
+      event.removeListener("mutationResponse", handleMutationResponse);
       reject(new Error(`Response from ${id} timed out`));
     });
   };

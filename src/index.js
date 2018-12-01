@@ -1,5 +1,7 @@
 const config = require("./config/config");
 const server = require("./server/server");
+const dbFactory = require("./repository/dbFactory");
+const pubsubFactory = require("./repository/pubsubFactory");
 const repository = require("./repository/repository");
 const MockLight = require("./mock/MockLight");
 const Debug = require("debug").default;
@@ -37,12 +39,25 @@ const getRepo = () => {
     }
   );
 
+  //TODO: Include this stuff in deps
+  const { PubSub } = require("apollo-server");
+  const gqlPubSub = new PubSub();
+
+  // TODO: Figure out where to put this
+  const events = require("events");
+  const event = new events.EventEmitter();
+
+  // Create our db and pubsub with the provided clients
+  const db = dbFactory(dbClient);
+  const pubsub = pubsubFactory(pubsubClient);
+
   // Inject Dependencies
-  return repository({ dbClient, pubsubClient });
+  return repository({ db, pubsub, gqlPubSub, event });
 };
 
 // Start the server
 const repo = getRepo();
+repo.init();
 debug("Starting Server");
 server
   .start({

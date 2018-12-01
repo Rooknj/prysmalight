@@ -1,9 +1,5 @@
 const { promisify } = require("util");
 const Debug = require("debug").default;
-const {
-  getNewRedisLight,
-  mapRedisObjectToLightObject
-} = require("./lightUtil");
 const debug = Debug("db");
 const { fromEvent } = require("rxjs");
 
@@ -12,13 +8,6 @@ const { fromEvent } = require("rxjs");
  * @param {object} client - The Redis client
  */
 const dbFactory = client => {
-  // TODO: Find a better way to handle errors
-  client.on("error", err => debug(err));
-  // TODO: Find a way safely call BGSAVE when you are making a bunch of addLight requests in rapid succession
-  // { ReplyError: ERR Background save already in progress
-  //   at parseError (/snapshot/app/node_modules/redis-parser/lib/parser.js:193:12)
-  //   at parseType (/snapshot/app/node_modules/redis-parser/lib/parser.js:303:14) command: 'BGSAVE', code: 'ERR' }
-
   // Promisify all client methods
   const asyncSMEMBERS = promisify(client.SMEMBERS).bind(client),
     asyncSADD = promisify(client.SADD).bind(client),
@@ -30,6 +19,28 @@ const dbFactory = client => {
     asyncHMSET = promisify(client.HMSET).bind(client),
     asyncDEL = promisify(client.DEL).bind(client),
     asyncHGETALL = promisify(client.HGETALL).bind(client);
+
+  // Initializing the self object which enables us to call sibiling methods
+  //(ex: getAllLights calls self.getLight() instead of just getLight())
+  let self = {};
+
+  // Set the connected status of the client.
+  // We have to do this because client.connected doesnt work for some reason
+  client.on("connect", () => {
+    debug("Connected to DB");
+    self.connected = true;
+  });
+  client.on("end", () => {
+    debug("disconnected from DB");
+    self.connected = false;
+  });
+
+  // TODO: Find a better way to handle errors
+  client.on("error", err => debug(err));
+  // TODO: Find a way safely call BGSAVE when you are making a bunch of addLight requests in rapid succession
+  // { ReplyError: ERR Background save already in progress
+  //   at parseError (/snapshot/app/node_modules/redis-parser/lib/parser.js:193:12)
+  //   at parseType (/snapshot/app/node_modules/redis-parser/lib/parser.js:303:14) command: 'BGSAVE', code: 'ERR' }
 
   /**
    * An observable of all the times the client connects
@@ -49,28 +60,52 @@ const dbFactory = client => {
   const getLight = async id => {
     if (!client.connected) {
       return {
-        error: new Error(`Can not get "${id}". Not connected to Redis`)
+        error: new Error(`Can not get "${id}". Not connected to Redis`),
+        light: null
       };
     }
+
+    if (!id)
+      return {
+        error: new Error("You must provide an Id to getLight"),
+        light: null
+      };
 
     let lightData, lightEffect;
     // Get data about the light
     try {
       lightData = await asyncHGETALL(id);
     } catch (error) {
-      return { error };
+      return { error, light: null };
     }
+
+    // If the data returned is null, that means it was not added
+    if (!lightData)
+      return { error: new Error(`"${id}" had no data`), light: null };
 
     // Get the light's effects
     try {
       lightEffect = await asyncSMEMBERS(lightData.effectsKey);
     } catch (error) {
-      return { error };
+      return { error, light: null };
     }
 
     // Convert that info into a javascript object
-    const lightObject = mapRedisObjectToLightObject(id, lightData, lightEffect);
-    return { light: lightObject };
+    const lightObject = {
+      id,
+      connected: lightData.connected,
+      state: lightData.state,
+      brightness: parseInt(lightData.brightness),
+      color: {
+        r: parseInt(lightData["color:red"]),
+        g: parseInt(lightData["color:green"]),
+        b: parseInt(lightData["color:blue"])
+      },
+      effect: lightData.effect,
+      speed: parseInt(lightData.speed),
+      supportedEffects: lightEffect
+    };
+    return { error: null, light: lightObject };
   };
 
   /**
@@ -79,7 +114,8 @@ const dbFactory = client => {
   const getAllLights = async () => {
     if (!client.connected) {
       return {
-        error: new Error("Can not get lights. Not connected to Redis")
+        error: new Error("Can not get lights. Not connected to Redis"),
+        lights: null
       };
     }
 
@@ -88,12 +124,12 @@ const dbFactory = client => {
     try {
       lightKeys = await asyncZRANGE("lightKeys", 0, -1);
     } catch (error) {
-      return { error };
+      return { error, lights: null };
     }
 
     // For each light key, get the corresponding light data
     const mapLightPromises = lightKeys.map(async lightKey =>
-      getLight(lightKey)
+      self.getLight(lightKey)
     );
 
     // Wait for all of the promises returned by getLight to resolve
@@ -127,15 +163,19 @@ const dbFactory = client => {
    */
   const setLight = async (id, lightData) => {
     if (!client.connected) {
-      return {
-        error: new Error(`Can not set "${id}". Not connected to Redis`)
-      };
+      return new Error(`Can not set "${id}". Not connected to Redis`);
     }
 
     // You need an id to set the light
     if (!id) {
-      return { error: new Error("No ID supplied to setLight()") };
+      return new Error("No ID supplied to setLight()");
     }
+
+    // You need data to set the light
+    if (!lightData) {
+      return new Error("No data supplied to setLight()");
+    }
+
     // Populate the redis object with the id of the light as a key
     let redisObject = [id];
     // Add the connected data
@@ -169,6 +209,11 @@ const dbFactory = client => {
       );
     }
 
+    // If none of the provided lightData was relavent, return an error
+    if (redisObject.length < 2) {
+      return new Error("The Data Supplied to setLight() was not light data");
+    }
+
     // Push data object to redis database
     const addLightDataPromise = asyncHMSET(redisObject);
 
@@ -176,135 +221,112 @@ const dbFactory = client => {
     try {
       await Promise.all([addLightDataPromise, addEffectsPromise]);
     } catch (error) {
-      return { error };
+      return error;
     }
 
-    return getLight(id);
+    return null;
   };
 
   /**
    * Add a new light with the specified id.
    * Default values are provided
+   * May return an error
    * @param {string} id
    */
   const addLight = async id => {
     if (!client.connected) {
-      return {
-        error: new Error(`Can not add "${id}". Not connected to Redis`)
-      };
+      return new Error(`Can not add "${id}". Not connected to Redis`);
     }
 
-    let lightScore, addLightKeyResponse, addLightDataResponse;
+    if (!id) return new Error("You must provide an Id to addLight");
 
-    // TODO: Figure out what i am doing here
+    // Increment the light score so that each light has a higher score than the previous
+    let lightScore;
     try {
       lightScore = await asyncINCR("lightScore");
     } catch (error) {
-      return { error };
+      return error;
     }
 
-    // TODO: Figure out what i am doing here
+    // Add the light id to an ordered set
     try {
-      addLightKeyResponse = await asyncZADD("lightKeys", lightScore, id);
+      await asyncZADD("lightKeys", lightScore, id);
     } catch (error) {
-      return { error };
+      return error;
     }
 
-    // TODO: Figure out what i am doing here
-    switch (addLightKeyResponse) {
-      // If the response is 1, then adding the light was successful
-      // If 0, it was unsuccessful
-      case 1:
-        debug("successfully added key");
-        try {
-          addLightDataResponse = await asyncHMSET(getNewRedisLight(id));
-        } catch (error) {
-          return { error };
-        }
-        break;
-      default:
-        return {
-          error: new Error(
-            "Could not add light key to redis. returned with response code != 1"
-          )
-        };
+    // Set the light's data to it's default value
+    try {
+      await asyncHMSET([
+        id,
+        "connected",
+        0,
+        "state",
+        "OFF",
+        "brightness",
+        100,
+        "color:red",
+        255,
+        "color:green",
+        0,
+        "color:blue",
+        0,
+        "effect",
+        "None",
+        "speed",
+        4,
+        "effectsKey",
+        `${id}:effects`
+      ]);
+    } catch (error) {
+      return error;
     }
 
-    // TODO: Figure out what i am doing here
-    switch (addLightDataResponse) {
-      // If the response is OK, then setting the light was successful
-      case "OK":
-        debug("Light successfully added");
-        // Save the redis database to persistant storage
-        client.BGSAVE();
-        // Return the newly added light
-        return getLight(id);
-      default:
-        return {
-          error: new Error(
-            'Could not add light key to redis. returned with response code != "OK"'
-          )
-        };
-    }
+    // Save redis cache to persistant storage
+    client.BGSAVE();
+
+    // Return null as the error
+    return null;
   };
 
   /**
    * Remove the light with the specified id.
-   * Will return an error if the light does not exist
-   * TODO: Change this function to use hasLight() and return as success if the light does not exist anyway
+   * May return an error
    * @param {string} id
    */
   const removeLight = async id => {
     if (!client.connected) {
-      return {
-        error: new Error(`Can't remove "${id}". Not connected to redis`)
-      };
+      return new Error(`Can't remove "${id}". Not connected to redis`);
     }
 
-    let removeKeyResponse, deleteLightResponse;
+    if (!id) return new Error("You must provide an Id to removeLight");
 
-    // TODO: Figure out what I am doing here
+    // Delete the light's effect list
     try {
-      removeKeyResponse = await asyncZREM("lightKeys", id);
+      await asyncDEL(`${id}:effects`);
     } catch (error) {
-      return { error };
+      return error;
     }
 
-    // TODO: Figure out what I am doing here
-    switch (removeKeyResponse) {
-      // If the response is 1, then deleting the lightKey was successful
-      // If 0, it was unsuccessful
-      case 1:
-        debug("successfully deleted key");
-        try {
-          deleteLightResponse = await asyncDEL(id);
-        } catch (error) {
-          return { error };
-        }
-        break;
-      default:
-        return {
-          error: new Error(
-            "Could not remove light key from Redis. Response code != 1"
-          )
-        };
+    // Delete the light's data
+    try {
+      await asyncDEL(id);
+    } catch (error) {
+      return error;
     }
 
-    // If the response is 1, then deleting the light was successful
-    switch (deleteLightResponse) {
-      case 1:
-        debug("Light successfully deleted");
-        // Save the redis database to persistant storage
-        client.BGSAVE();
-        // Return the id of the deleted light
-        return { lightRemoved: { id } };
-      default:
-        return {
-          error: new Error(
-            "Could not remove light key from Redis. Response code != 1"
-          )
-        };
+    // Remove the light's id from the list of lights
+    try {
+      await asyncZREM("lightKeys", id);
+    } catch (error) {
+      return error;
     }
+
+    // Save redis cache to persistant storage
+    client.BGSAVE();
+
+    // Return null as the error
+    return null;
   };
 
   /**
@@ -316,27 +338,45 @@ const dbFactory = client => {
       return {
         error: new Error(
           `Can not check if "${id}" was added. Not connected to Redis`
-        )
+        ),
+        hasLight: null
       };
     }
 
+    if (!id)
+      return {
+        error: new Error("You must provide an Id to hasLight"),
+        hasLight: null
+      };
+
     let lightScore;
-    // May throw an error
-    lightScore = await asyncZSCORE("lightKeys", id);
+
+    // Get the score of the light
+    try {
+      lightScore = await asyncZSCORE("lightKeys", id);
+    } catch (error) {
+      return {
+        error: error,
+        hasLight: true
+      };
+    }
 
     // If the light has a score, it exists.
     if (lightScore) {
       return {
+        error: null,
         hasLight: true
       };
     } else {
       return {
+        error: null,
         hasLight: false
       };
     }
   };
 
-  return Object.create({
+  self = {
+    connected: false,
     connections,
     disconnections,
     getAllLights,
@@ -345,7 +385,9 @@ const dbFactory = client => {
     addLight,
     removeLight,
     hasLight
-  });
+  };
+
+  return Object.create(self);
 };
 
 module.exports = dbFactory;

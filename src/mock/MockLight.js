@@ -1,6 +1,5 @@
 const MQTT = require("async-mqtt");
 const Debug = require("debug").default;
-const { parseMqttMessage } = require("../service/lightUtil");
 const debug = Debug("MockLight");
 const { mqttSettings } = require("../config/config");
 
@@ -10,6 +9,18 @@ const MQTT_LIGHT_CONNECTED_TOPIC = mqttSettings.MQTT_LIGHT_CONNECTED_TOPIC;
 const MQTT_LIGHT_STATE_TOPIC = mqttSettings.MQTT_LIGHT_STATE_TOPIC;
 const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
 const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
+
+const parseMqttMessage = jsonData => {
+  const message = JSON.parse(jsonData);
+
+  if (!message.name) {
+    debug(
+      `Received a messsage that did not have an id. Ignoring\nMessage: ${message}`
+    );
+    return;
+  }
+  return message;
+};
 
 class MockLight {
   constructor(lightId) {
@@ -103,7 +114,6 @@ class MockLight {
   }
 
   handleMessage(topic, message) {
-    // TODO: Implement
     // Convert message into a string
     const data = message.toString();
     debug(`Received message on topic ${topic} with a payload of ${data}`);

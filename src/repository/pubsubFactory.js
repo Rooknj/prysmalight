@@ -21,6 +21,20 @@ const toMessageObject = msg => JSON.parse(msg[1].toString());
  * @param {object} client - The MQTT client
  */
 const pubsubFactory = client => {
+  // Initializing the self object which enables us to access connected
+  let self = {};
+
+  // Set the connected status of the client.
+  // We have to do this because client.connected doesnt work for some reason
+  client.on("connect", () => {
+    debug("Connected to MQTT");
+    self.connected = true;
+  });
+  client.on("close", () => {
+    debug("disconnected from MQTT");
+    self.connected = false;
+  });
+
   /**
    * An observable of all the times the client connects
    */
@@ -68,10 +82,14 @@ const pubsubFactory = client => {
   const subscribeTo = async topic => {
     try {
       const granted = await client.subscribe(topic);
-      debug(
-        `Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`
-      );
-      return;
+      if (!granted[0]) {
+        debug(`Already subscribed to ${topic}`);
+      } else {
+        debug(
+          `Subscribed to ${granted[0].topic} with a qos of ${granted[0].qos}`
+        );
+      }
+      return null;
     } catch (error) {
       return error;
     }
@@ -87,7 +105,7 @@ const pubsubFactory = client => {
     try {
       await client.publish(topic, payload);
       debug(`Published payload of ${payload} to ${topic}`);
-      return;
+      return null;
     } catch (error) {
       return error;
     }
@@ -102,7 +120,7 @@ const pubsubFactory = client => {
     try {
       await client.unsubscribe(topic);
       debug(`Unsubscribed from ${topic}`);
-      return;
+      return null;
     } catch (error) {
       return error;
     }
@@ -114,6 +132,13 @@ const pubsubFactory = client => {
    * @param {string} id
    */
   const subscribeToLight = async id => {
+    if (!self.connected)
+      return new Error(
+        `Can not subscribe to (${id}). MQTT client not connected`
+      );
+
+    if (!id) return new Error("You must provide an id to this function");
+
     const subscribedToConnected = subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -130,7 +155,7 @@ const pubsubFactory = client => {
       subscribedToEffectList
     ]);
 
-    let returnError;
+    let returnError = null;
     // If any subscription failed, return 0
     subscriptionResponses.forEach(error => {
       // if one of the subscriptions already failed, ignore processing on the rest
@@ -148,6 +173,13 @@ const pubsubFactory = client => {
    * @param {string} id
    */
   const unsubscribeFromLight = async id => {
+    if (!self.connected)
+      return new Error(
+        `Can not unsubscribe from (${id}). MQTT client not connected`
+      );
+
+    if (!id) return new Error("You must provide an id to this function");
+
     const unsubscribedFromConnected = unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -164,7 +196,7 @@ const pubsubFactory = client => {
       unsubscribedFromEffectList
     ]);
 
-    let returnError;
+    let returnError = null;
     // If any subscription failed, return 0
     unsubscriptionResponses.forEach(error => {
       // if one of the subscriptions already failed, ignore processing on the rest
@@ -182,13 +214,21 @@ const pubsubFactory = client => {
    * @param {string} message
    */
   const publishToLight = async (id, message) => {
+    if (!self.connected)
+      return new Error(`Can not publish to (${id}). MQTT client not connected`);
+
+    if (!id) return new Error("You must provide an id to this function");
+    if (!message)
+      return new Error("You must provide a message to this function");
+
     return publishTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_COMMAND_TOPIC}`,
       Buffer.from(JSON.stringify(message))
     );
   };
 
-  return Object.create({
+  self = {
+    connected: false,
     connections,
     disconnections,
     allMessages,
@@ -198,7 +238,9 @@ const pubsubFactory = client => {
     subscribeToLight,
     unsubscribeFromLight,
     publishToLight
-  });
+  };
+
+  return Object.create(self);
 };
 
 module.exports = pubsubFactory;

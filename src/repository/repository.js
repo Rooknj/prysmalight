@@ -1,43 +1,55 @@
-const dbFactory = require("./dbFactory");
-const pubsubFactory = require("./pubsubFactory");
-const { toConnectionString } = require("./lightUtil");
 const Debug = require("debug").default;
 const debug = Debug("repo");
 
-//TODO: Include this stuff in deps
-const { PubSub } = require("apollo-server");
-const badPubSub = new PubSub();
 const ALL_LIGHTS_SUBSCRIPTION_TOPIC = "lightsChanged";
 const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
 const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
 
 // TODO: Add this variable to redis
+// TODO: Create a method in dbFactory called getMutationNumber which returns the incremented value
 let mutationNumber = 0;
 
 // TODO: Find a better way to do this
-const events = require("events");
+
 const { promisify } = require("util");
 const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
-const eventEmitter = new events.EventEmitter();
 
-module.exports = ({ dbClient, pubsubClient }) => {
-  // Create our db and pubsub with the provided clients
-  const db = dbFactory(dbClient);
-  const pubsub = pubsubFactory(pubsubClient);
+module.exports = ({ db, pubsub, gqlPubSub, event }) => {
+  let self = {};
 
-  // TODO: Find a better way to do this
-  // Subscribe to all lights on startup
-  let listeningToAllLights = false;
-  const listenToAllLights = async () => {
-    // If we are already subscribed, return
-    if (listeningToAllLights) return;
+  const init = () => {
+    // Start listening to the messages
+    pubsub.connectMessages.subscribe(self.handleConnectMessage);
+    pubsub.stateMessages.subscribe(self.handleStateMessage);
+    pubsub.effectMessages.subscribe(self.handleEffectListMessage);
+
+    // Subscribe to all lights on startup
+    db.connections.subscribe(self.connect);
+    pubsub.connections.subscribe(self.connect);
+    pubsub.disconnections.subscribe(() => (self.connected = false));
+    db.disconnections.subscribe(() => (self.connected = false));
+  };
+
+  /**
+   * Attempts to subscribe to all added lights
+   * Sets the self.connected property to true if successful
+   */
+  const connect = async () => {
+    if (!pubsub.connected) {
+      debug("Cant connect repo, pubsub not connected");
+      return new Error("pubsub not connected");
+    }
+    if (!db.connected) {
+      debug("Cant connect repo, db not connected");
+      return new Error("db not connected");
+    }
 
     // Get the saved lights from redis
     const { error, lights } = await db.getAllLights();
     if (error) {
       debug(`Error getting all lights during subscribeToAllLights ${error}`);
-      return;
+      return error;
     }
 
     // TODO: If you failed to subscribe to a light, find a way to resubscribe
@@ -47,21 +59,21 @@ module.exports = ({ dbClient, pubsubClient }) => {
     );
 
     // Wait for all subscriptions to resolve then check for errors
-    let didError = false;
     const errors = await Promise.all(subscriptionPromises);
+    let subscriptionError = null;
     errors.forEach(error => {
-      if (didError) return;
+      if (subscriptionError) return;
       if (error) {
-        debug("Error subscribing to at least one light");
-        didError = true;
+        debug(error);
+        subscriptionError = error;
       }
     });
 
-    if (!didError) listeningToAllLights = true;
+    if (subscriptionError) return subscriptionError;
+    // Set connection status to true if there were no errors
+    self.connected = true;
+    return null;
   };
-  db.connections.subscribe(listenToAllLights);
-  pubsub.connections.subscribe(listenToAllLights);
-  pubsub.disconnections.subscribe(() => (listeningToAllLights = false));
 
   /**
    * Updates the db with the connect message data and notifies subscribers.
@@ -69,27 +81,43 @@ module.exports = ({ dbClient, pubsubClient }) => {
    * @param {object} message - the connect status message of a light
    */
   const handleConnectMessage = async message => {
-    // Convert the message to a database string
-    const connectionString = toConnectionString(message.connection);
-    if (connectionString === -1) {
-      debug(`Incorrect connection format: ignoring\nMessage: ${message}`);
-      return;
+    if (!message.name) {
+      debug("No name in the connect message");
+      return new Error("No name supplied from the message");
     }
 
+    // Validate the message is in the correct format
+    const LIGHT_CONNECTED = 2;
+    const LIGHT_DISCONNECTED = 0;
+    let connection = Number(message.connection);
+    if (connection !== LIGHT_DISCONNECTED && connection !== LIGHT_CONNECTED) {
+      debug(`Incorrect connection format: ignoring\nMessage: ${message}`);
+      return new Error("Incorrect connection format");
+    }
+
+    let error, changedLight;
+
     // Update the light's connection data in the db
-    const { error, light: changedLight } = await db.setLight(message.name, {
-      connected: connectionString
+    error = await db.setLight(message.name, {
+      connected: connection
     });
     if (error) {
       debug(error);
-      return;
+      return error;
+    }
+
+    ({ error, light: changedLight } = await db.getLight(message.name));
+    if (error) {
+      debug(error);
+      return error;
     }
 
     // Notify subscribers of the change in connection status
-    badPubSub.publish(message.name, { lightChanged: changedLight });
-    badPubSub.publish("lightsChanged", {
+    gqlPubSub.publish(message.name, { lightChanged: changedLight });
+    gqlPubSub.publish("lightsChanged", {
       lightsChanged: changedLight
     });
+    return null;
   };
 
   /**
@@ -98,6 +126,10 @@ module.exports = ({ dbClient, pubsubClient }) => {
    * @param {object} message - the state message of a light
    */
   const handleStateMessage = async message => {
+    if (!message.name) {
+      debug("No name in the state message");
+      return new Error("No name supplied from the message");
+    }
     // Parse the message and generate a newState object
     // TODO: add data checking
     const { mutationId, state, brightness, color, effect, speed } = message;
@@ -108,24 +140,32 @@ module.exports = ({ dbClient, pubsubClient }) => {
     if (effect) newState = { ...newState, effect };
     if (speed) newState = { ...newState, speed };
 
+    // If nothing was added to newState, that means the message was irrelavent data
+    if (Object.keys(newState).length <= 0)
+      return new Error("Message had irrelevant data");
+
+    let error, changedLight;
     // Update the light's state data in the db
-    const { error, light: changedLight } = await db.setLight(
-      message.name,
-      newState
-    );
+    error = await db.setLight(message.name, newState);
     if (error) {
       debug(error);
-      return;
+      return error;
     }
 
+    ({ error, light: changedLight } = await db.getLight(message.name));
+    if (error) {
+      debug(error);
+      return error;
+    }
     // Notify subscribers of change in state
-    badPubSub.publish(message.name, { lightChanged: changedLight });
-    badPubSub.publish("lightsChanged", {
+    gqlPubSub.publish(message.name, { lightChanged: changedLight });
+    gqlPubSub.publish("lightsChanged", {
       lightsChanged: changedLight
     });
 
     // Notify setLight of the light's response
-    eventEmitter.emit("mutationResponse", mutationId, changedLight);
+    event.emit("mutationResponse", mutationId, changedLight);
+    return null;
   };
 
   /**
@@ -133,26 +173,39 @@ module.exports = ({ dbClient, pubsubClient }) => {
    * @param {object} message - the effect list message of a light
    */
   const handleEffectListMessage = async message => {
+    if (!message.name) {
+      debug("No name in the effect list message");
+      return new Error("No name supplied from the message");
+    }
+
+    let error, changedLight;
+
+    if (!Array.isArray(message.effectList)) {
+      debug("No effect list supplied in message");
+      return new Error("No effect list supplied in message");
+    }
     // Update the light's effect list in the db
-    const { error, light: changedLight } = await db.setLight(message.name, {
+    error = await db.setLight(message.name, {
       supportedEffects: message.effectList
     });
     if (error) {
       debug(error);
-      return;
+      return error;
+    }
+
+    ({ error, light: changedLight } = db.getLight(message.name));
+    if (error) {
+      debug(error);
+      return error;
     }
 
     // Notify subscribers of the change in the effect list
-    badPubSub.publish(message.name, { lightChanged: changedLight });
-    badPubSub.publish("lightsChanged", {
+    gqlPubSub.publish(message.name, { lightChanged: changedLight });
+    gqlPubSub.publish("lightsChanged", {
       lightsChanged: changedLight
     });
+    return null;
   };
-
-  // Start listening to the messages
-  pubsub.connectMessages.subscribe(handleConnectMessage);
-  pubsub.stateMessages.subscribe(handleStateMessage);
-  pubsub.effectMessages.subscribe(handleEffectListMessage);
 
   /**
    * Get the light with the specified id from the db.
@@ -165,7 +218,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
     // If the light was never added, return an error
     ({ error, hasLight } = await db.hasLight(lightId));
     if (error) return error;
-    if (!hasLight) return new Error(`"${lightId}" was not added`);
+    if (!hasLight) return new Error(`"${lightId}" is not currently added`);
 
     // Get the light and return the data
     ({ error, light } = await db.getLight(lightId));
@@ -188,23 +241,23 @@ module.exports = ({ dbClient, pubsubClient }) => {
   const addLight = async lightId => {
     let error, hasLight;
 
-    // Check if the light exists already before doing anything else
+    // If the light was already added, return an error
     ({ error, hasLight } = await db.hasLight(lightId));
     if (error) return error;
-    if (hasLight) return new Error(`"${lightId}" is already added`);
+    if (hasLight)
+      return new Error(`The light with id (${lightId}) was already added`);
 
     // Add new light to light database
-    ({ error } = await db.addLight(lightId));
+    error = await db.addLight(lightId);
     if (error) return error;
 
     // Subscribe to new messages from the new light
-    // TODO: put light in a queue to resubscribe when MQTT is connected
     error = await pubsub.subscribeToLight(lightId);
     if (error) debug(`Failed to subscribe to ${lightId}\n${error}`);
 
     // Get the newly added light, notify subscribers, and return it
-    const lightAdded = await getLight(lightId);
-    badPubSub.publish("lightAdded", { lightAdded });
+    const lightAdded = await self.getLight(lightId);
+    gqlPubSub.publish("lightAdded", { lightAdded });
     return lightAdded;
   };
 
@@ -215,7 +268,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
    * @param {string} lightId
    */
   const removeLight = async lightId => {
-    let error, hasLight, lightRemoved;
+    let error, hasLight;
 
     // Check if the light exists already before doing anything else
     ({ error, hasLight } = await db.hasLight(lightId));
@@ -232,11 +285,12 @@ module.exports = ({ dbClient, pubsubClient }) => {
     // TODO: Add cleanup here in case we only remove part of the light from redis
     // TODO: Figure out if we should resubscribe to the light if it wasn't completely removed
     // Remove light from database
-    ({ error, lightRemoved } = await db.removeLight(lightId));
+    error = await db.removeLight(lightId);
     if (error) return error;
 
+    const lightRemoved = { id: lightId };
     // Return the removed light and notify the subscribers
-    badPubSub.publish("lightRemoved", { lightRemoved });
+    gqlPubSub.publish("lightRemoved", { lightRemoved });
     return lightRemoved;
   };
 
@@ -264,10 +318,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
       const handleMutationResponse = (mutationId, changedLight) => {
         if (mutationId === payload.mutationId) {
           // Remove this mutation's event listener
-          eventEmitter.removeListener(
-            "mutationResponse",
-            handleMutationResponse
-          );
+          event.removeListener("mutationResponse", handleMutationResponse);
 
           // Resolve with the light's response data
           resolve(changedLight);
@@ -275,7 +326,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
       };
 
       // Every time we get a new message from the light, check to see if it has the same mutationId
-      eventEmitter.on("mutationResponse", handleMutationResponse);
+      event.on("mutationResponse", handleMutationResponse);
 
       // Publish to the light
       const error = await pubsub.publishToLight(id, payload);
@@ -283,7 +334,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
 
       // if the response takes too long, error out
       await asyncSetTimeout(TIMEOUT_WAIT);
-      eventEmitter.removeListener("mutationResponse", handleMutationResponse);
+      event.removeListener("mutationResponse", handleMutationResponse);
       reject(new Error(`Response from ${id} timed out`));
     });
   };
@@ -292,27 +343,33 @@ module.exports = ({ dbClient, pubsubClient }) => {
    * Subscribes to the changes of a specific light.
    * @param {string} lightId
    */
-  const subscribeToLight = lightId => badPubSub.asyncIterator(lightId);
+  const subscribeToLight = lightId => gqlPubSub.asyncIterator(lightId);
 
   /**
    * Subscribes to the changes of all lights.
    */
   const subscribeToAllLights = () =>
-    badPubSub.asyncIterator(ALL_LIGHTS_SUBSCRIPTION_TOPIC);
+    gqlPubSub.asyncIterator(ALL_LIGHTS_SUBSCRIPTION_TOPIC);
 
   /**
    * Subscribes to lights being added.
    */
   const subscribeToLightsAdded = () =>
-    badPubSub.asyncIterator(LIGHT_ADDED_SUBSCRIPTION_TOPIC);
+    gqlPubSub.asyncIterator(LIGHT_ADDED_SUBSCRIPTION_TOPIC);
 
   /**
    * Subscribes to lights being removed.
    */
   const subscribeToLightsRemoved = () =>
-    badPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
+    gqlPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
 
-  return Object.create({
+  self = {
+    connected: false,
+    init,
+    connect,
+    handleConnectMessage,
+    handleStateMessage,
+    handleEffectListMessage,
     getLight,
     getLights,
     setLight,
@@ -322,5 +379,7 @@ module.exports = ({ dbClient, pubsubClient }) => {
     subscribeToAllLights,
     subscribeToLightsAdded,
     subscribeToLightsRemoved
-  });
+  };
+
+  return Object.create(self);
 };

@@ -41,6 +41,7 @@ void createMqttTopic(char* bufferVariable, char* topLevel, char* lightName, char
 }
 
 // MQTT: topics
+// TODO: either dynamically create the length of these arrays based on the length of the config variables or make them big and the code that uses them ignores the empty space 
 // connection
 char MQTT_LIGHT_CONNECTED_TOPIC[36];
 // effect list
@@ -48,6 +49,8 @@ char MQTT_EFFECT_LIST_TOPIC[34];
 // state
 char MQTT_LIGHT_STATE_TOPIC[32];
 char MQTT_LIGHT_COMMAND_TOPIC[34];
+// config
+char MQTT_LIGHT_CONFIG_TOPIC[33];
 
 // homebridge
 char* HOMEKIT_LIGHT_STATE_TOPIC = "lightapp2/to/set";
@@ -485,6 +488,24 @@ void sendEffectList() {
   client.publish(MQTT_EFFECT_LIST_TOPIC, buffer, true);
 }
 
+// send effect list over MQTT
+void sendConfig() {
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  // populate payload with name
+  root["name"] = CONFIG_NAME;
+
+  // populate payload with config properties
+  root["ip"] = WiFi.localIP();
+  root["mac"] = WiFi.macAddress();
+  
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+
+  client.publish(MQTT_LIGHT_CONFIG_TOPIC, buffer, true);
+}
 
 
 // MQTT connect/reconnect function
@@ -634,6 +655,7 @@ void setup() {
   createMqttTopic(MQTT_EFFECT_LIST_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_EFFECT_LIST);
   createMqttTopic(MQTT_LIGHT_STATE_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_STATE);
   createMqttTopic(MQTT_LIGHT_COMMAND_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_COMMAND);
+  createMqttTopic(MQTT_LIGHT_CONFIG_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_CONFIG);
 
   Serial.println(MQTT_LIGHT_CONNECTED_TOPIC);
   Serial.println(MQTT_EFFECT_LIST_TOPIC);

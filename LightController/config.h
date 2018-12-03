@@ -37,6 +37,7 @@
 #define CONFIG_MQTT_EFFECT_LIST "effects"
 #define CONFIG_MQTT_STATE "state"
 #define CONFIG_MQTT_COMMAND "command"
+#define CONFIG_MQTT_CONFIG "config"
 
 // MDNS config
 #define CONFIG_MDNS_HOSTNAME "raspberrypi"

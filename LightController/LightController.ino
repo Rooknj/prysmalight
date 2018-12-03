@@ -567,6 +567,7 @@ void sendConfig()
   root["ipAddress"] = WiFi.localIP().toString();
   root["macAddress"] = WiFi.macAddress();
   root["numLeds"] = CONFIG_NUM_LEDS;
+  root["udpPort"] = udp_port;
 
   char buffer[root.measureLength() + 1];
   root.printTo(buffer, sizeof(buffer));

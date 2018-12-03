@@ -553,26 +553,33 @@ void sendEffectList()
   client.publish(MQTT_EFFECT_LIST_TOPIC, buffer, true);
 }
 
-// send effect list over MQTT
+// send effect list over MQTT (once every 10 seconds)
+long lastConfigUpdate = 0;
 void sendConfig()
 {
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+  long now = millis();
+  if (now - lastConfigUpdate > 10000)
+  {
+    lastConfigUpdate = now;
 
-  JsonObject &root = jsonBuffer.createObject();
+    StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
 
-  // populate payload with name
-  root["name"] = CONFIG_NAME;
+    JsonObject &root = jsonBuffer.createObject();
 
-  // populate payload with config properties
-  root["ipAddress"] = WiFi.localIP().toString();
-  root["macAddress"] = WiFi.macAddress();
-  root["numLeds"] = CONFIG_NUM_LEDS;
-  root["udpPort"] = udp_port;
+    // populate payload with name
+    root["name"] = CONFIG_NAME;
 
-  char buffer[root.measureLength() + 1];
-  root.printTo(buffer, sizeof(buffer));
+    // populate payload with config properties
+    root["ipAddress"] = WiFi.localIP().toString();
+    root["macAddress"] = WiFi.macAddress();
+    root["numLeds"] = CONFIG_NUM_LEDS;
+    root["udpPort"] = udp_port;
 
-  client.publish(MQTT_LIGHT_CONFIG_TOPIC, buffer, true);
+    char buffer[root.measureLength() + 1];
+    root.printTo(buffer, sizeof(buffer));
+
+    client.publish(MQTT_LIGHT_CONFIG_TOPIC, buffer);
+  }
 }
 
 // MQTT connect/reconnect function
@@ -611,7 +618,6 @@ boolean reconnect()
     setHomekitSaturation = true;
     sendState();
     sendEffectList();
-    sendConfig();
 
     // ... and resubscribe
     client.subscribe(MQTT_LIGHT_COMMAND_TOPIC);
@@ -852,6 +858,9 @@ void loop()
   {
     client.loop();
   }
+
+  // Publishes config information every 10 seconds
+  sendConfig();
 
   // Handles crossfading between colors/setting the color through the colorpicker
   handleColorChange();

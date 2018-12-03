@@ -2,4 +2,5 @@
 
 # misc
 .DS_Store
-
+.vscode
+src

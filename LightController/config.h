@@ -38,6 +38,7 @@
 #define CONFIG_MQTT_STATE "state"
 #define CONFIG_MQTT_COMMAND "command"
 #define CONFIG_MQTT_CONFIG "config"
+#define CONFIG_MQTT_DISCOVERY "discovery"
 
 // MDNS config
 #define CONFIG_MDNS_HOSTNAME "raspberrypi"

@@ -11,14 +11,14 @@
 
 #include "config.h"
 
-#include <ESP8266WiFi.h>         // ESP8266 Core WiFi Library
-#include <ESP8266mDNS.h>         // Enables finding addresses in the .local domain
-#include <DNSServer.h>           // Local DNS Server used for redirecting all requests to the configuration portal
-#include <ESP8266WebServer.h>    // Local WebServer used to serve the configuration portal
-#include <ArduinoOTA.h>          // Update ESP8266 over wifi
-#include <WiFiManager.h>         // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
-#include <PubSubClient.h>        // MQTT client library
-#include <ArduinoJson.h>         // Parse JSON
+#include <ESP8266WiFi.h>      // ESP8266 Core WiFi Library
+#include <ESP8266mDNS.h>      // Enables finding addresses in the .local domain
+#include <DNSServer.h>        // Local DNS Server used for redirecting all requests to the configuration portal
+#include <ESP8266WebServer.h> // Local WebServer used to serve the configuration portal
+#include <ArduinoOTA.h>       // Update ESP8266 over wifi
+#include <WiFiManager.h>      // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
+#include <PubSubClient.h>     // MQTT client library
+#include <ArduinoJson.h>      // Parse JSON
 #define FASTLED_ESP8266_DMA      // better control for ESP8266 will output or RX pin requires fork https://github.com/coryking/FastLED
 #include "src/FastLED/FastLED.h" // LED strip control library
 
@@ -36,22 +36,28 @@ void createMqttTopic(char *bufferVariable, char *topLevel, char *lightName, char
 {
   strcpy(bufferVariable, topLevel);
   strcat(bufferVariable, "/");
-  strcat(bufferVariable, lightName);
-  strcat(bufferVariable, "/");
+  if (lightName != NULL)
+  {
+    strcat(bufferVariable, lightName);
+    strcat(bufferVariable, "/");
+  }
+
   strcat(bufferVariable, topic);
 }
 
 // MQTT: topics
 // TODO: either dynamically create the length of these arrays based on the length of the config variables or make them big and the code that uses them ignores the empty space
 // connection
-char MQTT_LIGHT_CONNECTED_TOPIC[36];
+char MQTT_LIGHT_CONNECTED_TOPIC[50];
 // effect list
-char MQTT_EFFECT_LIST_TOPIC[34];
+char MQTT_EFFECT_LIST_TOPIC[50];
 // state
-char MQTT_LIGHT_STATE_TOPIC[32];
-char MQTT_LIGHT_COMMAND_TOPIC[34];
+char MQTT_LIGHT_STATE_TOPIC[50];
+char MQTT_LIGHT_COMMAND_TOPIC[50];
 // config
-char MQTT_LIGHT_CONFIG_TOPIC[33];
+char MQTT_LIGHT_CONFIG_TOPIC[50];
+// discovery
+char MQTT_LIGHT_DISCOVERY_TOPIC[50];
 
 // homebridge
 char *HOMEKIT_LIGHT_STATE_TOPIC = "lightapp2/to/set";
@@ -175,6 +181,10 @@ void callback(char *topic, byte *payload, unsigned int length)
     {
       return;
     }
+  }
+  else if (strcmp(topic, MQTT_LIGHT_DISCOVERY_TOPIC) == 0)
+  {
+    sendConfig();
   }
   else
   {
@@ -553,12 +563,12 @@ void sendEffectList()
   client.publish(MQTT_EFFECT_LIST_TOPIC, buffer, true);
 }
 
-// send effect list over MQTT (once every 10 seconds)
+// send effect list over MQTT (Debounce of 1 second)
 long lastConfigUpdate = 0;
 void sendConfig()
 {
   long now = millis();
-  if (now - lastConfigUpdate > 10000)
+  if (now - lastConfigUpdate > 1000)
   {
     lastConfigUpdate = now;
 
@@ -622,6 +632,7 @@ boolean reconnect()
     // ... and resubscribe
     client.subscribe(MQTT_LIGHT_COMMAND_TOPIC);
     client.subscribe(HOMEKIT_LIGHT_COMMAND_TOPIC);
+    client.subscribe(MQTT_LIGHT_DISCOVERY_TOPIC);
   }
   return client.connected();
 }
@@ -739,6 +750,7 @@ void setup()
   createMqttTopic(MQTT_LIGHT_STATE_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_STATE);
   createMqttTopic(MQTT_LIGHT_COMMAND_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_COMMAND);
   createMqttTopic(MQTT_LIGHT_CONFIG_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_CONFIG);
+  createMqttTopic(MQTT_LIGHT_DISCOVERY_TOPIC, CONFIG_MQTT_TOP, NULL, CONFIG_MQTT_DISCOVERY);
 
   // init FastLED and the LED strip
   FastLED.addLeds<CONFIG_CHIPSET, CONFIG_DATA_PIN, CONFIG_COLOR_ORDER>(leds, CONFIG_NUM_LEDS);
@@ -858,9 +870,6 @@ void loop()
   {
     client.loop();
   }
-
-  // Publishes config information every 10 seconds
-  sendConfig();
 
   // Handles crossfading between colors/setting the color through the colorpicker
   handleColorChange();

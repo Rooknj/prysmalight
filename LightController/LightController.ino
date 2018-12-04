@@ -388,7 +388,7 @@ bool processHomekitJson(char *message)
     {
       if (root.containsKey("value"))
       {
-        if (root["value"])
+        if (root["value"] || root["value"] == 0)
         {
           hue = root["value"];
           CRGB color = CHSV(map(hue, 0, 359, 0, 255), map(saturation, 0, 100, 0, 255), 255);

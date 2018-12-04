@@ -23,3 +23,7 @@ Lightapp2-esp8266
 - ArduinoJson by Benoit Blanchon: Version 5.13.3 (Will need to manually select this one)
   - Go to ~/Documents/Arduino/libraries/PubSubClient/src/PubSubClient.h and change MQTT_MAX_PACKET_SIZE to 512 instead of 128. This is because the messages sent by this app are greater than 128 bytes and will be ignored by the pubsubclient unless increased.
 
+## Set up OTA upload
+- Install Python 2.7 for OTA uploads: http://esp8266.github.io/Arduino/versions/2.0.0/doc/ota_updates/ota_updates.html
+
+

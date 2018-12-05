@@ -6,18 +6,8 @@ describe("serverSettings", () => {
   });
 });
 
-describe("redisSettings", () => {
-  test("has a port defined", () => {
-    expect(config.redisSettings.port).toBeDefined();
-  });
-
+describe("rabbitSettings", () => {
   test("has a host defined", () => {
-    expect(config.redisSettings.host).toBeDefined();
-  });
-});
-
-describe("mqttSettings", () => {
-  test("has a host defined", () => {
-    expect(config.mqttSettings.host).toBeDefined();
+    expect(config.rabbitSettings.host).toBeDefined();
   });
 });

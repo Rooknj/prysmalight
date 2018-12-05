@@ -23,7 +23,7 @@ if (argv.indexOf("--mock") >= 0) {
 
 if (argv.indexOf("--local") >= 0) {
   console.log("Spinning up Local RabbitMQ broker");
-  process.env.rabbitHost = "localhost";
+  process.env.RABBIT_HOST = "amqp://localhost";
   execSync("docker-compose up -d rabbit");
 }
 

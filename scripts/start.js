@@ -12,7 +12,7 @@ process.on("unhandledRejection", err => {
   throw err;
 });
 
-//const { execSync } = require("child_process");
+const { execSync } = require("child_process");
 const nodemon = require("nodemon");
 
 let argv = process.argv.slice(2);
@@ -22,7 +22,9 @@ if (argv.indexOf("--mock") >= 0) {
 }
 
 if (argv.indexOf("--local") >= 0) {
-  console.log("Local flag set");
+  console.log("Spinning up Local RabbitMQ broker");
+  process.env.rabbitHost = "localhost";
+  execSync("docker-compose up -d rabbit");
 }
 
 // TODO: Figure out how to get rid of that error that pops up.

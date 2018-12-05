@@ -34,4 +34,4 @@ if (process.env.PKG_TARGET) {
   }
 }
 
-exec([".", "--target", target, "--output", "./build/lightapp2-server"]);
+exec([".", "--target", target, "--output", "./build/lightapp2-apiGateway"]);

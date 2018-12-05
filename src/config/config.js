@@ -6,7 +6,15 @@ const serverSettings = {
 };
 
 const rabbitSettings = {
-  host: process.env.RABBIT_HOST || "amqp://raspberrypi.local"
+  protocol: "amqp",
+  hostname: process.env.RABBIT_HOST || "raspberrypi.local",
+  port: 5672,
+  username: "guest",
+  password: "guest",
+  locale: "en_US",
+  frameMax: 0,
+  heartbeat: 0,
+  vhost: "/"
 };
 
 module.exports = Object.assign({}, { serverSettings, rabbitSettings });

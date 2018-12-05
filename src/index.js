@@ -2,6 +2,7 @@ const config = require("./config/config");
 const server = require("./server/server");
 const Debug = require("debug").default;
 const debug = Debug("main");
+const repository = require("./repository/repository");
 
 // Verbose statement of service starting
 debug("--- API Gateway Microservice ---");
@@ -14,31 +15,27 @@ process.on("uncaughtRejection", err => {
   debug("Unhandled Rejection", err);
 });
 
-// RabbitMQ test
 const amqp = require("amqplib");
-
-const getAmqpClient = async () => {
-  try {
-    const channel = await amqp.connect(config.rabbitSettings.host);
-    console.log(channel);
-    return channel;
-  } catch (error) {
-    console.log(error);
+const startServer = async () => {
+  // Connect to the repository
+  let repo = null;
+  if (process.env.MOCK) {
+    const mockRepository = require("./mock/mockRepository");
+    repo = mockRepository;
+  } else {
+    repo = await repository(amqp, config.rabbitSettings);
   }
+
+  // Start the server
+  debug("Starting Server");
+  const app = await server.start({
+    port: config.serverSettings.port,
+    repo
+  });
+
+  app.on("close", () => {
+    debug("App Closed");
+  });
 };
 
-getAmqpClient();
-
-// const mockRepository = require("./mock/mockRepository");
-// const repo = mockRepository;
-// debug("Starting Server");
-// server
-//   .start({
-//     port: config.serverSettings.port,
-//     repo
-//   })
-//   .then(app => {
-//     app.on("close", () => {
-//       debug("App Closed");
-//     });
-//   });
+startServer();

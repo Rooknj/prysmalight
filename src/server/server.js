@@ -15,6 +15,10 @@ const start = options => {
       reject(new Error("The server must be started with an available port"));
     }
 
+    if (!options.repo) {
+      reject(new Error("The server must be started with a connected repo"));
+    }
+
     const app = express();
     const resolvers = resolversFactory(options.repo);
     const apolloServer = new ApolloServer({ typeDefs, resolvers });

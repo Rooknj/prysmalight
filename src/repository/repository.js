@@ -49,9 +49,13 @@ const repo = connection => {
 // Connect to rabbitMQ then pass that connection to the repo factory
 const connect = async (amqp, amqpSettings) => {
   // Validate the input
-  if (!amqp) return { error: new Error("You must provide an amqp library") };
+  if (!amqp)
+    return { error: new Error("You must provide an amqp library"), repo: null };
   if (!amqpSettings)
-    return { error: new Error("You must provide amqp connection settings") };
+    return {
+      error: new Error("You must provide amqp connection settings"),
+      repo: null
+    };
 
   // Attempt to connect to rabbitMQ until successful
   const RETRY_DELAY = 5; // Retry delay in seconds
@@ -69,7 +73,7 @@ const connect = async (amqp, amqpSettings) => {
       debug(`Connected to rabbitMQ after ${attemptNumber} attempts.`);
 
       // Pass the connection to the repo factory
-      return repo(connection);
+      return { error: null, repo: repo(connection) };
     } catch (err) {
       debug(
         `Error connecting to rabbitMQ. Retrying in ${RETRY_DELAY} seconds...`

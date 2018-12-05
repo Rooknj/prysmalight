@@ -18,6 +18,7 @@ const nodemon = require("nodemon");
 let argv = process.argv.slice(2);
 
 if (argv.indexOf("--mock") >= 0) {
+  console.log("Starting Mock Server")
   process.env.MOCK = true;
 }
 

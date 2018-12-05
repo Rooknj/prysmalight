@@ -18,12 +18,17 @@ process.on("uncaughtRejection", err => {
 const amqp = require("amqplib");
 const startServer = async () => {
   // Connect to the repository
-  let repo = null;
+  let repo = null,
+    error = null;
   if (process.env.MOCK) {
     const mockRepository = require("./mock/mockRepository");
     repo = mockRepository;
   } else {
-    repo = await repository(amqp, config.rabbitSettings);
+    ({ error, repo } = await repository(amqp, config.rabbitSettings));
+    if (error) {
+      debug(error);
+      process.exit(1);
+    }
   }
 
   // Start the server

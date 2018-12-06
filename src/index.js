@@ -44,6 +44,9 @@ const startServer = async () => {
       gqlPubSub: pubsub
     }));
 
+    // Init the service
+    await service.init();
+
     // If there was an error creating the service, log the error and exit
     if (error) {
       debug(error);

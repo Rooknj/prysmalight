@@ -20,14 +20,61 @@ const generateRandomId = () =>
 // JSON Buffer Generator
 const toJsonBuffer = object => Buffer.from(JSON.stringify(object));
 
-const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
+const createRpcChannel = async conn => {
+  const rpcChannel = await conn.createChannel();
+
+  //this queue is a "Direct reply-to" read more at the docs
+  //When some msg comes in, we "emit" a message to the proper "correlationId" listener
+  rpcChannel.consume(
+    "amq.rabbitmq.reply-to",
+    msg => eventEmitter.emit(msg.properties.correlationId, msg.content),
+    { noAck: true }
+  );
+
+  return rpcChannel;
+};
+
+const serviceFactory = ({ conn, gqlPubSub }) => {
   const GET_LIGHT_Q = "getLight";
   const GET_LIGHTS_Q = "getLights";
   const SET_LIGHT_Q = "setLight";
   const ADD_LIGHT_Q = "addLight";
   const REMOVE_LIGHT_Q = "removeLight";
+  const LIGHT_CHANGED_X = "changedLight";
 
   let self = {};
+
+  let rpcChannel = null;
+
+  const init = async () => {
+    // Create an rpcChannel for direct response requests in rabbitMQ
+    rpcChannel = await createRpcChannel(conn);
+
+    // Create a subscription channel
+    const subChannel = await conn.createChannel();
+    subChannel.assertExchange(LIGHT_CHANGED_X, "fanout", { durable: false });
+    subChannel.assertQueue("", { exclusive: true }).then(q => {
+      console.log(
+        " [*] Waiting for messages in %s. To exit press CTRL+C",
+        q.queue
+      );
+      subChannel.bindQueue(q.queue, LIGHT_CHANGED_X, "");
+      subChannel.consume(
+        q.queue,
+        msg => {
+          const msgData = JSON.parse(msg.content);
+
+          gqlPubSub.publish(msgData.lightChanged.id, {
+            lightChanged: msgData.lightChanged
+          });
+          gqlPubSub.publish(ALL_LIGHTS_SUBSCRIPTION_TOPIC, {
+            lightsChanged: msgData.lightChanged
+          });
+        },
+        { noAck: true }
+      );
+    });
+  };
 
   const sendRpcMessage = (q, id, message) => {
     //Checks if the queue exists, and create it if needed.
@@ -123,6 +170,7 @@ const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
       //Checks if the queue exists, and create it if needed.
       sendRpcMessage(REMOVE_LIGHT_Q, id, message);
     });
+
   /**
    * Subscribes to the changes of a specific light.
    * @param {string} lightId
@@ -148,6 +196,7 @@ const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
     gqlPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
 
   self = {
+    init,
     getLight,
     getLights,
     setLight,
@@ -160,20 +209,6 @@ const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
   };
 
   return Object.create(self);
-};
-
-const createRpcChannel = async conn => {
-  const rpcChannel = await conn.createChannel();
-
-  //this queue is a "Direct reply-to" read more at the docs
-  //When some msg comes in, we "emit" a message to the proper "correlationId" listener
-  rpcChannel.consume(
-    "amq.rabbitmq.reply-to",
-    msg => eventEmitter.emit(msg.properties.correlationId, msg.content),
-    { noAck: true }
-  );
-
-  return rpcChannel;
 };
 
 // Connect to rabbitMQ then pass that connection to the service factory
@@ -205,13 +240,9 @@ const connect = async ({ amqp, amqpSettings, gqlPubSub }) => {
       process.once("SIGINT", conn.close.bind(conn));
       debug(`Connected to rabbitMQ after ${attemptNumber} attempts.`);
 
-      // Create an rpcChannel for direct response requests in rabbitMQ
-      const rpcChannel = await createRpcChannel(conn);
-
-      // Pass the connection and rpcChannel to the service factory
       return {
         error: null,
-        service: serviceFactory({ conn, rpcChannel, gqlPubSub })
+        service: serviceFactory({ conn, gqlPubSub })
       };
     } catch (err) {
       debug(

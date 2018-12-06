@@ -18,6 +18,11 @@ process.on("uncaughtRejection", err => {
   debug("Unhandled Rejection", err);
 });
 
+// Initialize the global event emitter
+// TODO: Figure out where to put this
+const events = require("events");
+const event = new events.EventEmitter();
+
 // Get and initialize the repo
 const getRepo = () => {
   const mockRepository = require("./mock/mockRepository");
@@ -40,10 +45,6 @@ const getRepo = () => {
     }
   );
 
-  // TODO: Figure out where to put this
-  const events = require("events");
-  const event = new events.EventEmitter();
-
   // Create our db and pubsub with the provided clients
   const db = dbFactory(dbClient);
   const pubsub = pubsubFactory(pubsubClient);
@@ -57,9 +58,11 @@ repo.init();
 // Start the service
 debug("Starting Service");
 const amqp = require("amqplib");
-service.start({ amqp, amqpSettings: config.rabbitSettings, repo }).then(() => {
-  debug("Service Started");
-});
+service
+  .start({ amqp, amqpSettings: config.rabbitSettings, repo, event })
+  .then(() => {
+    debug("Service Started");
+  });
 
 // Create a Default Mock Light
 const createMockLight = async mockName => {

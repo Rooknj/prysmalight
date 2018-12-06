@@ -108,6 +108,7 @@ module.exports = ({ db, pubsub, event }) => {
       return error;
     }
 
+    event.emit("lightChanged", { lightChanged: changedLight });
     return null;
   };
 
@@ -151,6 +152,7 @@ module.exports = ({ db, pubsub, event }) => {
 
     // Notify setLight of the light's response
     event.emit("mutationResponse", mutationId, changedLight);
+    event.emit("lightChanged", { lightChanged: changedLight });
     return null;
   };
 
@@ -179,12 +181,13 @@ module.exports = ({ db, pubsub, event }) => {
       return error;
     }
 
-    ({ error, light: changedLight } = db.getLight(message.name));
+    ({ error, light: changedLight } = await db.getLight(message.name));
     if (error) {
       debug(error);
       return error;
     }
 
+    event.emit("lightChanged", { lightChanged: changedLight });
     return null;
   };
 

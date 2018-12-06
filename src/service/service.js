@@ -47,13 +47,14 @@ const connect = async ({ amqp, amqpSettings }) => {
   }
 };
 
-const start = async ({ amqp, amqpSettings, repo }) => {
+const start = async ({ amqp, amqpSettings, repo, event }) => {
   const conn = await connect({ amqp, amqpSettings });
   const GET_LIGHT_Q = "getLight";
   const GET_LIGHTS_Q = "getLights";
   const SET_LIGHT_Q = "setLight";
   const ADD_LIGHT_Q = "addLight";
   const REMOVE_LIGHT_Q = "removeLight";
+  const LIGHT_CHANGED_X = "changedLight";
 
   // Creates a consumer which listens to a specific rabbitMQ queue and sends a response to sent messages
   const createConsumer = (q, getResponse) => {
@@ -114,10 +115,12 @@ const start = async ({ amqp, amqpSettings, repo }) => {
     // Parse the message
     const msgData = JSON.parse(msg.content);
     // Get the light
-    const changedLight = await repo.setLight(
-      msgData.lightId,
-      msgData.lightData
-    );
+    let changedLight = null;
+    try {
+      changedLight = await repo.setLight(msgData.lightId, msgData.lightData);
+    } catch (error) {
+      changedLight = error;
+    }
 
     // Generate a response message
     let response = { error: null, data: null };
@@ -144,7 +147,6 @@ const start = async ({ amqp, amqpSettings, repo }) => {
     } else {
       response.data = { lightAdded };
     }
-    console.log(response);
     return response;
   });
 
@@ -163,8 +165,16 @@ const start = async ({ amqp, amqpSettings, repo }) => {
     } else {
       response.data = { lightRemoved };
     }
-    console.log(response);
     return response;
+  });
+
+  // Create a listener for lightChanged events triggered by the repo's handler functions
+  event.on("lightChanged", changedLight => {
+    // Publish a changedLight message in rabbitMQ
+    conn.createChannel().then(ch => {
+      ch.assertExchange("changedLight", "fanout", { durable: false });
+      ch.publish(LIGHT_CHANGED_X, "", toJsonBuffer(changedLight));
+    });
   });
 };
 

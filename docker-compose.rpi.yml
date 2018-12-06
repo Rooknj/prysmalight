@@ -25,3 +25,9 @@ services:
         - ./mqttConfig:/mosquitto/config
         - /mosquitto/data
         - /mosquitto/log
+  rabbit:
+    image: rabbitmq:3
+    hostname: "myrabbit"
+    container_name: rabbit
+    ports:
+      - "5672:5672"

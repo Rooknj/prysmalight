@@ -210,7 +210,8 @@ module.exports = ({ db, pubsub, event }) => {
    * Get all lights currently added to the db.
    */
   const getLights = async () => {
-    return await db.getAllLights();
+    const { error, lights } = await db.getAllLights();
+    return error ? error : lights;
   };
 
   /**
@@ -267,7 +268,7 @@ module.exports = ({ db, pubsub, event }) => {
     error = await db.removeLight(lightId);
     if (error) return error;
 
-    const lightRemoved = { id: lightId };
+    const lightRemoved = lightId;
     // Return the removed light's id
     return lightRemoved;
   };
@@ -276,14 +277,15 @@ module.exports = ({ db, pubsub, event }) => {
    * Sends a message to the specified light with a list of state changes.
    * @param {Object} light
    */
-  const setLight = async light => {
+  const setLight = async (lightId, lightData) => {
+    const id = lightId;
     // Check if the light exists already before doing anything else
-    const { error, hasLight } = await db.hasLight(light.id);
+    const { error, hasLight } = await db.hasLight(id);
     if (error) return error;
-    if (!hasLight) return new Error(`"${light.id}" was never added`);
+    if (!hasLight) return new Error(`"${id}" was never added`);
 
     // Create the command payload
-    const { id, state, brightness, color, effect, speed } = light;
+    const { state, brightness, color, effect, speed } = lightData;
     let payload = { mutationId: mutationNumber++, name: id };
     if (state) payload = { ...payload, state };
     if (brightness) payload = { ...payload, brightness };

@@ -1,10 +1,6 @@
 const Debug = require("debug").default;
 const debug = Debug("repo");
 
-const ALL_LIGHTS_SUBSCRIPTION_TOPIC = "lightsChanged";
-const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
-const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
-
 // TODO: Add this variable to redis
 // TODO: Create a method in dbFactory called getMutationNumber which returns the incremented value
 let mutationNumber = 0;
@@ -15,7 +11,7 @@ const { promisify } = require("util");
 const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 
-module.exports = ({ db, pubsub, gqlPubSub, event }) => {
+module.exports = ({ db, pubsub, event }) => {
   let self = {};
 
   const init = () => {
@@ -76,7 +72,7 @@ module.exports = ({ db, pubsub, gqlPubSub, event }) => {
   };
 
   /**
-   * Updates the db with the connect message data and notifies subscribers.
+   * Updates the db with the connect message data
    * Will ignore messages not in the correct format.
    * @param {object} message - the connect status message of a light
    */
@@ -112,16 +108,11 @@ module.exports = ({ db, pubsub, gqlPubSub, event }) => {
       return error;
     }
 
-    // Notify subscribers of the change in connection status
-    gqlPubSub.publish(message.name, { lightChanged: changedLight });
-    gqlPubSub.publish("lightsChanged", {
-      lightsChanged: changedLight
-    });
     return null;
   };
 
   /**
-   * Updates the db with the state message data and notifies subscribers.
+   * Updates the db with the state message data
    * Will also notify setLight that the light sent a response.
    * @param {object} message - the state message of a light
    */
@@ -157,11 +148,6 @@ module.exports = ({ db, pubsub, gqlPubSub, event }) => {
       debug(error);
       return error;
     }
-    // Notify subscribers of change in state
-    gqlPubSub.publish(message.name, { lightChanged: changedLight });
-    gqlPubSub.publish("lightsChanged", {
-      lightsChanged: changedLight
-    });
 
     // Notify setLight of the light's response
     event.emit("mutationResponse", mutationId, changedLight);
@@ -199,11 +185,6 @@ module.exports = ({ db, pubsub, gqlPubSub, event }) => {
       return error;
     }
 
-    // Notify subscribers of the change in the effect list
-    gqlPubSub.publish(message.name, { lightChanged: changedLight });
-    gqlPubSub.publish("lightsChanged", {
-      lightsChanged: changedLight
-    });
     return null;
   };
 
@@ -255,9 +236,8 @@ module.exports = ({ db, pubsub, gqlPubSub, event }) => {
     error = await pubsub.subscribeToLight(lightId);
     if (error) debug(`Failed to subscribe to ${lightId}\n${error}`);
 
-    // Get the newly added light, notify subscribers, and return it
+    // Get the newly added light and return it
     const lightAdded = await self.getLight(lightId);
-    gqlPubSub.publish("lightAdded", { lightAdded });
     return lightAdded;
   };
 
@@ -289,8 +269,7 @@ module.exports = ({ db, pubsub, gqlPubSub, event }) => {
     if (error) return error;
 
     const lightRemoved = { id: lightId };
-    // Return the removed light and notify the subscribers
-    gqlPubSub.publish("lightRemoved", { lightRemoved });
+    // Return the removed light's id
     return lightRemoved;
   };
 
@@ -339,30 +318,6 @@ module.exports = ({ db, pubsub, gqlPubSub, event }) => {
     });
   };
 
-  /**
-   * Subscribes to the changes of a specific light.
-   * @param {string} lightId
-   */
-  const subscribeToLight = lightId => gqlPubSub.asyncIterator(lightId);
-
-  /**
-   * Subscribes to the changes of all lights.
-   */
-  const subscribeToAllLights = () =>
-    gqlPubSub.asyncIterator(ALL_LIGHTS_SUBSCRIPTION_TOPIC);
-
-  /**
-   * Subscribes to lights being added.
-   */
-  const subscribeToLightsAdded = () =>
-    gqlPubSub.asyncIterator(LIGHT_ADDED_SUBSCRIPTION_TOPIC);
-
-  /**
-   * Subscribes to lights being removed.
-   */
-  const subscribeToLightsRemoved = () =>
-    gqlPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
-
   self = {
     connected: false,
     init,
@@ -374,11 +329,7 @@ module.exports = ({ db, pubsub, gqlPubSub, event }) => {
     getLights,
     setLight,
     addLight,
-    removeLight,
-    subscribeToLight,
-    subscribeToAllLights,
-    subscribeToLightsAdded,
-    subscribeToLightsRemoved
+    removeLight
   };
 
   return Object.create(self);

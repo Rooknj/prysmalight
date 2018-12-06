@@ -4,6 +4,7 @@
   "private": true,
   "description": "GraphQL Server for Lightapp2.",
   "dependencies": {
+    "amqplib": "^0.5.3",
     "apollo-server": "^2.0.0",
     "apollo-server-express": "^2.0.0-rc.12",
     "async-mqtt": "^1.0.1",

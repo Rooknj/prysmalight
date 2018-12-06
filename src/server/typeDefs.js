@@ -11,7 +11,7 @@ const Mutation = gql`
   type Mutation {
     setLight(lightID: String!, lightData: LightInput!): Light
     addLight(lightId: String!): Light
-    removeLight(lightId: String!): Light
+    removeLight(lightId: String!): String
   }
 `;
 

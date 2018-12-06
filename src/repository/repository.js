@@ -29,7 +29,7 @@ const repo = ({ connection, gqlPubSub }) => {
     gqlPubSub.publish("lightAdded", { lightAdded: { id: lightId } });
     return mockLight;
   };
-  const removeLight = lightId => mockLight;
+  const removeLight = lightId => mockLight.id;
   /**
    * Subscribes to the changes of a specific light.
    * @param {string} lightId

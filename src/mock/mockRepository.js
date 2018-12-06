@@ -1,7 +1,3 @@
-const { PubSub } = require("apollo-server");
-
-const pubSubClient = new PubSub();
-
 const mockLight = {
   id: "Mock Service Light 1",
   connected: true,

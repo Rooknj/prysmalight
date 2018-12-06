@@ -4,7 +4,8 @@ const resolversFactory = service => ({
     lights: () => service.getLights()
   },
   Mutation: {
-    setLight: (_, { light }) => service.setLight(light),
+    setLight: (_, { lightId, lightData }) =>
+      service.setLight(lightId, lightData),
     addLight: (_, { lightId }) => service.addLight(lightId),
     removeLight: (_, { lightId }) => service.removeLight(lightId)
   },

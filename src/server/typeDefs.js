@@ -9,7 +9,7 @@ const Query = gql`
 
 const Mutation = gql`
   type Mutation {
-    setLight(lightID: String!, lightData: LightInput!): Light
+    setLight(lightId: String!, lightData: LightInput!): Light
     addLight(lightId: String!): Light
     removeLight(lightId: String!): String
   }

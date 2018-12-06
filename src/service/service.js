@@ -17,7 +17,16 @@ const generateRandomId = () =>
   Math.random().toString() +
   Math.random().toString();
 
+// JSON Buffer Generator
+const toJsonBuffer = object => Buffer.from(JSON.stringify(object));
+
 const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
+  const GET_LIGHT_Q = "getLight";
+  const GET_LIGHTS_Q = "getLights";
+  const SET_LIGHT_Q = "setLight";
+  const ADD_LIGHT_Q = "addLight";
+  const REMOVE_LIGHT_Q = "removeLight";
+
   let self = {};
   const mockLight = {
     id: "Mock Service Light 1",
@@ -30,36 +39,102 @@ const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
     supportedEffects: ["Effect 1", "Effect 2", "Effect 3"]
   };
 
-  const getLight = lightId => mockLight;
-
-  const getLights = () => {
-    const id = generateRandomId();
-    const GET_LIGHTS_Q = "getLights";
-
-    //Event listener that will fire when the proper randomid is provided
-    eventEmitter.once(id, msg => {
-      const { error, lights } = JSON.parse(msg);
-      return error ? error : lights;
-    });
-
+  const sendRpcMessage = (q, id, message) => {
     //Checks if the queue exists, and create it if needed.
     rpcChannel
-      .assertQueue(GET_LIGHTS_Q)
+      .assertQueue(q)
       //Sent the buffered img to the queue with the ID and the responseQueue
       .then(() =>
-        rpcChannel.sendToQueue(GET_LIGHTS_Q, Buffer.from(""), {
+        rpcChannel.sendToQueue(q, toJsonBuffer(message), {
           correlationId: id,
           replyTo: "amq.rabbitmq.reply-to"
         })
       );
   };
 
-  const setLight = (lightId, lightData) => mockLight;
-  const addLight = lightId => {
-    gqlPubSub.publish("lightAdded", { lightAdded: { id: lightId } });
-    return mockLight;
-  };
-  const removeLight = lightId => mockLight.id;
+  const getLight = lightId =>
+    new Promise((resolve, reject) => {
+      const id = generateRandomId();
+
+      //Event listener that will fire when the proper randomid is provided
+      eventEmitter.once(id, msg => {
+        const { error, data } = JSON.parse(msg);
+        resolve(error ? new Error(error) : data.light);
+      });
+
+      const message = { lightId };
+
+      //Checks if the queue exists, and create it if needed.
+      sendRpcMessage(GET_LIGHT_Q, id, message);
+    });
+
+  const getLights = () =>
+    new Promise((resolve, reject) => {
+      const id = generateRandomId();
+
+      //Event listener that will fire when the proper randomid is provided
+      eventEmitter.once(id, msg => {
+        const { error, data } = JSON.parse(msg);
+        resolve(error ? new Error(error) : data.lights);
+      });
+
+      sendRpcMessage(GET_LIGHTS_Q, id, null);
+    });
+
+  const setLight = (lightId, lightData) =>
+    new Promise((resolve, reject) => {
+      const id = generateRandomId();
+
+      //Event listener that will fire when the proper randomid is provided
+      eventEmitter.once(id, msg => {
+        const { error, data } = JSON.parse(msg);
+        resolve(error ? new Error(error) : data.changedLight);
+      });
+      const message = { lightId, lightData };
+
+      //Checks if the queue exists, and create it if needed.
+      sendRpcMessage(SET_LIGHT_Q, id, message);
+    });
+
+  const addLight = lightId =>
+    new Promise((resolve, reject) => {
+      const id = generateRandomId();
+
+      //Event listener that will fire when the proper randomid is provided
+      eventEmitter.once(id, msg => {
+        console.log(JSON.parse(msg));
+        const { error, data } = JSON.parse(msg);
+        if (!error)
+          gqlPubSub.publish("lightAdded", { lightAdded: data.lightAdded });
+        resolve(error ? new Error(error) : data.lightAdded);
+      });
+
+      const message = { lightId };
+
+      //Checks if the queue exists, and create it if needed.
+      sendRpcMessage(ADD_LIGHT_Q, id, message);
+    });
+
+  const removeLight = lightId =>
+    new Promise((resolve, reject) => {
+      const id = generateRandomId();
+
+      //Event listener that will fire when the proper randomid is provided
+      eventEmitter.once(id, msg => {
+        console.log(JSON.parse(msg));
+        const { error, data } = JSON.parse(msg);
+        if (!error)
+          gqlPubSub.publish("lightRemoved", {
+            lightRemoved: data.lightRemoved
+          });
+        resolve(error ? new Error(error) : data.lightRemoved);
+      });
+
+      const message = { lightId };
+
+      //Checks if the queue exists, and create it if needed.
+      sendRpcMessage(REMOVE_LIGHT_Q, id, message);
+    });
   /**
    * Subscribes to the changes of a specific light.
    * @param {string} lightId

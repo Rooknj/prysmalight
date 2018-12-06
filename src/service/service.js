@@ -28,16 +28,6 @@ const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
   const REMOVE_LIGHT_Q = "removeLight";
 
   let self = {};
-  const mockLight = {
-    id: "Mock Service Light 1",
-    connected: true,
-    state: "ON",
-    brightness: 72,
-    color: { r: 0, g: 127, b: 255 },
-    effect: "None",
-    speed: 3,
-    supportedEffects: ["Effect 1", "Effect 2", "Effect 3"]
-  };
 
   const sendRpcMessage = (q, id, message) => {
     //Checks if the queue exists, and create it if needed.
@@ -53,7 +43,7 @@ const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
   };
 
   const getLight = lightId =>
-    new Promise((resolve, reject) => {
+    new Promise(resolve => {
       const id = generateRandomId();
 
       //Event listener that will fire when the proper randomid is provided
@@ -69,7 +59,7 @@ const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
     });
 
   const getLights = () =>
-    new Promise((resolve, reject) => {
+    new Promise(resolve => {
       const id = generateRandomId();
 
       //Event listener that will fire when the proper randomid is provided
@@ -82,7 +72,7 @@ const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
     });
 
   const setLight = (lightId, lightData) =>
-    new Promise((resolve, reject) => {
+    new Promise(resolve => {
       const id = generateRandomId();
 
       //Event listener that will fire when the proper randomid is provided
@@ -97,12 +87,11 @@ const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
     });
 
   const addLight = lightId =>
-    new Promise((resolve, reject) => {
+    new Promise(resolve => {
       const id = generateRandomId();
 
       //Event listener that will fire when the proper randomid is provided
       eventEmitter.once(id, msg => {
-        console.log(JSON.parse(msg));
         const { error, data } = JSON.parse(msg);
         if (!error)
           gqlPubSub.publish("lightAdded", { lightAdded: data.lightAdded });
@@ -116,12 +105,11 @@ const serviceFactory = ({ conn, rpcChannel, gqlPubSub }) => {
     });
 
   const removeLight = lightId =>
-    new Promise((resolve, reject) => {
+    new Promise(resolve => {
       const id = generateRandomId();
 
       //Event listener that will fire when the proper randomid is provided
       eventEmitter.once(id, msg => {
-        console.log(JSON.parse(msg));
         const { error, data } = JSON.parse(msg);
         if (!error)
           gqlPubSub.publish("lightRemoved", {

@@ -50,7 +50,6 @@ const connect = async ({ amqp, amqpSettings, repo }) => {
 
 const start = async ({ amqp, amqpSettings, repo }) => {
   const service = await connect({ amqp, amqpSettings, repo });
-  console.log("Started Service");
 };
 
 module.exports = Object.assign({}, { start });

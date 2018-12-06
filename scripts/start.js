@@ -27,7 +27,25 @@ if (argv.indexOf("--local") >= 0) {
   process.env.RABBIT_HOST = "localhost";
   console.log("Spinning up Local MQTT broker");
   process.env.MQTT_HOST = "localhost";
-  execSync("docker-compose up -d rabbit broker");
+
+  // Start docker containers
+  // TODO: Figure out a better way for microservices to share the broker
+  try {
+    execSync("docker-compose up -d rabbit broker", {
+      stdio: [process.stdin, process.stdout] // Ignore stderr so nothing prints to the console if this fails.
+    });
+  } catch (error) {
+    // If the first docker-compose failed, check to see if it was because there was already an instance of rabbitmq running.
+    if (error.message.includes("rabbit")) {
+      console.log(
+        "RabbitMQ server already running locally from another microservice."
+      );
+      execSync("docker-compose up -d  broker");
+    } else {
+      console.log(error);
+      process.exit(1);
+    }
+  }
 }
 
 if (!process.env.MOCK) {

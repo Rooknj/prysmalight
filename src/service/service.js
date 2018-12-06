@@ -7,8 +7,7 @@ const ALL_LIGHTS_SUBSCRIPTION_TOPIC = "lightsChanged";
 const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
 const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
 
-// TODO: Move this to be a dependency
-const service = ({ connection, gqlPubSub }) => {
+const serviceFactory = ({ connection, gqlPubSub }) => {
   let self = {};
 
   const mockLight = {
@@ -99,7 +98,10 @@ const connect = async ({ amqp, amqpSettings, gqlPubSub }) => {
       debug(`Connected to rabbitMQ after ${attemptNumber} attempts.`);
 
       // Pass the connection to the service factory
-      return { error: null, service: service({ connection, gqlPubSub }) };
+      return {
+        error: null,
+        service: serviceFactory({ connection, gqlPubSub })
+      };
     } catch (err) {
       debug(
         `Error connecting to rabbitMQ. Retrying in ${RETRY_DELAY} seconds...`

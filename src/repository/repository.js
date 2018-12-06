@@ -3,6 +3,10 @@ const debug = Debug("repository");
 const { promisify } = require("util");
 const asyncSetTimeout = promisify(setTimeout);
 
+const ALL_LIGHTS_SUBSCRIPTION_TOPIC = "lightsChanged";
+const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
+const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
+
 // TODO: Move this to be a dependency
 const repo = ({ connection, gqlPubSub }) => {
   let self = {};
@@ -18,15 +22,37 @@ const repo = ({ connection, gqlPubSub }) => {
     supportedEffects: ["Effect 1", "Effect 2", "Effect 3"]
   };
 
-  const getLight = () => mockLight;
+  const getLight = lightId => mockLight;
   const getLights = () => [mockLight, mockLight, mockLight];
-  const setLight = () => mockLight;
-  const addLight = () => mockLight;
-  const removeLight = () => mockLight;
-  const subscribeToLight = () => gqlPubSub.asyncIterator("test1");
-  const subscribeToAllLights = () => gqlPubSub.asyncIterator("test2");
-  const subscribeToLightsAdded = () => gqlPubSub.asyncIterator("test3");
-  const subscribeToLightsRemoved = () => gqlPubSub.asyncIterator("test4");
+  const setLight = (lightId, lightData) => mockLight;
+  const addLight = lightId => {
+    gqlPubSub.publish("lightAdded", { lightAdded: { id: lightId } });
+    return mockLight;
+  };
+  const removeLight = lightId => mockLight;
+  /**
+   * Subscribes to the changes of a specific light.
+   * @param {string} lightId
+   */
+  const subscribeToLight = lightId => gqlPubSub.asyncIterator(lightId);
+
+  /**
+   * Subscribes to the changes of all lights.
+   */
+  const subscribeToAllLights = () =>
+    gqlPubSub.asyncIterator(ALL_LIGHTS_SUBSCRIPTION_TOPIC);
+
+  /**
+   * Subscribes to lights being added.
+   */
+  const subscribeToLightsAdded = () =>
+    gqlPubSub.asyncIterator(LIGHT_ADDED_SUBSCRIPTION_TOPIC);
+
+  /**
+   * Subscribes to lights being removed.
+   */
+  const subscribeToLightsRemoved = () =>
+    gqlPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
 
   self = {
     getLight,

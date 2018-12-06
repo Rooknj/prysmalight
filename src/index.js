@@ -16,7 +16,8 @@ process.on("uncaughtRejection", err => {
 });
 
 const amqp = require("amqplib");
-const { PubSub } = require("apollo-server");
+const { AmqpPubSub } = require("graphql-rabbitmq-subscriptions");
+const bunyan = require("bunyan");
 
 const startServer = async () => {
   // Connect to the repository
@@ -26,11 +27,16 @@ const startServer = async () => {
     const mockRepository = require("./mock/mockRepository");
     repo = mockRepository;
   } else {
-    const pubSubClient = new PubSub();
+    const logger = bunyan.createLogger({ name: "gqlPubSub" });
+    const pubsub = new AmqpPubSub({
+      config: config.rabbitSettings,
+      logger
+    });
+
     ({ error, repo } = await repository({
       amqp,
       amqpSettings: config.rabbitSettings,
-      gqlPubSub: pubSubClient
+      gqlPubSub: pubsub
     }));
     if (error) {
       debug(error);

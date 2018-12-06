@@ -1,32 +1,32 @@
-const resolversFactory = repo => ({
+const resolversFactory = service => ({
   Query: {
-    light: (_, { lightId }) => repo.getLight(lightId),
-    lights: () => repo.getLights()
+    light: (_, { lightId }) => service.getLight(lightId),
+    lights: () => service.getLights()
   },
   Mutation: {
-    setLight: (_, { light }) => repo.setLight(light),
-    addLight: (_, { lightId }) => repo.addLight(lightId),
-    removeLight: (_, { lightId }) => repo.removeLight(lightId)
+    setLight: (_, { light }) => service.setLight(light),
+    addLight: (_, { lightId }) => service.addLight(lightId),
+    removeLight: (_, { lightId }) => service.removeLight(lightId)
   },
   Subscription: {
     lightChanged: {
       subscribe: (_, { lightId }) => {
-        return repo.subscribeToLight(lightId);
+        return service.subscribeToLight(lightId);
       }
     },
     lightsChanged: {
       subscribe: () => {
-        return repo.subscribeToAllLights();
+        return service.subscribeToAllLights();
       }
     },
     lightAdded: {
       subscribe: () => {
-        return repo.subscribeToLightsAdded();
+        return service.subscribeToLightsAdded();
       }
     },
     lightRemoved: {
       subscribe: () => {
-        return repo.subscribeToLightsRemoved();
+        return service.subscribeToLightsRemoved();
       }
     }
   }

@@ -2,7 +2,7 @@ const config = require("./config/config");
 const server = require("./server/server");
 const Debug = require("debug").default;
 const debug = Debug("main");
-const repository = require("./repository/repository");
+const serviceFactory = require("./service/service");
 
 // Verbose statement of service starting
 debug("--- API Gateway Microservice ---");
@@ -20,12 +20,12 @@ const { AmqpPubSub } = require("graphql-rabbitmq-subscriptions");
 const bunyan = require("bunyan");
 
 const startServer = async () => {
-  // Connect to the repository
-  let repo = null,
+  // Start the service
+  let service = null,
     error = null;
   if (process.env.MOCK) {
-    const mockRepository = require("./mock/mockRepository");
-    repo = mockRepository;
+    const mockService = require("./mock/mockService");
+    service = mockService;
   } else {
     const logger = bunyan.createLogger({ name: "gqlPubSub" });
     const pubsub = new AmqpPubSub({
@@ -33,7 +33,7 @@ const startServer = async () => {
       logger
     });
 
-    ({ error, repo } = await repository({
+    ({ error, service } = await serviceFactory({
       amqp,
       amqpSettings: config.rabbitSettings,
       gqlPubSub: pubsub
@@ -48,7 +48,7 @@ const startServer = async () => {
   debug("Starting Server");
   const app = await server.start({
     port: config.serverSettings.port,
-    repo
+    service
   });
 
   app.on("close", () => {

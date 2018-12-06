@@ -1,5 +1,5 @@
 const Debug = require("debug").default;
-const debug = Debug("repository");
+const debug = Debug("service");
 const { promisify } = require("util");
 const asyncSetTimeout = promisify(setTimeout);
 
@@ -8,7 +8,7 @@ const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
 const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
 
 // TODO: Move this to be a dependency
-const repo = ({ connection, gqlPubSub }) => {
+const service = ({ connection, gqlPubSub }) => {
   let self = {};
 
   const mockLight = {
@@ -69,15 +69,18 @@ const repo = ({ connection, gqlPubSub }) => {
   return Object.create(self);
 };
 
-// Connect to rabbitMQ then pass that connection to the repo factory
+// Connect to rabbitMQ then pass that connection to the service factory
 const connect = async ({ amqp, amqpSettings, gqlPubSub }) => {
   // Validate the input
   if (!amqp)
-    return { error: new Error("You must provide an amqp library"), repo: null };
+    return {
+      error: new Error("You must provide an amqp library"),
+      service: null
+    };
   if (!amqpSettings)
     return {
       error: new Error("You must provide amqp connection settings"),
-      repo: null
+      service: null
     };
 
   // Attempt to connect to rabbitMQ until successful
@@ -95,8 +98,8 @@ const connect = async ({ amqp, amqpSettings, gqlPubSub }) => {
       process.once("SIGINT", connection.close.bind(connection));
       debug(`Connected to rabbitMQ after ${attemptNumber} attempts.`);
 
-      // Pass the connection to the repo factory
-      return { error: null, repo: repo({ connection, gqlPubSub }) };
+      // Pass the connection to the service factory
+      return { error: null, service: service({ connection, gqlPubSub }) };
     } catch (err) {
       debug(
         `Error connecting to rabbitMQ. Retrying in ${RETRY_DELAY} seconds...`

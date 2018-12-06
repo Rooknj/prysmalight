@@ -53,7 +53,7 @@ const removeLightFromQuery = (cacheData, { subscriptionData }) => {
   // Find the index of the light to be removed and remove it
   const lightToRemove = subscriptionData.data.lightRemoved;
   return Object.assign({}, cacheData, {
-    lights: cacheData.lights.filter(light => light.id !== lightToRemove.id)
+    lights: cacheData.lights.filter(light => light.id !== lightToRemove)
   });
 };
 

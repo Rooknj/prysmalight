@@ -1,7 +1,7 @@
 import gql from "graphql-tag";
 
-const LIGHT_DATA = gql`
-  fragment lightData on Light {
+const LIGHT_FIELDS = gql`
+  fragment lightFields on Light {
     id
     connected
     state
@@ -20,61 +20,56 @@ const LIGHT_DATA = gql`
 export const LIGHT_ADDED = gql`
   subscription lightAdded {
     lightAdded {
-      ...lightData
+      ...lightFields
     }
   }
-  ${LIGHT_DATA}
+  ${LIGHT_FIELDS}
 `;
 
 export const LIGHT_REMOVED = gql`
   subscription lightRemoved {
-    lightRemoved {
-      id
-    }
+    lightRemoved
   }
 `;
 
 export const LIGHTS_CHANGED = gql`
   subscription lightsChanged {
     lightsChanged {
-      ...lightData
+      ...lightFields
     }
   }
-  ${LIGHT_DATA}
+  ${LIGHT_FIELDS}
 `;
 
 export const GET_LIGHTS = gql`
   query getLights {
     lights {
-      ...lightData
+      ...lightFields
     }
   }
-  ${LIGHT_DATA}
+  ${LIGHT_FIELDS}
 `;
 
 export const SET_LIGHT = gql`
-  mutation setLight($light: LightInput!) {
-    setLight(light: $light) {
-      ...lightData
+  mutation setLight($lightId: String!, $lightData: LightInput!) {
+    setLight(lightId: $lightId, lightData: $lightData) {
+      ...lightFields
     }
   }
-  ${LIGHT_DATA}
+  ${LIGHT_FIELDS}
 `;
 
 export const ADD_LIGHT = gql`
   mutation addLight($lightId: String!) {
     addLight(lightId: $lightId) {
-      ...lightData
+      ...lightFields
     }
   }
-  ${LIGHT_DATA}
+  ${LIGHT_FIELDS}
 `;
 
 export const REMOVE_LIGHT = gql`
   mutation removeLight($lightId: String!) {
-    removeLight(lightId: $lightId) {
-      ...lightData
-    }
+    removeLight(lightId: $lightId)
   }
-  ${LIGHT_DATA}
 `;

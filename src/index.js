@@ -16,6 +16,8 @@ process.on("uncaughtRejection", err => {
 });
 
 const amqp = require("amqplib");
+const { PubSub } = require("apollo-server");
+
 const startServer = async () => {
   // Connect to the repository
   let repo = null,
@@ -24,7 +26,12 @@ const startServer = async () => {
     const mockRepository = require("./mock/mockRepository");
     repo = mockRepository;
   } else {
-    ({ error, repo } = await repository(amqp, config.rabbitSettings));
+    const pubSubClient = new PubSub();
+    ({ error, repo } = await repository({
+      amqp,
+      amqpSettings: config.rabbitSettings,
+      gqlPubSub: pubSubClient
+    }));
     if (error) {
       debug(error);
       process.exit(1);

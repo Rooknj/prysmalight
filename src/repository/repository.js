@@ -4,10 +4,7 @@ const { promisify } = require("util");
 const asyncSetTimeout = promisify(setTimeout);
 
 // TODO: Move this to be a dependency
-const { PubSub } = require("apollo-server");
-const pubSubClient = new PubSub();
-
-const repo = connection => {
+const repo = ({ connection, gqlPubSub }) => {
   let self = {};
 
   const mockLight = {
@@ -26,10 +23,10 @@ const repo = connection => {
   const setLight = () => mockLight;
   const addLight = () => mockLight;
   const removeLight = () => mockLight;
-  const subscribeToLight = () => pubSubClient.asyncIterator("test1");
-  const subscribeToAllLights = () => pubSubClient.asyncIterator("test2");
-  const subscribeToLightsAdded = () => pubSubClient.asyncIterator("test3");
-  const subscribeToLightsRemoved = () => pubSubClient.asyncIterator("test4");
+  const subscribeToLight = () => gqlPubSub.asyncIterator("test1");
+  const subscribeToAllLights = () => gqlPubSub.asyncIterator("test2");
+  const subscribeToLightsAdded = () => gqlPubSub.asyncIterator("test3");
+  const subscribeToLightsRemoved = () => gqlPubSub.asyncIterator("test4");
 
   self = {
     getLight,
@@ -47,7 +44,7 @@ const repo = connection => {
 };
 
 // Connect to rabbitMQ then pass that connection to the repo factory
-const connect = async (amqp, amqpSettings) => {
+const connect = async ({ amqp, amqpSettings, gqlPubSub }) => {
   // Validate the input
   if (!amqp)
     return { error: new Error("You must provide an amqp library"), repo: null };
@@ -73,7 +70,7 @@ const connect = async (amqp, amqpSettings) => {
       debug(`Connected to rabbitMQ after ${attemptNumber} attempts.`);
 
       // Pass the connection to the repo factory
-      return { error: null, repo: repo(connection) };
+      return { error: null, repo: repo({ connection, gqlPubSub }) };
     } catch (err) {
       debug(
         `Error connecting to rabbitMQ. Retrying in ${RETRY_DELAY} seconds...`

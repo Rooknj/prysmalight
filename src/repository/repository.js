@@ -210,8 +210,7 @@ module.exports = ({ db, pubsub, event }) => {
    * Get all lights currently added to the db.
    */
   const getLights = async () => {
-    const { error, lights } = await db.getAllLights();
-    return error ? error : lights;
+    return await db.getAllLights();
   };
 
   /**

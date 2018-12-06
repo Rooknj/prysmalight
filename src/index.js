@@ -15,29 +15,36 @@ process.on("uncaughtRejection", err => {
   debug("Unhandled Rejection", err);
 });
 
-const amqp = require("amqplib");
-const { AmqpPubSub } = require("graphql-rabbitmq-subscriptions");
-const bunyan = require("bunyan");
-
 const startServer = async () => {
-  // Start the service
   let service = null,
     error = null;
+
+  // Get a service
   if (process.env.MOCK) {
+    // Use the mock service if the MOCK env variable is set
     const mockService = require("./mock/mockService");
     service = mockService;
   } else {
+    // Create the real service
+    const amqp = require("amqplib");
+    const { AmqpPubSub } = require("graphql-rabbitmq-subscriptions");
+    const bunyan = require("bunyan");
+
+    // Create the apollo pubsub depencency
     const logger = bunyan.createLogger({ name: "gqlPubSub" });
     const pubsub = new AmqpPubSub({
       config: config.rabbitSettings,
       logger
     });
 
-    ({ error, service } = await serviceFactory({
+    // Generate the service
+    ({ error, service } = await serviceFactory.connect({
       amqp,
       amqpSettings: config.rabbitSettings,
       gqlPubSub: pubsub
     }));
+
+    // If there was an error creating the service, log the error and exit
     if (error) {
       debug(error);
       process.exit(1);
@@ -50,7 +57,6 @@ const startServer = async () => {
     port: config.serverSettings.port,
     service
   });
-
   app.on("close", () => {
     debug("App Closed");
   });

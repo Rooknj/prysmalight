@@ -4,10 +4,11 @@ services:
     build:
       context: .
       dockerfile: rpi.Dockerfile
-    image: lightapp2-server-rpi
+    image: lightapp2-controller-microservice-rpi
     environment:
       - REDIS_HOST=redis # DO NOT delete this because travis needs it for some reason
       - MQTT_HOST=broker # DO NOT delete this because travis needs it for some reason
+      - RABBIT_HOST=rabbit
   redis:
     image: redis:latest
     ports:

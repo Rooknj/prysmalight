@@ -26,7 +26,7 @@ FROM node:carbon
 
 WORKDIR /usr/app
 
-COPY --from=builder /usr/app/build/lightapp2-server /usr/app
+COPY --from=builder /usr/app/build/lightapp2-controller-microservice /usr/app
 
 # Start the app
-CMD ./lightapp2-server
+CMD ./lightapp2-controller-microservice

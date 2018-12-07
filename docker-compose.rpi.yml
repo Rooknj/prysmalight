@@ -5,8 +5,6 @@ services:
       context: .
       dockerfile: rpi.Dockerfile
     image: lightapp2-server-rpi
-    ports:
-      - "4001:4001"
     environment:
       - REDIS_HOST=redis # DO NOT delete this because travis needs it for some reason
       - MQTT_HOST=broker # DO NOT delete this because travis needs it for some reason

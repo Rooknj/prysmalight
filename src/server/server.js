@@ -15,14 +15,12 @@ const start = options => {
       reject(new Error("The server must be started with an available port"));
     }
 
-    if (!options.repo) {
-      reject(
-        new Error("The server must be started with a connected Repository")
-      );
+    if (!options.service) {
+      reject(new Error("The server must be started with a connected service"));
     }
 
     const app = express();
-    const resolvers = resolversFactory(options.repo);
+    const resolvers = resolversFactory(options.service);
     const apolloServer = new ApolloServer({ typeDefs, resolvers });
 
     // Apply middleware to Express app

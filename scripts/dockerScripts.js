@@ -5,7 +5,7 @@ const parseArgs = require("minimist");
 const util = require("util");
 const exec = util.promisify(require("child_process").exec);
 
-const SERVICE = "server";
+const SERVICE = "api-gateway";
 const ARCHITECTURES = ["x64", "rpi"];
 
 const displayUsage = () => {

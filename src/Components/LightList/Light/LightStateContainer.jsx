@@ -25,9 +25,14 @@ const throttleSetLight = throttle((setLight, newLight, oldLight) => {
       color: newColor
     }
   };
+
+  const lightId = newLight.id;
+  const lightData = Object.assign({}, newLight);
+  delete lightData["id"];
   setLight({
     variables: {
-      light: newLight
+      lightId,
+      lightData
     },
     optimisticResponse
   });

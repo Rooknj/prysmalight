@@ -28,7 +28,8 @@ it("calls setLight with the correct variables when handleStateChange is called",
     ),
     mockEvent = { target: { checked: true } },
     expectedArguments = {
-      light: { id: MOCK_LIGHT.id, state: "ON" }
+      lightId: MOCK_LIGHT.id,
+      lightData: { state: "ON" }
     };
 
   wrapper.instance().handleStateChange(mockEvent); // Call method
@@ -44,7 +45,8 @@ it("calls setLight with the correct arguments when handleBrightnessChange is cal
     ),
     mockBrightness = 32,
     expectedArguments = {
-      light: { id: MOCK_LIGHT.id, brightness: mockBrightness }
+      lightId: MOCK_LIGHT.id,
+      lightData: { brightness: mockBrightness }
     };
 
   wrapper.instance().handleBrightnessChange({}, mockBrightness); // Call method
@@ -60,7 +62,8 @@ it("calls setLight with the correct arguments when handleColorChange is called a
     ),
     mockColor = { rgb: { r: 0, g: 100, b: 28 } },
     expectedArguments = {
-      light: { id: MOCK_LIGHT.id, color: mockColor.rgb }
+      lightId: MOCK_LIGHT.id,
+      lightData: { color: mockColor.rgb }
     };
 
   wrapper.instance().handleColorChange(mockColor); // Call method
@@ -87,7 +90,8 @@ it("calls setLight with the correct arguments when handleEffectChange is called"
     ),
     mockEvent = { target: { name: "effect", value: "Flash" } },
     expectedArguments = {
-      light: { id: MOCK_LIGHT.id, effect: "Flash" }
+      lightId: MOCK_LIGHT.id,
+      lightData: { effect: "Flash" }
     };
 
   wrapper.instance().handleEffectChange(mockEvent); // Call method

@@ -52,18 +52,16 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
 
     // Create a subscription channel
     const subChannel = await conn.createChannel();
+    // Listen for changedLight messages
     subChannel.assertExchange(LIGHT_CHANGED_X, "fanout", { durable: false });
     subChannel.assertQueue("", { exclusive: true }).then(q => {
-      console.log(
-        " [*] Waiting for messages in %s. To exit press CTRL+C",
-        q.queue
-      );
       subChannel.bindQueue(q.queue, LIGHT_CHANGED_X, "");
       subChannel.consume(
         q.queue,
         msg => {
           const msgData = JSON.parse(msg.content);
 
+          // Publish to graphql subscriptions that a light has changed
           gqlPubSub.publish(msgData.lightChanged.id, {
             lightChanged: msgData.lightChanged
           });

@@ -1,23 +1,23 @@
 language: node_js
 node_js:
-  - stable
+- stable
 sudo: required
 services:
-  - docker
+- docker
 cache:
   yarn: true
   directories:
-    - node_modules
+  - node_modules
 before_install:
-  - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.9.2
-  - export PATH="$HOME/.yarn/bin:$PATH"
-install: 
-  - yarn install --silent
+- curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.9.2
+- export PATH="$HOME/.yarn/bin:$PATH"
+install:
+- yarn install --silent
 script:
-  - node scripts/dockerScripts build
-  - yarn testIntegration
+- node scripts/dockerScripts build
+- yarn testIntegration
 before_deploy:
-  - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+- echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
   skip_cleanup: true
@@ -26,7 +26,7 @@ deploy:
     all_branches: true
 env:
   global:
-    - secure: RUlG1RCWB7qK1BGTPHLBlqmUgNzkIQpv6axnoSafgzWX1Kypf+UbzJy9Uu2oADDa5DPEyNjNkC+c5FTtjbdq360JnNHkOuvEmxR8R7kyCJ57Fe1KfWJV8/NCMBTKmukhMydslocT5h26QDjv0U3+RAe/NyFDrRKcEoMsOkxzXEkABq+xLymGcSiliCHBIVRsLnvA9h3morWjLu9o+KTl/R0e0P1zPLgqtFLD3EHtMaXtSwr3/9cq+OQYbt0gdFLpBJRrhDu665jVeeHpT8ji1ssWW2JPiJkE/Qom7oySRB+8oZ/oMlsLK/ft4M80YMiBitFlm0mzIC5AoNE8c0CNjeYiOygF71t5Nr6ms7GCorGeHEfTwzC9BxR4qbxAtKX92QP59X8Y43wW9ioLZ3fGPtjB3PylksInLdLObRnzfvSBY3xmGg/ifPvcSUeFhK25M9gvGVR2ge3FHm/RtzWLx+zOAQNwiDuYs4k/AvLevBdlaAXpjWsBk1ws4eyEhb99p2xDBuwPXZVwSXbcNfwX55Q8EmehCzbUuYBHzKudSWRCuTKIxH4lYNETi/fyhv7TX6gFa1+Z5GN647tBq/tvo9Pt8gdR6WGZrhXUGRjlIKj6z1CKTamUbHE85gnpTA5Ns5y+s9PvxsmQ6LDUxlhI+zvTj5lGC2tEPm3UQNr6V0o=
+  - secure: njje9sb+thffhIo3evEYJM2wowYK/dt+1kCe2oACGVJ3m1bHxAoM6qi2RLlMubfP0fmelZgHSbjxLVZc/bjvnAQ0Vk5QdWHDGGxJmYnTiHDwrJMhBjDxoW7GGJDyb5Cc4UtcKJ8gAIWmVn4GmkRLj+ktNZO1Gzd1qtYLEQVwvUG/eppIRKHcicAHSqsahkmjIcvgQIGmQd1AMDfod3N7Nx1Hy5oQLQTop5vFZEGV1kBZ6WRtn3N5q6t17z1753ZNxjgS3xnqO+H9QLuMvb7YuDg8aO+f53+iK62lYUK77D5lluH2v96ZSPuvJkPEu04zz2SxW3gvaRzRyUNl0K5881chR9TLQGlJVJdRvJmngxnMeHSzaqoV2ZtXf/SULZtMrxVidzHeEuOVdfC5EO8e3XUQNeTAYQT4SwHxFK1DOIdLjjHJvnEjkqhDbreDzMxHdF9AHK9hC3t/bb0I//33RffV+t0Izf4xK3GFpLgM0bodu6r9XZkI59FlbSz20YHZgXI2F5E53TefHlo1vnIHr6iIOqBoNc+T5lQ/zw++gQ2sahIc+R3dcIleu7X6ZbbsXbyet9flSpDnWUOIFlZfbD3AJC3SbJCACjWQag9frFcj0CLZV+iIGn6aTd9kVDN/h0bXsE987khfK/IbLZ7eyv9ypM564VYLwW2fMqtmYS4=
 notifications:
   slack:
-    secure: sZbAwpbsoZbslIUZa6bV7iSFImd/FlVsdVBLATSqYJvVRZt5GYNZ7lQYX+j3ll9GcIy2p4RYFapc7Ny59g3GPlRMwfZi4CVwPCIcIL/UwHzjyj2Fz3MwgAqmFK7/tRKc5zJnZhFr4eQsOC9kxanlvzqK2pGFu6OUHB9kwO2Ge8dlzKqtDCN86PkP8PGjCfL4iVIc1KbCTCKnOA8GSeoNLBR7+UfQeDc/+O2xvqssRZCUSvey102ADxEaOHCiVC07PMO9qUupMxkukm4plci79hUdCu+Ja50DNJJc1TsVRw+QQBEcBCOCIA9IzY4bZAeIw0y7u57IxNg0u0DvtmTIWaR2Fa3QfNgXAktri77ilkU5lbyCpHJsRjHeJx1zj97fPMP6RkL2uonCqf2e+820rOkIf5rdb+98SEaRUw/bdrV7QoT0CQ0+0XMwJWtyVd1hmnaf2c4l8UL0z/pwUrfDiRB12B4B0RYlz0L6e/wySRBHXfMto1cr4et80WwxBZ6XeYbYF6tNlPjpn4IM7FHdxZNPx8hcdgWb20C8KpYPXcatpPfRGggEvXsVREPK14MOSZmSJ1Aqi6dHG+X7QajyH8FYS+CWEN3Q6umOC7Fg9UQoWspnyjyzXatTjKOw1nDqZpECItw82DeXwRV7+ftpamABSxfzfcAz/4HgrgDZqr0=
+    secure: CfeajzhOWlkHvyGNASBrFji4E4Q6xiArJm7rvBldR33VxLmaW38H3+UXXo59+A84vRiFtUxb3Z+4DQiWlORgbRFyKBUMAavX17V9HjcAWSPD91V+uzrTIdeZuvHv02yLuqs9gY7nB+tAxGBgPagE3Ah5Oz/fLC0KNM3fd99JLOYl+dPk3+t6zhWD74OM1T7bbxXz7RzEk09pb8dAdUm9xFyCybU8TQcain9vR5m8YRCjCutv9MzXC5AUDB6vnh1y7KxCW42xcZgFw4wow2BrtKRTsMk0m/BpzLS2YvmVIVDk7FNPsO93bZudlYpDRIzaYShqoQZOe1o0Ol42j4EyxiKP8Lo2d/UMwO0DxXRSZ7waj/HjgooDayu3NjWcnNW9L8kv4TsLFHs4pErwCVjnMHFrDhCmhidwVtPav0EBAwOlK24EKUyqzc3alu4E8SJqKnlQZX+ahTybyRKUPkSY1YVJCmSYjafrhWjAdEEWEL5zWZxUZgOC87DXb3sIjfcCeHQGMpPJSL8OBGq9sd3IVGbkM7coo01RtttGOu9n1egt4EEMZgYGEHxjFojQiE31yuk1kEpk/KLfLlm8zFHLfgGakGmeQt3zYTaV4dOSN84LHpsCC4pJZpmtf5YGl5Sayw8kADZTZcd/10ElatBkstfp6JAkMDI8t7HCfEcl8yU=

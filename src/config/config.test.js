@@ -7,7 +7,15 @@ describe("serverSettings", () => {
 });
 
 describe("rabbitSettings", () => {
-  test("has a host defined", () => {
-    expect(config.rabbitSettings.host).toBeDefined();
+  test("has a hostname defined", () => {
+    expect(config.rabbitSettings.hostname).toBeDefined();
+  });
+
+  test("has a port defined", () => {
+    expect(config.rabbitSettings.port).toBeDefined();
+  });
+
+  test("has a protocol defined", () => {
+    expect(config.rabbitSettings.protocol).toBeDefined();
   });
 });

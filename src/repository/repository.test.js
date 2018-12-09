@@ -44,10 +44,6 @@ const createMockDependencies = () => {
     unsubscribeFromLight: jest.fn(async id => null),
     publishToLight: jest.fn(async (id, topic) => null)
   };
-  let mockGqlPubSub = {
-    publish: jest.fn(),
-    asyncIterator: jest.fn()
-  };
   let mockEvent = {
     emit: jest.fn(),
     removeListener: jest.fn(),
@@ -56,7 +52,6 @@ const createMockDependencies = () => {
   return {
     db: mockDB,
     pubsub: mockPubsub,
-    gqlPubSub: mockGqlPubSub,
     event: mockEvent
   };
 };
@@ -294,11 +289,8 @@ describe("handleConnectMessage", () => {
       connected: Number(MESSAGE.connection)
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith(MESSAGE.name, {
+    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
-    });
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith("lightsChanged", {
-      lightsChanged: changedLight
     });
   });
   test("handles the connect message (Example 2)", async () => {
@@ -318,11 +310,8 @@ describe("handleConnectMessage", () => {
       connected: Number(MESSAGE.connection)
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith(MESSAGE.name, {
+    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
-    });
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith("lightsChanged", {
-      lightsChanged: changedLight
     });
   });
   test("ignores the message and returns an error if no name is supplied", async () => {
@@ -334,7 +323,7 @@ describe("handleConnectMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
   });
   test("ignores the message and returns an error if the connection data is not in the correct format", async () => {
     let mockDeps = createMockDependencies();
@@ -345,7 +334,7 @@ describe("handleConnectMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
   });
   test("returns an error if it fails to change the light", async () => {
     let mockDeps = createMockDependencies();
@@ -357,7 +346,7 @@ describe("handleConnectMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
   });
   test("returns an error if it fails to get the changed light", async () => {
     let mockDeps = createMockDependencies();
@@ -369,7 +358,7 @@ describe("handleConnectMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.getLight).toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
   });
 });
 
@@ -403,11 +392,8 @@ describe("handleStateMessage", () => {
       speed: MESSAGE.speed
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith(MESSAGE.name, {
+    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
-    });
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith("lightsChanged", {
-      lightsChanged: changedLight
     });
     expect(mockDeps.event.emit).toBeCalledWith(
       "mutationResponse",
@@ -444,11 +430,8 @@ describe("handleStateMessage", () => {
       speed: MESSAGE.speed
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith(MESSAGE.name, {
+    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
-    });
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith("lightsChanged", {
-      lightsChanged: changedLight
     });
     expect(mockDeps.event.emit).toBeCalledWith(
       "mutationResponse",
@@ -472,7 +455,7 @@ describe("handleStateMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
     expect(mockDeps.event.emit).not.toBeCalled();
   });
   test("ignores the message and returns an error if no state data is supplied", async () => {
@@ -485,7 +468,7 @@ describe("handleStateMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
     expect(mockDeps.event.emit).not.toBeCalled();
   });
   test("returns an error if it fails to change the light", async () => {
@@ -506,7 +489,7 @@ describe("handleStateMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
     expect(mockDeps.event.emit).not.toBeCalled();
   });
   test("returns an error if it fails to get the changed light", async () => {
@@ -527,7 +510,7 @@ describe("handleStateMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.getLight).toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
     expect(mockDeps.event.emit).not.toBeCalled();
   });
 });
@@ -550,11 +533,8 @@ describe("handleEffectListMessage", () => {
       supportedEffects: MESSAGE.effectList
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith(MESSAGE.name, {
+    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
-    });
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith("lightsChanged", {
-      lightsChanged: changedLight
     });
   });
   test("handles the effect list message (Example 2)", async () => {
@@ -574,11 +554,8 @@ describe("handleEffectListMessage", () => {
       supportedEffects: MESSAGE.effectList
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith(MESSAGE.name, {
+    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
-    });
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith("lightsChanged", {
-      lightsChanged: changedLight
     });
   });
   test("ignores the message and returns an error if no name is supplied", async () => {
@@ -590,7 +567,7 @@ describe("handleEffectListMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
   });
   test("ignores the message and returns an error if no effect list is supplied", async () => {
     let mockDeps = createMockDependencies();
@@ -602,7 +579,7 @@ describe("handleEffectListMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
   });
   test("returns an error if it fails to change the light", async () => {
     let mockDeps = createMockDependencies();
@@ -614,7 +591,7 @@ describe("handleEffectListMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
     expect(mockDeps.event.emit).not.toBeCalled();
   });
   test("returns an error if it fails to get the changed light", async () => {
@@ -627,7 +604,7 @@ describe("handleEffectListMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.getLight).toBeCalled();
-    expect(mockDeps.gqlPubSub.publish).not.toBeCalled();
+    expect(mockDeps.event.emit).not.toBeCalled();
     expect(mockDeps.event.emit).not.toBeCalled();
   });
 });
@@ -753,24 +730,6 @@ describe("addLight", () => {
     expect(mockDeps.db.addLight).toBeCalledWith(ID);
     expect(mockDeps.pubsub.subscribeToLight).toBeCalledWith(ID);
   });
-  test("notifies subscribers of the added light", async () => {
-    let mockDeps = createMockDependencies();
-    const ID = "Test A";
-    const MOCKLIGHT = createMockLight(ID);
-    mockDeps.db.addLight = jest.fn(async () => null);
-    mockDeps.db.hasLight = jest.fn(async () => ({
-      error: null,
-      hasLight: false
-    }));
-    const repo = repository(mockDeps);
-    repo.__proto__.getLight = jest.fn(() => MOCKLIGHT);
-
-    await repo.addLight(ID);
-
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith("lightAdded", {
-      lightAdded: MOCKLIGHT
-    });
-  });
   test("returns an error if the light was already added", async () => {
     let mockDeps = createMockDependencies();
     const ID = "Test A";
@@ -834,26 +793,9 @@ describe("removeLight", () => {
 
     const response = await repo.removeLight(ID);
 
-    expect(response).toEqual({ id: ID });
+    expect(response).toEqual(ID);
     expect(mockDeps.db.removeLight).toBeCalledWith(ID);
     expect(mockDeps.pubsub.unsubscribeFromLight).toBeCalledWith(ID);
-  });
-  test("notifies subscribers of the removed light", async () => {
-    let mockDeps = createMockDependencies();
-    const ID = "Test A";
-    mockDeps.db.removeLight = jest.fn(async () => null);
-    mockDeps.db.hasLight = jest.fn(async () => ({
-      error: null,
-      hasLight: true
-    }));
-    const repo = repository(mockDeps);
-
-    const response = await repo.removeLight(ID);
-
-    expect(response).toEqual({ id: ID });
-    expect(mockDeps.gqlPubSub.publish).toBeCalledWith("lightRemoved", {
-      lightRemoved: { id: ID }
-    });
   });
   test("returns an error if the light was not already added", async () => {
     let mockDeps = createMockDependencies();
@@ -911,74 +853,4 @@ describe.skip("setLight", () => {
   test("returns an error if the light was not added", async () => {});
   test("returns an error if fails to publish to the light", async () => {});
   test.skip("returns an error if takes too long for the light to respond", async () => {});
-});
-
-describe("subscribeToLight", () => {
-  test("subscribes to the specified light (Example 1)", () => {
-    let mockDeps = createMockDependencies();
-    const SUBSCRIPTION = "subscription";
-    mockDeps.gqlPubSub.asyncIterator = jest.fn(() => SUBSCRIPTION);
-    const repo = repository(mockDeps);
-
-    const ID = "Test A";
-    const subscription = repo.subscribeToLight(ID);
-
-    expect(mockDeps.gqlPubSub.asyncIterator).toBeCalledWith(ID);
-    expect(subscription).toBe(SUBSCRIPTION);
-  });
-
-  test("subscribes to the specified light (Example 2)", () => {
-    let mockDeps = createMockDependencies();
-    const SUBSCRIPTION = "subscription";
-    mockDeps.gqlPubSub.asyncIterator = jest.fn(() => SUBSCRIPTION);
-    const repo = repository(mockDeps);
-
-    const ID = "Test 123";
-    const subscription = repo.subscribeToLight(ID);
-
-    expect(mockDeps.gqlPubSub.asyncIterator).toBeCalledWith(ID);
-    expect(subscription).toBe(SUBSCRIPTION);
-  });
-});
-
-describe("subscribeToAllLights", () => {
-  test("Subscribes to all lights", () => {
-    let mockDeps = createMockDependencies();
-    const SUBSCRIPTION = "subscription";
-    mockDeps.gqlPubSub.asyncIterator = jest.fn(() => SUBSCRIPTION);
-    const repo = repository(mockDeps);
-
-    const subscription = repo.subscribeToAllLights();
-
-    expect(mockDeps.gqlPubSub.asyncIterator).toBeCalledWith("lightsChanged");
-    expect(subscription).toBe(SUBSCRIPTION);
-  });
-});
-
-describe("subscribeToLightsAdded", () => {
-  test("Subscribes to lights added", () => {
-    let mockDeps = createMockDependencies();
-    const SUBSCRIPTION = "subscription";
-    mockDeps.gqlPubSub.asyncIterator = jest.fn(() => SUBSCRIPTION);
-    const repo = repository(mockDeps);
-
-    const subscription = repo.subscribeToLightsAdded();
-
-    expect(mockDeps.gqlPubSub.asyncIterator).toBeCalledWith("lightAdded");
-    expect(subscription).toBe(SUBSCRIPTION);
-  });
-});
-
-describe("subscribeToLightsRemoved", () => {
-  test("Subscribes to lights removed", () => {
-    let mockDeps = createMockDependencies();
-    const SUBSCRIPTION = "subscription";
-    mockDeps.gqlPubSub.asyncIterator = jest.fn(() => SUBSCRIPTION);
-    const repo = repository(mockDeps);
-
-    const subscription = repo.subscribeToLightsRemoved();
-
-    expect(mockDeps.gqlPubSub.asyncIterator).toBeCalledWith("lightRemoved");
-    expect(subscription).toBe(SUBSCRIPTION);
-  });
 });

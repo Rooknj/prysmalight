@@ -1,14 +1,14 @@
 const config = require("./config/config");
-const server = require("./server/server");
 const dbFactory = require("./repository/dbFactory");
 const pubsubFactory = require("./repository/pubsubFactory");
 const repository = require("./repository/repository");
+const service = require("./service/service");
 const MockLight = require("./mock/MockLight");
 const Debug = require("debug").default;
 const debug = Debug("main");
 
 // Verbose statement of service starting
-debug("--- Light Service ---");
+debug("--- Controller Service ---");
 
 // Unhandled error logging
 process.on("uncaughtException", err => {
@@ -18,6 +18,12 @@ process.on("uncaughtRejection", err => {
   debug("Unhandled Rejection", err);
 });
 
+// Initialize the global event emitter
+// TODO: Figure out where to put this
+const events = require("events");
+const event = new events.EventEmitter();
+
+// Get and initialize the repo
 const getRepo = () => {
   const mockRepository = require("./mock/mockRepository");
   if (process.env.MOCK) return mockRepository;
@@ -39,39 +45,27 @@ const getRepo = () => {
     }
   );
 
-  //TODO: Include this stuff in deps
-  const { PubSub } = require("apollo-server");
-  const gqlPubSub = new PubSub();
-
-  // TODO: Figure out where to put this
-  const events = require("events");
-  const event = new events.EventEmitter();
-
   // Create our db and pubsub with the provided clients
   const db = dbFactory(dbClient);
   const pubsub = pubsubFactory(pubsubClient);
 
   // Inject Dependencies
-  return repository({ db, pubsub, gqlPubSub, event });
+  return repository({ db, pubsub, event });
 };
-
-// Start the server
 const repo = getRepo();
 repo.init();
-debug("Starting Server");
-server
-  .start({
-    port: config.serverSettings.port,
-    repo
-  })
-  .then(app => {
-    app.on("close", () => {
-      debug("App Closed");
-    });
+
+// Start the service
+debug("Starting Service");
+const amqp = require("amqplib");
+service
+  .start({ amqp, amqpSettings: config.rabbitSettings, repo, event })
+  .then(() => {
+    debug("Service Started");
   });
 
 // Create a Default Mock Light
-const createMockLight = mockName => {
+const createMockLight = async mockName => {
   debug(`Starting mock light: ${mockName}`);
   const mockLight = new MockLight(mockName);
   mockLight.subscribeToCommands();

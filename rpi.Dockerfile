@@ -30,10 +30,7 @@ FROM resin/raspberrypi3-debian:jessie
 
 WORKDIR /usr/app
 
-COPY --from=builder /usr/app/build/lightapp2-server /usr/app
-
-# Make port 4001 available to the world outside this container
-EXPOSE 4001
+COPY --from=builder /usr/app/build/lightapp2-controller-microservice /usr/app
 
 # Start the app
-CMD ./lightapp2-server
+CMD ./lightapp2-controller-microservice

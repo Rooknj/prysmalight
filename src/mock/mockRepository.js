@@ -1,7 +1,3 @@
-const { PubSub } = require("apollo-server");
-
-const pubSubClient = new PubSub();
-
 const mockLight = {
   id: "Mock Service Light 1",
   connected: true,
@@ -18,19 +14,11 @@ const getLights = () => [mockLight, mockLight, mockLight];
 const setLight = () => mockLight;
 const addLight = () => mockLight;
 const removeLight = () => mockLight;
-const subscribeToLight = () => pubSubClient.asyncIterator("test1");
-const subscribeToAllLights = () => pubSubClient.asyncIterator("test2");
-const subscribeToLightsAdded = () => pubSubClient.asyncIterator("test3");
-const subscribeToLightsRemoved = () => pubSubClient.asyncIterator("test4");
 
 module.exports = {
   getLight,
   getLights,
   setLight,
   addLight,
-  removeLight,
-  subscribeToLight,
-  subscribeToAllLights,
-  subscribeToLightsAdded,
-  subscribeToLightsRemoved
+  removeLight
 };

@@ -9,7 +9,7 @@ node_modules
 
 # production
 /build
-lightapp2-server
+lightapp2-api-gateway
 
 # gulp cache
 .gulp-cache

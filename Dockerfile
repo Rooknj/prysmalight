@@ -26,10 +26,10 @@ FROM node:carbon
 
 WORKDIR /usr/app
 
-COPY --from=builder /usr/app/build/lightapp2-server /usr/app
+COPY --from=builder /usr/app/build/lightapp2-api-gateway /usr/app
 
 # Make port 4001 available to the world outside this container
 EXPOSE 4001
 
 # Start the app
-CMD ./lightapp2-server
+CMD ./lightapp2-api-gateway

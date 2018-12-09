@@ -1,27 +1,18 @@
 version: "3"
 services:
-  server:
+  api:
     build:
       context: .
       dockerfile: rpi.Dockerfile
-    image: lightapp2-server-rpi
+    image: lightapp2-api-gateway-rpi
     ports:
       - "4001:4001"
     environment:
-      - REDIS_HOST=redis # DO NOT delete this because travis needs it for some reason
-      - MQTT_HOST=broker # DO NOT delete this because travis needs it for some reason
-  redis:
-    image: redis:latest
+      - RABBIT_HOST=rabbit
+  rabbit:
+    image: rabbitmq:3
+    hostname: "myrabbit"
+    container_name: rabbit
     ports:
-      - "6379:6379"
-    volumes:
-      - ./redisData:/data
-  broker:
-      image: eclipse-mosquitto:latest
-      ports:
-        - "1883:1883"
-        - "9001:9001"
-      volumes:
-        - ./mqttConfig:/mosquitto/config
-        - /mosquitto/data
-        - /mosquitto/log
+      - "5672:5672"
+

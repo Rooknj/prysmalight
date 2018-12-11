@@ -20,7 +20,7 @@
 #include <PubSubClient.h>     // MQTT client library
 #include <ArduinoJson.h>      // Parse JSON
 #define FASTLED_ESP8266_DMA      // better control for ESP8266 will output or RX pin requires fork https://github.com/coryking/FastLED
-#include "src/FastLED/FastLED.h" // LED strip control library
+#include <FastLED.h> // LED strip control library
 
 // Search "Change to add effect" to find all areas you need to edit to add an effect
 

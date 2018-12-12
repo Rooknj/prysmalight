@@ -10,7 +10,6 @@
 */
 
 #include "config.h"
-#include "light.h"
 
 #include <ESP8266WiFi.h>      // ESP8266 Core WiFi Library
 #include <ESP8266mDNS.h>      // Enables finding addresses in the .local domain
@@ -20,8 +19,8 @@
 #include <WiFiManager.h>      // https://github.com/tzapu/WiFiManager WiFi Configuration Magic
 #include <PubSubClient.h>     // MQTT client library
 #include <ArduinoJson.h>      // Parse JSON
-#define FASTLED_ESP8266_DMA      // better control for ESP8266 will output or RX pin requires fork https://github.com/coryking/FastLED
-#include <FastLED.h> // LED strip control library
+#define FASTLED_ESP8266_DMA   // better control for ESP8266 will output or RX pin requires fork https://github.com/coryking/FastLED
+#include <FastLED.h>          // LED strip control library
 
 // Search "Change to add effect" to find all areas you need to edit to add an effect
 
@@ -142,10 +141,10 @@ WiFiUDP port;
 
 /************ Functions ******************/
 // function called to fill the LED strip a solid color
+Light light1();
 void setRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue)
 {
-  fill_solid(leds, CONFIG_NUM_LEDS, CRGB(p_red, p_green, p_blue));
-  FastLED.show();
+  light1.setRGB(p_red, p_green, p_blue);
 }
 
 void setHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)

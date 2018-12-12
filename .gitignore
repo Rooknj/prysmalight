@@ -4,6 +4,3 @@
 .DS_Store
 .vscode
 src
-
-# Arduino build folder
-build

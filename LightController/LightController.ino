@@ -141,10 +141,10 @@ WiFiUDP port;
 
 /************ Functions ******************/
 // function called to fill the LED strip a solid color
-Light light1();
 void setRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue)
 {
-  light1.setRGB(p_red, p_green, p_blue);
+  fill_solid(leds, CONFIG_NUM_LEDS, CRGB(p_red, p_green, p_blue));
+  FastLED.show();
 }
 
 void setHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)

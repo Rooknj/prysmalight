@@ -9,7 +9,7 @@ void setup()
   light.setBrightness(10);
   light.setEffect("Flash");
   light.setEffectSpeed(7);
-  light.setState(false);
+  //light.setState(false);
 }
 
 void loop()

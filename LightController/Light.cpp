@@ -13,8 +13,14 @@ WiFiUDP port;
 
 Light::Light()
 {
+  // Set Serial Communication rate
+  if (CONFIG_DEBUG)
+  {
+    // For some reason you can not call this inside LightController.ino or the FastLED DMA will not work
+    // TODO: Figure out why
+    Serial.begin(115200); 
+  }
   FastLED.addLeds<CONFIG_CHIPSET, CONFIG_DATA_PIN, CONFIG_COLOR_ORDER>(_leds, CONFIG_NUM_LEDS);
-  //FastLED.addLeds<CONFIG_CHIPSET, 8, CONFIG_COLOR_ORDER>(_leds, CONFIG_NUM_LEDS);
   _stateOn = false;
   _brightness = 100;
   _color = CRGB(255, 0, 0);
@@ -48,7 +54,6 @@ void Light::setBrightness(uint8_t brightness)
 
 void Light::setColorRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue)
 {
-  Serial.println("Setting state off");
   _stateOn = true;
   _color = CRGB(p_red, p_green, p_blue);
   _effect = NO_EFFECT;

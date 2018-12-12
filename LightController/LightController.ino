@@ -445,12 +445,6 @@ void setupOTA()
 /************ Arduino Setup ******************/
 void setup()
 {
-  // Set Serial Communication rate
-  if (CONFIG_DEBUG)
-  {
-    Serial.begin(115200);
-  }
-
   // Create MQTT topic strings
   createMqttTopic(MQTT_LIGHT_CONNECTED_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_CONNECTION);
   createMqttTopic(MQTT_EFFECT_LIST_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_EFFECT_LIST);

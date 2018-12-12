@@ -10,6 +10,7 @@
 */
 
 #include "config.h"
+#include "light.h"
 
 #include <ESP8266WiFi.h>      // ESP8266 Core WiFi Library
 #include <ESP8266mDNS.h>      // Enables finding addresses in the .local domain

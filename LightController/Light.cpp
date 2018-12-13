@@ -7,10 +7,6 @@
 #include "Arduino.h"
 #include "Light.h"
 
-#include "ESP8266WiFi.h" // ESP8266 Core WiFi Library
-#include "WiFiUdp.h"
-WiFiUDP port;
-
 Light::Light()
 {
   // Set Serial Communication rate
@@ -26,7 +22,6 @@ Light::Light()
   _color = CRGB(255, 0, 0);
   _effect = NO_EFFECT;
   _effectSpeed = 4;
-  port.begin(_UDP_PORT);
 }
 
 // ************************************************************************
@@ -119,19 +114,11 @@ int Light::getNumEffects()
   return _numEffects;
 }
 
-int Light::getUdpPort()
-{
-  return _UDP_PORT;
-}
-
 // ************************************************************************
 // Class Methods
 // ************************************************************************
-void Light::playEffect()
+void Light::loop(int packetSize, WiFiUDP port)
 {
-  // Handle reading visualization data
-  int packetSize = port.parsePacket(); // Read data over socket
-
   // Handle the current effect
   if (_effect == NO_EFFECT || _stateOn == false)
   { // Change to add effect
@@ -171,7 +158,22 @@ void Light::playEffect()
   }
   else if (_effect == "Visualize")
   {
-    handleVisualize(packetSize);
+    handleVisualize(packetSize, port);
+  }
+}
+
+void Light::handleVisualize(int packetSize, WiFiUDP port)
+{
+  if (packetSize == sizeof(_leds))
+  {
+    port.read((char *)_leds, sizeof(_leds));
+    FastLED.show();
+  }
+  else if (packetSize)
+  {
+    Serial.printf("Invalid packet size: %u (expected %u)\n", packetSize, sizeof(_leds));
+    port.flush();
+    return;
   }
 }
 
@@ -453,21 +455,6 @@ void Light::handleSinelon()
     int pos = beatsin16((int)(getBPM() / 5), 0, CONFIG_NUM_LEDS - 1);
     _leds[pos] += CHSV(gHue, 255, 192);
     FastLED.show();
-  }
-}
-
-void Light::handleVisualize(int packetSize)
-{
-  if (packetSize == sizeof(_leds))
-  {
-    port.read((char *)_leds, sizeof(_leds));
-    FastLED.show();
-  }
-  else if (packetSize)
-  {
-    Serial.printf("Invalid packet size: %u (expected %u)\n", packetSize, sizeof(_leds));
-    port.flush();
-    return;
   }
 }
 

@@ -12,6 +12,8 @@
 #define FASTLED_ESP8266_DMA // better control for ESP8266 will output or RX pin requires fork https://github.com/coryking/FastLED
 #include "FastLED.h"     // LED strip control library
 
+#include "WiFiUdp.h"
+
 #define NO_EFFECT "None"
 
 class Light
@@ -32,9 +34,8 @@ public:
   int getEffectSpeed();
   char **getEffects();
   int getNumEffects();
-  int getUdpPort();
 
-  void playEffect();
+  void loop(int packetSize, WiFiUDP port);
 
 private:
   // Variables with getters
@@ -46,7 +47,6 @@ private:
   int _numEffects = 9;
   char *_effects[9] = {"Flash", "Fade", "Rainbow", "Cylon", "Sinelon", "Confetti", "BPM", "Juggle", "Visualize"}; // Change to add effect
   CRGB _leds[CONFIG_NUM_LEDS];
-  const int _UDP_PORT = 7778;
 
   // Private functions
   void setRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue);
@@ -69,7 +69,7 @@ private:
   void handleJuggle();
   void handleBPM();
   void handleSinelon();
-  void handleVisualize(int packetSize);
+  void handleVisualize(int packetSize, WiFiUDP port);
 };
 
 #endif

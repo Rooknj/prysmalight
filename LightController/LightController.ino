@@ -22,6 +22,8 @@
 #include <ArduinoJson.h>      // Parse JSON
 
 Light light;
+const int _UDP_PORT = 7778;
+WiFiUDP port;
 
 // Search "Change to add effect" to find all areas you need to edit to add an effect
 
@@ -169,21 +171,13 @@ bool processJson(char *message)
   if (root.containsKey("effect"))
   {
     int numEffects = light.getNumEffects();
-    char** effects = light.getEffects();
+    char **effects = light.getEffects();
     for (int i = 0; i < numEffects; i++)
     {
       if (strcmp(root["effect"], effects[i]) == 0)
       {
         // Set effect if it is supported on this controller
         light.setEffect(root["effect"].asString());
-
-        // Clear current lights when Visualize effect is chosen
-        if (strcmp(root["effect"], "Visualize") == 0)
-        {
-          Serial.println("INFO: Clearing light for visualization");
-          light.setColorRGB(0, 0, 0);
-        }
-
         break;
       }
     }
@@ -261,7 +255,7 @@ void sendEffectList()
 
   // populate payload with effect list
   JsonArray &effectList = root.createNestedArray("effectList");
-  char** effects = light.getEffects();
+  char **effects = light.getEffects();
   int numEffects = light.getNumEffects();
   for (int i = 0; i < numEffects; i++)
   {
@@ -294,7 +288,7 @@ void sendConfig()
     root["ipAddress"] = WiFi.localIP().toString();
     root["macAddress"] = WiFi.macAddress();
     root["numLeds"] = CONFIG_NUM_LEDS;
-    root["udpPort"] = light.getUdpPort();
+    root["udpPort"] = _UDP_PORT;
 
     char buffer[root.measureLength() + 1];
     root.printTo(buffer, sizeof(buffer));
@@ -467,6 +461,9 @@ void setup()
   // init OTA firmware uploads
   setupOTA();
 
+  // Init visualization listening
+  port.begin(_UDP_PORT); // Setup
+
   // init the MQTT connection
   client.setServer(MQTT_SERVER_IP, MQTT_SERVER_PORT);
   client.setCallback(callback);
@@ -478,6 +475,11 @@ void loop()
 {
   // Handle OTA requests
   ArduinoOTA.handle();
+
+  // Handle reading visualization data
+  // This has to be in the main LightController.ino file or else it doesnt work for some reason
+  // TODO: Figure out reason
+  int packetSize = port.parsePacket(); // Read data over socket
 
   // Handle MQTT connection
   if (!client.connected())
@@ -505,5 +507,5 @@ void loop()
     client.loop();
   }
 
-  light.playEffect();
+  light.loop(packetSize, port);
 }

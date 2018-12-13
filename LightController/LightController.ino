@@ -112,9 +112,17 @@ void callback(char *topic, byte *payload, unsigned int length)
       return;
     }
   }
+  else if (strcmp(topic, HOMEKIT_LIGHT_COMMAND_TOPIC) == 0)
+  {
+    if (!processHomekitJson(message))
+    {
+      return;
+    }
+  }
   else if (strcmp(topic, MQTT_LIGHT_DISCOVERY_TOPIC) == 0)
   {
     sendConfig();
+    return;
   }
   else
   {
@@ -241,6 +249,10 @@ void sendState()
   root.printTo(buffer, sizeof(buffer));
 
   client.publish(MQTT_LIGHT_STATE_TOPIC, buffer, true);
+
+  // Send homekit state
+  sendHomekitState("On");
+  sendHomekitState("Brightness");
 }
 
 // send effect list over MQTT
@@ -295,6 +307,124 @@ void sendConfig()
 
     client.publish(MQTT_LIGHT_CONFIG_TOPIC, buffer);
   }
+}
+
+int currentHue = 0;
+int currentSaturation = 0;
+// function called to take Homekit JSON message, parse it, then set the according variables
+bool processHomekitJson(char *message)
+{
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject &root = jsonBuffer.parseObject(message);
+
+  if (!root.success())
+  {
+    Serial.println("ERROR: parseObject() failed");
+    return false;
+  }
+
+  if (root.containsKey("name"))
+  {
+    if (strcmp(root["name"], CONFIG_NAME) != 0)
+    {
+      Serial.println("DEBUG: Message was for different light");
+      return true;
+    }
+  }
+
+  if (root.containsKey("characteristic"))
+  {
+    if (strcmp(root["characteristic"], "On") == 0)
+    {
+      if (root.containsKey("value"))
+      {
+        if (root["value"])
+        {
+          light.setState(true);
+        }
+        else
+        {
+          light.setState(false);
+        }
+      }
+    }
+    else if (strcmp(root["characteristic"], "Brightness") == 0)
+    {
+      if (root.containsKey("value"))
+      {
+        if (root["value"])
+        {
+          light.setBrightness(root["value"]);
+        }
+      }
+    }
+    else if (strcmp(root["characteristic"], "Hue") == 0)
+    {
+      if (root.containsKey("value"))
+      {
+        if (root["value"] || root["value"] == 0)
+        {
+          currentHue = root["value"];
+          light.setColorHSV(map(currentHue, 0, 359, 0, 255), map(currentSaturation, 0, 100, 0, 255), 255);
+        }
+      }
+    }
+    else if (strcmp(root["characteristic"], "Saturation") == 0)
+    {
+      if (root.containsKey("value"))
+      {
+        if (root["value"] || root["value"] == 0)
+        {
+          currentSaturation = root["value"];
+          light.setColorHSV(map(currentHue, 0, 359, 0, 255), map(currentSaturation, 0, 100, 0, 255), 255);
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+// send light state over MQTT
+void sendHomekitState(char *characteristic)
+{
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject &root = jsonBuffer.createObject();
+
+  // populate payload with name
+  root["name"] = CONFIG_NAME;
+
+  // populate payload with service_name
+  root["service_name"] = CONFIG_NAME;
+
+  // populate payload with characteristic
+  root["characteristic"] = characteristic;
+
+  // populate payload with characteristic
+  if (strcmp(root["characteristic"], "On") == 0)
+  {
+    root["value"] = light.getState();
+  }
+  else if (strcmp(root["characteristic"], "Brightness") == 0)
+  {
+    root["value"] = light.getBrightness();
+  }
+  else if (strcmp(root["characteristic"], "Hue") == 0)
+  {
+    root["value"] = currentHue;
+  }
+  else if (strcmp(root["characteristic"], "Saturation") == 0)
+  {
+    root["value"] = currentSaturation;
+  }
+
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+
+  Serial.println(buffer);
+  client.publish(HOMEKIT_LIGHT_STATE_TOPIC, buffer, true);
 }
 
 // MQTT connect/reconnect function

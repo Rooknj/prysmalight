@@ -3,7 +3,7 @@
 #define CONFIG_DEBUG true
 
 // The unique name of the light (must be less than 16 characters)
-#define CONFIG_NAME "Test 3" // TODO: Change This (Must be unique)
+#define CONFIG_NAME "Test Light" // TODO: Change This (Must be unique)
 
 // Wifi manager access point config
 #define CONFIG_WIFI_MANAGER_PW "991f76a6ab"

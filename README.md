@@ -1,4 +1,5 @@
-<center> <h2>Lightapp2-esp8266</h2> </center>
+Lightapp2-esp8266
+===========================================
 
 <p align="center">
   <img alt="Lightapp2-esp8266" src="./esp8266.png" width="480">

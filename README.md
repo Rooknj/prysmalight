@@ -43,4 +43,14 @@ Lightapp2-esp8266
 ## Set up OTA upload
 - Install Python 2.7 for OTA uploads: http://esp8266.github.io/Arduino/versions/2.0.0/doc/ota_updates/ota_updates.html
 
+# Notes
+## First time upload and wifi connection
+- Make sure you set up wifi using the WiFi manager the first time you upload a sketch on an ESP8266 or you move to a new network.
+- If you have a static IP address set, The ESP8266 may say it connects to WiFi the first time you upload a sketch to it, but it really didn't. Just set it back to a dynamic IP address and it should work. Once that happens, set it back to a Static IP address and it should work just fine now.
+
+## Project Structure
+- All configuration data should go in config.h
+  - This should be the only file typical users will want to change
+- All logic relating to controlling the LED strips is located in Light.h and Light.cpp
+- All logic relating to connecting to MQTT and handling messages is located in the main sketch: LightController.ino
 

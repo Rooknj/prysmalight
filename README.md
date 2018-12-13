@@ -19,6 +19,6 @@ These scripts are useful for creating custom docker images for testing
 
 - ```node scripts/dockerScripts build -t <TAG>``` - Builds a docker image
 - ```node scripts/dockerScripts tag -t <TAG>``` - Tags the built docker image with the supplied tag
-- ```node scripts/dockerScripts publish [-h|-t]``` - Pushes the image with the supplied tag to my docker-cloud repository
+- ```node scripts/dockerScripts publish -t <TAG>``` - Pushes the image with the supplied tag to my docker-cloud repository
 
 

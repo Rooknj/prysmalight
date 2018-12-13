@@ -1,4 +1,4 @@
-Lightapp2-client
+Lightapp2-client [![Build Status](https://travis-ci.org/Rooknj/lightapp2-client.svg?branch=master)](https://travis-ci.org/Rooknj/lightapp2-client)
 ===========================================
 
 <p align="center">
@@ -8,10 +8,6 @@ Lightapp2-client
 <p align="center">
   A React app to control Addressable LED strips
 </p>
-
-<p align="center">
-  <a href="https://travis-ci.org/Rooknj/lightapp2-client"><img alt="NPM Status" src="https://travis-ci.org/Rooknj/lightapp2-client.svg?branch=master"></a>
-</p> 
 
 ## Requirements to run
 - You must have at least Node 8.11.3 installed

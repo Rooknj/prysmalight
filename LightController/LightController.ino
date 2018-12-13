@@ -22,19 +22,149 @@
 #include <ArduinoJson.h>      // Parse JSON
 
 Light light;
-const int _UDP_PORT = 7778;
+
+//*******************************************************
+// WiFi Setup
+//*******************************************************
+WiFiClient wifiClient;
 WiFiUDP port;
+const int _UDP_PORT = 7778;
 
-// Search "Change to add effect" to find all areas you need to edit to add an effect
+// WIFI Setup
+void setupWifi()
+{
+  // Autoconnect to Wifi
+  WiFiManager wifiManager;
 
-/************ MQTT Setup Variables ******************/
-// MQTT: ID, server IP, port, username and password
-const PROGMEM char *MQTT_CLIENT_ID = CONFIG_NAME;
+  // Set static IP address if one is provided
+#ifdef STATIC_IP
+  Serial.print("INFO: adding static IP ");
+  Serial.println(STATIC_IP);
+  IPAddress _ip, _gw, _sn;
+  _ip.fromString(STATIC_IP);
+  _gw.fromString(STATIC_GW);
+  _sn.fromString(STATIC_SN);
+  wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
+#endif
+
+  if (!wifiManager.autoConnect(CONFIG_NAME, CONFIG_WIFI_MANAGER_PW))
+  {
+    // (AP-Name, Password)
+    Serial.println("ERROR: failed to connect to Wifi");
+    Serial.println("DEBUG: try resetting the module");
+    delay(3000);
+    ESP.reset();
+    delay(5000);
+  }
+  Serial.println("INFO: connected to Wifi :)");
+}
+
+//*******************************************************
+// OTA Setup
+//*******************************************************
+void setupOTA()
+{
+  // OTA Setup
+  ArduinoOTA.onStart([]() {
+    Serial.println("INFO: starting OTA upload");
+    digitalWrite(LED_BUILTIN, LOW);
+  });
+
+  ArduinoOTA.onEnd([]() {
+    Serial.println("INFO: OTA upload successful");
+    digitalWrite(LED_BUILTIN, HIGH);
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    Serial.printf("INFO: upload %u%% complete\n", (progress / (total / 100)));
+  });
+
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("ERROR: OTA %u: ", error);
+    if (error == OTA_AUTH_ERROR)
+      Serial.println("OTA Auth Failed");
+    else if (error == OTA_BEGIN_ERROR)
+      Serial.println("OTA Begin Failed");
+    else if (error == OTA_CONNECT_ERROR)
+      Serial.println("OTA Connect Failed");
+    else if (error == OTA_RECEIVE_ERROR)
+      Serial.println("OTA Receive Failed");
+    else if (error == OTA_END_ERROR)
+      Serial.println("OTA End Failed");
+  });
+
+  ArduinoOTA.setHostname(CONFIG_NAME);
+  ArduinoOTA.setPassword(CONFIG_OTA_PASSWORD);
+  ArduinoOTA.begin();
+  Serial.println("INFO: OTA ready");
+}
+
+//*******************************************************
+// MQTT Setup
+//*******************************************************
+// client info
+PubSubClient client(wifiClient);
+const char *MQTT_CLIENT_ID = CONFIG_NAME;
 char MQTT_SERVER_IP[16];
-const PROGMEM uint16_t MQTT_SERVER_PORT = CONFIG_MQTT_SERVER_PORT;
-const PROGMEM char *MQTT_USER = CONFIG_MQTT_USER;
-const PROGMEM char *MQTT_PASSWORD = CONFIG_MQTT_PASSWORD;
+const uint16_t MQTT_SERVER_PORT = CONFIG_MQTT_SERVER_PORT;
+const char *MQTT_USER = CONFIG_MQTT_USER;
+const char *MQTT_PASSWORD = CONFIG_MQTT_PASSWORD;
 
+// get the Mqtt broker's ip address
+void setMqttIpWithMDNS()
+{
+  char hostString[16] = {0};
+  int n = MDNS.queryService("mqtt", "tcp");
+  if (n == 0)
+  {
+    Serial.println("INFO: no services found");
+  }
+  else
+  {
+    for (int i = 0; i < n; ++i)
+    {
+      // Going through every available service,
+      // we're searching for the one whose hostname
+      // matches what we want, and then get its IP
+      if (MDNS.hostname(i) == CONFIG_MDNS_HOSTNAME)
+      {
+        String MQTT_HOST = String(MDNS.IP(i)[0]) + String(".") +
+                           String(MDNS.IP(i)[1]) + String(".") +
+                           String(MDNS.IP(i)[2]) + String(".") +
+                           String(MDNS.IP(i)[3]);
+        Serial.print("INFO: MQTT Host IP: ");
+        Serial.println(MQTT_HOST);
+        // Set MQTT_SERVER_IP to MQTT_HOST
+        MQTT_HOST.toCharArray(MQTT_SERVER_IP, 16);
+      }
+    }
+  }
+}
+
+// topics
+char MQTT_LIGHT_CONNECTED_TOPIC[50]; // for sending connection messages
+char MQTT_EFFECT_LIST_TOPIC[50];     // for sending the effect list
+char MQTT_LIGHT_STATE_TOPIC[50];     // for sending the state
+char MQTT_LIGHT_COMMAND_TOPIC[50];   // for receiving commands
+char MQTT_LIGHT_CONFIG_TOPIC[50];    // for sending config info
+char MQTT_LIGHT_DISCOVERY_TOPIC[50]; // to know when to send config info
+
+// homebridge
+char *HOMEKIT_LIGHT_STATE_TOPIC = "lightapp2/to/set";
+char *HOMEKIT_LIGHT_COMMAND_TOPIC = "lightapp2/from/set";
+
+// payloads
+const char *LIGHT_ON = "ON";
+const char *LIGHT_OFF = "OFF";
+const char *LIGHT_CONNECTED = "2";
+const char *LIGHT_DISCONNECTED = "0";
+
+// send/receive buffer
+// Make this bigger if you need to add more objects to the json
+// Also make sure MQTT_MAX_PACKET_SIZE in PubSubClient.h is big enough
+const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
+
+// MQTT Setup
 void createMqttTopic(char *bufferVariable, char *topLevel, char *lightName, char *topic)
 {
   strcpy(bufferVariable, topLevel);
@@ -47,50 +177,69 @@ void createMqttTopic(char *bufferVariable, char *topLevel, char *lightName, char
 
   strcat(bufferVariable, topic);
 }
+void setupMqtt()
+{
+  // Create MQTT topic strings
+  createMqttTopic(MQTT_LIGHT_CONNECTED_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_CONNECTION);
+  createMqttTopic(MQTT_EFFECT_LIST_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_EFFECT_LIST);
+  createMqttTopic(MQTT_LIGHT_STATE_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_STATE);
+  createMqttTopic(MQTT_LIGHT_COMMAND_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_COMMAND);
+  createMqttTopic(MQTT_LIGHT_CONFIG_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_CONFIG);
+  createMqttTopic(MQTT_LIGHT_DISCOVERY_TOPIC, CONFIG_MQTT_TOP, NULL, CONFIG_MQTT_DISCOVERY);
 
-// MQTT: topics
-// TODO: either dynamically create the length of these arrays based on the length of the config variables or make them big and the code that uses them ignores the empty space
-// connection
-char MQTT_LIGHT_CONNECTED_TOPIC[50];
-// effect list
-char MQTT_EFFECT_LIST_TOPIC[50];
-// state
-char MQTT_LIGHT_STATE_TOPIC[50];
-char MQTT_LIGHT_COMMAND_TOPIC[50];
-// config
-char MQTT_LIGHT_CONFIG_TOPIC[50];
-// discovery
-char MQTT_LIGHT_DISCOVERY_TOPIC[50];
+  // init the MQTT connection
+  client.setServer(MQTT_SERVER_IP, MQTT_SERVER_PORT);
+  client.setCallback(callback);
+}
 
-// homebridge
-char *HOMEKIT_LIGHT_STATE_TOPIC = "lightapp2/to/set";
-char *HOMEKIT_LIGHT_COMMAND_TOPIC = "lightapp2/from/set";
-
-// payloads by default (on/off)
-const PROGMEM char *LIGHT_ON = "ON";
-const PROGMEM char *LIGHT_OFF = "OFF";
-const PROGMEM char *LIGHT_CONNECTED = "2";
-const PROGMEM char *LIGHT_DISCONNECTED = "0";
-
-// buffer used to send/receive data with MQTT
-const uint8_t MSG_BUFFER_SIZE = 20;
-char m_msg_buffer[MSG_BUFFER_SIZE];
-
-WiFiClient wifiClient;
-PubSubClient client(wifiClient);
-
-// Make this bigger if you need to add more objects to the json
-// Also make sure MQTT_MAX_PACKET_SIZE in PubSubClient.h is big enough
-const int BUFFER_SIZE = JSON_OBJECT_SIZE(20);
-
-/************ Data Global Variables ******************/
+//*******************************************************
+// MQTT Functions
+//*******************************************************
 unsigned int mutationId;
 bool mutationIdWasChanged = false;
 
-// Change to add effect ^^^^^
+// MQTT connect/reconnect function
+boolean reconnect()
+{
+  setMqttIpWithMDNS();
 
-/************ Functions ******************/
-// function called when a MQTT message arrived
+  // Set up connection state payload
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+  JsonObject &root = jsonBuffer.createObject();
+  // populate payload with name
+  root["name"] = CONFIG_NAME;
+  // populate payload with connection status
+  root["connection"] = LIGHT_DISCONNECTED;
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+
+  if (client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, buffer))
+  {
+    Serial.println("INFO: connected to MQTT broker");
+
+    // Once connected, publish an announcement...
+    // publish that the ESP is connected
+
+    // populate payload with new connection status
+    root["connection"] = LIGHT_CONNECTED;
+    char buffer[root.measureLength() + 1];
+    root.printTo(buffer, sizeof(buffer));
+
+    client.publish(MQTT_LIGHT_CONNECTED_TOPIC, buffer, true);
+
+    // publish the initial values
+    sendState();
+    sendEffectList();
+
+    // ... and resubscribe
+    client.subscribe(MQTT_LIGHT_COMMAND_TOPIC);
+    client.subscribe(HOMEKIT_LIGHT_COMMAND_TOPIC);
+    client.subscribe(MQTT_LIGHT_DISCOVERY_TOPIC);
+  }
+  return client.connected();
+}
+
+// function called when a MQTT message arrives
 void callback(char *topic, byte *payload, unsigned int length)
 {
   Serial.print("INFO: Message arrived [");
@@ -132,7 +281,7 @@ void callback(char *topic, byte *payload, unsigned int length)
   sendState();
 }
 
-// function called to take JSON message, parse it, then set the according variables
+// Parse the JSON message
 bool processJson(char *message)
 {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
@@ -280,7 +429,7 @@ void sendEffectList()
   client.publish(MQTT_EFFECT_LIST_TOPIC, buffer, true);
 }
 
-// send effect list over MQTT (Debounce of 1 second)
+// send config over MQTT (Debounce of 1 second)
 long lastConfigUpdate = 0;
 void sendConfig()
 {
@@ -309,9 +458,12 @@ void sendConfig()
   }
 }
 
+//*******************************************************
+// Homekit Functions
+//*******************************************************
+// function called to take Homekit JSON message, parse it, then set the according variables
 int currentHue = 0;
 int currentSaturation = 0;
-// function called to take Homekit JSON message, parse it, then set the according variables
 bool processHomekitJson(char *message)
 {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
@@ -427,155 +579,12 @@ void sendHomekitState(char *characteristic)
   client.publish(HOMEKIT_LIGHT_STATE_TOPIC, buffer, true);
 }
 
-// MQTT connect/reconnect function
-boolean reconnect()
-{
-  setMqttIpWithMDNS();
-
-  // Set up connection state payload
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
-  JsonObject &root = jsonBuffer.createObject();
-  // populate payload with name
-  root["name"] = CONFIG_NAME;
-  // populate payload with connection status
-  root["connection"] = LIGHT_DISCONNECTED;
-  char buffer[root.measureLength() + 1];
-  root.printTo(buffer, sizeof(buffer));
-
-  if (client.connect(MQTT_CLIENT_ID, MQTT_USER, MQTT_PASSWORD, MQTT_LIGHT_CONNECTED_TOPIC, 0, true, buffer))
-  {
-    Serial.println("INFO: connected to MQTT broker");
-
-    // Once connected, publish an announcement...
-    // publish that the ESP is connected
-
-    // populate payload with new connection status
-    root["connection"] = LIGHT_CONNECTED;
-    char buffer[root.measureLength() + 1];
-    root.printTo(buffer, sizeof(buffer));
-
-    client.publish(MQTT_LIGHT_CONNECTED_TOPIC, buffer, true);
-
-    // publish the initial values
-    sendState();
-    sendEffectList();
-
-    // ... and resubscribe
-    client.subscribe(MQTT_LIGHT_COMMAND_TOPIC);
-    client.subscribe(HOMEKIT_LIGHT_COMMAND_TOPIC);
-    client.subscribe(MQTT_LIGHT_DISCOVERY_TOPIC);
-  }
-  return client.connected();
-}
-
-/************ WIFI Setup ******************/
-void setupWifi()
-{
-  // Autoconnect to Wifi
-  WiFiManager wifiManager;
-
-// Set static IP address if one is provided
-#ifdef STATIC_IP
-  Serial.print("INFO: adding static IP ");
-  Serial.println(STATIC_IP);
-  IPAddress _ip, _gw, _sn;
-  _ip.fromString(STATIC_IP);
-  _gw.fromString(STATIC_GW);
-  _sn.fromString(STATIC_SN);
-  wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
-#endif
-
-  if (!wifiManager.autoConnect(CONFIG_NAME, CONFIG_WIFI_MANAGER_PW))
-  {
-    // (AP-Name, Password)
-    Serial.println("ERROR: failed to connect to Wifi");
-    Serial.println("DEBUG: try resetting the module");
-    delay(3000);
-    ESP.reset();
-    delay(5000);
-  }
-  Serial.println("INFO: connected to Wifi :)");
-}
-
-/************ Find MDNS name of MQTT server ******************/
-void setMqttIpWithMDNS()
-{
-  char hostString[16] = {0};
-  int n = MDNS.queryService("mqtt", "tcp");
-  if (n == 0)
-  {
-    Serial.println("INFO: no services found");
-  }
-  else
-  {
-    for (int i = 0; i < n; ++i)
-    {
-      // Going through every available service,
-      // we're searching for the one whose hostname
-      // matches what we want, and then get its IP
-      if (MDNS.hostname(i) == CONFIG_MDNS_HOSTNAME)
-      {
-        String MQTT_HOST = String(MDNS.IP(i)[0]) + String(".") +
-                           String(MDNS.IP(i)[1]) + String(".") +
-                           String(MDNS.IP(i)[2]) + String(".") +
-                           String(MDNS.IP(i)[3]);
-        Serial.print("INFO: MQTT Host IP: ");
-        Serial.println(MQTT_HOST);
-        // Set MQTT_SERVER_IP to MQTT_HOST
-        MQTT_HOST.toCharArray(MQTT_SERVER_IP, 16);
-      }
-    }
-  }
-}
-
-/************ OTA Setup ******************/
-void setupOTA()
-{
-  // OTA Setup
-  ArduinoOTA.onStart([]() {
-    Serial.println("INFO: starting OTA upload");
-    digitalWrite(LED_BUILTIN, LOW);
-  });
-
-  ArduinoOTA.onEnd([]() {
-    Serial.println("INFO: OTA upload successful");
-    digitalWrite(LED_BUILTIN, HIGH);
-  });
-
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    Serial.printf("INFO: upload %u%% complete\n", (progress / (total / 100)));
-  });
-
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("ERROR: OTA %u: ", error);
-    if (error == OTA_AUTH_ERROR)
-      Serial.println("OTA Auth Failed");
-    else if (error == OTA_BEGIN_ERROR)
-      Serial.println("OTA Begin Failed");
-    else if (error == OTA_CONNECT_ERROR)
-      Serial.println("OTA Connect Failed");
-    else if (error == OTA_RECEIVE_ERROR)
-      Serial.println("OTA Receive Failed");
-    else if (error == OTA_END_ERROR)
-      Serial.println("OTA End Failed");
-  });
-
-  ArduinoOTA.setHostname(CONFIG_NAME);
-  ArduinoOTA.setPassword(CONFIG_OTA_PASSWORD);
-  ArduinoOTA.begin();
-  Serial.println("INFO: OTA ready");
-}
-
-/************ Arduino Setup ******************/
+//*******************************************************
+// Arduino Functions
+//*******************************************************
+// Setup
 void setup()
 {
-  // Create MQTT topic strings
-  createMqttTopic(MQTT_LIGHT_CONNECTED_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_CONNECTION);
-  createMqttTopic(MQTT_EFFECT_LIST_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_EFFECT_LIST);
-  createMqttTopic(MQTT_LIGHT_STATE_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_STATE);
-  createMqttTopic(MQTT_LIGHT_COMMAND_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_COMMAND);
-  createMqttTopic(MQTT_LIGHT_CONFIG_TOPIC, CONFIG_MQTT_TOP, CONFIG_NAME, CONFIG_MQTT_CONFIG);
-  createMqttTopic(MQTT_LIGHT_DISCOVERY_TOPIC, CONFIG_MQTT_TOP, NULL, CONFIG_MQTT_DISCOVERY);
 
   // init the light
   light.setBrightness(100);
@@ -591,15 +600,14 @@ void setup()
   // init OTA firmware uploads
   setupOTA();
 
+  // init the Mqtt client
+  setupMqtt();
+
   // Init visualization listening
   port.begin(_UDP_PORT); // Setup
-
-  // init the MQTT connection
-  client.setServer(MQTT_SERVER_IP, MQTT_SERVER_PORT);
-  client.setCallback(callback);
 }
 
-/************ Main Loop ******************/
+// Loop
 long lastReconnectAttempt = 0;
 void loop()
 {

@@ -49,6 +49,10 @@ const connect = async ({ amqp, amqpSettings }) => {
 
 const start = async ({ amqp, amqpSettings, repo, event }) => {
   const conn = await connect({ amqp, amqpSettings });
+
+  // Make sure you create a single channel to reuse for things like this.
+  // TODO: Figure out if it would be smart to use this channel for all consumers too
+  const eventChannel = await conn.createChannel();
   const GET_LIGHT_Q = "getLight";
   const GET_LIGHTS_Q = "getLights";
   const SET_LIGHT_Q = "setLight";
@@ -171,10 +175,8 @@ const start = async ({ amqp, amqpSettings, repo, event }) => {
   // Create a listener for lightChanged events triggered by the repo's handler functions
   event.on("lightChanged", changedLight => {
     // Publish a changedLight message in rabbitMQ
-    conn.createChannel().then(ch => {
-      ch.assertExchange("changedLight", "fanout", { durable: false });
-      ch.publish(LIGHT_CHANGED_X, "", toJsonBuffer(changedLight));
-    });
+    eventChannel.assertExchange("changedLight", "fanout", { durable: false });
+    eventChannel.publish(LIGHT_CHANGED_X, "", toJsonBuffer(changedLight));
   });
 };
 

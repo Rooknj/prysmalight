@@ -7,6 +7,8 @@ const ALL_LIGHTS_SUBSCRIPTION_TOPIC = "lightsChanged";
 const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
 const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
 
+const RESPONSE_TIMEOUT = 5000;
+
 // TODO: Pass this in as a depencency for testing purposes
 const { EventEmitter } = require("events");
 const eventEmitter = new EventEmitter();
@@ -101,6 +103,9 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
 
       //Checks if the queue exists, and create it if needed.
       sendRpcMessage(GET_LIGHT_Q, id, message);
+      setTimeout(() => {
+        resolve(new Error("Controller timed out"));
+      }, RESPONSE_TIMEOUT);
     });
 
   const getLights = () =>
@@ -114,6 +119,9 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
       });
 
       sendRpcMessage(GET_LIGHTS_Q, id, null);
+      setTimeout(() => {
+        resolve(new Error("Controller timed out"));
+      }, RESPONSE_TIMEOUT);
     });
 
   const setLight = (lightId, lightData) =>
@@ -129,6 +137,9 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
 
       //Checks if the queue exists, and create it if needed.
       sendRpcMessage(SET_LIGHT_Q, id, message);
+      setTimeout(() => {
+        resolve(new Error("Controller timed out"));
+      }, RESPONSE_TIMEOUT);
     });
 
   const addLight = lightId =>
@@ -147,6 +158,9 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
 
       //Checks if the queue exists, and create it if needed.
       sendRpcMessage(ADD_LIGHT_Q, id, message);
+      setTimeout(() => {
+        resolve(new Error("Controller timed out"));
+      }, RESPONSE_TIMEOUT);
     });
 
   const removeLight = lightId =>
@@ -167,6 +181,9 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
 
       //Checks if the queue exists, and create it if needed.
       sendRpcMessage(REMOVE_LIGHT_Q, id, message);
+      setTimeout(() => {
+        resolve(new Error("Controller timed out"));
+      }, RESPONSE_TIMEOUT);
     });
 
   /**

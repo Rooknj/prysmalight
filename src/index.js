@@ -27,15 +27,13 @@ const startServer = async () => {
   } else {
     // Create the real service
     const amqp = require("amqplib");
-    const { AmqpPubSub } = require("graphql-rabbitmq-subscriptions");
-    const bunyan = require("bunyan");
 
-    // Create the apollo pubsub depencency
-    const logger = bunyan.createLogger({ name: "gqlPubSub" });
-    const pubsub = new AmqpPubSub({
-      config: config.rabbitSettings,
-      logger
-    });
+    // Create the gqlPubSub
+    // Note: the graphql-rabbitmq-subscriptions library creates channels which it never destroys every time you use a function
+    // like pubsub.asyncIterator() or pubsub.publish(). This is why I stopped using it as rabbitmq would eventually run out of
+    // memory and crash.
+    const { PubSub } = require("graphql-subscriptions");
+    const pubsub = new PubSub();
 
     // Generate the service
     ({ error, service } = await serviceFactory.connect({

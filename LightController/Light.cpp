@@ -54,16 +54,16 @@ void Light::setColorRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue)
 {
   _stateOn = true;
   _color = CRGB(p_red, p_green, p_blue);
+  changeColorTo(p_red, p_green, p_blue); // You must call this before changing the effect for its logic to work
   _effect = NO_EFFECT;
-  changeColorTo(p_red, p_green, p_blue);
 }
 
 void Light::setColorHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
 {
   _stateOn = true;
   _color = CHSV(p_hue, p_saturation, p_value);
+  changeColorTo(_color.r, _color.g, _color.b); // You must call this before changing the effect for its logic to work
   _effect = NO_EFFECT;
-  changeColorTo(_color.r, _color.g, _color.b);
 }
 
 void Light::setEffect(String effect)
@@ -480,76 +480,74 @@ boolean inFade = false;
 
 void Light::changeColorTo(uint8_t red, uint8_t green, uint8_t blue)
 {
-  setRGB(red, green, blue);
-  // startFade = true;
-  // targetRed = red;
-  // targetGreen = green;
-  // targetBlue = blue;
+  startFade = true;
+  targetRed = red;
+  targetGreen = green;
+  targetBlue = blue;
 }
 
 // Color takes 500ms to change no matter What
-int transitionSpeed = 500;
-void Light::handleColorChange() {}
-// {
-//   if (startFade)
-//   {
-//     // TODO: Clean up logic
-//     if (currentEffect != NO_EFFECT && stateOn)
-//     {
-//       return;
-//     }
-//     if (transitionTime == 0 || currentEffect != NO_EFFECT || wasInEffect)
-//     {
-//       if (wasInEffect)
-//       {
-//         wasInEffect = false;
-//       }
-//       light.setColorRGB(realRed, realGreen, realBlue);
+int transitionSpeed = 0;
+//int transitionSpeed = 500;
+void Light::handleColorChange()
+{
+  if (startFade)
+  {
+    // If we are playing an effect, do nothing
+    if (_effect != NO_EFFECT && _stateOn)
+    {
+      return;
+    }
 
-//       redVal = realRed;
-//       grnVal = realGreen;
-//       bluVal = realBlue;
+    // If the transitions are off, or the light is set to an effect, dont do the transition
+    if (transitionSpeed == 0 || _effect != NO_EFFECT)
+    {
+      setRGB(targetRed, targetGreen, targetBlue);
 
-//       startFade = false;
-//     }
-//     else
-//     {
-//       loopCount = 0;
-//       stepR = calculateStep(redVal, realRed);
-//       stepG = calculateStep(grnVal, realGreen);
-//       stepB = calculateStep(bluVal, realBlue);
+      currentRed = targetRed;
+      currentGreen = targetGreen;
+      currentBlue = targetBlue;
 
-//       inFade = true;
-//     }
-//   }
+      startFade = false;
+    }
+    // else
+    // {
+    //   loopCount = 0;
+    //   stepR = calculateStep(redVal, realRed);
+    //   stepG = calculateStep(grnVal, realGreen);
+    //   stepB = calculateStep(bluVal, realBlue);
 
-//   if (inFade)
-//   {
-//     startFade = false;
-//     unsigned long now = millis();
-//     if (now - lastLoop > transitionTime)
-//     {
-//       if (loopCount <= 255)
-//       {
-//         lastLoop = now;
+    //   inFade = true;
+    // }
+  }
 
-//         redVal = calculateVal(stepR, redVal, loopCount);
-//         grnVal = calculateVal(stepG, grnVal, loopCount);
-//         bluVal = calculateVal(stepB, bluVal, loopCount);
+  // if (inFade)
+  // {
+  //   startFade = false;
+  //   unsigned long now = millis();
+  //   if (now - lastLoop > transitionTime)
+  //   {
+  //     if (loopCount <= 255)
+  //     {
+  //       lastLoop = now;
 
-//         light.setColorRGB(redVal, grnVal, bluVal); // Write current values to LED pins
+  //       redVal = calculateVal(stepR, redVal, loopCount);
+  //       grnVal = calculateVal(stepG, grnVal, loopCount);
+  //       bluVal = calculateVal(stepB, bluVal, loopCount);
 
-//         Serial.print("Loop count: ");
-//         Serial.println(loopCount);
-//         loopCount++;
-//       }
-//       else
-//       {
-//         inFade = false;
-//       }
-//     }
-//   }
-// }
+  //       light.setColorRGB(redVal, grnVal, bluVal); // Write current values to LED pins
+
+  //       Serial.print("Loop count: ");
+  //       Serial.println(loopCount);
+  //       loopCount++;
+  //     }
+  //     else
+  //     {
+  //       inFade = false;
+  //     }
+  //   }
+  // }
+}
 
 // Brightness takes 1000ms to change from 0-100%, 500ms to change from 0-50, 250 ms to change from 0-25, etc.
 // Make it a percentage of how big the brightness change is;

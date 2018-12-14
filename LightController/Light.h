@@ -75,8 +75,8 @@ private:
   void changeColorTo(uint8_t red, uint8_t green, uint8_t blue);
   void handleColorChange();
   void handleBrightnessChange();
-  int calculateStep(int prevValue, int endValue);
-  int calculateVal(int step, int val, int i);
+  int calculateStep(int prevValue, int endValue, int totalSteps);
+  int calculateVal(int step, int val, int i, int minVal, int maxVal);
 };
 
 #endif

@@ -471,7 +471,9 @@ void Light::handleSinelon()
 //************************************************************************
 // Crossfade
 //************************************************************************
-uint8_t currentRed = 0; // Initialized as the initial color defined in the constructor
+// Color takes 500ms to change no matter what
+int transitionSpeed = 510; // In ms, has to be a multiple of 255
+uint8_t currentRed = 0;    // Initialized as the initial color defined in the constructor
 uint8_t currentGreen = 0;
 uint8_t currentBlue = 0;
 uint8_t targetRed = 0;
@@ -482,6 +484,11 @@ int stepGreen = 0;
 int stepBlue = 0;
 boolean startFade = false;
 boolean inFade = false;
+int currentStep = 0;
+int numberOfPossibleColorValues = 255;
+int maxColorValue = 255;
+int minColorValue = 0;
+int totalColorSteps = (maxColorValue - minColorValue) * numberOfPossibleColorValues;
 
 void Light::changeColorTo(uint8_t red, uint8_t green, uint8_t blue)
 {
@@ -491,14 +498,6 @@ void Light::changeColorTo(uint8_t red, uint8_t green, uint8_t blue)
   targetBlue = blue;
 }
 
-// Color takes 500ms to change no matter What
-//int transitionSpeed = 0;
-int transitionSpeed = 510; // In ms, has to be a multiple of 255
-int currentStep = 0;
-int numberOfPossibleColorValues = 255;
-int maxColorValue = 255;
-int minColorValue = 0;
-int totalColorSteps = (maxColorValue - minColorValue) * numberOfPossibleColorValues;
 // TODO: Values between 0 and 255 are always off by 1. Not a big deal but would be nice to fix
 unsigned long lastStepTime = 0;
 void Light::handleColorChange()
@@ -560,7 +559,7 @@ void Light::handleColorChange()
     }
 
     // If we have gone through all 255 steps, end the transition
-    if (currentStep > totalColorSteps)
+    if (currentStep >= totalColorSteps)
     {
       inFade = false;
       // Serial.println("Ending Fade: ");
@@ -570,23 +569,79 @@ void Light::handleColorChange()
   }
 }
 
+// Brightness takes 1000ms to change from 0-100%, 500ms to change from 0-50, 250 ms to change from 0-25, etc.unsigned long lastBrightnessStepTime = 0;
+int maxBrightnessTransitionTime = 1000;
 uint8_t currentBrightness;
 uint8_t targetBrightness;
 int stepBrightness = 0;
 boolean startBrightnessTransition = false;
 boolean inBrightnessTransition = false;
+int currentBrightnessStep = 0;
+int numberOfPossibleBrightnessValues = 100;
+int maxBrightnessValue = 100;
+int minBrightnessValue = 0;
+int totalBrightnessSteps = 1;
 
 void Light::changeBrightnessTo(uint8_t brightness)
 {
-  FastLED.setBrightness(map(brightness, 0, 100, 0, CONFIG_MAX_BRIGHTNESS));
-  FastLED.show();
   startBrightnessTransition = true;
   targetBrightness = brightness;
 }
 
-// Brightness takes 1000ms to change from 0-100%, 500ms to change from 0-50, 250 ms to change from 0-25, etc.
-// Make it a percentage of how big the brightness change is;
-void Light::handleBrightnessChange() {}
+unsigned long lastBrightnessStepTime = 0;
+void Light::handleBrightnessChange()
+{
+  if (startBrightnessTransition)
+  {
+    // If the lights are off, just set the brightness. Dont need to be fancy
+    if (!_stateOn)
+    {
+      FastLED.setBrightness(map(targetBrightness, 0, 100, 0, CONFIG_MAX_BRIGHTNESS));
+      currentBrightness = targetBrightness;
+
+      startBrightnessTransition = false;
+    }
+    else
+    {
+      startBrightnessTransition = false;
+      inBrightnessTransition = true;
+      currentBrightnessStep = 0;
+      totalBrightnessSteps = abs(targetBrightness - currentBrightness);
+    }
+
+    // Calculate the step values
+    stepBrightness = calculateStep(currentBrightness, targetBrightness, totalBrightnessSteps);
+  }
+
+  // If we are currently in the middle of a color change, keep doing the transition
+  if (inBrightnessTransition)
+  {
+    int stepDuration = maxBrightnessTransitionTime / numberOfPossibleBrightnessValues;
+
+    unsigned long now = millis();
+    // If its time to take a step
+    if (now - lastBrightnessStepTime > stepDuration)
+    {
+      lastBrightnessStepTime = now;
+
+      currentBrightness = calculateVal(stepBrightness, currentBrightness, currentBrightnessStep, minBrightnessValue, maxBrightnessValue);
+      currentBrightnessStep++;
+
+      // Set the value and increment the step;
+      FastLED.setBrightness(map(currentBrightness, 0, 100, 0, CONFIG_MAX_BRIGHTNESS));
+      FastLED.show();
+    }
+
+    // If we have gone through all 255 steps, end the transition
+    if (currentBrightnessStep >= totalBrightnessSteps)
+    {
+      inBrightnessTransition = false;
+      //Serial.println("Ending Brightness Transition: ");
+      //Serial.printf("Current Brightness: %i\n", currentBrightness);
+      //Serial.printf("target Brightness: %i\n", targetBrightness);
+    }
+  }
+}
 
 int Light::calculateStep(int prevValue, int endValue, int totalSteps)
 {

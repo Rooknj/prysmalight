@@ -74,6 +74,7 @@ private:
   // Color/Brightness transition functions
   void changeColorTo(uint8_t red, uint8_t green, uint8_t blue);
   void handleColorChange();
+  void changeBrightnessTo(uint8_t brightness);
   void handleBrightnessChange();
   int calculateStep(int prevValue, int endValue, int totalSteps);
   int calculateVal(int step, int val, int i, int minVal, int maxVal);

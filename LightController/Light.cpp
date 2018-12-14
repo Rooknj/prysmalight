@@ -46,8 +46,7 @@ void Light::setState(boolean stateOn)
 void Light::setBrightness(uint8_t brightness)
 {
   _brightness = brightness;
-  FastLED.setBrightness(map(brightness, 0, 100, 0, CONFIG_MAX_BRIGHTNESS));
-  FastLED.show();
+  changeBrightnessTo(brightness);
 }
 
 void Light::setColorRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue)
@@ -124,6 +123,9 @@ void Light::loop(int packetSize, WiFiUDP port)
 {
   // Handle color changes
   handleColorChange();
+
+  // Handle Brightness changes
+  handleBrightnessChange();
 
   // Handle the current effect
   if (_effect == NO_EFFECT || _stateOn == false)
@@ -561,11 +563,25 @@ void Light::handleColorChange()
     if (currentStep > totalColorSteps)
     {
       inFade = false;
-      Serial.println("Ending Fade: ");
-      Serial.printf("Current Red: %i, Current Green: %i, Current Blue: %i\n", currentRed, currentGreen, currentBlue);
-      Serial.printf("target Red: %i, target Green: %i, target Blue: %i\n", targetRed, targetGreen, targetBlue);
+      // Serial.println("Ending Fade: ");
+      // Serial.printf("Current Red: %i, Current Green: %i, Current Blue: %i\n", currentRed, currentGreen, currentBlue);
+      // Serial.printf("target Red: %i, target Green: %i, target Blue: %i\n", targetRed, targetGreen, targetBlue);
     }
   }
+}
+
+uint8_t currentBrightness;
+uint8_t targetBrightness;
+int stepBrightness = 0;
+boolean startBrightnessTransition = false;
+boolean inBrightnessTransition = false;
+
+void Light::changeBrightnessTo(uint8_t brightness)
+{
+  FastLED.setBrightness(map(brightness, 0, 100, 0, CONFIG_MAX_BRIGHTNESS));
+  FastLED.show();
+  startBrightnessTransition = true;
+  targetBrightness = brightness;
 }
 
 // Brightness takes 1000ms to change from 0-100%, 500ms to change from 0-50, 250 ms to change from 0-25, etc.

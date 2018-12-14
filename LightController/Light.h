@@ -10,7 +10,7 @@
 #include "config.h"
 #define FASTLED_INTERNAL
 #define FASTLED_ESP8266_DMA // better control for ESP8266 will output or RX pin requires fork https://github.com/coryking/FastLED
-#include "FastLED.h"     // LED strip control library
+#include "FastLED.h"        // LED strip control library
 
 #include "WiFiUdp.h"
 
@@ -70,6 +70,13 @@ private:
   void handleBPM();
   void handleSinelon();
   void handleVisualize(int packetSize, WiFiUDP port);
+
+  // Color/Brightness transition functions
+  void changeColorTo(uint8_t red, uint8_t green, uint8_t blue);
+  void handleColorChange();
+  void handleBrightnessChange();
+  int calculateStep(int prevValue, int endValue);
+  int calculateVal(int step, int val, int i);
 };
 
 #endif

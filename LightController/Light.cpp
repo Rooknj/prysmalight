@@ -7,6 +7,9 @@
 #include "Arduino.h"
 #include "Light.h"
 
+//************************************************************************
+// Constructor
+//************************************************************************
 Light::Light()
 {
   // Set Serial Communication rate
@@ -14,7 +17,7 @@ Light::Light()
   {
     // For some reason you can not call this inside LightController.ino or the FastLED DMA will not work
     // TODO: Figure out why
-    Serial.begin(115200); 
+    Serial.begin(115200);
   }
   FastLED.addLeds<CONFIG_CHIPSET, CONFIG_DATA_PIN, CONFIG_COLOR_ORDER>(_leds, CONFIG_NUM_LEDS);
   _stateOn = false;
@@ -24,19 +27,19 @@ Light::Light()
   _effectSpeed = 4;
 }
 
-// ************************************************************************
+//************************************************************************
 // Setters
-// ************************************************************************
+//************************************************************************
 void Light::setState(boolean stateOn)
 {
   _stateOn = stateOn;
   if (stateOn)
   {
-    setRGB(_color.r, _color.g, _color.b);
+    changeColorTo(_color.r, _color.g, _color.b);
   }
   else
   {
-    setRGB(0, 0, 0);
+    changeColorTo(0, 0, 0);
   }
 }
 
@@ -52,7 +55,7 @@ void Light::setColorRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue)
   _stateOn = true;
   _color = CRGB(p_red, p_green, p_blue);
   _effect = NO_EFFECT;
-  setRGB(p_red, p_green, p_blue);
+  changeColorTo(p_red, p_green, p_blue);
 }
 
 void Light::setColorHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
@@ -60,7 +63,7 @@ void Light::setColorHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
   _stateOn = true;
   _color = CHSV(p_hue, p_saturation, p_value);
   _effect = NO_EFFECT;
-  setHSV(p_hue, p_saturation, p_value);
+  changeColorTo(_color.r, _color.g, _color.b);
 }
 
 void Light::setEffect(String effect)
@@ -76,9 +79,9 @@ void Light::setEffectSpeed(int effectSpeed)
   _effectSpeed = effectSpeed;
 }
 
-// ************************************************************************
+//************************************************************************
 // Getters
-// ************************************************************************
+//************************************************************************
 boolean Light::getState()
 {
   return _stateOn;
@@ -114,11 +117,14 @@ int Light::getNumEffects()
   return _numEffects;
 }
 
-// ************************************************************************
+//************************************************************************
 // Class Methods
-// ************************************************************************
+//************************************************************************
 void Light::loop(int packetSize, WiFiUDP port)
 {
+  // Handle color changes
+  handleColorChange();
+
   // Handle the current effect
   if (_effect == NO_EFFECT || _stateOn == false)
   { // Change to add effect
@@ -177,9 +183,10 @@ void Light::handleVisualize(int packetSize, WiFiUDP port)
   }
 }
 
-// ************************************************************************
-// Private functions
-// ************************************************************************
+//************************************************************************
+// Light Effects
+//************************************************************************
+// Sets the light strip to an RGB color
 void Light::setRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue)
 {
   CRGB newColor = CRGB(p_red, p_green, p_blue);
@@ -187,6 +194,7 @@ void Light::setRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue)
   FastLED.show();
 }
 
+// Sets the light strip to an HSV color
 void Light::setHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
 {
   CRGB newColor = CHSV(p_hue, p_saturation, p_value);
@@ -254,7 +262,7 @@ int Light::getCycleSpeed()
   }
 }
 
-//CYCLE HUE
+// Cycles through all hue values on loop
 long lastHueCycle = 0;
 byte gHue;
 void Light::cycleHue()
@@ -262,6 +270,7 @@ void Light::cycleHue()
   gHue++;
 }
 
+// Determines when the current effect should update
 long lastUpdate = 0;
 bool Light::shouldUpdate()
 {
@@ -343,6 +352,8 @@ void Light::handleConfetti()
 }
 
 // Cylon
+int LED = 0;
+bool forward = true;
 void Light::fadeall()
 {
   for (int i = 0; i < CONFIG_NUM_LEDS; i++)
@@ -350,9 +361,6 @@ void Light::fadeall()
     _leds[i].nscale8(247);
   }
 }
-
-int LED = 0;
-bool forward = true;
 void Light::handleCylon()
 {
   if (shouldUpdate())
@@ -428,7 +436,6 @@ int Light::getBPM()
     return 180;
   }
 }
-
 void Light::handleBPM()
 {
   if (shouldUpdate())
@@ -446,6 +453,7 @@ void Light::handleBPM()
   }
 }
 
+// Sinelon
 void Light::handleSinelon()
 {
   if (shouldUpdate())
@@ -458,103 +466,96 @@ void Light::handleSinelon()
   }
 }
 
-/************ Crossfade transition function ******************/
-/*
-void handleColorChange()
+//************************************************************************
+// Crossfade
+//************************************************************************
+uint8_t currentRed = 255; // Initialized as the initial color defined in the constructor
+uint8_t currentGreen = 0;
+uint8_t currentBlue = 0;
+uint8_t targetRed;
+uint8_t targetGreen;
+uint8_t targetBlue;
+boolean startFade = false;
+boolean inFade = false;
+
+void Light::changeColorTo(uint8_t red, uint8_t green, uint8_t blue)
 {
-  if (startFade)
-  {
-    // TODO: Clean up logic
-    if (currentEffect != NO_EFFECT && stateOn)
-    {
-      return;
-    }
-    if (transitionTime == 0 || currentEffect != NO_EFFECT || wasInEffect)
-    {
-      if (wasInEffect)
-      {
-        wasInEffect = false;
-      }
-      light.setColorRGB(realRed, realGreen, realBlue);
-
-      redVal = realRed;
-      grnVal = realGreen;
-      bluVal = realBlue;
-
-      startFade = false;
-    }
-    else
-    {
-      loopCount = 0;
-      stepR = calculateStep(redVal, realRed);
-      stepG = calculateStep(grnVal, realGreen);
-      stepB = calculateStep(bluVal, realBlue);
-
-      inFade = true;
-    }
-  }
-
-  if (inFade)
-  {
-    startFade = false;
-    unsigned long now = millis();
-    if (now - lastLoop > transitionTime)
-    {
-      if (loopCount <= 255)
-      {
-        lastLoop = now;
-
-        redVal = calculateVal(stepR, redVal, loopCount);
-        grnVal = calculateVal(stepG, grnVal, loopCount);
-        bluVal = calculateVal(stepB, bluVal, loopCount);
-
-        light.setColorRGB(redVal, grnVal, bluVal); // Write current values to LED pins
-
-        Serial.print("Loop count: ");
-        Serial.println(loopCount);
-        loopCount++;
-      }
-      else
-      {
-        inFade = false;
-      }
-    }
-  }
+  setRGB(red, green, blue);
+  // startFade = true;
+  // targetRed = red;
+  // targetGreen = green;
+  // targetBlue = blue;
 }
-*/
 
-// Change to add effect
+// Color takes 500ms to change no matter What
+int transitionSpeed = 500;
+void Light::handleColorChange() {}
+// {
+//   if (startFade)
+//   {
+//     // TODO: Clean up logic
+//     if (currentEffect != NO_EFFECT && stateOn)
+//     {
+//       return;
+//     }
+//     if (transitionTime == 0 || currentEffect != NO_EFFECT || wasInEffect)
+//     {
+//       if (wasInEffect)
+//       {
+//         wasInEffect = false;
+//       }
+//       light.setColorRGB(realRed, realGreen, realBlue);
 
-// From https://www.arduino.cc/en/Tutorial/ColorCrossfader
-/* BELOW THIS LINE IS THE MATH -- YOU SHOULDN'T NEED TO CHANGE THIS FOR THE BASICS
-*
-* The program works like this:
-* Imagine a crossfade that moves the red LED from 0-10,
-*   the green from 0-5, and the blue from 10 to 7, in
-*   ten steps.
-*   We'd want to count the 10 steps and increase or
-*   decrease color values in evenly stepped increments.
-*   Imagine a + indicates raising a value by 1, and a -
-*   equals lowering it. Our 10 step fade would look like:
-*
-*   1 2 3 4 5 6 7 8 9 10
-* R + + + + + + + + + +
-* G   +   +   +   +   +
-* B     -     -     -
-*
-* The red rises from 0 to 10 in ten steps, the green from
-* 0-5 in 5 steps, and the blue falls from 10 to 7 in three steps.
-*
-* In the real program, the color percentages are converted to
-* 0-255 values, and there are 255 steps (255*4).
-*
-* To figure out how big a step there should be between one up- or
-* down-tick of one of the LED values, we call calculateStep(),
-* which calculates the absolute gap between the start and end values,
-* and then divides that gap by 255 to determine the size of the step
-* between adjustments in the value.
-*/
-int calculateStep(int prevValue, int endValue)
+//       redVal = realRed;
+//       grnVal = realGreen;
+//       bluVal = realBlue;
+
+//       startFade = false;
+//     }
+//     else
+//     {
+//       loopCount = 0;
+//       stepR = calculateStep(redVal, realRed);
+//       stepG = calculateStep(grnVal, realGreen);
+//       stepB = calculateStep(bluVal, realBlue);
+
+//       inFade = true;
+//     }
+//   }
+
+//   if (inFade)
+//   {
+//     startFade = false;
+//     unsigned long now = millis();
+//     if (now - lastLoop > transitionTime)
+//     {
+//       if (loopCount <= 255)
+//       {
+//         lastLoop = now;
+
+//         redVal = calculateVal(stepR, redVal, loopCount);
+//         grnVal = calculateVal(stepG, grnVal, loopCount);
+//         bluVal = calculateVal(stepB, bluVal, loopCount);
+
+//         light.setColorRGB(redVal, grnVal, bluVal); // Write current values to LED pins
+
+//         Serial.print("Loop count: ");
+//         Serial.println(loopCount);
+//         loopCount++;
+//       }
+//       else
+//       {
+//         inFade = false;
+//       }
+//     }
+//   }
+// }
+
+// Brightness takes 1000ms to change from 0-100%, 500ms to change from 0-50, 250 ms to change from 0-25, etc.
+// Make it a percentage of how big the brightness change is;
+void Light::handleBrightnessChange() {}
+
+int Light::calculateStep(int prevValue, int endValue)
 {
   int step = endValue - prevValue; // What's the overall gap?
   if (step)
@@ -570,7 +571,7 @@ int calculateStep(int prevValue, int endValue)
 *  colors, it increases or decreases the value of that color by 1.
 *  (R, G, and B are each calculated separately.)
 */
-int calculateVal(int step, int val, int i)
+int Light::calculateVal(int step, int val, int i)
 {
   if ((step) && i % step == 0)
   { // If step is non-zero and its time to change a value,
@@ -584,7 +585,7 @@ int calculateVal(int step, int val, int i)
     }
   }
 
-  // Defensive driving: make sure val stays in the range 0-255
+  // Make sure val stays in the range 0-255
   if (val > 255)
   {
     val = 255;

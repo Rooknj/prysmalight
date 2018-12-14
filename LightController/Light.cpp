@@ -493,8 +493,9 @@ void Light::changeColorTo(uint8_t red, uint8_t green, uint8_t blue)
 //int transitionSpeed = 0;
 int transitionSpeed = 510; // In ms, has to be a multiple of 255
 int currentStep = 0;
-long lastStepTime = 0;
 
+// TODO: Values between 0 and 255 are always off by 1. Not a big deal but would be nice to fix
+unsigned long lastStepTime = 0;
 void Light::handleColorChange()
 {
   if (startFade)
@@ -527,11 +528,6 @@ void Light::handleColorChange()
       stepRed = calculateStep(currentRed, targetRed);
       stepGreen = calculateStep(currentGreen, targetGreen);
       stepBlue = calculateStep(currentBlue, targetBlue);
-      Serial.println("Starting Fade: ");
-      Serial.printf("Current Red: %i, Current Green: %i, Current Blue: %i\n", currentRed, currentGreen, currentBlue);
-      Serial.printf("target Red: %i, target Green: %i, target Blue: %i\n", targetRed, targetGreen, targetBlue);
-      Serial.printf("step Red: %i, step Green: %i, step Blue: %i\n", stepRed, stepGreen, stepBlue);
-      Serial.printf("Current Step: %i", currentStep);
     }
   }
 
@@ -546,20 +542,25 @@ void Light::handleColorChange()
     {
       lastStepTime = now;
 
-      // Calculate the next value to change to
-      currentRed = calculateVal(stepRed, currentRed, currentStep);
-      currentGreen = calculateVal(stepGreen, currentGreen, currentStep);
-      currentBlue = calculateVal(stepBlue, currentBlue, currentStep);
-
+      for (int i = 0; i <= 255; i++)
+      {
+        // Calculate the next value to change to
+        currentRed = calculateVal(stepRed, currentRed, currentStep);
+        currentGreen = calculateVal(stepGreen, currentGreen, currentStep);
+        currentBlue = calculateVal(stepBlue, currentBlue, currentStep);
+        currentStep++;
+      }
       // Set the value and increment the step;
       setRGB(currentRed, currentGreen, currentBlue); // Write current values to LED pins
-      currentStep++;
     }
 
     // If we have gone through all 255 steps, end the transition
-    if (currentStep > 255)
+    if (currentStep > 65025)
     {
       inFade = false;
+      Serial.println("Ending Fade: ");
+      Serial.printf("Current Red: %i, Current Green: %i, Current Blue: %i\n", currentRed, currentGreen, currentBlue);
+      Serial.printf("target Red: %i, target Green: %i, target Blue: %i\n", targetRed, targetGreen, targetBlue);
     }
   }
 }
@@ -572,8 +573,8 @@ int Light::calculateStep(int prevValue, int endValue)
 {
   int step = endValue - prevValue; // What's the overall gap?
   if (step)
-  {                    // If its non-zero,
-    step = 255 / step; //   divide by 255
+  {                      // If its non-zero,
+    step = 65025 / step; //   divide by 255
   }
 
   return step;

@@ -469,12 +469,15 @@ void Light::handleSinelon()
 //************************************************************************
 // Crossfade
 //************************************************************************
-uint8_t currentRed = 255; // Initialized as the initial color defined in the constructor
+uint8_t currentRed = 0; // Initialized as the initial color defined in the constructor
 uint8_t currentGreen = 0;
 uint8_t currentBlue = 0;
-uint8_t targetRed;
-uint8_t targetGreen;
-uint8_t targetBlue;
+uint8_t targetRed = 0;
+uint8_t targetGreen = 0;
+uint8_t targetBlue = 0;
+int stepRed = 0;
+int stepGreen = 0;
+int stepBlue = 0;
 boolean startFade = false;
 boolean inFade = false;
 
@@ -487,8 +490,11 @@ void Light::changeColorTo(uint8_t red, uint8_t green, uint8_t blue)
 }
 
 // Color takes 500ms to change no matter What
-int transitionSpeed = 0;
-//int transitionSpeed = 500;
+//int transitionSpeed = 0;
+int transitionSpeed = 510; // In ms, has to be a multiple of 255
+int currentStep = 0;
+long lastStepTime = 0;
+
 void Light::handleColorChange()
 {
   if (startFade)
@@ -510,43 +516,52 @@ void Light::handleColorChange()
 
       startFade = false;
     }
-    // else
-    // {
-    //   loopCount = 0;
-    //   stepR = calculateStep(redVal, realRed);
-    //   stepG = calculateStep(grnVal, realGreen);
-    //   stepB = calculateStep(bluVal, realBlue);
+    // Start the transition
+    else
+    {
+      startFade = false;
+      inFade = true;
+      currentStep = 0;
 
-    //   inFade = true;
-    // }
+      // Calculate the step values
+      stepRed = calculateStep(currentRed, targetRed);
+      stepGreen = calculateStep(currentGreen, targetGreen);
+      stepBlue = calculateStep(currentBlue, targetBlue);
+      Serial.println("Starting Fade: ");
+      Serial.printf("Current Red: %i, Current Green: %i, Current Blue: %i\n", currentRed, currentGreen, currentBlue);
+      Serial.printf("target Red: %i, target Green: %i, target Blue: %i\n", targetRed, targetGreen, targetBlue);
+      Serial.printf("step Red: %i, step Green: %i, step Blue: %i\n", stepRed, stepGreen, stepBlue);
+      Serial.printf("Current Step: %i", currentStep);
+    }
   }
 
-  // if (inFade)
-  // {
-  //   startFade = false;
-  //   unsigned long now = millis();
-  //   if (now - lastLoop > transitionTime)
-  //   {
-  //     if (loopCount <= 255)
-  //     {
-  //       lastLoop = now;
+  // If we are currently in the middle of a color change, keep doing the transition
+  if (inFade)
+  {
+    int stepDuration = transitionSpeed / 255;
 
-  //       redVal = calculateVal(stepR, redVal, loopCount);
-  //       grnVal = calculateVal(stepG, grnVal, loopCount);
-  //       bluVal = calculateVal(stepB, bluVal, loopCount);
+    unsigned long now = millis();
+    // If its time to take a step
+    if (now - lastStepTime > stepDuration)
+    {
+      lastStepTime = now;
 
-  //       light.setColorRGB(redVal, grnVal, bluVal); // Write current values to LED pins
+      // Calculate the next value to change to
+      currentRed = calculateVal(stepRed, currentRed, currentStep);
+      currentGreen = calculateVal(stepGreen, currentGreen, currentStep);
+      currentBlue = calculateVal(stepBlue, currentBlue, currentStep);
 
-  //       Serial.print("Loop count: ");
-  //       Serial.println(loopCount);
-  //       loopCount++;
-  //     }
-  //     else
-  //     {
-  //       inFade = false;
-  //     }
-  //   }
-  // }
+      // Set the value and increment the step;
+      setRGB(currentRed, currentGreen, currentBlue); // Write current values to LED pins
+      currentStep++;
+    }
+
+    // If we have gone through all 255 steps, end the transition
+    if (currentStep > 255)
+    {
+      inFade = false;
+    }
+  }
 }
 
 // Brightness takes 1000ms to change from 0-100%, 500ms to change from 0-50, 250 ms to change from 0-25, etc.

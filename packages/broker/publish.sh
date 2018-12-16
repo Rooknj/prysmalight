@@ -1,0 +1,70 @@
+#!/bin/bash
+# sysinfo_page - A script to publish lightapp2-client to docker cloud
+
+##### Variables
+tag=
+confirm=n
+skipConfirm=
+
+##### Functions
+usage() {
+    echo "usage: sysinfo_page [-t --tag]  [-Y | --yes] [-h | --help]"
+}
+
+buildDocker() {
+    echo "Building docker image"
+    docker-compose build
+
+    echo "Tagging docker image with \"broker-$tag\""
+    docker tag lightapp2-broker-prod rooknj/lightapp2:broker-$tag
+
+    echo "Pushing docker image"
+    docker push rooknj/lightapp2:broker-$tag
+}
+
+getTagFromUser() {
+    printf "Enter the tag for your image: "
+    read tag
+}
+
+getConfirmationFromUser() {
+    printf "I will tag this docker image with \"broker-$tag\", is that ok? [Y/n]: " 
+    read confirm
+}
+
+promptUser() {
+    getConfirmationFromUser
+    if [ "$confirm" = "Y" ] ; then
+        buildDocker
+    else
+        echo "Aborting"
+    fi
+}
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -t | --tag )            shift
+                                tag=$1
+                                ;;
+        -Y | --yes )            skipConfirm=1
+                                ;;
+        -h | --help )           usage
+                                exit
+                                ;;
+        * )                     usage
+                                exit 1
+    esac
+    shift
+done
+
+# If the tag is empty, prompt the user for one
+if [ "$tag" = "" ]; then
+    getTagFromUser
+fi
+
+# If the user skipped the confirmation step, then go straight to building
+if [ "$skipConfirm" = "1" ]; then
+    buildDocker
+else
+    promptUser
+fi

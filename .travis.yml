@@ -20,10 +20,11 @@ before_install:
 script: "./buildChanged.sh"
 before_deploy:
 - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+- chmod +x deployChanged.sh
 deploy:
   provider: script
   skip_cleanup: true
-  script: echo "deploy"
+  script: ./deployChanged.sh
   on:
     all_branches: true
 env:

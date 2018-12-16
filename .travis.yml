@@ -1,0 +1,31 @@
+sudo: required
+services:
+- docker
+matrix:
+  include:
+  - language: node_js
+    node_js: stable
+    env: BUILD_ENV=client
+  - language: node_js
+    node_js: stable
+    env: BUILD_ENV=api
+  - language: node_js
+    node_js: stable
+    env: BUILD_ENV=controller
+  - language: node_js
+    node_js: stable
+    env: BUILD_ENV=broker
+before_install:
+- chmod +x buildChanged.sh
+script: "./buildChanged.sh"
+before_deploy:
+- echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
+deploy:
+  provider: script
+  skip_cleanup: true
+  script: echo "deploy"
+  on:
+    all_branches: true
+env:
+  global:
+    secure: YkvWxe2j5MrBJ08yruMuNlA5oJXIaKS5zJec4Su6Vd7c9UAGIh0HDiZx6q1EARjhtE783l2d2TCYxjPbdg5TxKHzzXtTZNqIvj8uRDFz2ODAHCXsJiseiEiv2bGvjAKwj3Por5UaBMfZ7rLwdLeLfI+tRBIo4IklKNX7+OsW8L4XZK+b9Mbmo/RW6P4O877chuz6wlma1FJeGLkD9PFHmLbwRwVWC3qjExIDgJKVP4vRwoQN1mzf7P5/tr+xNbBcxRYPpzzCd6kLw/arXIRo+p9r4tg3NfVv0hmb1VGd6CdDyXbMsBTy9KYI3M9RgCaHbjag4HjAKuayPB53cbnFUy95zaKFYiMzjkTsU4QxSjKMAwKPzaZEwUQpFYsbZCnhMg2OAka7T5fwCzc+G4qrPiSQKRkB+oxPHjFaRZcPnBplWwv67oqEt7IUQNAI1Xkf8T8KBH3aJD8lEe7Wnd77aRwAraQzYT3xUI9RqXIXntTPpWgGVaBL7ktTyarujkWfmzClpuLKje0AiokqI8Yg7HB+/sz7x57VeTOxJPiFI/+o0AQiocRiWfMiPDXIVyCWUE3Pj5Ww2WnBGO5f4FOWKv/j21eXusof2dzsk4i6UOdN8nYqS6oZ/N8/aLcEtmXzLZ/P+WURV+3ChBYi6sT2w5IRbKFeLhiUAH7VBJBDZ1U=

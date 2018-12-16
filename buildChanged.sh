@@ -14,6 +14,9 @@ detect_changed_services() {
   do
     if [ "$service" == "$BUILD_ENV" ]; then
       echo "-------------------Building $service---------------------"
+      cd "./packages/$service"
+      chmod +x build.sh
+      ./build.sh
     fi
   done
 }

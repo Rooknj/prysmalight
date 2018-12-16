@@ -1,0 +1,18 @@
+version: "3"
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: lightapp2-api-gateway-x64
+    ports:
+      - "4001:4001"
+    environment:
+      - RABBIT_HOST=rabbit
+      - DEBUG="main,config,server,service";
+  rabbit:
+    image: rabbitmq:3
+    hostname: "myrabbit"
+    container_name: rabbit
+    ports:
+      - "5672:5672"

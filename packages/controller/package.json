@@ -1,0 +1,42 @@
+{
+  "name": "lightapp2-controller-microservice",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Light Control Microservice",
+  "dependencies": {
+    "amqplib": "^0.5.3",
+    "async-mqtt": "^1.0.1",
+    "debug": "^3.1.0",
+    "redis": "^2.8.0",
+    "rxjs": "^6.3.3"
+  },
+  "devDependencies": {
+    "eslint": "^5.2.0",
+    "husky": "^0.14.3",
+    "jest": "^23.4.2",
+    "lint-staged": "^7.0.0",
+    "minimist": "^1.2.0",
+    "nodemon": "^1.18.3",
+    "pkg": "^4.3.3",
+    "prettier": "^1.11.1",
+    "rimraf": "^2.6.2"
+  },
+  "lint-staged": {
+    "src/**/*.{js,json,graphql}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "scripts": {
+    "precommit": "lint-staged",
+    "test": "node scripts/test",
+    "testIntegration": "node scripts/integration",
+    "build": "node scripts/build",
+    "start": "node scripts/start",
+    "clean": "node scripts/clean"
+  },
+  "bin": {
+    "prod-server": "src/index.js"
+  },
+  "main": "src/index.js"
+}

@@ -1,0 +1,20 @@
+sudo: required
+services:
+- docker
+matrix:
+  include:
+  - language: node_js  
+    node_js: stable
+    env: BUILD_ENV=client
+  - language: node_js 
+    node_js: stable
+    env: BUILD_ENV=api
+  - language: node_js 
+    node_js: stable
+    env: BUILD_ENV=controller
+  - language: node_js 
+    node_js: stable
+    env: BUILD_ENV=broker
+script: ./build.sh
+
+

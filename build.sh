@@ -12,7 +12,7 @@ detect_changed_services() {
 
   for service in $changed_services
   do
-    if [ "$service" == '$BUILD_ENV' ]; then
+    if [ "$service" == "$BUILD_ENV" ]; then
       echo "-------------------Building $service---------------------"
 
     fi

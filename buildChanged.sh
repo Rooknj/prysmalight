@@ -14,10 +14,14 @@ detect_changed_services() {
   do
     if [ "$service" == "$BUILD_ENV" ]; then
       echo "-------------------Building $service---------------------"
-
     fi
   done
 }
 
-detect_changed_services
+if [ "$TRAVIS" == "true" ]; then
+  detect_changed_services
+else
+  echo "Not in CI pipeline, aborting"
+  exit 1
+fi
 #git diff --name-only HEAD master | grep "^packages"

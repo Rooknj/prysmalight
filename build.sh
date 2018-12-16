@@ -5,14 +5,16 @@ detect_changed_services() {
   echo "detecting changed folders for this commit"
 
   # get a list of all the changed folders only
-  changed_services=`git diff --name-only HEAD master | grep "^packages" | awk 'BEGIN {FS="/"} {print $2}' | uniq`
+  git remote set-branches --add origin master
+  git fetch
+  changed_services=`git diff --name-only HEAD origin/master | grep "^packages" | awk 'BEGIN {FS="/"} {print $2}' | uniq`
   echo "changed folders: "$changed_services
 
   for service in $changed_services
   do
     if [ "$service" == '$BUILD_ENV' ]; then
       echo "-------------------Building $service---------------------"
-      
+
     fi
   done
 }

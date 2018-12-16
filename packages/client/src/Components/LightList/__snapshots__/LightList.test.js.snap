@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches mounted snapshot 1`] = `
+<div
+  className="MuiGrid-container-1 MuiGrid-justify-xs-space-around-21"
+/>
+`;
+
+exports[`matches shallow snapshot 1`] = `
+<WithStyles(Grid)
+  container={true}
+  justify="space-around"
+/>
+`;

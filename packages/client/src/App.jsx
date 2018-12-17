@@ -9,7 +9,7 @@ import amber from "@material-ui/core/colors/amber";
 import deepPurple from "@material-ui/core/colors/deepPurple";
 import styled from "styled-components";
 import Typography from "@material-ui/core/Typography";
-import LightActions from "./Components/LightActions/LightActions";
+import LightActionsContainer from "./Components/LightActions/LightActionsContainer";
 
 const theme = createMuiTheme({
   palette: {
@@ -22,20 +22,9 @@ const theme = createMuiTheme({
   }
 });
 
-const StyledAppBar = styled(AppBar)`
-  top: auto !important;
-  right: auto !important;
-  min-width: 21rem;
-  bottom: 0;
-`;
-
 const StyledToolbar = styled(Toolbar)`
   align-items: center;
-  justify-content: center;
-`;
-
-const StyledAppBody = styled.div`
-  padding-bottom: 5rem;
+  justify-content: space-between;
 `;
 
 const App = () => (
@@ -47,16 +36,10 @@ const App = () => (
             <Typography variant="h6" color="inherit">
               Light App 2.0
             </Typography>
+            <LightActionsContainer />
           </StyledToolbar>
         </AppBar>
-        <StyledAppBody>
-          <LightTool />
-        </StyledAppBody>
-        <StyledAppBar position="fixed" color="primary">
-          <StyledToolbar>
-            <LightActions />
-          </StyledToolbar>
-        </StyledAppBar>
+        <LightTool />
       </CssBaseline>
     </ThemeProvider>
   </MuiThemeProvider>

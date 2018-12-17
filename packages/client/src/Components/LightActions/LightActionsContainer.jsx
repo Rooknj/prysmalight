@@ -1,7 +1,7 @@
 import React from "react";
 import DeleteIcon from "@material-ui/icons/Delete";
 import AddIcon from "@material-ui/icons/Add";
-import LightSpeedDial from "./LightSpeedDial";
+import LightActions from "./LightActions";
 import LightFormDialog from "./LightFormDialog";
 import { Mutation } from "react-apollo";
 import { ADD_LIGHT, REMOVE_LIGHT, GET_LIGHTS } from "../graphqlConstants";
@@ -43,7 +43,7 @@ const removeLightFromCache = (cache, { data: { removeLight } }) => {
   });
 };
 
-class LightActions extends React.Component {
+class LightActionsContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -109,7 +109,7 @@ class LightActions extends React.Component {
 
     return (
       <React.Fragment>
-        <LightSpeedDial actions={actions} />
+        <LightActions actions={actions} />
         <Mutation
           mutation={ADD_LIGHT}
           update={addLightToCache}
@@ -167,6 +167,6 @@ class LightActions extends React.Component {
   }
 }
 
-LightActions.propTypes = {};
+LightActionsContainer.propTypes = {};
 
-export default LightActions;
+export default LightActionsContainer;

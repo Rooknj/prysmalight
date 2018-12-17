@@ -5,14 +5,14 @@ detect_changed_services() {
   echo "detecting changed folders for this commit"
 
   # get a list of all the changed folders only
-  git remote set-branches --add origin master
-  git fetch
   changed_services=()
   if [ "$TRAVIS_BRANCH" == "master" ]; then
     echo "-------------------Master Branch---------------------"
-    changed_services=("client" "api" "controller")
+    changed_services=`git diff --name-only HEAD^ HEAD | grep "^packages" | awk 'BEGIN {FS="/"} {print $2}' | uniq`
   else
     echo "-------------------$TRAVIS_BRANCH---------------------"
+    git remote set-branches --add origin master
+    git fetch
     changed_services=`git diff --name-only HEAD origin/master | grep "^packages" | awk 'BEGIN {FS="/"} {print $2}' | uniq`
   fi
   echo "changed services: "$changed_services

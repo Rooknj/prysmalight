@@ -31,7 +31,7 @@ class ErrorSnackbar extends React.Component {
       <React.Fragment>
         <Snackbar
           anchorOrigin={{
-            vertical: "top",
+            vertical: "bottom",
             horizontal: "center"
           }}
           open={this.state.open}

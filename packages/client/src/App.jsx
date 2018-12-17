@@ -6,12 +6,14 @@ import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "styled-components";
-import lime from "@material-ui/core/colors/lime";
+import amber from "@material-ui/core/colors/amber";
+import deepPurple from "@material-ui/core/colors/deepPurple";
 
 const theme = createMuiTheme({
   palette: {
     type: "dark", // Switching the dark mode on is a single property value change.
-    primary: lime
+    primary: amber,
+    secondary: deepPurple
   },
   typography: {
     useNextVariants: true
@@ -22,7 +24,7 @@ const App = () => (
   <MuiThemeProvider theme={theme}>
     <ThemeProvider theme={{ ...theme }}>
       <CssBaseline>
-        <AppBar position="static" color="default">
+        <AppBar position="static" color="primary">
           <Toolbar>
             <Typography variant="h6" color="inherit">
               Light App 2.0

@@ -3,10 +3,8 @@ import { shallow, mount } from "enzyme";
 import { MockedProvider } from "react-apollo/test-utils";
 import { GET_LIGHTS } from "../graphqlConstants";
 import wait from "waait";
-import LightListQueryContainer, {
-  Loading,
-  ErrorPage
-} from "./LightListQueryContainer";
+import LightListQueryContainer, { Loading } from "./LightListQueryContainer";
+import ErrorPage from "./ErrorPage";
 import LightListSubscriptionContainer from "./LightListSubscriptionContainer";
 
 // Mock out the Subscription Container so that it will not get rendered when mounting the Query Container

@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches mounted snapshot 1`] = `
+Array [
+  <div
+    className="MuiSnackbar-root-1 MuiSnackbar-anchorOriginBottomLeft-7"
+    onMouseEnter={[Function]}
+    onMouseLeave={[Function]}
+>
+    <div
+        aria-describedby="message-id"
+        className="MuiTypography-root-38 MuiTypography-body1-47 MuiPaper-root-11 MuiPaper-elevation6-19 MuiSnackbarContent-root-8"
+        direction="up"
+        role="alertdialog"
+        style={Object {}}
+    >
+        <div
+            className="MuiSnackbarContent-message-9"
+        >
+            <span
+                id="message-id"
+            >
+                <p
+                    className="MuiTypography-root-38 MuiTypography-body1-47 MuiTypography-colorError-72"
+                >
+                    Error!
+                </p>
+            </span>
+        </div>
+        <div
+            className="MuiSnackbarContent-action-10"
+        >
+            <button
+                aria-label="Close"
+                className="MuiButtonBase-root-79 MuiIconButton-root-73 MuiIconButton-colorInherit-74 sc-bdVaJa dKqnEJ"
+                disabled={false}
+                onBlur={[Function]}
+                onClick={[Function]}
+                onFocus={[Function]}
+                onKeyDown={[Function]}
+                onKeyUp={[Function]}
+                onMouseDown={[Function]}
+                onMouseLeave={[Function]}
+                onMouseUp={[Function]}
+                onTouchEnd={[Function]}
+                onTouchMove={[Function]}
+                onTouchStart={[Function]}
+                tabIndex="0"
+                type="button"
+            >
+                <span
+                    className="MuiIconButton-label-78"
+                >
+                    <svg
+                        aria-hidden="true"
+                        className="MuiSvgIcon-root-82"
+                        focusable="false"
+                        role="presentation"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+                        />
+                        <path
+                            d="M0 0h24v24H0z"
+                            fill="none"
+                        />
+                    </svg>
+                </span>
+                <span
+                    className="MuiTouchRipple-root-91"
+                />
+            </button>
+        </div>
+    </div>
+</div>,
+  "",
+]
+`;
+
+exports[`matches shallow snapshot 1`] = `
+<ErrorSnackbar
+  message="Error!"
+/>
+`;

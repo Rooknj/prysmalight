@@ -3,14 +3,14 @@
 exports[`matches mounted snapshot 1`] = `
 Array [
   <div
-    className="MuiSnackbar-root-1 MuiSnackbar-anchorOriginBottomLeft-7"
+    className="MuiSnackbar-root-1 MuiSnackbar-anchorOriginTopCenter-2"
     onMouseEnter={[Function]}
     onMouseLeave={[Function]}
 >
     <div
         aria-describedby="message-id"
         className="MuiTypography-root-38 MuiTypography-body1-47 MuiPaper-root-11 MuiPaper-elevation6-19 MuiSnackbarContent-root-8"
-        direction="up"
+        direction="down"
         role="alertdialog"
         style={Object {}}
     >

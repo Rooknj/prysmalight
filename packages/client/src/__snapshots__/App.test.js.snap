@@ -6,13 +6,18 @@ Array [
     className="MuiPaper-root-10 MuiPaper-elevation4-16 MuiAppBar-root-1 MuiAppBar-positionStatic-5 MuiAppBar-colorPrimary-8"
 >
     <div
-        className="MuiToolbar-root-37 MuiToolbar-regular-39 MuiToolbar-gutters-38"
+        className="MuiToolbar-root-37 MuiToolbar-regular-39 MuiToolbar-gutters-38 sc-bdVaJa hSDAgr"
     >
         <h6
             className="MuiTypography-root-41 MuiTypography-h6-58 MuiTypography-colorInherit-70"
         >
             Light App 2.0
         </h6>
+        <div
+            id="LightActionsContainer"
+        >
+            Mocked Light Actions Container
+        </div>
     </div>
 </header>,
   <div
@@ -825,14 +830,15 @@ exports[`matches shallow snapshot 1`] = `
         color="primary"
         position="static"
       >
-        <WithStyles(Toolbar)>
+        <Styled(WithStyles(Toolbar))>
           <WithStyles(Typography)
             color="inherit"
             variant="h6"
           >
             Light App 2.0
           </WithStyles(Typography)>
-        </WithStyles(Toolbar)>
+          <Component />
+        </Styled(WithStyles(Toolbar))>
       </WithStyles(AppBar)>
       <Component />
     </WithStyles(CssBaseline)>

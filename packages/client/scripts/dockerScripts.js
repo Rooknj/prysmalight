@@ -87,6 +87,7 @@ const getTag = tag => {
 
   const branchName = process.env.TRAVIS_BRANCH;
   if (branchName) {
+    console.log(branchName);
     if (branchName === "master") {
       return "latest";
     }

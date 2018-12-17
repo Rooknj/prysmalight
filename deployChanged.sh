@@ -7,7 +7,12 @@ detect_changed_services() {
   # get a list of all the changed folders only
   git remote set-branches --add origin master
   git fetch
-  changed_services=`git diff --name-only HEAD origin/master | grep "^packages" | awk 'BEGIN {FS="/"} {print $2}' | uniq`
+  changed_services=()
+  if ["$TRAVIS_BRANCH" == "master"]; then
+    changed_services=`git diff --name-only HEAD^ HEAD | grep "^packages" | awk 'BEGIN {FS="/"} {print $2}' | uniq`
+  else
+    changed_services=`git diff --name-only HEAD origin/master | grep "^packages" | awk 'BEGIN {FS="/"} {print $2}' | uniq`
+  fi
   echo "changed folders: "$changed_services
 
   for service in $changed_services

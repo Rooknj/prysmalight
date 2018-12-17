@@ -8,7 +8,7 @@ detect_changed_services() {
   git remote set-branches --add origin master
   git fetch
   changed_services=()
-  if ["$TRAVIS_BRANCH" == "master"]; then
+  if [ "$TRAVIS_BRANCH" == "master" ]; then
     echo "-------------------Master Branch---------------------"
     changed_services=("client" "api" "controller")
   else

@@ -10,12 +10,12 @@ detect_changed_services() {
   changed_services=()
   if ["$TRAVIS_BRANCH" == "master"]; then
     echo "-------------------Master Branch---------------------"
-    changed_services=`git diff --name-only HEAD^ HEAD | grep "^packages" | awk 'BEGIN {FS="/"} {print $2}' | uniq`
+    changed_services=("client" "api" "controller")
   else
     echo "-------------------$TRAVIS_BRANCH---------------------"
     changed_services=`git diff --name-only HEAD origin/master | grep "^packages" | awk 'BEGIN {FS="/"} {print $2}' | uniq`
   fi
-  echo "changed folders: "$changed_services
+  echo "changed services: "$changed_services
 
   for service in $changed_services
   do

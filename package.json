@@ -1,0 +1,12 @@
+{
+  "name": "lightapp2",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/Rooknj/lightapp2.git",
+  "author": "Nick Rook <rooknj@outlook.com>",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "minimist": "^1.2.0"
+  }
+}

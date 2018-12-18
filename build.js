@@ -2,8 +2,7 @@
 // node -x hey -y cool chocolatey crackers =>
 // {_: [chocolatey, crackers], x: hey, y: cool}
 const parseArgs = require("minimist");
-const {executeCommand, packageWasChanged} = require("./util");
-const PACKAGES = ["api", "client", "controller"];
+const {executeCommand, packageWasChanged, PACKAGES} = require("./util");
 
 // Builds the package (Note: using -t local. Change docker build so i dont need to include a tag for building)
 const buildPackage = async packageName => {

@@ -3,6 +3,8 @@ const child_process = require("child_process");
 const exec = util.promisify(child_process.exec);
 const execSync = child_process.execSync;
 
+const PACKAGES = ["api", "client", "controller"];
+
 /**
  * Executes a command then prints STDOUT and STDERR.
  * Any command that errors will cause the process to exit with error code 1.
@@ -57,9 +59,10 @@ const packageWasChanged = packageName => {
     .map(filename => filename.trim());
   console.log("Changed Files:", changedFiles);
 
+  console.log("Target package", packageName)
   return false;
 };
 
 console.log(packageWasChanged(process.argv[2]));
 
-module.exports = { executeCommand, packageWasChanged };
+module.exports = { executeCommand, packageWasChanged, PACKAGES };

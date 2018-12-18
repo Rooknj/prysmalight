@@ -32,15 +32,18 @@ const executeCommand = async (command, cwd = null) => {
 };
 
 const packageWasChanged = packageName => {
+  let currentBranch;
   if (process.env.TRAVIS) {
     console.log("In CI, adding master as remote");
     execSync(`git remote set-branches --add origin master`);
     execSync(`git fetch`);
+    currentBranch = process.env.TRAVIS_BRANCH;
+  } else {
+    currentBranch = execSync("git rev-parse --abbrev-ref HEAD")
+      .toString()
+      .trim();
   }
 
-  let currentBranch = execSync("git rev-parse --abbrev-ref HEAD")
-    .toString()
-    .trim();
   console.log("Current Branch:", currentBranch);
 
   let diffBranches;

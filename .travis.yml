@@ -5,9 +5,9 @@ services:
 - docker
 matrix:
   include:
-    env: PACKAGE=client
-    env: PACKAGE=api
-    env: PACKAGE=controller
+    - env: PACKAGE=client
+    - env: PACKAGE=api
+    - env: PACKAGE=controller
 cache:
   yarn: true
   directories:

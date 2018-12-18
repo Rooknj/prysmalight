@@ -59,10 +59,17 @@ const packageWasChanged = packageName => {
     .map(filename => filename.trim());
   console.log("Changed Files:", changedFiles);
 
-  console.log("Target package", packageName)
-  return false;
+  let wasChanged = false;
+  changedFiles.forEach(file => {
+    const directories = file.split("/");
+    if (directories.length > 1) {
+      const pkg = directories[1];
+      if (pkg === packageName) {
+        wasChanged = true;
+      }
+    }
+  });
+  return wasChanged;
 };
-
-console.log(packageWasChanged(process.argv[2]));
 
 module.exports = { executeCommand, packageWasChanged, PACKAGES };

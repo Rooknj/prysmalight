@@ -1,15 +1,11 @@
 import React from "react";
+import AppBar from "./Components/LightAppBar/LightAppBar";
 import LightTool from "./Components/LightTool";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 import { ThemeProvider } from "styled-components";
 import amber from "@material-ui/core/colors/amber";
 import deepPurple from "@material-ui/core/colors/deepPurple";
-import styled from "styled-components";
-import Typography from "@material-ui/core/Typography";
-import LightActionsContainer from "./Components/LightActions/LightActionsContainer";
 
 const theme = createMuiTheme({
   palette: {
@@ -22,23 +18,11 @@ const theme = createMuiTheme({
   }
 });
 
-const StyledToolbar = styled(Toolbar)`
-  align-items: center;
-  justify-content: space-between;
-`;
-
 const App = () => (
   <MuiThemeProvider theme={theme}>
     <ThemeProvider theme={{ ...theme }}>
       <CssBaseline>
-        <AppBar position="sticky" color="primary">
-          <StyledToolbar>
-            <Typography variant="h6" color="inherit">
-              Light App 2.0
-            </Typography>
-            <LightActionsContainer />
-          </StyledToolbar>
-        </AppBar>
+        <AppBar />
         <LightTool />
       </CssBaseline>
     </ThemeProvider>

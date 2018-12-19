@@ -1,10 +1,8 @@
 import React from "react";
-import DeleteIcon from "@material-ui/icons/Delete";
-import AddIcon from "@material-ui/icons/Add";
 import LightActions from "./LightActions";
 import LightFormDialog from "./LightFormDialog";
 import { Mutation } from "react-apollo";
-import { ADD_LIGHT, REMOVE_LIGHT, GET_LIGHTS } from "../graphqlConstants";
+import { ADD_LIGHT, REMOVE_LIGHT, GET_LIGHTS } from "../../graphqlConstants";
 
 const addLightToCache = (cache, { data: { addLight } }) => {
   // If no data was returned, do nothing
@@ -48,19 +46,7 @@ class LightActionsContainer extends React.Component {
     super(props);
     this.state = {
       showAddLight: false,
-      showRemoveLight: false,
-      actions: [
-        {
-          name: "Add Light",
-          icon: <AddIcon />,
-          handler: this.handleShowAddLight
-        },
-        {
-          name: "Remove Light",
-          icon: <DeleteIcon />,
-          handler: this.handleShowRemoveLight
-        }
-      ]
+      showRemoveLight: false
     };
   }
 
@@ -105,11 +91,14 @@ class LightActionsContainer extends React.Component {
   };
 
   render() {
-    const { showAddLight, showRemoveLight, actions } = this.state;
+    const { showAddLight, showRemoveLight } = this.state;
 
     return (
-      <React.Fragment>
-        <LightActions actions={actions} />
+      <div>
+        <LightActions
+          onAddLight={this.handleShowAddLight}
+          onRemoveLight={this.handleShowRemoveLight}
+        />
         <Mutation
           mutation={ADD_LIGHT}
           update={addLightToCache}
@@ -162,7 +151,7 @@ class LightActionsContainer extends React.Component {
             />
           )}
         </Mutation>
-      </React.Fragment>
+      </div>
     );
   }
 }

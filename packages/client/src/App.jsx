@@ -2,21 +2,9 @@ import React from "react";
 import AppBar from "./Components/LightAppBar/LightAppBar";
 import LightTool from "./Components/LightTool";
 import CssBaseline from "@material-ui/core/CssBaseline";
-import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
+import { MuiThemeProvider } from "@material-ui/core/styles";
+import theme from "./theme";
 import { ThemeProvider } from "styled-components";
-import amber from "@material-ui/core/colors/amber";
-import deepPurple from "@material-ui/core/colors/deepPurple";
-
-const theme = createMuiTheme({
-  palette: {
-    type: "dark", // Switching the dark mode on is a single property value change.
-    primary: amber,
-    secondary: deepPurple
-  },
-  typography: {
-    useNextVariants: true
-  }
-});
 
 const App = () => (
   <MuiThemeProvider theme={theme}>

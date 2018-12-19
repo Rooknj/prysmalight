@@ -1,52 +1,12 @@
-// Returns an array of objects in the shape of:
-// node -x hey -y cool chocolatey crackers =>
-// {_: [chocolatey, crackers], x: hey, y: cool}
+//rooknj/lightapp2-client:<version>?-rpi
+
+
+
 const parseArgs = require("minimist");
-const util = require("util");
-const exec = util.promisify(require("child_process").exec);
+const {} = require("util");
 
 const SERVICE = "client";
 const ARCHITECTURES = ["x64", "rpi"];
-
-const displayUsage = () => {
-  console.log(`
-Usage: buildDocker COMMAND
-
-A script to build docker images of lightapp2-client
-
-Options:
-  -h, --help          Display usage
-      --rpi           Only build for Raspberry Pi
-      --x64           Only build for x64 machines
-  -y, --yes           Auto accept all prompts
-  -t        string    Use this string as a tag instead of defaults
-
-Commands:
-  build               Builds the docker images
-  tag                 Tags the docker images
-  publish             Publishes the docker images
-    `);
-};
-
-const executeCommand = async command => {
-  console.log(`Executing: ${command}`);
-  try {
-    const { stdout, stderr } = await exec(command);
-    console.log(`Finished: ${command}`);
-    console.log("STDOUT:");
-    console.log(stdout || "None");
-    console.log("STDERR:");
-    console.log(stderr || "None");
-  } catch (error) {
-    console.log("Error executing", command);
-    console.log("STDOUT:");
-    console.log(error.stdout || "None");
-    console.log("STDERR:");
-    console.log(error.stderr || "None");
-    process.exit(1);
-  }
-  return;
-}
 
 // Build a docker image
 const buildDockerImage = async dockerComposeFile => {
@@ -80,10 +40,6 @@ const generateDockerImageName = (service, arch) =>
 // Get the base tag to be used in this script
 const getTag = tag => {
   if (tag) return tag;
-  const travisTag = process.env.TRAVIS_TAG;
-  if (travisTag) {
-    return travisTag;
-  }
 
   const branchName = process.env.TRAVIS_BRANCH;
   if (branchName) {

@@ -31,7 +31,7 @@ const App = () => (
   <MuiThemeProvider theme={theme}>
     <ThemeProvider theme={{ ...theme }}>
       <CssBaseline>
-        <AppBar position="static" color="primary">
+        <AppBar position="sticky" color="primary">
           <StyledToolbar>
             <Typography variant="h6" color="inherit">
               Light App 2.0

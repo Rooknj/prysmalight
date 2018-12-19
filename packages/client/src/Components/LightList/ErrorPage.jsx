@@ -5,7 +5,6 @@ import { withTheme } from "@material-ui/core/styles";
 const propTypes = {};
 const defaultProps = {};
 const ErrorPage = ({ message, theme }) => {
-  console.error(message);
   return (
     <div
       style={{

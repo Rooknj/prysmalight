@@ -3,7 +3,7 @@
 exports[`matches mounted snapshot 1`] = `
 Array [
   <header
-    className="MuiPaper-root-10 MuiPaper-elevation4-16 MuiAppBar-root-1 MuiAppBar-positionStatic-5 MuiAppBar-colorPrimary-8"
+    className="MuiPaper-root-10 MuiPaper-elevation4-16 MuiAppBar-root-1 MuiAppBar-positionSticky-4 MuiAppBar-colorPrimary-8"
 >
     <div
         className="MuiToolbar-root-37 MuiToolbar-regular-39 MuiToolbar-gutters-38 sc-bdVaJa hSDAgr"
@@ -826,20 +826,7 @@ exports[`matches shallow snapshot 1`] = `
     }
   >
     <WithStyles(CssBaseline)>
-      <WithStyles(AppBar)
-        color="primary"
-        position="static"
-      >
-        <Styled(WithStyles(Toolbar))>
-          <WithStyles(Typography)
-            color="inherit"
-            variant="h6"
-          >
-            Light App 2.0
-          </WithStyles(Typography)>
-          <Component />
-        </Styled(WithStyles(Toolbar))>
-      </WithStyles(AppBar)>
+      <LightAppBar />
       <Component />
     </WithStyles(CssBaseline)>
   </ThemeProvider>

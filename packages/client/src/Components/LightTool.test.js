@@ -7,9 +7,6 @@ import { createSerializer } from "enzyme-to-json";
 jest.mock("./LightList/LightListQueryContainer", () => () => (
   <div id="MockLightListQueryContainer">Mocked Light List Query Container</div>
 ));
-jest.mock("./LightActions/LightActionsContainer", () => () => (
-  <div id="MockLightActionsContainer">Mocked Light Actions Container</div>
-));
 
 // Add serializer to allow enzyme to create snapshots
 expect.addSnapshotSerializer(createSerializer({ mode: "deep" }));

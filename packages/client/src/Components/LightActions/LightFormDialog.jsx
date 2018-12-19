@@ -36,6 +36,13 @@ class LightFormDialog extends React.Component {
     this.props.onSubmit(this.state.lightId);
   };
 
+  handleKeyPress = ev => {
+    if (ev.key === "Enter") {
+      ev.preventDefault();
+      this.handleSubmit();
+    }
+  };
+
   render() {
     const {
       open,
@@ -59,6 +66,7 @@ class LightFormDialog extends React.Component {
             fullWidth
             value={this.state.lightId}
             onChange={this.handleChange}
+            onKeyPress={this.handleKeyPress}
           />
         </DialogContent>
         <DialogActions>

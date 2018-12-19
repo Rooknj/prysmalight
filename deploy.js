@@ -1,16 +1,18 @@
 const parseArgs = require("minimist");
-const { executeCommand, packageWasChanged, PACKAGES } = require("./util");
+const { packageWasChanged, PACKAGES, publishDockerImage } = require("./util");
 
-const deployPackage = async packageName => {
+const deployPackage = async (packageName, tag) => {
   if (!process.env.TRAVIS || packageWasChanged(packageName)) {
-    await executeCommand(
-      `node scripts/dockerScripts tag`,
-      `./packages/${packageName}`
-    );
-    await executeCommand(
-      `node scripts/dockerScripts publish`,
-      `./packages/${packageName}`
-    );
+    const branchName = process.env.TRAVIS_BRANCH;
+    if (branchName) {
+      if (branchName === "master") {
+        tag = "latest";
+      } else {
+        tag = "test";
+      }
+    }
+    publishDockerImage(packageName, tag);
+    publishDockerImage(packageName, tag, true);
   } else {
     console.log(
       `Currently in CI and ${packageName} was not changed. Skipping deploy`
@@ -20,10 +22,16 @@ const deployPackage = async packageName => {
 
 // Process all command line arguments
 const processArgs = async args => {
+  // a tag is required if not in CI
+  if (!args.t && !process.env.TRAVIS) {
+    console.log("Not in CI and no tag was given. Aborting");
+    process.exit(1);
+  }
+
   if (args.all) {
     // Builds docker images for all packages
-    console.log("Deploying all packages");
-    PACKAGES.forEach(pack => deployPackage(pack));
+    console.log("deploying all packages");
+    PACKAGES.forEach(pack => deployPackage(pack, args.t));
   } else {
     // Builds docker images for specified packages
     const packages = args._;
@@ -43,8 +51,8 @@ const processArgs = async args => {
     });
 
     // Build all specified packages
-    console.log(`Deploying ${packages}`);
-    packages.forEach(pack => deployPackage(pack));
+    console.log(`deploying ${packages}`);
+    packages.forEach(pack => deployPackage(pack, args.t));
   }
 };
 

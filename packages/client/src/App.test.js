@@ -8,9 +8,12 @@ jest.mock("./Components/LightTool", () => () => (
   <div id="MockLightTool">Mocked Light Tool</div>
 ));
 
-jest.mock("./Components/LightActions/LightActionsContainer", () => () => (
-  <div id="LightActionsContainer">Mocked Light Actions Container</div>
-));
+jest.mock(
+  "./Components/LightAppBar/LightActions/LightActionsContainer",
+  () => () => (
+    <div id="LightActionsContainer">Mocked Light Actions Container</div>
+  )
+);
 
 // Add serializer to allow enzyme to create snapshots
 expect.addSnapshotSerializer(createSerializer({ mode: "deep" }));

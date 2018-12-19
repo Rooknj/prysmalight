@@ -1,16 +1,18 @@
 const parseArgs = require("minimist");
-const { executeCommand, packageWasChanged, PACKAGES } = require("./util");
+const { packageWasChanged, PACKAGES, publishDockerImage } = require("./util");
 
 const deployPackage = async packageName => {
   if (!process.env.TRAVIS || packageWasChanged(packageName)) {
-    await executeCommand(
-      `node scripts/dockerScripts tag`,
-      `./packages/${packageName}`
-    );
-    await executeCommand(
-      `node scripts/dockerScripts publish`,
-      `./packages/${packageName}`
-    );
+    const branchName = process.env.TRAVIS_BRANCH;
+    if (branchName) {
+      if (branchName === "master") {
+        tag = "latest";
+      } else {
+        tag = "test";
+      }
+    }
+    publishDockerImage(packageName, tag);
+    publishDockerImage(packageName, tag, true);
   } else {
     console.log(
       `Currently in CI and ${packageName} was not changed. Skipping deploy`

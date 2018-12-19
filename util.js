@@ -75,4 +75,41 @@ const packageWasChanged = packageName => {
   return wasChanged;
 };
 
-module.exports = { executeCommand, packageWasChanged, PACKAGES };
+const buildDockerImage = async (pkg, tag, rpi) => {
+  const path = `./packages/${pkg}`;
+  if (rpi) {
+    const image = `rooknj/lightapp2-${pkg}:${tag}-rpi`;
+    const latest = `rooknj/lightapp2-${pkg}:latest-rpi`;
+    console.log("Pulling", latest);
+    await executeCommand(`docker pull ${latest}`);
+    console.log("Building", image);
+    await executeCommand(
+      `docker build -f ${path}/rpi.Dockerfile --cache-from ${latest} -t ${image} ${path}`
+    );
+  } else {
+    const image = `rooknj/lightapp2-${pkg}:${tag}`;
+    const latest = `rooknj/lightapp2-${pkg}:latest`;
+    console.log("Pulling", latest);
+    await executeCommand(`docker pull ${latest}`);
+    console.log("Building", image);
+    await executeCommand(
+      `docker build --cache-from ${latest} -t ${image} ${path}`
+    );
+  }
+};
+
+const publishDockerImage = async (pkg, tag, rpi) => {
+  if (rpi) {
+    await executeCommand(`docker push rooknj/lightapp2-${pkg}:${tag}-rpi`);
+  } else {
+    await executeCommand(`docker push rooknj/lightapp2-${pkg}:${tag}`);
+  }
+};
+
+module.exports = {
+  executeCommand,
+  packageWasChanged,
+  PACKAGES,
+  buildDockerImage,
+  publishDockerImage
+};

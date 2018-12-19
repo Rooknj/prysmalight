@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import IconButton from "@material-ui/core/IconButton";
 import AddIcon from "@material-ui/icons/Add";
 import EditIcon from "@material-ui/icons/Edit";
@@ -17,5 +18,10 @@ const LightActions = ({ onAddLight, onRemoveLight }) => (
     </IconButton>
   </React.Fragment>
 );
+
+LightActions.propTypes = {
+  onAddLight: PropTypes.func.isRequired,
+  onRemoveLight: PropTypes.func.isRequired
+};
 
 export default LightActions;

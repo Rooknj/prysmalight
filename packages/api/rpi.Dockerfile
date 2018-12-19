@@ -19,7 +19,7 @@ RUN npm install -g yarn
 RUN yarn global add pkg
 # Install app dependencies
 RUN yarn install --silent
- # Test app
+# Test app
 RUN yarn test --no-watch
 
 # Build app

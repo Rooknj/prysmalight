@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import Card from "@material-ui/core/Card";
-import CardContent from "@material-ui/core/CardContent";
 import LightHeader from "./LightHeader/LightHeader";
 import BrightnessSlider from "./BrightnessSlider/BrightnessSlider";
 import Collapse from "@material-ui/core/Collapse";
@@ -70,13 +69,11 @@ class Light extends React.Component {
             timeout="auto"
             unmountOnExit
           >
-            <CardContent>
-              <BrightnessSlider
-                connected={light.connected}
-                brightness={light.brightness}
-                onBrightnessChange={onBrightnessChange}
-              />
-            </CardContent>
+            <BrightnessSlider
+              connected={light.connected}
+              brightness={light.brightness}
+              onBrightnessChange={onBrightnessChange}
+            />
           </Collapse>
         </Card>
       </StyledCardWrapper>

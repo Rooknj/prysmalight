@@ -36,12 +36,12 @@ class LightHeader extends React.Component {
     const { id, color, connected, state, waiting, onChange } = this.props;
     return (
       <Grid container alignItems="center">
-        <Grid item xs={7}>
+        <Grid item xs={7} onClick={() => alert(1)}>
           <LightStatus id={id} color={color} connected={connected} />
         </Grid>
         <Grid item xs={5}>
           <Grid container justify="flex-end">
-            <Grid item>
+            <Grid item onClick={() => alert(2)}>
               <Fade
                 in={waiting}
                 style={{

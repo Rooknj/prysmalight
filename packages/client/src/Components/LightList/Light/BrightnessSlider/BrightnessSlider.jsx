@@ -4,9 +4,10 @@ import Slider from "@material-ui/lab/Slider";
 import styled from "styled-components";
 
 const StyledDiv = styled.div`
-  height: 3rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
+  height: 2rem;
+  margin-bottom: 1rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
   display: flex;
 `;
 
@@ -31,16 +32,18 @@ const defaultProps = {};
 
 const BrightnessSlider = ({ brightness, onBrightnessChange, connected }) => {
   return (
-    <StyledDiv>
-      <StyledSlider
-        value={brightness}
-        min={0}
-        max={100}
-        step={1}
-        onChange={onBrightnessChange}
-        disabled={connected !== 2}
-      />
-    </StyledDiv>
+    <React.Fragment>
+      <StyledDiv onClick={e => e.stopPropagation()}>
+        <StyledSlider
+          value={brightness}
+          min={0}
+          max={100}
+          step={1}
+          onChange={onBrightnessChange}
+          disabled={connected !== 2}
+        />
+      </StyledDiv>
+    </React.Fragment>
   );
 };
 

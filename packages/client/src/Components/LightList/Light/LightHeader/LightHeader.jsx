@@ -32,16 +32,18 @@ const defaultProps = {
 };
 
 class LightHeader extends React.Component {
+  stopPropagation = e => e.stopPropagation();
+
   render() {
     const { id, color, connected, state, waiting, onChange } = this.props;
     return (
       <Grid container alignItems="center">
-        <Grid item xs={7} onClick={() => alert(1)}>
+        <Grid item xs={7}>
           <LightStatus id={id} color={color} connected={connected} />
         </Grid>
         <Grid item xs={5}>
           <Grid container justify="flex-end">
-            <Grid item onClick={() => alert(2)}>
+            <Grid item>
               <Fade
                 in={waiting}
                 style={{
@@ -58,6 +60,7 @@ class LightHeader extends React.Component {
                 onChange={onChange}
                 disabled={connected !== 2}
                 color="primary"
+                onClick={this.stopPropagation}
               />
             </Grid>
           </Grid>

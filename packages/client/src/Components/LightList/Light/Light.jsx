@@ -55,7 +55,7 @@ class Light extends React.Component {
     const { light, loading, onStateChange, onBrightnessChange } = this.props;
     return (
       <StyledCardWrapper>
-        <Card>
+        <Card onClick={() => alert(light.id)}>
           <LightHeader
             id={light.id}
             color={light.color}

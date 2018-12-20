@@ -6,6 +6,8 @@ import LightHeader from "./LightHeader/LightHeader";
 import BrightnessSlider from "./BrightnessSlider/BrightnessSlider";
 import Collapse from "@material-ui/core/Collapse";
 
+import LightDialog from "./LightDialog/LightDialog";
+
 import styled from "styled-components";
 
 const StyledCardWrapper = styled.div`
@@ -51,32 +53,51 @@ const defaultProps = {
 };
 
 class Light extends React.Component {
+  state = {
+    open: false
+  };
+
+  handleOpen = () => {
+    this.setState({ open: true });
+  };
+
+  handleClose = () => {
+    this.setState({ open: false });
+  };
+
   render() {
     const { light, loading, onStateChange, onBrightnessChange } = this.props;
     return (
-      <StyledCardWrapper>
-        <Card onClick={() => alert(light.id)}>
-          <LightHeader
-            id={light.id}
-            color={light.color}
-            connected={light.connected}
-            state={light.state}
-            onChange={onStateChange}
-            waiting={loading}
-          />
-          <Collapse
-            in={light.state === "ON" ? true : false}
-            timeout="auto"
-            unmountOnExit
-          >
-            <BrightnessSlider
+      <React.Fragment>
+        <LightDialog
+          open={this.state.open}
+          onClose={this.handleClose}
+          {...this.props}
+        />
+        <StyledCardWrapper>
+          <Card onClick={this.handleOpen}>
+            <LightHeader
+              id={light.id}
+              color={light.color}
               connected={light.connected}
-              brightness={light.brightness}
-              onBrightnessChange={onBrightnessChange}
+              state={light.state}
+              onChange={onStateChange}
+              waiting={loading}
             />
-          </Collapse>
-        </Card>
-      </StyledCardWrapper>
+            <Collapse
+              in={light.state === "ON" ? true : false}
+              timeout="auto"
+              unmountOnExit
+            >
+              <BrightnessSlider
+                connected={light.connected}
+                brightness={light.brightness}
+                onBrightnessChange={onBrightnessChange}
+              />
+            </Collapse>
+          </Card>
+        </StyledCardWrapper>
+      </React.Fragment>
     );
   }
 }

@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import Card from "@material-ui/core/Card";
 import LightHeader from "./LightHeader/LightHeader";
 import LightContent from "./LightContent/LightContent";
+import Collapse from "@material-ui/core/Collapse";
 
 import styled from "styled-components";
 
@@ -82,18 +83,24 @@ class Light extends React.Component {
             onChange={onStateChange}
             waiting={loading}
           />
-          <LightContent
-            connected={light.connected}
-            brightness={light.brightness}
-            color={light.color}
-            colors={colors}
-            effect={light.effect}
-            supportedEffects={light.supportedEffects}
-            speed={light.speed}
-            onInputChange={onEffectChange}
-            onBrightnessChange={onBrightnessChange}
-            onColorChange={onColorChange}
-          />
+          <Collapse
+            in={light.state === "ON" ? true : false}
+            timeout="auto"
+            unmountOnExit
+          >
+            <LightContent
+              connected={light.connected}
+              brightness={light.brightness}
+              color={light.color}
+              colors={colors}
+              effect={light.effect}
+              supportedEffects={light.supportedEffects}
+              speed={light.speed}
+              onInputChange={onEffectChange}
+              onBrightnessChange={onBrightnessChange}
+              onColorChange={onColorChange}
+            />
+          </Collapse>
         </Card>
       </StyledCardWrapper>
     );

@@ -10,10 +10,9 @@ import Collapse from "@material-ui/core/Collapse";
 import styled from "styled-components";
 
 const StyledCardWrapper = styled.div`
-  min-width: 20rem;
-  max-width: 27rem;
+  min-width: 18rem;
   margin: 0 auto;
-  padding: 1em;
+  padding: 0.5rem;
 `;
 
 const propTypes = {

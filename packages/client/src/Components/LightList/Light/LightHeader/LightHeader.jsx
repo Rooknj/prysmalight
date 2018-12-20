@@ -45,7 +45,7 @@ class LightHeader extends React.Component {
               <Fade
                 in={waiting}
                 style={{
-                  transitionDelay: waiting ? "200ms" : "0ms"
+                  transitionDelay: waiting ? "400ms" : "0ms"
                 }}
                 unmountOnExit
               >

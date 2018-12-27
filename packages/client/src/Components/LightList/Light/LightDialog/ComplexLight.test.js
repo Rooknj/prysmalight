@@ -1,6 +1,6 @@
 import React from "react";
 import { shallow, mount } from "enzyme";
-import Light from "../LightDialog";
+import Light from "./ComplexLight";
 import { createSerializer } from "enzyme-to-json";
 import { ThemeProvider } from "styled-components";
 

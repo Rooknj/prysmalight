@@ -2,13 +2,19 @@
 
 exports[`matches mounted snapshot 1`] = `
 <div
-  className="MuiGrid-container-1 MuiGrid-justify-xs-space-around-21"
-/>
+  className="sc-bdVaJa gSvyBK"
+>
+  <div
+    className="MuiGrid-container-1 MuiGrid-justify-xs-center-18"
+  />
+</div>
 `;
 
 exports[`matches shallow snapshot 1`] = `
-<WithStyles(Grid)
-  container={true}
-  justify="space-around"
-/>
+<styled.div>
+  <WithStyles(Grid)
+    container={true}
+    justify="center"
+  />
+</styled.div>
 `;

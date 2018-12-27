@@ -3,7 +3,6 @@ import PropTypes from "prop-types";
 import Switch from "@material-ui/core/Switch";
 import Grid from "@material-ui/core/Grid";
 import LightStatus from "./LightStatus";
-import Fade from "@material-ui/core/Fade";
 import CircularProgress from "@material-ui/core/CircularProgress";
 
 const propTypes = {
@@ -32,8 +31,6 @@ const defaultProps = {
 };
 
 class LightHeader extends React.Component {
-  stopPropagation = e => e.stopPropagation();
-
   render() {
     const { id, color, connected, state, waiting, onChange } = this.props;
     return (
@@ -43,24 +40,13 @@ class LightHeader extends React.Component {
         </Grid>
         <Grid item xs={5}>
           <Grid container justify="flex-end">
-            <Grid item>
-              <Fade
-                in={waiting}
-                style={{
-                  transitionDelay: waiting ? "400ms" : "0ms"
-                }}
-                unmountOnExit
-              >
-                <CircularProgress />
-              </Fade>
-            </Grid>
+            <Grid item>{waiting && <CircularProgress />}</Grid>
             <Grid item>
               <Switch
                 checked={state === "ON" ? true : false}
                 onChange={onChange}
                 disabled={connected !== 2}
                 color="primary"
-                onClick={this.stopPropagation}
               />
             </Grid>
           </Grid>

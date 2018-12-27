@@ -1,0 +1,47 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`matches mounted snapshot 1`] = `""`;
+
+exports[`matches shallow snapshot 1`] = `
+<WithStyles(Dialog)
+  TransitionComponent={[Function]}
+  fullScreen={true}
+>
+  <WithStyles(AppBar)
+    color="secondary"
+    position="relative"
+  >
+    <Styled(WithStyles(Toolbar))>
+      <WithStyles(Typography)
+        color="inherit"
+        variant="h6"
+      />
+      <WithStyles(IconButton)
+        aria-label="Close"
+        color="inherit"
+      >
+        <pure(CloseIcon) />
+      </WithStyles(IconButton)>
+    </Styled(WithStyles(Toolbar))>
+  </WithStyles(AppBar)>
+  <Light
+    light={
+      Object {
+        "brightness": 0,
+        "color": Object {
+          "b": 0,
+          "g": 0,
+          "r": 0,
+        },
+        "connected": 0,
+        "id": "",
+        "state": "OFF",
+      }
+    }
+    onBrightnessChange={[Function]}
+    onColorChange={[Function]}
+    onEffectChange={[Function]}
+    onStateChange={[Function]}
+  />
+</WithStyles(Dialog)>
+`;

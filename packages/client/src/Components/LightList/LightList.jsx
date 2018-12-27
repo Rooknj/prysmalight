@@ -2,6 +2,11 @@ import React from "react";
 import PropTypes from "prop-types";
 import LightMutationContainer from "./Light/LightMutationContainer";
 import Grid from "@material-ui/core/Grid";
+import styled from "styled-components";
+
+const GridWrapper = styled.div`
+  padding: 0.5rem;
+`;
 
 const propTypes = {
   lights: PropTypes.arrayOf(
@@ -27,13 +32,15 @@ const defaultProps = {
 };
 
 const LightList = ({ lights }) => (
-  <Grid container justify={lights.length < 4 ? "space-around" : "flex-start"}>
-    {lights.map(light => (
-      <Grid key={light.id} item xs={12} sm={12} md={6} lg={4} xl={3}>
-        <LightMutationContainer light={light} />
-      </Grid>
-    ))}
-  </Grid>
+  <GridWrapper>
+    <Grid container justify={"center"}>
+      {lights.map(light => (
+        <Grid key={light.id} item xs={12}>
+          <LightMutationContainer light={light} />
+        </Grid>
+      ))}
+    </Grid>
+  </GridWrapper>
 );
 
 LightList.propTypes = propTypes;

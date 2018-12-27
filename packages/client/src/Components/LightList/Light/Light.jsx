@@ -3,27 +3,19 @@ import PropTypes from "prop-types";
 
 import Card from "@material-ui/core/Card";
 import LightHeader from "./LightHeader/LightHeader";
-import LightContent from "./LightContent/LightContent";
+import BrightnessSlider from "./BrightnessSlider/BrightnessSlider";
+import Collapse from "@material-ui/core/Collapse";
+
+import LightDialog from "./LightDialog/LightDialog";
 
 import styled from "styled-components";
 
 const StyledCardWrapper = styled.div`
-  min-width: 20rem;
-  max-width: 27rem;
+  min-width: 18rem;
+  max-width: 35rem;
   margin: 0 auto;
-  padding: 1em;
+  padding: 0.5rem;
 `;
-
-const colors = [
-  "#FF0000", //red
-  "#FFA500", //orange
-  "#FFFF00", //yellow
-  "#00FF00", //green
-  "#00FFFF", //cyan
-  "#0000FF", //blue
-  "#A500FF", //purple
-  "#FF00FF" //pink
-];
 
 const propTypes = {
   light: PropTypes.shape({
@@ -62,40 +54,51 @@ const defaultProps = {
 };
 
 class Light extends React.Component {
+  state = {
+    open: false
+  };
+
+  handleOpen = () => {
+    this.setState({ open: true });
+  };
+
+  handleClose = () => {
+    this.setState({ open: false });
+  };
+
   render() {
-    const {
-      light,
-      loading,
-      onStateChange,
-      onEffectChange,
-      onBrightnessChange,
-      onColorChange
-    } = this.props;
+    const { light, loading, onStateChange, onBrightnessChange } = this.props;
     return (
-      <StyledCardWrapper>
-        <Card>
-          <LightHeader
-            id={light.id}
-            color={light.color}
-            connected={light.connected}
-            state={light.state}
-            onChange={onStateChange}
-            waiting={loading}
-          />
-          <LightContent
-            connected={light.connected}
-            brightness={light.brightness}
-            color={light.color}
-            colors={colors}
-            effect={light.effect}
-            supportedEffects={light.supportedEffects}
-            speed={light.speed}
-            onInputChange={onEffectChange}
-            onBrightnessChange={onBrightnessChange}
-            onColorChange={onColorChange}
-          />
-        </Card>
-      </StyledCardWrapper>
+      <React.Fragment>
+        <LightDialog
+          open={this.state.open}
+          onClose={this.handleClose}
+          {...this.props}
+        />
+        <StyledCardWrapper>
+          <Card onClick={this.handleOpen}>
+            <LightHeader
+              id={light.id}
+              color={light.color}
+              connected={light.connected}
+              state={light.state}
+              onChange={onStateChange}
+              waiting={loading}
+            />
+            <Collapse
+              in={light.state === "ON" ? true : false}
+              timeout="auto"
+              unmountOnExit
+            >
+              <BrightnessSlider
+                connected={light.connected}
+                brightness={light.brightness}
+                onBrightnessChange={onBrightnessChange}
+              />
+            </Collapse>
+          </Card>
+        </StyledCardWrapper>
+      </React.Fragment>
     );
   }
 }

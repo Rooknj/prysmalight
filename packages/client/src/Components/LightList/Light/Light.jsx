@@ -12,6 +12,7 @@ import styled from "styled-components";
 
 const StyledCardWrapper = styled.div`
   min-width: 18rem;
+  max-width: 35rem;
   margin: 0 auto;
   padding: 0.5rem;
 `;

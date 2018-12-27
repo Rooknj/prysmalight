@@ -33,9 +33,9 @@ const defaultProps = {
 
 const LightList = ({ lights }) => (
   <GridWrapper>
-    <Grid container justify={"flex-start"}>
+    <Grid container justify={"center"}>
       {lights.map(light => (
-        <Grid key={light.id} item xs={12} sm={6} md={6} lg={4} xl={3}>
+        <Grid key={light.id} item xs={12}>
           <LightMutationContainer light={light} />
         </Grid>
       ))}

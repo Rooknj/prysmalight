@@ -47,6 +47,10 @@ const StyledBottomNavigation = styled(BottomNavigation)`
   width: 100%;
   position: fixed;
   bottom: 0;
+  background-color: ${({ theme }) => {
+    // TODO: Make sure to change this when you ditch the light dialog for react-router
+    return theme.palette.background.default;
+  }};
 `;
 
 class Light extends React.Component {

@@ -2,6 +2,9 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
+// Font Import
+import "typeface-roboto";
+
 // Local Imports
 import App from "./App";
 

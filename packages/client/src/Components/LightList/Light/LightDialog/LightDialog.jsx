@@ -7,7 +7,7 @@ import IconButton from "@material-ui/core/IconButton";
 import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
-import ComplexLight from "./ComplexLight";
+import LightControls from "./LightControls";
 
 import styled from "styled-components";
 
@@ -76,7 +76,7 @@ class LightDialog extends React.Component {
             </IconButton>
           </StyledToolbar>
         </AppBar>
-        <ComplexLight {...this.props} />
+        <LightControls {...this.props} />
       </Dialog>
     );
   }

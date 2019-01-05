@@ -6,6 +6,9 @@ import ColorIcon from "mdi-material-ui/FormatColorFill";
 import ThemeIcon from "mdi-material-ui/Palette";
 import FlashIcon from "mdi-material-ui/Flash";
 import styled from "styled-components";
+import ColorControls from "./ColorControls";
+import ThemeControls from "./ThemeControls";
+import EffectControls from "./EffectControls";
 
 const propTypes = {
   light: PropTypes.shape({
@@ -73,16 +76,31 @@ class Light extends React.Component {
       onColorChange
     } = this.props;
     const { value } = this.state;
+
+    let controls;
+    if (value === 0) {
+      controls = (
+        <ColorControls color={light.color} onColorChange={onColorChange} />
+      );
+    } else if (value === 1) {
+      controls = <ThemeControls />;
+    } else {
+      controls = <EffectControls />;
+    }
+
     return (
-      <StyledBottomNavigation
-        value={value}
-        onChange={this.handleChange}
-        showLabels
-      >
-        <BottomNavigationAction label="Colors" icon={<ColorIcon />} />
-        <BottomNavigationAction label="Themes" icon={<ThemeIcon />} />
-        <BottomNavigationAction label="Effects" icon={<FlashIcon />} />
-      </StyledBottomNavigation>
+      <React.Fragment>
+        {controls}
+        <StyledBottomNavigation
+          value={value}
+          onChange={this.handleChange}
+          showLabels
+        >
+          <BottomNavigationAction label="Colors" icon={<ColorIcon />} />
+          <BottomNavigationAction label="Themes" icon={<ThemeIcon />} />
+          <BottomNavigationAction label="Effects" icon={<FlashIcon />} />
+        </StyledBottomNavigation>
+      </React.Fragment>
     );
   }
 }

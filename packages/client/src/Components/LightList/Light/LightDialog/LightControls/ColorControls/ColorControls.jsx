@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import ColorPicker from "./ColorPicker";
 
 const propTypes = {
   color: PropTypes.shape({
@@ -18,8 +19,11 @@ const defaultProps = {
   }
 };
 
-const ColorControls = props => <div>Color</div>;
-
+const ColorControls = props => (
+  <div>
+    <ColorPicker color={props.color} onChange={props.onColorChange} />
+  </div>
+);
 ColorControls.propTypes = propTypes;
 ColorControls.defaultProps = defaultProps;
 

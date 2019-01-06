@@ -23,6 +23,13 @@
   dependencies:
     regenerator-runtime "^0.12.0"
 
+"@jaames/iro@^3.5.4":
+  version "3.5.4"
+  resolved "https://registry.yarnpkg.com/@jaames/iro/-/iro-3.5.4.tgz#561a5ffecabf5891fce8950410a76fca2b7863a4"
+  integrity sha512-TQArLbHE90G10pYRgoRbO+/As9lyz/m+HII9F++QYmpN3/jSIy5gOrizX3PeJ9nyu3U4rh/SWwKfO/4+m+4gOw==
+  dependencies:
+    css-reset-and-normalize "^1.0.1"
+
 "@material-ui/core@^3.6.0":
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-3.6.0.tgz#15d602e9316659368e33dd43279b7995b26423ea"
@@ -2333,6 +2340,11 @@ css-loader@0.28.7:
     postcss-modules-values "^1.1.0"
     postcss-value-parser "^3.3.0"
     source-list-map "^2.0.0"
+
+css-reset-and-normalize@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/css-reset-and-normalize/-/css-reset-and-normalize-1.0.1.tgz#1b52857a4ddd3731fb5697238c63021cb576c94c"
+  integrity sha512-Bt69gRJBE6aeDAFvEQzv44IiI3n/mJnogcPrv/9TYBAYKu2BTIJvlzSO5enjahA9Is3MBIa5039NhLuww6x5Vw==
 
 css-select@^1.1.0, css-select@~1.2.0:
   version "1.2.0"

@@ -9,7 +9,7 @@ let throttleSpeed;
 if (process.env.REACT_APP_ENV === "test") {
   throttleSpeed = 0;
 } else {
-  throttleSpeed = 100;
+  throttleSpeed = 500;
 }
 
 const throttleSetLight = throttle((setLight, newLight, oldLight) => {

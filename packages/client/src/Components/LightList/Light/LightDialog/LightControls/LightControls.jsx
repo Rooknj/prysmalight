@@ -85,7 +85,14 @@ class Light extends React.Component {
     } else if (value === 1) {
       controls = <ThemeControls />;
     } else {
-      controls = <EffectControls />;
+      controls = (
+        <EffectControls
+          effect={light.effect}
+          onInputChange={onEffectChange}
+          supportedEffects={light.supportedEffects}
+          speed={light.speed}
+        />
+      );
     }
 
     return (

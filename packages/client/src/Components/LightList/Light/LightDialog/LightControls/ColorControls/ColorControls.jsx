@@ -1,6 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 import ColorPicker from "./ColorPicker";
+import styled from "styled-components";
+
+const StyledDiv = styled.div`
+  margin-top: 1em;
+  margin-left: auto;
+  margin-right: auto;
+`;
 
 const propTypes = {
   color: PropTypes.shape({
@@ -20,9 +27,9 @@ const defaultProps = {
 };
 
 const ColorControls = props => (
-  <div>
+  <StyledDiv>
     <ColorPicker color={props.color} onChange={props.onColorChange} />
-  </div>
+  </StyledDiv>
 );
 ColorControls.propTypes = propTypes;
 ColorControls.defaultProps = defaultProps;

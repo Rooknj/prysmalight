@@ -15,9 +15,11 @@ const pathResolve = require("path").resolve;
 
 let argv = process.argv.slice(2);
 
+process.env.REACT_APP_ENV = "dev";
+
 if (argv.indexOf("--local") >= 0) {
   console.log("Using Local Server");
-  process.env.REACT_APP_ENV = "local";
+  process.env.REACT_APP_ENV = "dev-local";
 }
 
 const args = spawnArgs("react-scripts start", { removequotes: "always" });

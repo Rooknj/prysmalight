@@ -19,10 +19,12 @@ import { HttpLink } from "apollo-link-http"; // Use Apollo Over HTTP (Queries, M
 import { WebSocketLink } from "apollo-link-ws"; // Use Apollo Over Websockets (Subscriptions)
 
 let serverName;
-if (process.env.REACT_APP_ENV === "local") {
+if (process.env.REACT_APP_ENV === "dev") {
+  serverName = "raspberrypi.local";
+} else if (process.env.REACT_APP_ENV === "dev-local") {
   serverName = "localhost";
 } else {
-  serverName = "raspberrypi.local";
+  serverName = window.location.hostname;
 }
 
 // Create an http link:

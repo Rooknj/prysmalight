@@ -1,5 +1,5 @@
-# lightapp2
-Monorepo for lightapp2
+# Prysmalight
+Monorepo for Prysmalight
 
 # Important Notes
 - This app is served at http://raspberrypi.local

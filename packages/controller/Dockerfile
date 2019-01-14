@@ -26,7 +26,7 @@ FROM node:carbon
 
 WORKDIR /usr/app
 
-COPY --from=builder /usr/app/build/lightapp2-controller-microservice /usr/app
+COPY --from=builder /usr/app/build/prysmalight-controller /usr/app
 
 # Start the app
-CMD ./lightapp2-controller-microservice
+CMD ./prysmalight-controller

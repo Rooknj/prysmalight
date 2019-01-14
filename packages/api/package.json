@@ -1,8 +1,8 @@
 {
-  "name": "lightapp2-server",
+  "name": "prysmalight-api",
   "version": "0.1.0",
   "private": true,
-  "description": "GraphQL Server for Lightapp2.",
+  "description": "GraphQL Server for PrysmaLight.",
   "dependencies": {
     "amqplib": "^0.5.3",
     "apollo-server": "^2.0.0",

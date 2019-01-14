@@ -1,8 +1,8 @@
-Lightapp2-client [![Build Status](https://travis-ci.org/Rooknj/lightapp2-client.svg?branch=master)](https://travis-ci.org/Rooknj/lightapp2-client)
+Prysmalight-client
 ===========================================
 
 <p align="center">
-  <img alt="Lightapp2-client" src="./lights.png" width="400">
+  <img alt="Prysmalight-client" src="./lights.png" width="400">
 </p>
 
 <p align="center">

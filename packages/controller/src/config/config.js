@@ -36,7 +36,7 @@ const mqttSettings = {
   reconnectPeriod: 5000, // Amount of time between reconnection attempts
   username: "pi",
   password: "MQTTIsBetterThanUDP",
-  MQTT_LIGHT_TOP_LEVEL: "lightapp2",
+  MQTT_LIGHT_TOP_LEVEL: "prysmalight",
   MQTT_LIGHT_CONNECTED_TOPIC: "connected",
   MQTT_LIGHT_STATE_TOPIC: "state",
   MQTT_LIGHT_COMMAND_TOPIC: "command",

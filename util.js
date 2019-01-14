@@ -78,8 +78,8 @@ const packageWasChanged = packageName => {
 const buildDockerImage = async (pkg, tag, rpi) => {
   const path = `./packages/${pkg}`;
   if (rpi) {
-    const image = `rooknj/lightapp2-${pkg}:${tag}-rpi`;
-    const latest = `rooknj/lightapp2-${pkg}:latest-rpi`;
+    const image = `rooknj/prysmalight-${pkg}:${tag}-rpi`;
+    const latest = `rooknj/prysmalight-${pkg}:latest-rpi`;
     console.log("Pulling", latest);
     await executeCommand(`docker pull ${latest}`);
     console.log("Building", image);
@@ -87,8 +87,8 @@ const buildDockerImage = async (pkg, tag, rpi) => {
       `docker build -f ${path}/rpi.Dockerfile --cache-from ${latest} -t ${image} ${path}`
     );
   } else {
-    const image = `rooknj/lightapp2-${pkg}:${tag}`;
-    const latest = `rooknj/lightapp2-${pkg}:latest`;
+    const image = `rooknj/prysmalight-${pkg}:${tag}`;
+    const latest = `rooknj/prysmalight-${pkg}:latest`;
     console.log("Pulling", latest);
     await executeCommand(`docker pull ${latest}`);
     console.log("Building", image);
@@ -100,9 +100,9 @@ const buildDockerImage = async (pkg, tag, rpi) => {
 
 const publishDockerImage = async (pkg, tag, rpi) => {
   if (rpi) {
-    await executeCommand(`docker push rooknj/lightapp2-${pkg}:${tag}-rpi`);
+    await executeCommand(`docker push rooknj/prysmalight-${pkg}:${tag}-rpi`);
   } else {
-    await executeCommand(`docker push rooknj/lightapp2-${pkg}:${tag}`);
+    await executeCommand(`docker push rooknj/prysmalight-${pkg}:${tag}`);
   }
 };
 

@@ -30,10 +30,10 @@ FROM resin/raspberrypi3-debian:jessie
 
 WORKDIR /usr/app
 
-COPY --from=builder /usr/app/build/lightapp2-api-gateway /usr/app
+COPY --from=builder /usr/app/build/prysmalight-api /usr/app
 
 # Make port 4001 available to the world outside this container
 EXPOSE 4001
 
 # Start the app
-CMD ./lightapp2-api-gateway
+CMD ./prysmalight-api

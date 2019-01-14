@@ -16,7 +16,6 @@ const buildPackage = async (packageName, tag) => {
       }
     }
     buildDockerImage(packageName, tag);
-    buildDockerImage(packageName, tag, true);
   } else {
     console.log(
       `Currently in CI and ${packageName} was not changed. Skipping build`

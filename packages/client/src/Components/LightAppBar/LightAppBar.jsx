@@ -14,7 +14,7 @@ const LightAppBar = () => (
   <AppBar position="sticky" color="primary">
     <StyledToolbar>
       <Typography variant="h6" color="inherit">
-        Light App 2.0
+        Prysmalight
       </Typography>
       <LightActionsContainer />
     </StyledToolbar>

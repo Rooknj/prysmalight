@@ -150,8 +150,8 @@ char MQTT_LIGHT_CONFIG_TOPIC[50];    // for sending config info
 char MQTT_LIGHT_DISCOVERY_TOPIC[50]; // to know when to send config info
 
 // homebridge
-char *HOMEKIT_LIGHT_STATE_TOPIC = "lightapp2/to/set";
-char *HOMEKIT_LIGHT_COMMAND_TOPIC = "lightapp2/from/set";
+char *HOMEKIT_LIGHT_STATE_TOPIC = "prysmalight/to/set";
+char *HOMEKIT_LIGHT_COMMAND_TOPIC = "prysmalight/from/set";
 
 // payloads
 const char *LIGHT_ON = "ON";

@@ -15,7 +15,7 @@ Lightapp2-client [![Build Status](https://travis-ci.org/Rooknj/lightapp2-client.
 
 ## Commands
 - ```yarn start [--local]``` - Starts the Server
-  - ```--local``` will run the client against a server running at localhost:4001 (Default is raspberrypi.local:4001)
+  - ```--local``` will run the client against a server running at localhost:4001 (Default is prysma.local:4001)
 - ```yarn build``` - Makes a production build of the client (Uses React-scripts build from create-react-app)
 - ```yarn test [--no-watch]``` - Runs unit tests
   - ```--no-watch``` will run the unit tests once and exit (Default is watch mode)

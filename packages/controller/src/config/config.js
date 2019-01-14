@@ -2,7 +2,7 @@ const Debug = require("debug").default;
 const debug = Debug("config");
 
 const getMqttHost = () => {
-  let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
+  let MQTT_BROKER = `tcp://prysma.local:1883`;
   if (process.env.MQTT_HOST) {
     debug(`Adding custom MQTT host: ${process.env.MQTT_HOST}`);
     MQTT_BROKER = `tcp://${process.env.MQTT_HOST}:1883`;
@@ -21,7 +21,7 @@ const getRedisHost = () => {
 
 const rabbitSettings = {
   protocol: "amqp",
-  hostname: process.env.RABBIT_HOST || "raspberrypi.local",
+  hostname: process.env.RABBIT_HOST || "prysma.local",
   port: 5672,
   username: "guest",
   password: "guest",

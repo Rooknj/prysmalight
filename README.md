@@ -2,8 +2,8 @@
 Monorepo for Prysmalight
 
 # Important Notes
-- This app is served at http://raspberrypi.local
-  - If your router doesn’t support mDNS, then you’ll have to use the IP address of your Pi instead of raspberrypi.local. For example, http://192.168.0.9. You should be able to find the IP address of your Pi from the admin interface of your router.
+- This app is served at http://prysma.local
+  - If your device doesn’t support mDNS, then you’ll have to use the IP address of your Pi instead of prysma.local. For example, http://192.168.0.9. You should be able to find the IP address of your Pi from the admin interface of your router.
 - You must update the ESP8266 yourself using the Arduino IDE. This is a DIY project currently so you need to update this yourself
 - You can not dynamically change the number of LEDs in your strip. This requires a firmware update on the esp8266
 - The Hub is the only thing that talks to the lights. All services have to go through the RPI hub

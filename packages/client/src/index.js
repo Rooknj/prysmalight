@@ -20,7 +20,7 @@ import { WebSocketLink } from "apollo-link-ws"; // Use Apollo Over Websockets (S
 
 let serverName;
 if (process.env.REACT_APP_ENV === "dev") {
-  serverName = "raspberrypi.local";
+  serverName = "prysma.local";
 } else if (process.env.REACT_APP_ENV === "dev-local") {
   serverName = "localhost";
 } else {

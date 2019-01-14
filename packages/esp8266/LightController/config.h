@@ -41,7 +41,7 @@
 #define CONFIG_MQTT_DISCOVERY "discovery"
 
 // MDNS config
-#define CONFIG_MDNS_HOSTNAME "raspberrypi"
+#define CONFIG_MDNS_HOSTNAME "prysma"
 
 // OTA config
 #define CONFIG_OTA_PASSWORD "ESP8266Rulez"

@@ -12,7 +12,6 @@ const deployPackage = async (packageName, tag) => {
       }
     }
     publishDockerImage(packageName, tag);
-    publishDockerImage(packageName, tag, true);
   } else {
     console.log(
       `Currently in CI and ${packageName} was not changed. Skipping deploy`

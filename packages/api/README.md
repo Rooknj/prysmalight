@@ -12,5 +12,4 @@
 - yarn start [--local, --mock]
 - yarn build
 - yarn test [--no-watch]
-- yarn testIntegration [--rpi]
 - yarn clean

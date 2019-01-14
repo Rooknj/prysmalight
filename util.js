@@ -75,35 +75,20 @@ const packageWasChanged = packageName => {
   return wasChanged;
 };
 
-const buildDockerImage = async (pkg, tag, rpi) => {
+const buildDockerImage = async (pkg, tag) => {
   const path = `./packages/${pkg}`;
-  if (rpi) {
-    const image = `rooknj/prysmalight-${pkg}:${tag}-rpi`;
-    const latest = `rooknj/prysmalight-${pkg}:latest-rpi`;
-    console.log("Pulling", latest);
-    await executeCommand(`docker pull ${latest}`);
-    console.log("Building", image);
-    await executeCommand(
-      `docker build -f ${path}/rpi.Dockerfile --cache-from ${latest} -t ${image} ${path}`
-    );
-  } else {
-    const image = `rooknj/prysmalight-${pkg}:${tag}`;
-    const latest = `rooknj/prysmalight-${pkg}:latest`;
-    console.log("Pulling", latest);
-    await executeCommand(`docker pull ${latest}`);
-    console.log("Building", image);
-    await executeCommand(
-      `docker build --cache-from ${latest} -t ${image} ${path}`
-    );
-  }
+  const image = `rooknj/prysmalight-${pkg}:${tag}`;
+  const latest = `rooknj/prysmalight-${pkg}:latest`;
+  console.log("Pulling", latest);
+  await executeCommand(`docker pull ${latest}`);
+  console.log("Building", image);
+  await executeCommand(
+    `docker build --cache-from ${latest} -t ${image} ${path}`
+  );
 };
 
-const publishDockerImage = async (pkg, tag, rpi) => {
-  if (rpi) {
-    await executeCommand(`docker push rooknj/prysmalight-${pkg}:${tag}-rpi`);
-  } else {
-    await executeCommand(`docker push rooknj/prysmalight-${pkg}:${tag}`);
-  }
+const publishDockerImage = async (pkg, tag) => {
+  await executeCommand(`docker push rooknj/prysmalight-${pkg}:${tag}`);
 };
 
 module.exports = {

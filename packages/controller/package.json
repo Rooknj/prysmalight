@@ -30,7 +30,6 @@
   "scripts": {
     "precommit": "lint-staged",
     "test": "node scripts/test",
-    "testIntegration": "node scripts/integration",
     "build": "node scripts/build",
     "start": "node scripts/start",
     "clean": "node scripts/clean"

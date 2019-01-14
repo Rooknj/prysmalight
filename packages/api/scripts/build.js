@@ -32,7 +32,7 @@ if (process.env.PKG_TARGET) {
       target = "node8-linux-x64";
       break;
     default:
-      return new Error("No target specified");
+      throw new Error("No target specified");
   }
 }
 

@@ -1,18 +1,22 @@
 ## Build Environment
 # The latest LTS version of node
-FROM node:carbon-alpine as builder
+FROM resin/raspberrypi3-node:8.11.3-slim as builder
 
 # Create app directory
 WORKDIR /usr/app
 
-ENV PKG_TARGET="node8-linux-x64"
+ENV PKG_TARGET="node8-linux-armv7"
 
 # Add app
 COPY . .
 
+# Start QEMU support for building on all architectures
+RUN [ "cross-build-start" ]
+
+# Install Yarn
+RUN npm install -g yarn
 # Install pkg
 RUN yarn global add pkg
-
 # Install app dependencies
 RUN yarn install --silent
  # Test app
@@ -22,7 +26,7 @@ RUN yarn test --no-watch
 RUN yarn build
 
 ## Prod Environment
-FROM node:carbon
+FROM resin/raspberrypi3-debian:jessie
 
 WORKDIR /usr/app
 

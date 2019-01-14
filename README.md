@@ -15,10 +15,8 @@ Monorepo for Prysmalight
       - tag - tags docker images
       - publish - publishes docker images to the cloud repository
   - src - holds main package code
-  - Dockerfile - dockerfile for x64 images
-  - rpi.Dockerfile - dockerfile for raspberry pi images
-  - docker-compose.yml - docker compose for x64 images
-  - docker-compose.rpi.yml - docker compose for raspberry pi images
+  - Dockerfile - dockerfile for raspberry pi images
+  - docker-compose.yml - docker compose for raspberry pi images
   - .dockerignore - docker ignore file
   - package.json - holds all package commands
     - start - starts the program running locally

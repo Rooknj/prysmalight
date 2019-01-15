@@ -2,11 +2,14 @@ import React from "react";
 import PropTypes from "prop-types";
 import ColorPicker from "./ColorPicker";
 import styled from "styled-components";
+import Typography from "@material-ui/core/Typography";
 
-const StyledDiv = styled.div`
+const PickerDiv = styled.div`
+  margin: 1em auto auto auto;
+`;
+
+const TextDiv = styled.div`
   margin-top: 1em;
-  margin-left: auto;
-  margin-right: auto;
 `;
 
 const propTypes = {
@@ -27,9 +30,21 @@ const defaultProps = {
 };
 
 const ColorControls = props => (
-  <StyledDiv>
-    <ColorPicker color={props.color} onChange={props.onColorChange} />
-  </StyledDiv>
+  <React.Fragment>
+    <TextDiv>
+      <Typography variant="h6" align="center">
+        Move Circle to Pick a Color
+      </Typography>
+    </TextDiv>
+    <PickerDiv>
+      <ColorPicker
+        color={props.color}
+        onChange={props.onColorChange}
+        height={320}
+        width={320}
+      />
+    </PickerDiv>
+  </React.Fragment>
 );
 ColorControls.propTypes = propTypes;
 ColorControls.defaultProps = defaultProps;

@@ -56,6 +56,13 @@ const StyledBottomNavigation = styled(BottomNavigation)`
   }};
 `;
 
+const ControlsContainer = styled.div`
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 56px;
+`;
+
 class Light extends React.Component {
   state = {
     value: 0
@@ -97,7 +104,7 @@ class Light extends React.Component {
 
     return (
       <React.Fragment>
-        {controls}
+        <ControlsContainer>{controls}</ControlsContainer>
         <StyledBottomNavigation
           value={value}
           onChange={this.handleChange}

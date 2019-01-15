@@ -8,6 +8,7 @@ import Typography from "@material-ui/core/Typography";
 import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
 import LightControls from "./LightControls";
+import LightHeader from "./LightHeader";
 
 import styled from "styled-components";
 
@@ -58,7 +59,13 @@ function Transition(props) {
 
 class LightDialog extends React.Component {
   render() {
-    const { onClose, open, light } = this.props;
+    const {
+      onClose,
+      open,
+      light,
+      onStateChange,
+      onBrightnessChange
+    } = this.props;
     return (
       <Dialog
         fullScreen
@@ -66,16 +73,12 @@ class LightDialog extends React.Component {
         onClose={onClose}
         TransitionComponent={Transition}
       >
-        <AppBar position="relative" color="secondary">
-          <StyledToolbar>
-            <Typography variant="h6" color="inherit">
-              {light.id}
-            </Typography>
-            <IconButton color="inherit" onClick={onClose} aria-label="Close">
-              <CloseIcon />
-            </IconButton>
-          </StyledToolbar>
-        </AppBar>
+        <LightHeader
+          light={light}
+          onClose={onClose}
+          onStateChange={onStateChange}
+          onBrightnessChange={onBrightnessChange}
+        />
         <LightControls {...this.props} />
       </Dialog>
     );

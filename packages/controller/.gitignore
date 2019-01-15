@@ -9,7 +9,7 @@ node_modules
 
 # production
 /build
-lightapp2-controller-microservice
+prysmalight-controller
 
 # gulp cache
 .gulp-cache

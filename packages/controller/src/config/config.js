@@ -2,7 +2,7 @@ const Debug = require("debug").default;
 const debug = Debug("config");
 
 const getMqttHost = () => {
-  let MQTT_BROKER = `tcp://raspberrypi.local:1883`;
+  let MQTT_BROKER = `tcp://prysma.local:1883`;
   if (process.env.MQTT_HOST) {
     debug(`Adding custom MQTT host: ${process.env.MQTT_HOST}`);
     MQTT_BROKER = `tcp://${process.env.MQTT_HOST}:1883`;
@@ -21,7 +21,7 @@ const getRedisHost = () => {
 
 const rabbitSettings = {
   protocol: "amqp",
-  hostname: process.env.RABBIT_HOST || "raspberrypi.local",
+  hostname: process.env.RABBIT_HOST || "prysma.local",
   port: 5672,
   username: "guest",
   password: "guest",
@@ -36,7 +36,7 @@ const mqttSettings = {
   reconnectPeriod: 5000, // Amount of time between reconnection attempts
   username: "pi",
   password: "MQTTIsBetterThanUDP",
-  MQTT_LIGHT_TOP_LEVEL: "lightapp2",
+  MQTT_LIGHT_TOP_LEVEL: "prysmalight",
   MQTT_LIGHT_CONNECTED_TOPIC: "connected",
   MQTT_LIGHT_STATE_TOPIC: "state",
   MQTT_LIGHT_COMMAND_TOPIC: "command",

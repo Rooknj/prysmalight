@@ -7,7 +7,7 @@ const serverSettings = {
 
 const rabbitSettings = {
   protocol: "amqp",
-  hostname: process.env.RABBIT_HOST || "raspberrypi.local",
+  hostname: process.env.RABBIT_HOST || "prysma.local",
   port: 5672,
   username: "guest",
   password: "guest",

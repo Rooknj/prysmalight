@@ -1,8 +1,8 @@
-Lightapp2-esp8266
+prysmalight-esp8266
 ===========================================
 
 <p align="center">
-  <img alt="Lightapp2-esp8266" src="./esp8266.png" width="480">
+  <img alt="prysmalight-esp8266" src="./esp8266.png" width="480">
 </p>
 
 <p align="center">

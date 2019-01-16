@@ -37,6 +37,7 @@ const StyledCirclePicker = styled(CirclePicker)`
 `;
 
 const CirclePickerWrapper = styled.div`
+  margin-top: 1em;
   overflow-x: hidden;
 `;
 

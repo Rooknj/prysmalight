@@ -6,6 +6,7 @@ exports[`matches shallow snapshot 1`] = `
 <WithStyles(Dialog)
   TransitionComponent={[Function]}
   fullScreen={true}
+  open={false}
 >
   <LightHeader
     light={
@@ -41,7 +42,9 @@ exports[`matches shallow snapshot 1`] = `
     onBrightnessChange={[Function]}
     onColorChange={[Function]}
     onEffectChange={[Function]}
+    onSpeedChange={[Function]}
     onStateChange={[Function]}
+    open={false}
   />
 </WithStyles(Dialog)>
 `;

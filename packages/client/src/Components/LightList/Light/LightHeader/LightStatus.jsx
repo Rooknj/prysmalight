@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import CardHeader from "@material-ui/core/CardHeader";
 import Avatar from "@material-ui/core/Avatar";
-import HightlightIcon from "@material-ui/icons/Highlight";
+import LightIcon from "mdi-material-ui/Lightbulb";
 import grey from "@material-ui/core/colors/grey";
 import styled from "styled-components";
 
@@ -34,7 +34,7 @@ const LightStatus = props => {
       subheader={props.connected === 2 ? "Connected" : "Disonnected"}
       avatar={
         <StyledAvatar aria-label="Light">
-          <HightlightIcon
+          <LightIcon
             nativeColor={`rgb(${props.color.r},${props.color.g},${
               props.color.b
             })`}

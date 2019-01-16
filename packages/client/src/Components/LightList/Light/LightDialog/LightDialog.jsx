@@ -1,20 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Dialog from "@material-ui/core/Dialog";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import IconButton from "@material-ui/core/IconButton";
-import Typography from "@material-ui/core/Typography";
-import CloseIcon from "@material-ui/icons/Close";
 import Slide from "@material-ui/core/Slide";
-import ComplexLight from "./ComplexLight";
-
-import styled from "styled-components";
-
-const StyledToolbar = styled(Toolbar)`
-  align-items: center;
-  justify-content: space-between;
-`;
+import LightControls from "./LightControls";
+import LightHeader from "./DialogHeader";
 
 const propTypes = {
   light: PropTypes.shape({
@@ -35,7 +24,8 @@ const propTypes = {
   onStateChange: PropTypes.func.isRequired,
   onBrightnessChange: PropTypes.func.isRequired,
   onColorChange: PropTypes.func.isRequired,
-  onEffectChange: PropTypes.func.isRequired
+  onEffectChange: PropTypes.func.isRequired,
+  onSpeedChange: PropTypes.func.isRequired
 };
 
 const defaultProps = {
@@ -58,7 +48,13 @@ function Transition(props) {
 
 class LightDialog extends React.Component {
   render() {
-    const { onClose, open, light } = this.props;
+    const {
+      onClose,
+      open,
+      light,
+      onStateChange,
+      onBrightnessChange
+    } = this.props;
     return (
       <Dialog
         fullScreen
@@ -66,17 +62,13 @@ class LightDialog extends React.Component {
         onClose={onClose}
         TransitionComponent={Transition}
       >
-        <AppBar position="relative" color="secondary">
-          <StyledToolbar>
-            <Typography variant="h6" color="inherit">
-              {light.id}
-            </Typography>
-            <IconButton color="inherit" onClick={onClose} aria-label="Close">
-              <CloseIcon />
-            </IconButton>
-          </StyledToolbar>
-        </AppBar>
-        <ComplexLight {...this.props} />
+        <LightHeader
+          light={light}
+          onClose={onClose}
+          onStateChange={onStateChange}
+          onBrightnessChange={onBrightnessChange}
+        />
+        <LightControls {...this.props} />
       </Dialog>
     );
   }

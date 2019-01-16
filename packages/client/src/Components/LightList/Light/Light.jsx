@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import Card from "@material-ui/core/Card";
 import LightHeader from "./LightHeader/LightHeader";
-import BrightnessSlider from "./BrightnessSlider/BrightnessSlider";
+import BrightnessSection from "./BrightnessSection";
 import Collapse from "@material-ui/core/Collapse";
 
 import LightDialog from "./LightDialog/LightDialog";
@@ -36,7 +36,8 @@ const propTypes = {
   onStateChange: PropTypes.func.isRequired,
   onBrightnessChange: PropTypes.func.isRequired,
   onColorChange: PropTypes.func.isRequired,
-  onEffectChange: PropTypes.func.isRequired
+  onEffectChange: PropTypes.func.isRequired,
+  onSpeedChange: PropTypes.func.isRequired
 };
 
 const defaultProps = {
@@ -90,7 +91,7 @@ class Light extends React.Component {
               timeout="auto"
               unmountOnExit
             >
-              <BrightnessSlider
+              <BrightnessSection
                 connected={light.connected}
                 brightness={light.brightness}
                 onBrightnessChange={onBrightnessChange}

@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import Slider from "@material-ui/lab/Slider";
+import Slider from "./SmoothSlider";
 import styled from "styled-components";
 import BrightnessIcon from "@material-ui/icons/BrightnessLow";
 
@@ -12,7 +12,6 @@ const IconDiv = styled.div`
 `;
 
 const StyledDiv = styled.div`
-  height: 2rem;
   margin-bottom: 1rem;
   margin-left: 1rem;
   margin-right: 1rem;
@@ -21,22 +20,18 @@ const StyledDiv = styled.div`
 
 const StyledSlider = styled(Slider)`
   padding-top: 1rem;
+  padding-bottom: 1rem;
 `;
 
 const propTypes = {
   connected: PropTypes.number,
   brightness: PropTypes.number,
-  color: PropTypes.shape({
-    r: PropTypes.number.isRequired,
-    g: PropTypes.number.isRequired,
-    b: PropTypes.number.isRequired
-  }),
   onBrightnessChange: PropTypes.func
 };
 
 const defaultProps = {};
 
-const BrightnessSlider = ({ brightness, onBrightnessChange, connected }) => {
+const BrightnessSection = ({ brightness, onBrightnessChange, connected }) => {
   return (
     <React.Fragment>
       <StyledDiv onClick={e => e.stopPropagation()}>
@@ -56,7 +51,7 @@ const BrightnessSlider = ({ brightness, onBrightnessChange, connected }) => {
   );
 };
 
-BrightnessSlider.propTypes = propTypes;
-BrightnessSlider.defaultProps = defaultProps;
+BrightnessSection.propTypes = propTypes;
+BrightnessSection.defaultProps = defaultProps;
 
-export default BrightnessSlider;
+export default BrightnessSection;

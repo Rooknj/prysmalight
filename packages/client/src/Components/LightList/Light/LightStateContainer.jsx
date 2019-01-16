@@ -9,7 +9,7 @@ let throttleSpeed;
 if (process.env.REACT_APP_ENV === "test") {
   throttleSpeed = 0;
 } else {
-  throttleSpeed = 100;
+  throttleSpeed = 500;
 }
 
 const throttleSetLight = throttle((setLight, newLight, oldLight) => {
@@ -69,11 +69,20 @@ class LightStateContainer extends React.Component {
     throttleSetLight(setLight, newLight, light);
   };
 
-  handleEffectChange = e => {
+  handleEffectChange = effect => {
     const { setLight, light } = this.props;
     const newLight = {
       id: light.id,
-      [e.target.name]: e.target.value
+      effect
+    };
+    throttleSetLight(setLight, newLight, light);
+  };
+
+  handleSpeedChange = (_, speed) => {
+    const { setLight, light } = this.props;
+    const newLight = {
+      id: light.id,
+      speed
     };
     throttleSetLight(setLight, newLight, light);
   };
@@ -88,6 +97,7 @@ class LightStateContainer extends React.Component {
         onBrightnessChange={this.handleBrightnessChange}
         onColorChange={this.handleColorChange}
         onEffectChange={this.handleEffectChange}
+        onSpeedChange={this.handleSpeedChange}
       />
     );
   }

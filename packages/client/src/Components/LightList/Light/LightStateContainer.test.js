@@ -88,13 +88,30 @@ it("calls setLight with the correct arguments when handleEffectChange is called"
     wrapper = shallow(
       <LightStateContainer light={MOCK_LIGHT} setLight={setLightSpy} />
     ),
-    mockEvent = { target: { name: "effect", value: "Flash" } },
+    mockEffect = "Flash",
     expectedArguments = {
       lightId: MOCK_LIGHT.id,
-      lightData: { effect: "Flash" }
+      lightData: { effect: mockEffect }
     };
 
-  wrapper.instance().handleEffectChange(mockEvent); // Call method
+  wrapper.instance().handleEffectChange(mockEffect); // Call method
+  expect(setLightSpy).toHaveBeenCalledTimes(1);
+  const args = setLightSpy.mock.calls[0][0]; // Get the arguments that setLight was called with
+  expect(args).toHaveProperty("variables", expectedArguments);
+});
+
+it("calls setLight with the correct arguments when handleSpeedChange is called", () => {
+  const setLightSpy = jest.fn(),
+    wrapper = shallow(
+      <LightStateContainer light={MOCK_LIGHT} setLight={setLightSpy} />
+    ),
+    mockSpeed = 7,
+    expectedArguments = {
+      lightId: MOCK_LIGHT.id,
+      lightData: { speed: mockSpeed }
+    };
+
+  wrapper.instance().handleSpeedChange({}, mockSpeed); // Call method
   expect(setLightSpy).toHaveBeenCalledTimes(1);
   const args = setLightSpy.mock.calls[0][0]; // Get the arguments that setLight was called with
   expect(args).toHaveProperty("variables", expectedArguments);

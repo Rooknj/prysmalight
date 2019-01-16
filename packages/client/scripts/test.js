@@ -22,7 +22,9 @@ if (argv.indexOf("--no-watch") >= 0) {
 }
 
 // TODO: Run react scripts test --env=jsdom
-const args = spawnArgs("react-scripts test --env=jsdom", { removequotes: "always" });
+const args = spawnArgs("react-scripts test --env=jsdom", {
+  removequotes: "always"
+});
 
 const result = spawn.sync(args.shift(), args, {
   stdio: ["inherit", "inherit", "inherit"], // stdin, stdout, stderr. set to ignore to ignore
@@ -34,3 +36,7 @@ const result = spawn.sync(args.shift(), args, {
       pathResolve(process.cwd(), "node_modules", ".bin")
   })
 });
+
+if (result.status !== 0) {
+  process.exit(result.status || 1);
+}

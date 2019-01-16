@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import Dialog from "@material-ui/core/Dialog";
 import Slide from "@material-ui/core/Slide";
 import LightControls from "./LightControls";
-import LightHeader from "./LightHeader";
+import LightHeader from "./DialogHeader";
 
 const propTypes = {
   light: PropTypes.shape({

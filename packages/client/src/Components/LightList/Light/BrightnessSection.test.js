@@ -1,7 +1,7 @@
 import React from "react";
 import { shallow } from "enzyme";
-import BrightnessSlider from "./BrightnessSlider";
+import BrightnessSection from "./BrightnessSection";
 
 it("renders without crashing", () => {
-  shallow(<BrightnessSlider />);
+  shallow(<BrightnessSection />);
 });

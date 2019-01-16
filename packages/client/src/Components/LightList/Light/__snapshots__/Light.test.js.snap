@@ -4,7 +4,7 @@ exports[`matches mounted snapshot 1`] = `
 Array [
   "",
   <div
-    className="sc-kAzzGY ktNNNZ"
+    className="sc-kgoBCf hBThxx"
 >
     <div
         className="MuiPaper-root-17 MuiPaper-elevation1-20 MuiPaper-rounded-18 MuiCard-root-16"
@@ -132,6 +132,7 @@ exports[`matches shallow snapshot 1`] = `
     onClose={[Function]}
     onColorChange={[Function]}
     onEffectChange={[Function]}
+    onSpeedChange={[Function]}
     onStateChange={[Function]}
     open={false}
   />

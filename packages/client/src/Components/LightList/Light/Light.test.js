@@ -9,39 +9,28 @@ expect.addSnapshotSerializer(createSerializer({ mode: "deep" }));
 
 const mockTheme = { spacing: { unit: 2 } };
 
+const defaultProps = {
+  onStateChange: () => true,
+  onBrightnessChange: () => true,
+  onColorChange: () => true,
+  onEffectChange: () => true,
+  onSpeedChange: () => true
+};
+
 // TODO: Test rendering with actual mock light data
 it("renders without crashing", () => {
-  shallow(
-    <Light
-      onStateChange={() => true}
-      onBrightnessChange={() => true}
-      onColorChange={() => true}
-      onEffectChange={() => true}
-    />
-  );
+  shallow(<Light {...defaultProps} />);
 });
 
 it("matches shallow snapshot", () => {
-  const shallowed = shallow(
-    <Light
-      onStateChange={() => true}
-      onBrightnessChange={() => true}
-      onColorChange={() => true}
-      onEffectChange={() => true}
-    />
-  );
+  const shallowed = shallow(<Light {...defaultProps} />);
   expect(shallowed).toMatchSnapshot();
 });
 
 it("matches mounted snapshot", () => {
   const mounted = mount(
     <ThemeProvider theme={mockTheme}>
-      <Light
-        onStateChange={() => true}
-        onBrightnessChange={() => true}
-        onColorChange={() => true}
-        onEffectChange={() => true}
-      />
+      <Light {...defaultProps} />
     </ThemeProvider>
   );
   expect(mounted).toMatchSnapshot();

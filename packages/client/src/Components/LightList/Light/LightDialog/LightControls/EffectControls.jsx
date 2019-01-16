@@ -14,6 +14,7 @@ const StyledSlider = styled(Slider)`
 
 const SpeedSection = styled.div`
   display: flex;
+  margin-top: auto;
 `;
 
 const FastIcon = styled(RabbitIcon)`

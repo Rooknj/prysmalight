@@ -5,7 +5,7 @@ import styled from "styled-components";
 import Typography from "@material-ui/core/Typography";
 
 const PickerDiv = styled.div`
-  margin: 1em auto auto auto;
+  margin: 0 auto 0 auto;
 `;
 
 const TextDiv = styled.div`

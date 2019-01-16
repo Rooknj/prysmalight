@@ -1,26 +1,41 @@
 import React from "react";
 import PropTypes from "prop-types";
 import Grid from "@material-ui/core/Grid";
-
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Typography from "@material-ui/core/Typography";
+import Button from "@material-ui/core/Button";
 import styled from "styled-components";
+import Slider from "../../SmoothSlider";
+import TurtleIcon from "mdi-material-ui/Turtle";
+import RabbitIcon from "mdi-material-ui/Rabbit";
 
-const StyledSelect = styled(Select)`
-  min-width: 120px;
+const StyledSlider = styled(Slider)`
+  padding-top: 1em;
+  padding-bottom: 1em;
 `;
 
-const StyledFormControl = styled(FormControl)`
-    margin: ${({ theme }) => theme.spacing.unit}px
-    min-width: 120px;
+const SpeedSection = styled.div`
+  display: flex;
+`;
+
+const FastIcon = styled(RabbitIcon)`
+  margin-left: 1em;
+`;
+
+const SlowIcon = styled(TurtleIcon)`
+  margin-right: 1em;
+`;
+
+const EffectButton = styled(Button)`
+  margin: auto;
+  display: flex;
+  min-width: 8em;
+  margin-bottom: 1em;
 `;
 
 const propTypes = {
+  connected: PropTypes.number,
   effect: PropTypes.string,
-  onInputChange: PropTypes.func,
+  onEffectChange: PropTypes.func,
+  onSpeedChange: PropTypes.func,
   supportedEffects: PropTypes.array,
   speed: PropTypes.number
 };
@@ -32,67 +47,50 @@ const defaultProps = {
   speed: 4
 };
 
-const EffectControls = props => {
-  return (
-    <Grid
-      container
-      direction="row"
-      spacing={16}
-      justify="space-between"
-      alignItems="center"
-    >
-      <Grid item xs={12}>
-        <Typography variant="body2">Animations</Typography>
-      </Grid>
-      <Grid item xs={6}>
-        <StyledFormControl>
-          <InputLabel htmlFor="effect">Effect</InputLabel>
-          <StyledSelect
-            value={props.effect}
-            onChange={props.onInputChange}
-            inputProps={{
-              name: "effect",
-              id: "effect"
-            }}
-          >
-            {props.supportedEffects.map(effect => (
-              <MenuItem key={effect} value={effect}>
-                {effect}
-              </MenuItem>
-            ))}
-          </StyledSelect>
-        </StyledFormControl>
-      </Grid>
-      <Grid
-        item
-        xs={6}
-        style={{
-          display: "flex",
-          justifyContent: "flex-end"
-        }}
-      >
-        <StyledFormControl>
-          <InputLabel htmlFor="speed">Speed</InputLabel>
-          <StyledSelect
-            value={props.speed}
-            onChange={props.onInputChange}
-            inputProps={{
-              name: "speed",
-              id: "speed"
-            }}
-          >
-            {[1, 2, 3, 4, 5, 6, 7].map(speed => (
-              <MenuItem key={speed} value={speed}>
-                {speed}
-              </MenuItem>
-            ))}
-          </StyledSelect>
-        </StyledFormControl>
-      </Grid>
-    </Grid>
-  );
-};
+class EffectControls extends React.Component {
+  handleClick = effect => () => {
+    this.props.onEffectChange(effect);
+  };
 
+  render() {
+    const {
+      supportedEffects,
+      effect,
+      speed,
+      connected,
+      onSpeedChange
+    } = this.props;
+    return (
+      <React.Fragment>
+        <Grid container>
+          {supportedEffects.map(supportedEffect => (
+            <Grid key={supportedEffect} item xs={6} sm={4} md={3}>
+              <EffectButton
+                variant="contained"
+                color={supportedEffect === effect ? "secondary" : "primary"}
+                onClick={this.handleClick(supportedEffect)}
+              >
+                {supportedEffect}
+              </EffectButton>
+            </Grid>
+          ))}
+        </Grid>
+        <SpeedSection>
+          <SlowIcon color="primary" />
+          <StyledSlider
+            value={speed}
+            min={1}
+            max={7}
+            step={1}
+            onChange={onSpeedChange}
+            disabled={connected !== 2}
+          />
+          <FastIcon color="primary" />
+        </SpeedSection>
+      </React.Fragment>
+    );
+  }
+}
 EffectControls.propTypes = propTypes;
 EffectControls.defaultProps = defaultProps;
 

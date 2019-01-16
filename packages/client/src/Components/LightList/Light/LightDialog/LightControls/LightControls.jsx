@@ -29,7 +29,8 @@ const propTypes = {
   onStateChange: PropTypes.func.isRequired,
   onBrightnessChange: PropTypes.func.isRequired,
   onColorChange: PropTypes.func.isRequired,
-  onEffectChange: PropTypes.func.isRequired
+  onEffectChange: PropTypes.func.isRequired,
+  onSpeedChange: PropTypes.func.isRequired
 };
 
 const defaultProps = {
@@ -61,6 +62,7 @@ const ControlsContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 56px;
+  padding: 1em;
 `;
 
 class Light extends React.Component {
@@ -69,7 +71,6 @@ class Light extends React.Component {
   };
 
   handleChange = (_, value) => {
-    console.log(value);
     this.setState({ value });
   };
 
@@ -79,6 +80,7 @@ class Light extends React.Component {
       loading,
       onStateChange,
       onEffectChange,
+      onSpeedChange,
       onBrightnessChange,
       onColorChange
     } = this.props;
@@ -94,8 +96,10 @@ class Light extends React.Component {
     } else {
       controls = (
         <EffectControls
+          connected={light.connected}
           effect={light.effect}
-          onInputChange={onEffectChange}
+          onEffectChange={onEffectChange}
+          onSpeedChange={onSpeedChange}
           supportedEffects={light.supportedEffects}
           speed={light.speed}
         />

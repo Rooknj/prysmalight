@@ -62,7 +62,7 @@ const ControlsContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 56px;
-  padding: 1em;
+  padding: 1em 1em 0em 1em;
 `;
 
 class Light extends React.Component {
@@ -92,7 +92,9 @@ class Light extends React.Component {
         <ColorControls color={light.color} onColorChange={onColorChange} />
       );
     } else if (value === 1) {
-      controls = <ThemeControls />;
+      controls = (
+        <ThemeControls color={light.color} onColorChange={onColorChange} />
+      );
     } else {
       controls = (
         <EffectControls

@@ -1,26 +1,16 @@
 import React from "react";
 import PropTypes from "prop-types";
+import styled from "styled-components";
+import { CirclePicker } from "react-color";
 
 const propTypes = {
-  light: PropTypes.shape({
-    id: PropTypes.string.isRequired,
-    connected: PropTypes.number,
-    state: PropTypes.string,
-    brightness: PropTypes.number,
-    color: PropTypes.shape({
-      r: PropTypes.number.isRequired,
-      g: PropTypes.number.isRequired,
-      b: PropTypes.number.isRequired
-    }),
-    effect: PropTypes.string,
-    speed: PropTypes.number,
-    supportedEffects: PropTypes.array
+  connected: PropTypes.number,
+  color: PropTypes.shape({
+    r: PropTypes.number.isRequired,
+    g: PropTypes.number.isRequired,
+    b: PropTypes.number.isRequired
   }),
-  loading: PropTypes.bool,
-  onStateChange: PropTypes.func.isRequired,
-  onBrightnessChange: PropTypes.func.isRequired,
-  onColorChange: PropTypes.func.isRequired,
-  onEffectChange: PropTypes.func.isRequired
+  onColorChange: PropTypes.func.isRequired
 };
 
 const defaultProps = {
@@ -37,7 +27,35 @@ const defaultProps = {
   }
 };
 
-const ThemeControls = props => "Theme";
+const StyledCirclePicker = styled(CirclePicker)`
+  width: 100% !important;
+  overflow-y: auto;
+  padding: 1em;
+  margin-right: 0;
+  margin-left: 28px;
+  justify-content: center;
+`;
+
+const colors = [
+  "#FF0000", //red
+  "#FFA500", //orange
+  "#FFFF00", //yellow
+  "#00FF00", //green
+  "#00FFFF", //cyan
+  "#0000FF", //blue
+  "#A500FF", //purple
+  "#FF00FF" //pink
+];
+
+const ThemeControls = props => (
+  <StyledCirclePicker
+    color={props.color}
+    onChange={props.onColorChange}
+    colors={colors}
+    circleSize={56}
+    circleSpacing={42}
+  />
+);
 
 ThemeControls.propTypes = propTypes;
 ThemeControls.defaultProps = defaultProps;

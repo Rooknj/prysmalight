@@ -34,3 +34,5 @@ const result = spawn.sync(args.shift(), args, {
       pathResolve(process.cwd(), "node_modules", ".bin")
   })
 });
+
+console.log("Result:", result)

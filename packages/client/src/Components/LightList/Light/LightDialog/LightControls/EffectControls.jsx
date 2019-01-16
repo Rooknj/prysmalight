@@ -14,8 +14,15 @@ const StyledSlider = styled(Slider)`
 
 const SpeedSection = styled.div`
   display: flex;
+  padding-top: 1em;
+  padding-bottom: 1em;
+  overflow-x: hidden;
   margin-top: auto;
-`;
+`; // The overflow-x is to fix this bug https://github.com/mui-org/material-ui/issues/13455
+
+const MarginContainer = styled.div`
+  margin: 2em 1em 0em 1em
+`; // The overflow-x is to fix this bug https://github.com/mui-org/material-ui/issues/13455
 
 const FastIcon = styled(RabbitIcon)`
   margin-left: 1em;
@@ -62,7 +69,7 @@ class EffectControls extends React.Component {
       onSpeedChange
     } = this.props;
     return (
-      <React.Fragment>
+      <MarginContainer>
         <Grid container>
           {supportedEffects.map(supportedEffect => (
             <Grid key={supportedEffect} item xs={6} sm={4} md={3}>
@@ -88,7 +95,7 @@ class EffectControls extends React.Component {
           />
           <FastIcon color="primary" />
         </SpeedSection>
-      </React.Fragment>
+      </MarginContainer>
     );
   }
 }

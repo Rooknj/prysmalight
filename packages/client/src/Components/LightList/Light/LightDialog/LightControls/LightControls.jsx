@@ -62,7 +62,7 @@ const ControlsContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 56px;
-  padding: 1em 1em 0em 1em;
+  overflow-y: scroll;
 `;
 
 class Light extends React.Component {
@@ -77,11 +77,8 @@ class Light extends React.Component {
   render() {
     const {
       light,
-      loading,
-      onStateChange,
       onEffectChange,
       onSpeedChange,
-      onBrightnessChange,
       onColorChange
     } = this.props;
     const { value } = this.state;

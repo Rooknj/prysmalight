@@ -9,6 +9,7 @@ const PickerDiv = styled.div`
 `;
 
 const TextDiv = styled.div`
+  margin-top: 1em;
   margin-bottom: 1em;
 `;
 

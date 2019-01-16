@@ -4,7 +4,7 @@ exports[`matches mounted snapshot 1`] = `
 Array [
   "",
   <div
-    className="sc-VigVT cuHzsq"
+    className="sc-kAzzGY ktNNNZ"
 >
     <div
         className="MuiPaper-root-17 MuiPaper-elevation1-20 MuiPaper-rounded-18 MuiCard-root-16"
@@ -34,14 +34,8 @@ Array [
                                 role="presentation"
                                 viewBox="0 0 24 24"
                             >
-                                <defs>
-                                    <path
-                                        d="M0 0h24v24H0V0z"
-                                        id="a"
-                                    />
-                                </defs>
                                 <path
-                                    d="M6 14l3 3v5h6v-5l3-3V9H6zm5-12h2v3h-2zM3.5 5.875L4.914 4.46l2.12 2.122L5.62 7.997zm13.46.71l2.123-2.12 1.414 1.414L18.375 8z"
+                                    d="M12,2C8.13,2 5,5.13 5,9C5,11.38 6.19,13.47 8,14.74V17C8,17.55 8.45,18 9,18H15C15.55,18 16,17.55 16,17V14.74C17.81,13.47 19,11.38 19,9C19,5.13 15.87,2 12,2M9,21C9,21.55 9.45,22 10,22H14C14.55,22 15,21.55 15,21V20H9V21Z"
                                 />
                             </svg>
                         </div>
@@ -164,7 +158,7 @@ exports[`matches shallow snapshot 1`] = `
         timeout="auto"
         unmountOnExit={true}
       >
-        <BrightnessSlider
+        <BrightnessSection
           brightness={0}
           connected={0}
           onBrightnessChange={[Function]}

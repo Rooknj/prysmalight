@@ -36,25 +36,31 @@ const StyledCirclePicker = styled(CirclePicker)`
   justify-content: center;
 `;
 
+const CirclePickerWrapper = styled.div`
+  overflow-x: hidden;
+`;
+
 const colors = [
   "#FF0000", //red
-  "#FFA500", //orange
+  "#FF8800", //orange
   "#FFFF00", //yellow
   "#00FF00", //green
   "#00FFFF", //cyan
   "#0000FF", //blue
-  "#A500FF", //purple
+  "#8800FF", //purple
   "#FF00FF" //pink
 ];
 
 const ThemeControls = props => (
-  <StyledCirclePicker
-    color={props.color}
-    onChange={props.onColorChange}
-    colors={colors}
-    circleSize={56}
-    circleSpacing={42}
-  />
+  <CirclePickerWrapper>
+    <StyledCirclePicker
+      color={props.color}
+      onChange={props.onColorChange}
+      colors={colors}
+      circleSize={56}
+      circleSpacing={42}
+    />
+  </CirclePickerWrapper>
 );
 
 ThemeControls.propTypes = propTypes;

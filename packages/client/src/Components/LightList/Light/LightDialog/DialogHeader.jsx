@@ -21,7 +21,8 @@ const LeftSide = styled.div`
 `;
 
 const StyledIconButton = styled(IconButton)`
-  margin-right: 0.5em;
+  margin-left: -12px;
+  margin-right: 20px;
 `;
 
 const StyledSlider = styled(Slider)`

@@ -7,7 +7,6 @@ const express = require("express"); // NodeJS Web Server
 const cors = require("cors"); // Cross Origin Resource Sharing Middleware
 const helmet = require("helmet"); // Security Middleware
 const compression = require("compression"); // Compression Middleware
-const debug = Debug("server");
 
 const start = options => {
   return new Promise((resolve, reject) => {

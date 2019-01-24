@@ -4,9 +4,13 @@ services:
     image: rabbitmq:3
     hostname: "myrabbit"
     container_name: rabbit
+    ports:
+      - "5672:5672"
   redis:
     image: redis:latest
     container_name: redis
+    ports:
+      - "6379:6379"
     volumes:
       - ./redisData:/data
   broker:

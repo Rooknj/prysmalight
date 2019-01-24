@@ -1,3 +1,4 @@
+"use strict";
 const resolversFactory = service => ({
   Query: {
     light: (_, { lightId }) => service.getLight(lightId),

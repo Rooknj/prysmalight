@@ -1,6 +1,6 @@
+"use strict";
 const typeDefs = require("./typeDefs");
 const resolversFactory = require("./resolversFactory");
-const Debug = require("debug").default;
 const { ApolloServer } = require("apollo-server-express");
 const http = require("http"); // Library to create an http server
 const express = require("express"); // NodeJS Web Server

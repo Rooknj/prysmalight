@@ -1,5 +1,4 @@
-const Debug = require("debug").default;
-const debug = Debug("config");
+"use strict";
 
 const serverSettings = {
   port: process.env.PORT || 4001

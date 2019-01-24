@@ -1,3 +1,4 @@
+"use strict";
 const config = require("./config/config");
 const server = require("./server/server");
 const serviceFactory = require("./service/service");

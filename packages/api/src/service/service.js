@@ -1,3 +1,4 @@
+"use strict";
 const Debug = require("debug").default;
 const debug = Debug("service");
 const { promisify } = require("util");

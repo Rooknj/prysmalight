@@ -1,18 +1,19 @@
 const config = require("./config/config");
 const server = require("./server/server");
-const Debug = require("debug").default;
-const debug = Debug("main");
 const serviceFactory = require("./service/service");
 
+// Enable console log statements in this file
+/*eslint no-console:0*/
+
 // Verbose statement of service starting
-debug("--- API Gateway Microservice ---");
+console.log("--- API Gateway Microservice ---");
 
 // Unhandled error logging
 process.on("uncaughtException", err => {
-  debug("Unhandled Exception", err);
+  console.log("Unhandled Exception", err);
 });
 process.on("uncaughtRejection", err => {
-  debug("Unhandled Rejection", err);
+  console.log("Unhandled Rejection", err);
 });
 
 const startServer = async () => {
@@ -47,19 +48,19 @@ const startServer = async () => {
 
     // If there was an error creating the service, log the error and exit
     if (error) {
-      debug(error);
+      console.log(error);
       process.exit(1);
     }
   }
 
   // Start the server
-  debug("Starting Server");
+  console.log("Starting Server");
   const app = await server.start({
     port: config.serverSettings.port,
     service
   });
   app.on("close", () => {
-    debug("App Closed");
+    console.log("App Closed");
   });
 };
 

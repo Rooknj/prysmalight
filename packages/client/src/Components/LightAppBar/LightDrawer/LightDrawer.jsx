@@ -16,22 +16,34 @@ const DrawerHeader = styled.div`
   min-height: 56px;
 `;
 
-const LightDrawer = ({ open, onOpen, onClose }) => (
+const LightDrawer = ({
+  open,
+  onOpen,
+  onClose,
+  updating,
+  onUpdate,
+  rebooting,
+  onReboot
+}) => (
   <SwipeableDrawer anchor="left" open={open} onOpen={onOpen} onClose={onClose}>
     <DrawerHeader />
     <Divider />
     <List>
-      <ListItem button>
+      <ListItem button onClick={onUpdate} disabled={updating}>
         <ListItemIcon>
           <UpdateIcon />
         </ListItemIcon>
-        <ListItemText primary={"Update Prysmalight"} />
+        <ListItemText
+          primary={updating ? "Updating..." : "Update Prysmalight"}
+        />
       </ListItem>
-      <ListItem button>
+      <ListItem button onClick={onReboot} disabled={rebooting}>
         <ListItemIcon>
           <RebootIcon />
         </ListItemIcon>
-        <ListItemText primary={"Reboot Prysmalight Hub"} />
+        <ListItemText
+          primary={rebooting ? "Initiating Reboot..." : "Reboot Prysmalight Hub"}
+        />
       </ListItem>
     </List>
   </SwipeableDrawer>

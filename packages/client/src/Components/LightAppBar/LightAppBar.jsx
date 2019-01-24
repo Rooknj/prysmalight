@@ -18,7 +18,6 @@ const LeftDiv = styled.div`
 `;
 
 const StyledMenuButton = styled(IconButton)`
-  ${({ open }) => (open ? "display: none;" : "")}
   margin-left: -12px;
   margin-right: 20px;
 `;

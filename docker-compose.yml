@@ -1,0 +1,20 @@
+version: "3"
+services:
+  rabbit:
+    image: rabbitmq:3
+    hostname: "myrabbit"
+    container_name: rabbit
+  redis:
+    image: redis:latest
+    container_name: redis
+    volumes:
+      - ./redisData:/data
+  broker:
+    image: eclipse-mosquitto:latest
+    container_name: broker
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mqtt/config:/mqtt/config
+      - /mqtt/data
+      - /mqtt/log

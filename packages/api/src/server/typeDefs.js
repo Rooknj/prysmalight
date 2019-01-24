@@ -12,6 +12,8 @@ const Mutation = gql`
     setLight(lightId: String!, lightData: LightInput!): Light
     addLight(lightId: String!): Light
     removeLight(lightId: String!): String
+    updateHub: String
+    rebootHub: String
   }
 `;
 

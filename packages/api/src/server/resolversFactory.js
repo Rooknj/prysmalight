@@ -7,7 +7,9 @@ const resolversFactory = service => ({
     setLight: (_, { lightId, lightData }) =>
       service.setLight(lightId, lightData),
     addLight: (_, { lightId }) => service.addLight(lightId),
-    removeLight: (_, { lightId }) => service.removeLight(lightId)
+    removeLight: (_, { lightId }) => service.removeLight(lightId),
+    updateHub: () => "Update Complete",
+    rebootHub: () => "Rebooting..."
   },
   Subscription: {
     lightChanged: {

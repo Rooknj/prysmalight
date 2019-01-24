@@ -34,19 +34,13 @@ const start = options => {
     apolloServer.installSubscriptionHandlers(httpServer);
 
     // Start the httpServer
-    const server = httpServer.listen(options.port, () => {
-      debug(
-        `🚀 Server ready at http://localhost:${options.port}${
-          apolloServer.graphqlPath
-        }`
-      );
-      debug(
-        `🚀 Subscriptions ready at ws://localhost:${options.port}${
-          apolloServer.subscriptionsPath
-        }`
-      );
-
-      resolve(server);
+    const apolloApp = httpServer.listen(options.port, () => {
+      resolve({
+        app: apolloApp,
+        port: options.port,
+        gqlPath: apolloServer.graphqlPath,
+        subscriptionsPath: apolloServer.subscriptionsPath
+      });
     });
   });
 };

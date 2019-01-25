@@ -1,38 +1,54 @@
 import React from "react";
 import Typography from "@material-ui/core/Typography";
 import { withTheme } from "@material-ui/core/styles";
+import styled from "styled-components";
+import Button from "@material-ui/core/Button";
 //import PropTypes from "prop-types";
+
+const TextArea = styled.div`
+  text-align: center;
+  padding: 1em;
+`;
+
+const RefreshButton = styled(Button)`
+  margin: auto;
+  display: flex;
+  min-width: 8em;
+  margin-bottom: 1em;
+`;
+
 const propTypes = {};
 const defaultProps = {};
-const ErrorPage = ({ message, theme }) => {
+const ErrorPage = ({ message, theme, refetch }) => {
   return (
-    <div
-      style={{
-        width: 400,
-        height: 400,
-        display: "block",
-        margin: "auto",
-        position: "relative"
-      }}
-    >
-      <svg
-        version="1.0"
-        xmlns="http://www.w3.org/2000/svg"
-        width="300.000000pt"
-        height="300.000000pt"
-        viewBox="0 0 260.000000 245.000000"
-        preserveAspectRatio="xMidYMid meet"
+    <React.Fragment>
+      <div
+        style={{
+          width: 300,
+          height: 300,
+          display: "block",
+          margin: "auto",
+          position: "relative"
+        }}
       >
-        <metadata>
-          Created by potrace 1.11, written by Peter Selinger 2001-2013
-        </metadata>
-        <g
-          transform="translate(0.000000,245.000000) scale(0.100000,-0.100000)"
-          fill={theme.palette.text.primary}
-          stroke="none"
+        <svg
+          version="1.0"
+          xmlns="http://www.w3.org/2000/svg"
+          width="300"
+          height="300"
+          viewBox="0 0 260.000000 245.000000"
+          preserveAspectRatio="xMidYMid meet"
         >
-          <path
-            d="M1015 2401 c-126 -57 -164 -223 -78 -337 l23 -31 -31 -58 c-17 -31
+          <metadata>
+            Created by potrace 1.11, written by Peter Selinger 2001-2013
+          </metadata>
+          <g
+            transform="translate(0.000000,245.000000) scale(0.100000,-0.100000)"
+            fill={theme.palette.text.primary}
+            stroke="none"
+          >
+            <path
+              d="M1015 2401 c-126 -57 -164 -223 -78 -337 l23 -31 -31 -58 c-17 -31
 -39 -92 -51 -134 -17 -66 -19 -95 -13 -212 5 -115 3 -138 -10 -149 -8 -7 -30
 -42 -48 -79 -48 -96 -118 -224 -129 -238 -7 -9 -7 -13 0 -13 6 0 13 4 17 9 3
 5 30 15 61 22 69 15 177 1 311 -42 216 -69 286 -115 405 -265 48 -62 103 -121
@@ -55,21 +71,25 @@ const ErrorPage = ({ message, theme }) => {
 -306 224 -57 27 -74 30 -140 26 l-76 -3 -18 50 c-13 39 -17 73 -14 151 3 88 8
 109 35 169 29 61 34 67 55 60 12 -4 48 -10 79 -12 49 -4 65 -1 109 23 73 40
 109 104 109 196 l0 67 43 9 c67 15 245 13 316 -3z"
-          />
-          <path
-            d="M1745 1595 c-38 -25 -98 -54 -133 -66 -112 -37 -146 -86 -101 -143
+            />
+            <path
+              d="M1745 1595 c-38 -25 -98 -54 -133 -66 -112 -37 -146 -86 -101 -143
 39 -49 167 -96 267 -96 40 0 44 2 59 38 34 81 26 313 -10 312 -7 0 -43 -21
 -82 -45z"
-          />
-        </g>
-      </svg>
-      <center>
-        <Typography variant="h3" color="default">
+            />
+          </g>
+        </svg>
+      </div>
+      <TextArea>
+        <Typography variant="h4" color="default">
           Oops something went wrong!
         </Typography>
         {/* TODO: Add a refresh button here */}
-      </center>
-    </div>
+      </TextArea>
+      <RefreshButton variant="contained" color="secondary" onClick={() => refetch()}>
+        Refresh
+      </RefreshButton>
+    </React.Fragment>
   );
 };
 ErrorPage.propTypes = propTypes;

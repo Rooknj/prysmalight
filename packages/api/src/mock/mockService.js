@@ -1,3 +1,4 @@
+"use strict";
 const { PubSub } = require("apollo-server");
 
 const pubSubClient = new PubSub();

@@ -1,3 +1,4 @@
+"use strict";
 const Debug = require("debug").default;
 const debug = Debug("service");
 const { promisify } = require("util");
@@ -7,7 +8,9 @@ const ALL_LIGHTS_SUBSCRIPTION_TOPIC = "lightsChanged";
 const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
 const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
 
-const RESPONSE_TIMEOUT = 5000;
+const CONTROLLER_TIMEOUT = 5000;
+const UPDATE_TIMEOUT = 30000;
+const REBOOT_TIMEOUT = 5000;
 
 // TODO: Pass this in as a depencency for testing purposes
 const { EventEmitter } = require("events");
@@ -22,6 +25,7 @@ const generateRandomId = () =>
 // JSON Buffer Generator
 const toJsonBuffer = object => Buffer.from(JSON.stringify(object));
 
+// Function to create a channel for Direct Reply To communication (used in service init function)
 const createRpcChannel = async conn => {
   const rpcChannel = await conn.createChannel();
 
@@ -43,6 +47,8 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
   const ADD_LIGHT_Q = "addLight";
   const REMOVE_LIGHT_Q = "removeLight";
   const LIGHT_CHANGED_X = "changedLight";
+  const UPDATE_HUB_Q = "updateHub";
+  const REBOOT_HUB_Q = "rebootHub";
 
   let self = {};
 
@@ -105,7 +111,7 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
       sendRpcMessage(GET_LIGHT_Q, id, message);
       setTimeout(() => {
         resolve(new Error("Controller timed out"));
-      }, RESPONSE_TIMEOUT);
+      }, CONTROLLER_TIMEOUT);
     });
 
   const getLights = () =>
@@ -121,7 +127,7 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
       sendRpcMessage(GET_LIGHTS_Q, id, null);
       setTimeout(() => {
         resolve(new Error("Controller timed out"));
-      }, RESPONSE_TIMEOUT);
+      }, CONTROLLER_TIMEOUT);
     });
 
   const setLight = (lightId, lightData) =>
@@ -139,7 +145,7 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
       sendRpcMessage(SET_LIGHT_Q, id, message);
       setTimeout(() => {
         resolve(new Error("Controller timed out"));
-      }, RESPONSE_TIMEOUT);
+      }, CONTROLLER_TIMEOUT);
     });
 
   const addLight = lightId =>
@@ -160,7 +166,7 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
       sendRpcMessage(ADD_LIGHT_Q, id, message);
       setTimeout(() => {
         resolve(new Error("Controller timed out"));
-      }, RESPONSE_TIMEOUT);
+      }, CONTROLLER_TIMEOUT);
     });
 
   const removeLight = lightId =>
@@ -183,7 +189,7 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
       sendRpcMessage(REMOVE_LIGHT_Q, id, message);
       setTimeout(() => {
         resolve(new Error("Controller timed out"));
-      }, RESPONSE_TIMEOUT);
+      }, CONTROLLER_TIMEOUT);
     });
 
   /**
@@ -210,6 +216,38 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
   const subscribeToLightsRemoved = () =>
     gqlPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
 
+  const updateHub = () =>
+    new Promise(resolve => {
+      const id = generateRandomId();
+
+      //Event listener that will fire when the proper randomid is provided
+      eventEmitter.once(id, msg => {
+        const { error, data } = JSON.parse(msg);
+        resolve(error ? new Error(error) : data);
+      });
+
+      sendRpcMessage(UPDATE_HUB_Q, id, null);
+      setTimeout(() => {
+        resolve(new Error("Update Service timed out"));
+      }, UPDATE_TIMEOUT);
+    });
+
+  const rebootHub = () =>
+    new Promise(resolve => {
+      const id = generateRandomId();
+
+      //Event listener that will fire when the proper randomid is provided
+      eventEmitter.once(id, msg => {
+        const { error, data } = JSON.parse(msg);
+        resolve(error ? new Error(error) : data);
+      });
+
+      sendRpcMessage(REBOOT_HUB_Q, id, null);
+      setTimeout(() => {
+        resolve(new Error("Reboot Service timed out"));
+      }, REBOOT_TIMEOUT);
+    });
+
   self = {
     init,
     getLight,
@@ -220,7 +258,9 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
     subscribeToLight,
     subscribeToAllLights,
     subscribeToLightsAdded,
-    subscribeToLightsRemoved
+    subscribeToLightsRemoved,
+    updateHub,
+    rebootHub
   };
 
   return Object.create(self);

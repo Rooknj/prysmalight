@@ -1,13 +1,12 @@
+"use strict";
 const typeDefs = require("./typeDefs");
 const resolversFactory = require("./resolversFactory");
-const Debug = require("debug").default;
 const { ApolloServer } = require("apollo-server-express");
 const http = require("http"); // Library to create an http server
 const express = require("express"); // NodeJS Web Server
 const cors = require("cors"); // Cross Origin Resource Sharing Middleware
 const helmet = require("helmet"); // Security Middleware
 const compression = require("compression"); // Compression Middleware
-const debug = Debug("server");
 
 const start = options => {
   return new Promise((resolve, reject) => {
@@ -34,19 +33,13 @@ const start = options => {
     apolloServer.installSubscriptionHandlers(httpServer);
 
     // Start the httpServer
-    const server = httpServer.listen(options.port, () => {
-      debug(
-        `🚀 Server ready at http://localhost:${options.port}${
-          apolloServer.graphqlPath
-        }`
-      );
-      debug(
-        `🚀 Subscriptions ready at ws://localhost:${options.port}${
-          apolloServer.subscriptionsPath
-        }`
-      );
-
-      resolve(server);
+    const apolloApp = httpServer.listen(options.port, () => {
+      resolve({
+        app: apolloApp,
+        port: options.port,
+        gqlPath: apolloServer.graphqlPath,
+        subscriptionsPath: apolloServer.subscriptionsPath
+      });
     });
   });
 };

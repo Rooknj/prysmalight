@@ -9,7 +9,7 @@ const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
 const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
 
 const CONTROLLER_TIMEOUT = 5000;
-const UPDATE_TIMEOUT = 30000;
+const UPDATE_TIMEOUT = 120000; // 2 minutes
 const REBOOT_TIMEOUT = 5000;
 
 // TODO: Pass this in as a depencency for testing purposes

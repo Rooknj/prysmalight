@@ -21,7 +21,7 @@ Array [
                 id="message-id"
             >
                 <p
-                    className="MuiTypography-root-38 MuiTypography-body1-47 MuiTypography-colorError-72"
+                    className="MuiTypography-root-38 MuiTypography-body1-47 MuiTypography-colorInherit-67"
                 >
                     Error!
                 </p>
@@ -79,7 +79,7 @@ Array [
 `;
 
 exports[`matches shallow snapshot 1`] = `
-<ErrorSnackbar
+<LightSnackbar
   message="Error!"
 />
 `;

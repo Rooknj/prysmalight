@@ -62,7 +62,7 @@ const ControlsContainer = styled.div`
   display: flex;
   flex-direction: column;
   margin-bottom: 56px;
-  overflow-y: scroll;
+  overflow-y: auto;
 `;
 
 class Light extends React.Component {

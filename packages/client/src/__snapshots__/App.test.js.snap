@@ -2,24 +2,76 @@
 
 exports[`matches mounted snapshot 1`] = `
 Array [
-  <header
-    className="MuiPaper-root-10 MuiPaper-elevation4-16 MuiAppBar-root-1 MuiAppBar-positionSticky-4 MuiAppBar-colorPrimary-8"
->
+  Array [
     <div
-        className="MuiToolbar-root-37 MuiToolbar-regular-39 MuiToolbar-gutters-38 sc-bdVaJa hSDAgr"
-    >
-        <h6
-            className="MuiTypography-root-41 MuiTypography-h6-58 MuiTypography-colorInherit-70"
-        >
-            Prysmalight
-        </h6>
-        <div
-            id="LightActionsContainer"
-        >
-            Mocked Light Actions Container
-        </div>
-    </div>
+      id="LightDrawer"
+>
+      Mocked Light Drawer
+</div>,
+    <header
+      className="MuiPaper-root-10 MuiPaper-elevation4-16 MuiAppBar-root-1 MuiAppBar-positionSticky-4 MuiAppBar-colorPrimary-8"
+>
+      <div
+            className="MuiToolbar-root-37 MuiToolbar-regular-39 MuiToolbar-gutters-38 sc-bdVaJa dsgXoZ"
+      >
+            <div
+                  className="sc-bwzfXH fNOhzS"
+            >
+                  <button
+                        aria-label="Menu"
+                        className="MuiButtonBase-root-47 MuiIconButton-root-41 MuiIconButton-colorInherit-42 sc-htpNat hNAYgr"
+                        disabled={false}
+                        onBlur={[Function]}
+                        onClick={[Function]}
+                        onFocus={[Function]}
+                        onKeyDown={[Function]}
+                        onKeyUp={[Function]}
+                        onMouseDown={[Function]}
+                        onMouseLeave={[Function]}
+                        onMouseUp={[Function]}
+                        onTouchEnd={[Function]}
+                        onTouchMove={[Function]}
+                        onTouchStart={[Function]}
+                        tabIndex="0"
+                        type="button"
+                  >
+                        <span
+                              className="MuiIconButton-label-46"
+                        >
+                              <svg
+                                    aria-hidden="true"
+                                    className="MuiSvgIcon-root-50"
+                                    focusable="false"
+                                    role="presentation"
+                                    viewBox="0 0 24 24"
+                              >
+                                    <path
+                                          d="M0 0h24v24H0z"
+                                          fill="none"
+                                    />
+                                    <path
+                                          d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"
+                                    />
+                              </svg>
+                        </span>
+                        <span
+                              className="MuiTouchRipple-root-94"
+                        />
+                  </button>
+                  <h6
+                        className="MuiTypography-root-59 MuiTypography-h6-76 MuiTypography-colorInherit-88"
+                  >
+                        Prysmalight
+                  </h6>
+            </div>
+            <div
+                  id="LightActionsContainer"
+            >
+                  Mocked Light Actions Container
+            </div>
+      </div>
 </header>,
+  ],
   <div
     id="MockLightTool"
 >
@@ -941,7 +993,7 @@ exports[`matches shallow snapshot 1`] = `
       }
     >
       <WithStyles(CssBaseline)>
-        <LightAppBar />
+        <LightAppBarContainer />
         <Component />
       </WithStyles(CssBaseline)>
     </ThemeProvider>

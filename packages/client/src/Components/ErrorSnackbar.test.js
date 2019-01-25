@@ -1,7 +1,7 @@
 import React from "react";
 import { shallow, mount } from "enzyme";
 import { createSerializer } from "enzyme-to-json";
-import ErrorSnackbar from "./ErrorSnackbar";
+import LightSnackbar from "./LightSnackbar";
 import { ThemeProvider } from "styled-components";
 
 // Add serializer to allow enzyme to create snapshots
@@ -13,7 +13,7 @@ const mockMessage = "Error!";
 it("renders without crashing", () => {
   shallow(
     <ThemeProvider theme={mockTheme}>
-      <ErrorSnackbar message={mockMessage} />
+      <LightSnackbar message={mockMessage} />
     </ThemeProvider>
   );
 });
@@ -21,7 +21,7 @@ it("renders without crashing", () => {
 it("matches shallow snapshot", () => {
   const shallowed = shallow(
     <ThemeProvider theme={mockTheme}>
-      <ErrorSnackbar message={mockMessage} />
+      <LightSnackbar message={mockMessage} />
     </ThemeProvider>
   );
   expect(shallowed).toMatchSnapshot();
@@ -30,7 +30,7 @@ it("matches shallow snapshot", () => {
 it("matches mounted snapshot", () => {
   const mounted = mount(
     <ThemeProvider theme={mockTheme}>
-      <ErrorSnackbar message={mockMessage} />
+      <LightSnackbar message={mockMessage} />
     </ThemeProvider>
   );
   expect(mounted).toMatchSnapshot();

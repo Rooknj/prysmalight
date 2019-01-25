@@ -15,6 +15,10 @@ jest.mock(
   )
 );
 
+jest.mock("./Components/LightAppBar/LightDrawer", () => () => (
+  <div id="LightDrawer">Mocked Light Drawer</div>
+));
+
 // Add serializer to allow enzyme to create snapshots
 expect.addSnapshotSerializer(createSerializer({ mode: "deep" }));
 

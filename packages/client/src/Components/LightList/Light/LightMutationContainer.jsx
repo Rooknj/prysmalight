@@ -3,7 +3,7 @@ import React from "react";
 import { Mutation } from "react-apollo";
 import { SET_LIGHT } from "../../graphqlConstants";
 import LightStateContainer from "./LightStateContainer";
-import ErrorSnackbar from "./ErrorSnackbar";
+import LightSnackbar from "../../LightSnackbar";
 
 class LightMutationContainer extends React.Component {
   render() {
@@ -21,8 +21,9 @@ class LightMutationContainer extends React.Component {
                 error={error}
               />
               {error && (
-                <ErrorSnackbar
+                <LightSnackbar
                   message={`Error changing ${this.props.light.id}`}
+                  type="error"
                 />
               )}
             </React.Fragment>

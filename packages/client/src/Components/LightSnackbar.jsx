@@ -12,7 +12,7 @@ const StyledIconButton = styled(IconButton)`
 const propTypes = {};
 const defaultProps = {};
 
-class ErrorSnackbar extends React.Component {
+class LightSnackbar extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -26,7 +26,7 @@ class ErrorSnackbar extends React.Component {
     this.setState({ open: false });
   };
   render() {
-    const { message } = this.props;
+    const { message, type } = this.props;
     return (
       <React.Fragment>
         <Snackbar
@@ -42,7 +42,7 @@ class ErrorSnackbar extends React.Component {
           }}
           message={
             <span id="message-id">
-              <Typography variant="body1" color="error">
+              <Typography variant="body1" color={type === "error" ? "error" : "inherit"}>
                 {message}
               </Typography>
             </span>
@@ -62,6 +62,6 @@ class ErrorSnackbar extends React.Component {
     );
   }
 }
-ErrorSnackbar.propTypes = propTypes;
-ErrorSnackbar.defaultProps = defaultProps;
-export default ErrorSnackbar;
+LightSnackbar.propTypes = propTypes;
+LightSnackbar.defaultProps = defaultProps;
+export default LightSnackbar;

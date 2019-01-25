@@ -25,10 +25,10 @@ export const Loading = () => (
 );
 
 const LightListQueryContainer = () => (
-  <Query query={GET_LIGHTS}>
-    {({ loading, error, data, subscribeToMore }) => {
-      if (loading) return <Loading />;
-      if (error) return <ErrorPage message={error.message} />;
+  <Query query={GET_LIGHTS} fetchPolicy="cache-and-network" notifyOnNetworkStatusChange>
+    {({ loading, error, data, subscribeToMore, refetch, networkStatus }) => {
+      if (loading || networkStatus === 4) return <Loading />;
+      if (error) return <ErrorPage message={error.message} refetch={refetch} />;
       return (
         <LightListSubscriptionContainer
           lights={data.lights}

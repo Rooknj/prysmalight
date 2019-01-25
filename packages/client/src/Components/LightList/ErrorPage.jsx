@@ -2,6 +2,7 @@ import React from "react";
 import Typography from "@material-ui/core/Typography";
 import { withTheme } from "@material-ui/core/styles";
 import styled from "styled-components";
+import Button from "@material-ui/core/Button";
 //import PropTypes from "prop-types";
 
 const TextArea = styled.div`
@@ -9,9 +10,16 @@ const TextArea = styled.div`
   padding: 1em;
 `;
 
+const RefreshButton = styled(Button)`
+  margin: auto;
+  display: flex;
+  min-width: 8em;
+  margin-bottom: 1em;
+`;
+
 const propTypes = {};
 const defaultProps = {};
-const ErrorPage = ({ message, theme }) => {
+const ErrorPage = ({ message, theme, refetch }) => {
   return (
     <React.Fragment>
       <div
@@ -78,6 +86,9 @@ const ErrorPage = ({ message, theme }) => {
         </Typography>
         {/* TODO: Add a refresh button here */}
       </TextArea>
+      <RefreshButton variant="contained" color="secondary" onClick={() => refetch()}>
+        Refresh
+      </RefreshButton>
     </React.Fragment>
   );
 };

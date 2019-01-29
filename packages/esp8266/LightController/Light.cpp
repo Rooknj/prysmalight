@@ -204,65 +204,8 @@ void Light::setHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
   FastLED.show();
 }
 
-int Light::getFlashSpeed()
-{
-  switch (_effectSpeed)
-  {
-  case 1:
-    return 2000;
-    break;
-  case 2:
-    return 1000;
-    break;
-  case 3:
-    return 500;
-    break;
-  case 4:
-    return 300;
-    break;
-  case 5:
-    return 200;
-    break;
-  case 6:
-    return 100;
-    break;
-  case 7:
-    return 50;
-    break;
-  default:
-    return 1000;
-  }
-}
-
-int Light::getCycleSpeed()
-{
-  switch (_effectSpeed)
-  {
-  case 1:
-    return 100;
-    break;
-  case 2:
-    return 50;
-    break;
-  case 3:
-    return 33;
-    break;
-  case 4:
-    return 17;
-    break;
-  case 5:
-    return 8;
-    break;
-  case 6:
-    return 5;
-    break;
-  case 7:
-    return 3;
-    break;
-  default:
-    return 33;
-  }
-}
+const int FLASH_SPEEDS[7] = {2000, 1000, 500, 300, 200, 100, 50};
+const int CYCLE_SPEEDS[7] = {100, 50, 33, 17, 8, 5, 3};
 
 // Cycles through all hue values on loop
 long lastHueCycle = 0;
@@ -279,11 +222,11 @@ bool Light::shouldUpdate()
   long updateThreshold;
   if (_effect == "Flash")
   {
-    updateThreshold = getFlashSpeed();
+    updateThreshold = FLASH_SPEEDS[_effectSpeed - 1];
   }
   else
   {
-    updateThreshold = getCycleSpeed();
+    updateThreshold = CYCLE_SPEEDS[_effectSpeed - 1];
   }
   long now = millis();
 

@@ -68,7 +68,7 @@ void Light::setColorHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
 void Light::setEffect(String effect)
 {
   _stateOn = true;
-  _color = CRGB(0, 0, 0);
+  _color = CRGB(255, 255, 255);
   _effect = effect;
   setRGB(0, 0, 0);
 }

@@ -344,7 +344,7 @@ void Light::handleJuggle()
     byte dothue = 0;
     for (int i = 0; i < 8; i++)
     {
-      _leds[beatsin16(i + 7, 0, CONFIG_NUM_LEDS - 1)] |= CHSV(dothue, 200, 255);
+      _leds[beatsin16(i + 7, 0, CONFIG_NUM_LEDS - 1)] |= CHSV(dothue, 200, 255); //TODO: Try changing i+7 (BPM) http://fastled.io/docs/3.1/group__lib8tion.html#gaa46e5de1c4c27833359e7a97a18c839b
       dothue += 32;
     }
     FastLED.show();

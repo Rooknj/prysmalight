@@ -471,9 +471,41 @@ void Light::handleSinelon()
 //************************************************************************
 // Crossfade
 //************************************************************************
+int getStep(int start, int target, int numSteps)
+{
+  return (target - start) / numSteps;
+}
+
+int getRemainder(int start, int target, int numSteps)
+{
+  return (target - start) % numSteps;
+}
+
+int getChange(int stepAmount, int remainderAmount, int currentStep, int numSteps)
+{
+  int extra = 0;
+  if (((currentStep * abs(remainderAmount)) / numSteps) >
+      (((currentStep - 1) * abs(remainderAmount)) / numSteps))
+  {
+    if (stepAmount < 0 || remainderAmount < 0)
+    {
+      extra = -1;
+    }
+    else
+    {
+      extra = 1;
+    }
+  }
+
+  return stepAmount + extra;
+}
+
 // Color takes 500ms to change no matter what
-int transitionSpeed = 510; // In ms, has to be a multiple of 255
-uint8_t currentRed = 0;    // Initialized as the initial color defined in the constructor
+int colorTransitionTime = 500; // In ms, has to be a multiple of 255
+int numColorSteps = 30;
+boolean startFade = false;
+boolean inFade = false;
+uint8_t currentRed = 0; // Initialized as the initial color defined in the constructor
 uint8_t currentGreen = 0;
 uint8_t currentBlue = 0;
 uint8_t targetRed = 0;
@@ -482,13 +514,10 @@ uint8_t targetBlue = 0;
 int stepRed = 0;
 int stepGreen = 0;
 int stepBlue = 0;
-boolean startFade = false;
-boolean inFade = false;
+int remainderRed = 0;
+int remainderGreen = 0;
+int remainderBlue = 0;
 int currentStep = 0;
-int numberOfPossibleColorValues = 255;
-int maxColorValue = 255;
-int minColorValue = 0;
-int totalColorSteps = (maxColorValue - minColorValue) * numberOfPossibleColorValues;
 
 void Light::changeColorTo(uint8_t red, uint8_t green, uint8_t blue)
 {
@@ -498,7 +527,6 @@ void Light::changeColorTo(uint8_t red, uint8_t green, uint8_t blue)
   targetBlue = blue;
 }
 
-// TODO: Values between 0 and 255 are always off by 1. Not a big deal but would be nice to fix
 unsigned long lastStepTime = 0;
 void Light::handleColorChange()
 {
@@ -511,7 +539,7 @@ void Light::handleColorChange()
     }
 
     // If the transitions are off, or the light is set to an effect, dont do the transition
-    if (transitionSpeed == 0 || _effect != NO_EFFECT)
+    if (colorTransitionTime == 0 || _effect != NO_EFFECT)
     {
       setRGB(targetRed, targetGreen, targetBlue);
 
@@ -526,19 +554,22 @@ void Light::handleColorChange()
     {
       startFade = false;
       inFade = true;
-      currentStep = 0;
+      currentStep = 1;
 
       // Calculate the step values
-      stepRed = calculateStep(currentRed, targetRed, totalColorSteps);
-      stepGreen = calculateStep(currentGreen, targetGreen, totalColorSteps);
-      stepBlue = calculateStep(currentBlue, targetBlue, totalColorSteps);
+      stepRed = getStep(currentRed, targetRed, numColorSteps);
+      stepGreen = getStep(currentGreen, targetGreen, numColorSteps);
+      stepBlue = getStep(currentBlue, targetBlue, numColorSteps);
+      remainderRed = getRemainder(currentRed, targetRed, numColorSteps);
+      remainderGreen = getRemainder(currentGreen, targetGreen, numColorSteps);
+      remainderBlue = getRemainder(currentBlue, targetBlue, numColorSteps);
     }
   }
 
   // If we are currently in the middle of a color change, keep doing the transition
   if (inFade)
   {
-    int stepDuration = transitionSpeed / numberOfPossibleColorValues;
+    int stepDuration = colorTransitionTime / numColorSteps;
 
     unsigned long now = millis();
     // If its time to take a step
@@ -546,41 +577,41 @@ void Light::handleColorChange()
     {
       lastStepTime = now;
 
-      for (int i = 0; i <= numberOfPossibleColorValues; i++)
-      {
-        // Calculate the next value to change to
-        currentRed = calculateVal(stepRed, currentRed, currentStep, minColorValue, maxColorValue);
-        currentGreen = calculateVal(stepGreen, currentGreen, currentStep, minColorValue, maxColorValue);
-        currentBlue = calculateVal(stepBlue, currentBlue, currentStep, minColorValue, maxColorValue);
-        currentStep++;
-      }
+      // Calculate the next value to change to
+      currentRed += getChange(stepRed, remainderRed, currentStep, numColorSteps);
+      currentGreen += getChange(stepGreen, remainderGreen, currentStep, numColorSteps);
+      currentBlue += getChange(stepBlue, remainderBlue, currentStep, numColorSteps);
+      currentStep++;
+
       // Set the value and increment the step;
       setRGB(currentRed, currentGreen, currentBlue); // Write current values to LED pins
     }
 
     // If we have gone through all 255 steps, end the transition
-    if (currentStep >= totalColorSteps)
+    if (currentStep > numColorSteps)
     {
       inFade = false;
-      // Serial.println("Ending Fade: ");
-      // Serial.printf("Current Red: %i, Current Green: %i, Current Blue: %i\n", currentRed, currentGreen, currentBlue);
-      // Serial.printf("target Red: %i, target Green: %i, target Blue: %i\n", targetRed, targetGreen, targetBlue);
+      //Serial.println("Ending Fade: ");
+      //Serial.printf("Current Red: %i, Current Green: %i, Current Blue: %i\n", currentRed, currentGreen, currentBlue);
+      //Serial.printf("target Red: %i, target Green: %i, target Blue: %i\n", targetRed, targetGreen, targetBlue);
     }
   }
 }
 
 // Brightness takes 1000ms to change from 0-100%, 500ms to change from 0-50, 250 ms to change from 0-25, etc.unsigned long lastBrightnessStepTime = 0;
-int maxBrightnessTransitionTime = 1000;
+const int maxBrightnessTransitionTime = 1000;
+const int maxBrightnessSteps = 60;
+const int maxBrightness = 100;
+const int minBrightness = 0;
+int brightnessTransitionTime = 1;
+int numBrightnessSteps = 1;
+boolean startBrightnessTransition = false;
+boolean inBrightnessTransition = false;
 uint8_t currentBrightness;
 uint8_t targetBrightness;
 int stepBrightness = 0;
-boolean startBrightnessTransition = false;
-boolean inBrightnessTransition = false;
+int remainderBrightness = 0;
 int currentBrightnessStep = 0;
-int numberOfPossibleBrightnessValues = 100;
-int maxBrightnessValue = 100;
-int minBrightnessValue = 0;
-int totalBrightnessSteps = 1;
 
 void Light::changeBrightnessTo(uint8_t brightness)
 {
@@ -605,18 +636,23 @@ void Light::handleBrightnessChange()
     {
       startBrightnessTransition = false;
       inBrightnessTransition = true;
-      currentBrightnessStep = 0;
-      totalBrightnessSteps = abs(targetBrightness - currentBrightness);
+      currentBrightnessStep = 1;
+      brightnessTransitionTime = abs(targetBrightness - currentBrightness) * maxBrightnessTransitionTime / (maxBrightness - minBrightness);
+      numBrightnessSteps = abs(targetBrightness - currentBrightness) * maxBrightnessSteps / (maxBrightness - minBrightness);
+      if(numBrightnessSteps == 0) {
+        numBrightnessSteps = 1;
+      }
     }
 
     // Calculate the step values
-    stepBrightness = calculateStep(currentBrightness, targetBrightness, totalBrightnessSteps);
+    stepBrightness = getStep(currentBrightness, targetBrightness, numBrightnessSteps);
+    remainderBrightness = getRemainder(currentBrightness, targetBrightness, numBrightnessSteps);
   }
 
   // If we are currently in the middle of a color change, keep doing the transition
   if (inBrightnessTransition)
   {
-    int stepDuration = maxBrightnessTransitionTime / numberOfPossibleBrightnessValues;
+    int stepDuration = brightnessTransitionTime / numBrightnessSteps;
 
     unsigned long now = millis();
     // If its time to take a step
@@ -624,7 +660,7 @@ void Light::handleBrightnessChange()
     {
       lastBrightnessStepTime = now;
 
-      currentBrightness = calculateVal(stepBrightness, currentBrightness, currentBrightnessStep, minBrightnessValue, maxBrightnessValue);
+      currentBrightness += getChange(stepBrightness, remainderBrightness, currentBrightnessStep, numBrightnessSteps);
       currentBrightnessStep++;
 
       // Set the value and increment the step;
@@ -633,7 +669,7 @@ void Light::handleBrightnessChange()
     }
 
     // If we have gone through all 255 steps, end the transition
-    if (currentBrightnessStep >= totalBrightnessSteps)
+    if (currentBrightnessStep > numBrightnessSteps)
     {
       inBrightnessTransition = false;
       //Serial.println("Ending Brightness Transition: ");
@@ -641,47 +677,4 @@ void Light::handleBrightnessChange()
       //Serial.printf("target Brightness: %i\n", targetBrightness);
     }
   }
-}
-
-int Light::calculateStep(int prevValue, int endValue, int totalSteps)
-{
-  int step = endValue - prevValue; // What's the overall gap?
-  if (step)
-  {                           // If its non-zero,
-    step = totalSteps / step; //   divide by 255
-  }
-
-  return step;
-}
-
-/* The next function is calculateVal. When the loop value, i,
-*  reaches the step size appropriate for one of the
-*  colors, it increases or decreases the value of that color by 1.
-*  (R, G, and B are each calculated separately.)
-*/
-int Light::calculateVal(int step, int val, int i, int minVal, int maxVal)
-{
-  if ((step) && i % step == 0)
-  { // If step is non-zero and its time to change a value,
-    if (step > 0)
-    { //   increment the value if step is positive...
-      val += 1;
-    }
-    else if (step < 0)
-    { //   ...or decrement it if step is negative
-      val -= 1;
-    }
-  }
-
-  // Make sure val stays in the range 0-255
-  if (val > maxVal)
-  {
-    val = maxVal;
-  }
-  else if (val < minVal)
-  {
-    val = minVal;
-  }
-
-  return val;
 }

@@ -377,7 +377,7 @@ void Light::handleJuggle()
 }
 
 // BPM
-const int BPMS[7] = {20, 30, 43, 58, 75, 90, 120};
+const int BPMS[7] = {15, 20, 30, 40, 55, 75, 100};
 void Light::handleBPM()
 {
   if (shouldUpdate())

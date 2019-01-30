@@ -204,8 +204,13 @@ void Light::setHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
   FastLED.show();
 }
 
-const int FLASH_SPEEDS[7] = {2000, 1000, 500, 300, 200, 100, 50};
-const int CYCLE_SPEEDS[7] = {100, 50, 33, 17, 8, 5, 3};
+const int FPS60 = 17;                                               // How many ms it takes between updates to reach 60 frames per second (1000/60)
+const int FLASH_SPEEDS[7] = {4000, 2000, 1000, 500, 350, 200, 100}; // In ms between color transitions
+const int FADE_SPEEDS[7] = {200, 100, 50, 33, 17, 12, 8};           // In ms between changing the hue by 1 (hue is a number 0-255)
+const int RAINBOW_SPEEDS[7] = {200, 100, 50, 33, 17, 12, 8};        // In ms between shifting the LED's and hue by 1
+const int CONFETTI_SPEEDS[7] = {50, 33, 23, 17, 13, 10, 8};         // In ms between shifting the LED's and hue by 1
+const int CYLON_SPEEDS[7] = {5, 10, 17, 25, 50, 75, 100};           // In percent of the strip to travel in a second
+const int ORIGINAL_SPEEDS[7] = {100, 50, 33, 17, 8, 5, 3};
 
 // Cycles through all hue values on loop
 long lastHueCycle = 0;
@@ -224,9 +229,28 @@ bool Light::shouldUpdate()
   {
     updateThreshold = FLASH_SPEEDS[_effectSpeed - 1];
   }
+  else if (_effect == "Fade")
+  {
+    updateThreshold = FADE_SPEEDS[_effectSpeed - 1];
+  }
+  else if (_effect == "Rainbow")
+  {
+    updateThreshold = RAINBOW_SPEEDS[_effectSpeed - 1];
+  }
+  else if (_effect == "Confetti")
+  {
+    updateThreshold = CONFETTI_SPEEDS[_effectSpeed - 1];
+  }
+  else if (_effect == "Cylon")
+  {
+    // calculates how many LEDs to move in a second in terms of the percentage of the strip
+    updateThreshold = 1000 / (CONFIG_NUM_LEDS * CYLON_SPEEDS[_effectSpeed - 1] / 100);
+    // calculates how many LEDs to move in a second in terms of the number of LEDs per second
+    //updateThreshold = 1000 / CYLON_SPEEDS[_effectSpeed - 1];
+  }
   else
   {
-    updateThreshold = CYCLE_SPEEDS[_effectSpeed - 1];
+    updateThreshold = FPS60;
   }
   long now = millis();
 
@@ -278,7 +302,7 @@ void Light::handleRainbow()
   if (shouldUpdate())
   {
     cycleHue();
-    fill_rainbow(_leds, CONFIG_NUM_LEDS, gHue, 7);
+    fill_rainbow(_leds, CONFIG_NUM_LEDS, gHue, 1); // Try changing the last number for extending the length of each color
     FastLED.show();
   }
 }
@@ -334,6 +358,7 @@ void Light::handleCylon()
   }
 }
 
+const int JUGGLE_BPMS_ADDER[7] = {1, 2, 3, 4, 5, 6, 7};
 // Juggle
 void Light::handleJuggle()
 {
@@ -344,7 +369,7 @@ void Light::handleJuggle()
     byte dothue = 0;
     for (int i = 0; i < 8; i++)
     {
-      _leds[beatsin16(i + 7, 0, CONFIG_NUM_LEDS - 1)] |= CHSV(dothue, 200, 255); //TODO: Try changing i+7 (BPM) http://fastled.io/docs/3.1/group__lib8tion.html#gaa46e5de1c4c27833359e7a97a18c839b
+      _leds[beatsin16(i + JUGGLE_BPMS_ADDER[_effectSpeed], 0, CONFIG_NUM_LEDS - 1)] |= CHSV(dothue, 200, 255); //TODO: Try changing i+7 (BPM) http://fastled.io/docs/3.1/group__lib8tion.html#gaa46e5de1c4c27833359e7a97a18c839b
       dothue += 32;
     }
     FastLED.show();
@@ -352,42 +377,14 @@ void Light::handleJuggle()
 }
 
 // BPM
-int Light::getBPM()
-{
-  switch (_effectSpeed)
-  {
-  case 1:
-    return 10;
-    break;
-  case 2:
-    return 15;
-    break;
-  case 3:
-    return 30;
-    break;
-  case 4:
-    return 60;
-    break;
-  case 5:
-    return 90;
-    break;
-  case 6:
-    return 120;
-    break;
-  case 7:
-    return 150;
-    break;
-  default:
-    return 180;
-  }
-}
+const int BPMS[7] = {20, 30, 43, 58, 75, 90, 120};
 void Light::handleBPM()
 {
   if (shouldUpdate())
   {
     cycleHue();
     // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-    uint8_t BeatsPerMinute = getBPM();
+    uint8_t BeatsPerMinute = BPMS[_effectSpeed];
     CRGBPalette16 palette = PartyColors_p;
     uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
     for (int i = 0; i < CONFIG_NUM_LEDS; i++)
@@ -399,13 +396,14 @@ void Light::handleBPM()
 }
 
 // Sinelon
+const int SINELON_BPMS[7] = {1, 3, 5, 8, 10, 12, 15};
 void Light::handleSinelon()
 {
   if (shouldUpdate())
   {
     cycleHue();
     fadeToBlackBy(_leds, CONFIG_NUM_LEDS, 20);
-    int pos = beatsin16((int)(getBPM() / 5), 0, CONFIG_NUM_LEDS - 1);
+    int pos = beatsin16(SINELON_BPMS[_effectSpeed], 0, CONFIG_NUM_LEDS - 1);
     _leds[pos] += CHSV(gHue, 255, 192);
     FastLED.show();
   }
@@ -582,7 +580,8 @@ void Light::handleBrightnessChange()
       currentBrightnessStep = 1;
       brightnessTransitionTime = abs(targetBrightness - currentBrightness) * maxBrightnessTransitionTime / (maxBrightness - minBrightness);
       numBrightnessSteps = abs(targetBrightness - currentBrightness) * maxBrightnessSteps / (maxBrightness - minBrightness);
-      if(numBrightnessSteps == 0) {
+      if (numBrightnessSteps == 0)
+      {
         numBrightnessSteps = 1;
       }
     }

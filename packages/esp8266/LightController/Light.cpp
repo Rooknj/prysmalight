@@ -302,7 +302,7 @@ void Light::handleRainbow()
   if (shouldUpdate())
   {
     cycleHue();
-    fill_rainbow(_leds, CONFIG_NUM_LEDS, gHue, 1); // Try changing the last number for extending the length of each color
+    fill_rainbow(_leds, CONFIG_NUM_LEDS, gHue, 3); // The shorter the last number, the longer each color is on the rainbow
     FastLED.show();
   }
 }
@@ -358,7 +358,7 @@ void Light::handleCylon()
   }
 }
 
-const int JUGGLE_BPMS_ADDER[7] = {1, 2, 3, 4, 5, 6, 7};
+const int JUGGLE_BPMS_ADDER[7] = {1, 5, 10, 15, 20, 25, 30};
 // Juggle
 void Light::handleJuggle()
 {
@@ -369,7 +369,7 @@ void Light::handleJuggle()
     byte dothue = 0;
     for (int i = 0; i < 8; i++)
     {
-      _leds[beatsin16(i + JUGGLE_BPMS_ADDER[_effectSpeed], 0, CONFIG_NUM_LEDS - 1)] |= CHSV(dothue, 200, 255); //TODO: Try changing i+7 (BPM) http://fastled.io/docs/3.1/group__lib8tion.html#gaa46e5de1c4c27833359e7a97a18c839b
+      _leds[beatsin16(i + JUGGLE_BPMS_ADDER[_effectSpeed - 1], 0, CONFIG_NUM_LEDS - 1)] |= CHSV(dothue, 200, 255); //TODO: Try changing i+7 (BPM) http://fastled.io/docs/3.1/group__lib8tion.html#gaa46e5de1c4c27833359e7a97a18c839b
       dothue += 32;
     }
     FastLED.show();
@@ -377,14 +377,14 @@ void Light::handleJuggle()
 }
 
 // BPM
-const int BPMS[7] = {15, 20, 30, 40, 55, 75, 100};
+const int BPMS[7] = {15, 20, 30, 40, 55, 75, 98}; // 98 seems to be the max value
 void Light::handleBPM()
 {
   if (shouldUpdate())
   {
     cycleHue();
     // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-    uint8_t BeatsPerMinute = BPMS[_effectSpeed];
+    uint8_t BeatsPerMinute = BPMS[_effectSpeed - 1];
     CRGBPalette16 palette = PartyColors_p;
     uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
     for (int i = 0; i < CONFIG_NUM_LEDS; i++)
@@ -403,7 +403,7 @@ void Light::handleSinelon()
   {
     cycleHue();
     fadeToBlackBy(_leds, CONFIG_NUM_LEDS, 20);
-    int pos = beatsin16(SINELON_BPMS[_effectSpeed], 0, CONFIG_NUM_LEDS - 1);
+    int pos = beatsin16(SINELON_BPMS[_effectSpeed - 1], 0, CONFIG_NUM_LEDS - 1);
     _leds[pos] += CHSV(gHue, 255, 192);
     FastLED.show();
   }

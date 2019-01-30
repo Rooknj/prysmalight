@@ -190,10 +190,10 @@ void Light::handleVisualize(int packetSize, WiFiUDP port)
 //************************************************************************
 const int FRAMES_PER_SECOND = 60;                                   // The Frames Per Second of all animations
 const int FLASH_SPEEDS[7] = {4000, 2000, 1000, 500, 350, 200, 100}; // In ms between color transitions
-const int FADE_SPEEDS[7] = {200, 100, 50, 33, 17, 12, 8};           // In ms between changing the hue by 1 (hue is a number 0-255)
-const int RAINBOW_SPEEDS[7] = {200, 100, 50, 33, 17, 12, 8};        // In ms between shifting the LED's and hue by 1
+const int FADE_SPEEDS[7] = {200, 100, 50, 33, 20, 10, 4};           // In ms between changing the hue by 1 (hue is a number 0-255)
+const int RAINBOW_SPEEDS[7] = {100, 50, 33, 17, 12, 10, 4};        // In ms between shifting the LED's and hue by 1
 const int CONFETTI_SPEEDS[7] = {50, 33, 23, 17, 13, 10, 8};         // In ms between shifting the LED's and hue by 1
-const int CYLON_SPEEDS[7] = {5, 10, 17, 25, 50, 75, 100};           // In percent of the strip to travel in a second
+const int CYLON_SPEEDS[7] = {10, 25, 50, 75, 100, 150, 200};           // In percent of the strip to travel in a second
 const int ORIGINAL_SPEEDS[7] = {100, 50, 33, 17, 8, 5, 3};
 
 // Determines when to physically update the LED strip

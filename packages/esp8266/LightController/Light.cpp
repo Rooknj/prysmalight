@@ -358,7 +358,7 @@ void Light::handleCylon()
   }
 }
 
-const int JUGGLE_BPMS_ADDER[7] = {1, 5, 10, 15, 20, 25, 30};
+const int JUGGLE_BPMS_ADDER[7] = {1, 4, 7, 10, 13, 27, 20};
 // Juggle
 void Light::handleJuggle()
 {
@@ -377,7 +377,7 @@ void Light::handleJuggle()
 }
 
 // BPM
-const int BPMS[7] = {15, 20, 30, 40, 55, 75, 98}; // 98 seems to be the max value
+const int BPMS[7] = {15, 30, 50, 80, 100, 120, 150}; // 98 seems to be the max value
 void Light::handleBPM()
 {
   if (shouldUpdate())
@@ -396,7 +396,7 @@ void Light::handleBPM()
 }
 
 // Sinelon
-const int SINELON_BPMS[7] = {1, 3, 5, 8, 10, 12, 15};
+const int SINELON_BPMS[7] = {8, 12, 14, 18, 22, 26, 30};
 void Light::handleSinelon()
 {
   if (shouldUpdate())

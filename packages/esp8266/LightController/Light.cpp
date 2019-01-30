@@ -188,6 +188,37 @@ void Light::handleVisualize(int packetSize, WiFiUDP port)
 //************************************************************************
 // Light Effects
 //************************************************************************
+const int FRAMES_PER_SECOND = 60;                                   // The Frames Per Second of all animations
+const int FLASH_SPEEDS[7] = {4000, 2000, 1000, 500, 350, 200, 100}; // In ms between color transitions
+const int FADE_SPEEDS[7] = {200, 100, 50, 33, 17, 12, 8};           // In ms between changing the hue by 1 (hue is a number 0-255)
+const int RAINBOW_SPEEDS[7] = {200, 100, 50, 33, 17, 12, 8};        // In ms between shifting the LED's and hue by 1
+const int CONFETTI_SPEEDS[7] = {50, 33, 23, 17, 13, 10, 8};         // In ms between shifting the LED's and hue by 1
+const int CYLON_SPEEDS[7] = {5, 10, 17, 25, 50, 75, 100};           // In percent of the strip to travel in a second
+const int ORIGINAL_SPEEDS[7] = {100, 50, 33, 17, 8, 5, 3};
+
+// Determines when to physically update the LED strip
+long lastShow = 0;
+bool shouldShow()
+{
+  int updateThreshold = 1000 / FRAMES_PER_SECOND;
+  long now = millis();
+
+  if (now - lastShow > updateThreshold)
+  {
+    lastShow = now;
+    return true;
+  }
+  return false;
+}
+
+// Cycles through all hue values on loop
+long lastHueCycle = 0;
+byte gHue;
+void Light::cycleHue()
+{
+  gHue++;
+}
+
 // Sets the light strip to an RGB color
 void Light::setRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue)
 {
@@ -202,22 +233,6 @@ void Light::setHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
   CRGB newColor = CHSV(p_hue, p_saturation, p_value);
   fill_solid(_leds, CONFIG_NUM_LEDS, newColor);
   FastLED.show();
-}
-
-const int FPS60 = 17;                                               // How many ms it takes between updates to reach 60 frames per second (1000/60)
-const int FLASH_SPEEDS[7] = {4000, 2000, 1000, 500, 350, 200, 100}; // In ms between color transitions
-const int FADE_SPEEDS[7] = {200, 100, 50, 33, 17, 12, 8};           // In ms between changing the hue by 1 (hue is a number 0-255)
-const int RAINBOW_SPEEDS[7] = {200, 100, 50, 33, 17, 12, 8};        // In ms between shifting the LED's and hue by 1
-const int CONFETTI_SPEEDS[7] = {50, 33, 23, 17, 13, 10, 8};         // In ms between shifting the LED's and hue by 1
-const int CYLON_SPEEDS[7] = {5, 10, 17, 25, 50, 75, 100};           // In percent of the strip to travel in a second
-const int ORIGINAL_SPEEDS[7] = {100, 50, 33, 17, 8, 5, 3};
-
-// Cycles through all hue values on loop
-long lastHueCycle = 0;
-byte gHue;
-void Light::cycleHue()
-{
-  gHue++;
 }
 
 // Determines when the current effect should update
@@ -250,7 +265,7 @@ bool Light::shouldUpdate()
   }
   else
   {
-    updateThreshold = FPS60;
+    updateThreshold = 17;
   }
   long now = millis();
 
@@ -292,7 +307,11 @@ void Light::handleFade()
   if (shouldUpdate())
   {
     cycleHue();
-    setHSV(gHue, 255, 255);
+    fill_solid(_leds, CONFIG_NUM_LEDS, CHSV(gHue, 255, 255));
+  }
+  if (shouldShow())
+  {
+    FastLED.show();
   }
 }
 
@@ -303,6 +322,9 @@ void Light::handleRainbow()
   {
     cycleHue();
     fill_rainbow(_leds, CONFIG_NUM_LEDS, gHue, 3); // The shorter the last number, the longer each color is on the rainbow
+  }
+  if (shouldShow())
+  {
     FastLED.show();
   }
 }
@@ -316,6 +338,9 @@ void Light::handleConfetti()
     fadeToBlackBy(_leds, CONFIG_NUM_LEDS, 10);
     int pos = random16(CONFIG_NUM_LEDS);
     _leds[pos] += CHSV(gHue + random8(64), 200, 255);
+  }
+  if (shouldShow())
+  {
     FastLED.show();
   }
 }
@@ -354,6 +379,9 @@ void Light::handleCylon()
       LED--;
     }
     _leds[LED] = CHSV(gHue, 255, 255);
+  }
+  if (shouldShow())
+  {
     FastLED.show();
   }
 }
@@ -362,7 +390,7 @@ const int JUGGLE_BPMS_ADDER[7] = {1, 4, 7, 10, 13, 27, 20};
 // Juggle
 void Light::handleJuggle()
 {
-  if (shouldUpdate())
+  if (shouldShow())
   {
     // eight colored dots, weaving in and out of sync with each other
     fadeToBlackBy(_leds, CONFIG_NUM_LEDS, 20);
@@ -380,7 +408,7 @@ void Light::handleJuggle()
 const int BPMS[7] = {15, 30, 50, 80, 100, 120, 150}; // 98 seems to be the max value
 void Light::handleBPM()
 {
-  if (shouldUpdate())
+  if (shouldShow())
   {
     cycleHue();
     // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
@@ -399,7 +427,7 @@ void Light::handleBPM()
 const int SINELON_BPMS[7] = {8, 12, 14, 18, 22, 26, 30};
 void Light::handleSinelon()
 {
-  if (shouldUpdate())
+  if (shouldShow())
   {
     cycleHue();
     fadeToBlackBy(_leds, CONFIG_NUM_LEDS, 20);

@@ -65,12 +65,16 @@ void Light::setColorHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
   _effect = NO_EFFECT;
 }
 
+bool startFlash = false;
 void Light::setEffect(String effect)
 {
   _stateOn = true;
   _color = CRGB(255, 255, 255);
   _effect = effect;
   setRGB(0, 0, 0);
+  if(effect == "Flash") {
+    startFlash = true
+  }
 }
 
 void Light::setEffectSpeed(int effectSpeed)
@@ -281,8 +285,9 @@ bool Light::shouldUpdate()
 byte flash_index = 0;
 void Light::handleFlash()
 {
-  if (shouldUpdate())
+  if (shouldUpdate() || startFlash)
   {
+    startFlash = false;
     if (flash_index == 0)
     {
       setRGB(255, 0, 0);

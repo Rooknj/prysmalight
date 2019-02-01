@@ -73,7 +73,7 @@ void Light::setEffect(String effect)
   _effect = effect;
   setRGB(0, 0, 0);
   if(effect == "Flash") {
-    startFlash = true
+    startFlash = true;
   }
 }
 

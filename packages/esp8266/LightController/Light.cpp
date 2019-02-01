@@ -392,13 +392,14 @@ void Light::handleCylon()
 }
 
 const int JUGGLE_BPMS_ADDER[7] = {1, 4, 7, 10, 13, 27, 20};
+const int JUGGLE_FADE[7] = {20, 25, 30, 35, 40, 45, 50};
 // Juggle
 void Light::handleJuggle()
 {
   if (shouldShow())
   {
     // eight colored dots, weaving in and out of sync with each other
-    fadeToBlackBy(_leds, CONFIG_NUM_LEDS, 20);
+    fadeToBlackBy(_leds, CONFIG_NUM_LEDS, JUGGLE_FADE[_effectSpeed - 1]);
     byte dothue = 0;
     for (int i = 0; i < 8; i++)
     {

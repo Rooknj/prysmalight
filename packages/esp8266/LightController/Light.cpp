@@ -65,12 +65,16 @@ void Light::setColorHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
   _effect = NO_EFFECT;
 }
 
+bool startFlash = false;
 void Light::setEffect(String effect)
 {
   _stateOn = true;
-  _color = CRGB(0, 0, 0);
+  _color = CRGB(255, 255, 255);
   _effect = effect;
   setRGB(0, 0, 0);
+  if(effect == "Flash") {
+    startFlash = true;
+  }
 }
 
 void Light::setEffectSpeed(int effectSpeed)
@@ -188,6 +192,37 @@ void Light::handleVisualize(int packetSize, WiFiUDP port)
 //************************************************************************
 // Light Effects
 //************************************************************************
+const int FRAMES_PER_SECOND = 60;                                   // The Frames Per Second of all animations
+const int FLASH_SPEEDS[7] = {4000, 2000, 1000, 500, 350, 200, 100}; // In ms between color transitions
+const int FADE_SPEEDS[7] = {200, 100, 50, 33, 20, 10, 4};           // In ms between changing the hue by 1 (hue is a number 0-255)
+const int RAINBOW_SPEEDS[7] = {100, 50, 33, 17, 12, 10, 4};        // In ms between shifting the LED's and hue by 1
+const int CONFETTI_SPEEDS[7] = {50, 33, 23, 17, 13, 10, 8};         // In ms between shifting the LED's and hue by 1
+const int CYLON_SPEEDS[7] = {10, 25, 50, 75, 100, 150, 200};           // In percent of the strip to travel in a second
+const int ORIGINAL_SPEEDS[7] = {100, 50, 33, 17, 8, 5, 3};
+
+// Determines when to physically update the LED strip
+long lastShow = 0;
+bool shouldShow()
+{
+  int updateThreshold = 1000 / FRAMES_PER_SECOND;
+  long now = millis();
+
+  if (now - lastShow > updateThreshold)
+  {
+    lastShow = now;
+    return true;
+  }
+  return false;
+}
+
+// Cycles through all hue values on loop
+long lastHueCycle = 0;
+byte gHue;
+void Light::cycleHue()
+{
+  gHue++;
+}
+
 // Sets the light strip to an RGB color
 void Light::setRGB(uint8_t p_red, uint8_t p_green, uint8_t p_blue)
 {
@@ -204,74 +239,6 @@ void Light::setHSV(uint8_t p_hue, uint8_t p_saturation, uint8_t p_value)
   FastLED.show();
 }
 
-int Light::getFlashSpeed()
-{
-  switch (_effectSpeed)
-  {
-  case 1:
-    return 2000;
-    break;
-  case 2:
-    return 1000;
-    break;
-  case 3:
-    return 500;
-    break;
-  case 4:
-    return 300;
-    break;
-  case 5:
-    return 200;
-    break;
-  case 6:
-    return 100;
-    break;
-  case 7:
-    return 50;
-    break;
-  default:
-    return 1000;
-  }
-}
-
-int Light::getCycleSpeed()
-{
-  switch (_effectSpeed)
-  {
-  case 1:
-    return 100;
-    break;
-  case 2:
-    return 50;
-    break;
-  case 3:
-    return 33;
-    break;
-  case 4:
-    return 17;
-    break;
-  case 5:
-    return 8;
-    break;
-  case 6:
-    return 5;
-    break;
-  case 7:
-    return 3;
-    break;
-  default:
-    return 33;
-  }
-}
-
-// Cycles through all hue values on loop
-long lastHueCycle = 0;
-byte gHue;
-void Light::cycleHue()
-{
-  gHue++;
-}
-
 // Determines when the current effect should update
 long lastUpdate = 0;
 bool Light::shouldUpdate()
@@ -279,11 +246,30 @@ bool Light::shouldUpdate()
   long updateThreshold;
   if (_effect == "Flash")
   {
-    updateThreshold = getFlashSpeed();
+    updateThreshold = FLASH_SPEEDS[_effectSpeed - 1];
+  }
+  else if (_effect == "Fade")
+  {
+    updateThreshold = FADE_SPEEDS[_effectSpeed - 1];
+  }
+  else if (_effect == "Rainbow")
+  {
+    updateThreshold = RAINBOW_SPEEDS[_effectSpeed - 1];
+  }
+  else if (_effect == "Confetti")
+  {
+    updateThreshold = CONFETTI_SPEEDS[_effectSpeed - 1];
+  }
+  else if (_effect == "Cylon")
+  {
+    // calculates how many LEDs to move in a second in terms of the percentage of the strip
+    updateThreshold = 1000 / (CONFIG_NUM_LEDS * CYLON_SPEEDS[_effectSpeed - 1] / 100);
+    // calculates how many LEDs to move in a second in terms of the number of LEDs per second
+    //updateThreshold = 1000 / CYLON_SPEEDS[_effectSpeed - 1];
   }
   else
   {
-    updateThreshold = getCycleSpeed();
+    updateThreshold = 17;
   }
   long now = millis();
 
@@ -299,8 +285,9 @@ bool Light::shouldUpdate()
 byte flash_index = 0;
 void Light::handleFlash()
 {
-  if (shouldUpdate())
+  if (shouldUpdate() || startFlash)
   {
+    startFlash = false;
     if (flash_index == 0)
     {
       setRGB(255, 0, 0);
@@ -325,7 +312,11 @@ void Light::handleFade()
   if (shouldUpdate())
   {
     cycleHue();
-    setHSV(gHue, 255, 255);
+    fill_solid(_leds, CONFIG_NUM_LEDS, CHSV(gHue, 255, 255));
+  }
+  if (shouldShow())
+  {
+    FastLED.show();
   }
 }
 
@@ -335,7 +326,10 @@ void Light::handleRainbow()
   if (shouldUpdate())
   {
     cycleHue();
-    fill_rainbow(_leds, CONFIG_NUM_LEDS, gHue, 7);
+    fill_rainbow(_leds, CONFIG_NUM_LEDS, gHue, 3); // The shorter the last number, the longer each color is on the rainbow
+  }
+  if (shouldShow())
+  {
     FastLED.show();
   }
 }
@@ -349,6 +343,9 @@ void Light::handleConfetti()
     fadeToBlackBy(_leds, CONFIG_NUM_LEDS, 10);
     int pos = random16(CONFIG_NUM_LEDS);
     _leds[pos] += CHSV(gHue + random8(64), 200, 255);
+  }
+  if (shouldShow())
+  {
     FastLED.show();
   }
 }
@@ -387,21 +384,26 @@ void Light::handleCylon()
       LED--;
     }
     _leds[LED] = CHSV(gHue, 255, 255);
+  }
+  if (shouldShow())
+  {
     FastLED.show();
   }
 }
 
+const int JUGGLE_BPMS_ADDER[7] = {1, 4, 7, 10, 13, 17, 20};
+const int JUGGLE_FADE[7] = {20, 25, 30, 35, 40, 45, 50};
 // Juggle
 void Light::handleJuggle()
 {
-  if (shouldUpdate())
+  if (shouldShow())
   {
     // eight colored dots, weaving in and out of sync with each other
-    fadeToBlackBy(_leds, CONFIG_NUM_LEDS, 20);
+    fadeToBlackBy(_leds, CONFIG_NUM_LEDS, JUGGLE_FADE[_effectSpeed - 1]);
     byte dothue = 0;
     for (int i = 0; i < 8; i++)
     {
-      _leds[beatsin16(i + 7, 0, CONFIG_NUM_LEDS - 1)] |= CHSV(dothue, 200, 255);
+      _leds[beatsin16(i + JUGGLE_BPMS_ADDER[_effectSpeed - 1], 0, CONFIG_NUM_LEDS - 1)] |= CHSV(dothue, 200, 255); //TODO: Try changing i+7 (BPM) http://fastled.io/docs/3.1/group__lib8tion.html#gaa46e5de1c4c27833359e7a97a18c839b
       dothue += 32;
     }
     FastLED.show();
@@ -409,42 +411,14 @@ void Light::handleJuggle()
 }
 
 // BPM
-int Light::getBPM()
-{
-  switch (_effectSpeed)
-  {
-  case 1:
-    return 10;
-    break;
-  case 2:
-    return 15;
-    break;
-  case 3:
-    return 30;
-    break;
-  case 4:
-    return 60;
-    break;
-  case 5:
-    return 90;
-    break;
-  case 6:
-    return 120;
-    break;
-  case 7:
-    return 150;
-    break;
-  default:
-    return 180;
-  }
-}
+const int BPMS[7] = {15, 30, 50, 80, 100, 120, 150}; // 98 seems to be the max value
 void Light::handleBPM()
 {
-  if (shouldUpdate())
+  if (shouldShow())
   {
     cycleHue();
     // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
-    uint8_t BeatsPerMinute = getBPM();
+    uint8_t BeatsPerMinute = BPMS[_effectSpeed - 1];
     CRGBPalette16 palette = PartyColors_p;
     uint8_t beat = beatsin8(BeatsPerMinute, 64, 255);
     for (int i = 0; i < CONFIG_NUM_LEDS; i++)
@@ -456,13 +430,14 @@ void Light::handleBPM()
 }
 
 // Sinelon
+const int SINELON_BPMS[7] = {8, 12, 14, 18, 22, 26, 30};
 void Light::handleSinelon()
 {
-  if (shouldUpdate())
+  if (shouldShow())
   {
     cycleHue();
     fadeToBlackBy(_leds, CONFIG_NUM_LEDS, 20);
-    int pos = beatsin16((int)(getBPM() / 5), 0, CONFIG_NUM_LEDS - 1);
+    int pos = beatsin16(SINELON_BPMS[_effectSpeed - 1], 0, CONFIG_NUM_LEDS - 1);
     _leds[pos] += CHSV(gHue, 255, 192);
     FastLED.show();
   }
@@ -639,7 +614,8 @@ void Light::handleBrightnessChange()
       currentBrightnessStep = 1;
       brightnessTransitionTime = abs(targetBrightness - currentBrightness) * maxBrightnessTransitionTime / (maxBrightness - minBrightness);
       numBrightnessSteps = abs(targetBrightness - currentBrightness) * maxBrightnessSteps / (maxBrightness - minBrightness);
-      if(numBrightnessSteps == 0) {
+      if (numBrightnessSteps == 0)
+      {
         numBrightnessSteps = 1;
       }
     }

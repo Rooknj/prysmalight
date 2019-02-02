@@ -391,7 +391,7 @@ void Light::handleCylon()
   }
 }
 
-const int JUGGLE_BPMS_ADDER[7] = {1, 4, 7, 10, 13, 27, 20};
+const int JUGGLE_BPMS_ADDER[7] = {1, 4, 7, 10, 13, 17, 20};
 const int JUGGLE_FADE[7] = {20, 25, 30, 35, 40, 45, 50};
 // Juggle
 void Light::handleJuggle()

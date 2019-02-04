@@ -5,7 +5,9 @@
   "repository": "https://github.com/Rooknj/prysmalight.git",
   "author": "Nick Rook <rooknj@outlook.com>",
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "lerna": "^3.10.7"
+  },
   "dependencies": {
     "minimist": "^1.2.0"
   }

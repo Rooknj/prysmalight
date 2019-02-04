@@ -1,7 +1,6 @@
 {
   "name": "prysmalight-controller",
   "version": "0.0.0",
-  "private": true,
   "description": "Light Control Microservice",
   "dependencies": {
     "amqplib": "^0.5.3",

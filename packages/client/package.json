@@ -1,6 +1,6 @@
 {
   "name": "prysmalight-client",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
   "dependencies": {
     "@jaames/iro": "^3.5.4",

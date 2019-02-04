@@ -1,6 +1,10 @@
 {
   "name": "prysmalight",
   "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "main": "index.js",
   "repository": "https://github.com/Rooknj/prysmalight.git",
   "author": "Nick Rook <rooknj@outlook.com>",

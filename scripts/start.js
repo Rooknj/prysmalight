@@ -17,37 +17,35 @@ const nodemon = require("nodemon");
 
 let argv = process.argv.slice(2);
 
+console.log("Spinning up Local RabbitMQ broker");
+process.env.RABBIT_HOST = "localhost";
+console.log("Spinning up Local MQTT broker");
+process.env.MQTT_HOST = "localhost";
+console.log("Spinning up Local Redis Server");
+process.env.REDIS_HOST = "localhost";
+
+// Start docker containers
+// TODO: Figure out a better way for microservices to share the broker
+try {
+  execSync("docker-compose up -d rabbit broker redis", {
+    stdio: [process.stdin, process.stdout] // Ignore stderr so nothing prints to the console if this fails.
+  });
+} catch (error) {
+  // If the first docker-compose failed, check to see if it was because there was already an instance of rabbitmq running.
+  if (error.message.includes("rabbit")) {
+    console.log(
+      "RabbitMQ server already running locally from another microservice."
+    );
+    execSync("docker-compose up -d broker redis");
+  } else {
+    console.log(error);
+    process.exit(1);
+  }
+}
+
 if (argv.indexOf("--mock") >= 0) {
   console.log("Starting Mock Server");
   process.env.MOCK = true;
-}
-
-if (argv.indexOf("--local") >= 0) {
-  console.log("Spinning up Local RabbitMQ broker");
-  process.env.RABBIT_HOST = "localhost";
-  console.log("Spinning up Local MQTT broker");
-  process.env.MQTT_HOST = "localhost";
-  console.log("Spinning up Local Redis Server");
-  process.env.REDIS_HOST = "localhost";
-
-  // Start docker containers
-  // TODO: Figure out a better way for microservices to share the broker
-  try {
-    execSync("docker-compose up -d rabbit broker", {
-      stdio: [process.stdin, process.stdout] // Ignore stderr so nothing prints to the console if this fails.
-    });
-  } catch (error) {
-    // If the first docker-compose failed, check to see if it was because there was already an instance of rabbitmq running.
-    if (error.message.includes("rabbit")) {
-      console.log(
-        "RabbitMQ server already running locally from another microservice."
-      );
-      execSync("docker-compose up -d  broker");
-    } else {
-      console.log(error);
-      process.exit(1);
-    }
-  }
 }
 
 // TODO: Figure out how to get rid of that error that pops up.

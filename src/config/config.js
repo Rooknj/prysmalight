@@ -6,7 +6,7 @@ const serverSettings = {
 
 const rabbitSettings = {
   protocol: "amqp",
-  hostname: process.env.RABBIT_HOST || "prysma.local",
+  hostname: process.env.RABBIT_HOST || "localhost",
   port: 5672,
   username: "guest",
   password: "guest",
@@ -17,7 +17,7 @@ const rabbitSettings = {
 };
 
 const mqttSettings = {
-  host: process.env.REDIS_HOST || "prysma.local",
+  host: process.env.REDIS_HOST || "localhost",
   reconnectPeriod: 5000, // Amount of time between reconnection attempts
   username: "pi",
   password: "MQTTIsBetterThanUDP",
@@ -29,7 +29,7 @@ const mqttSettings = {
 };
 
 const redisSettings = {
-  host: process.env.REDIS_HOST || "prysma.local",
+  host: process.env.REDIS_HOST || "localhost",
   port: process.env.REDIS_PORT || 6379
 };
 

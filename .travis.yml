@@ -3,11 +3,6 @@ node_js: stable
 sudo: required
 services:
 - docker
-matrix:
-  include:
-    - env: PACKAGE=client
-    - env: PACKAGE=api
-    - env: PACKAGE=controller
 cache:
   yarn: true
   directories:
@@ -15,13 +10,13 @@ cache:
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.9.2
   - export PATH="$HOME/.yarn/bin:$PATH"
-script: travis_wait node build $PACKAGE
+script: travis_wait echo build
 before_deploy:
 - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:
   provider: script
   skip_cleanup: true
-  script: node deploy $PACKAGE
+  script: echo deploy
   on:
     all_branches: true
 env:

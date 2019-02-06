@@ -29,7 +29,9 @@
     "graphql": "^0.13.2",
     "graphql-subscriptions": "^1.0.0",
     "helmet": "^3.12.1",
-    "minimist": "^1.2.0"
+    "async-mqtt": "^1.0.1",
+    "redis": "^2.8.0",
+    "rxjs": "^6.3.3"
   },
   "lint-staged": {
     "src/**/*.{js,json,graphql}": [

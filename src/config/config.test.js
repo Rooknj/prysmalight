@@ -19,3 +19,19 @@ describe("rabbitSettings", () => {
     expect(config.rabbitSettings.protocol).toBeDefined();
   });
 });
+
+describe("redisSettings", () => {
+  test("has a port defined", () => {
+    expect(config.redisSettings.port).toBeDefined();
+  });
+
+  test("has a host defined", () => {
+    expect(config.redisSettings.host).toBeDefined();
+  });
+});
+
+describe("mqttSettings", () => {
+  test("has a host defined", () => {
+    expect(config.mqttSettings.host).toBeDefined();
+  });
+});

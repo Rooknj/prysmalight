@@ -27,6 +27,8 @@ if (argv.indexOf("--local") >= 0) {
   process.env.RABBIT_HOST = "localhost";
   console.log("Spinning up Local MQTT broker");
   process.env.MQTT_HOST = "localhost";
+  console.log("Spinning up Local Redis Server");
+  process.env.REDIS_HOST = "localhost";
 
   // Start docker containers
   // TODO: Figure out a better way for microservices to share the broker
@@ -46,11 +48,6 @@ if (argv.indexOf("--local") >= 0) {
       process.exit(1);
     }
   }
-}
-
-if (!process.env.MOCK) {
-  console.log("Spinning up Local Redis Server");
-  execSync("docker-compose up -d redis");
 }
 
 // TODO: Figure out how to get rid of that error that pops up.

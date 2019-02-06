@@ -26,24 +26,21 @@ class MockLight {
   constructor(lightId) {
     this.lightId = lightId;
 
-    this.mqttClient = MQTT.connect(
-      mqttSettings.host,
-      {
-        reconnectPeriod: mqttSettings.reconnectPeriod, // Amount of time between reconnection attempts
-        username: mqttSettings.username,
-        password: mqttSettings.password,
-        will: {
-          topic: `${MQTT_LIGHT_TOP_LEVEL}/${
-            this.lightId
-          }/${MQTT_LIGHT_CONNECTED_TOPIC}`,
-          payload: Buffer.from(
-            JSON.stringify({ name: this.lightId, connection: 0 })
-          ),
-          qos: 0,
-          retain: true
-        }
+    this.mqttClient = MQTT.connect(mqttSettings.host, {
+      reconnectPeriod: mqttSettings.reconnectPeriod, // Amount of time between reconnection attempts
+      username: mqttSettings.username,
+      password: mqttSettings.password,
+      will: {
+        topic: `${MQTT_LIGHT_TOP_LEVEL}/${
+          this.lightId
+        }/${MQTT_LIGHT_CONNECTED_TOPIC}`,
+        payload: Buffer.from(
+          JSON.stringify({ name: this.lightId, connection: 0 })
+        ),
+        qos: 0,
+        retain: true
       }
-    );
+    });
 
     this.state = {
       state: "OFF",

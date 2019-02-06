@@ -1,12 +1,54 @@
 {
   "name": "prysmalight",
+  "private": true,
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "GraphQL Server for PrysmaLight.",
+  "main": "src/index.js",
   "repository": "https://github.com/Rooknj/prysmalight.git",
   "author": "Nick Rook <rooknj@outlook.com>",
   "license": "MIT",
-  "devDependencies": {},
+  "devDependencies": {
+    "eslint": "^5.2.0",
+    "husky": "^0.14.3",
+    "jest": "^23.4.2",
+    "lint-staged": "^7.0.0",
+    "minimist": "^1.2.0",
+    "nodemon": "^1.18.3",
+    "pkg": "^4.3.3",
+    "prettier": "^1.11.1",
+    "rimraf": "^2.6.2"
+  },
   "dependencies": {
+    "amqplib": "^0.5.3",
+    "apollo-server": "^2.0.0",
+    "apollo-server-express": "^2.0.0-rc.12",
+    "compression": "^1.7.3",
+    "cors": "^2.8.4",
+    "debug": "^3.1.0",
+    "express": "^4.16.2",
+    "graphql": "^0.13.2",
+    "graphql-subscriptions": "^1.0.0",
+    "helmet": "^3.12.1",
     "minimist": "^1.2.0"
+  },
+  "lint-staged": {
+    "src/**/*.{js,json,graphql}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "scripts": {
+    "precommit": "lint-staged",
+    "test": "node scripts/test",
+    "build": "node scripts/build",
+    "start": "node scripts/start",
+    "clean": "node scripts/clean",
+    "docker": "node scripts/dockerScripts"
+  },
+  "bin": {
+    "prod-server": "src/index.js"
+  },
+  "pkg": {
+    "assets": "node_modules/casual/src/providers/*"
   }
 }

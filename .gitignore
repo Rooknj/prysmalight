@@ -10,12 +10,6 @@ node_modules
 # production
 /build
 
-# gulp cache
-.gulp-cache
-
-# databases
-*.sqlite
-
 # misc
 .DS_Store
 .env.local

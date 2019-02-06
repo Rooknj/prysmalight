@@ -4,8 +4,6 @@
 process.env.BABEL_ENV = "production";
 process.env.NODE_ENV = "production";
 
-const SERVICE = "api";
-
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
@@ -36,4 +34,4 @@ if (process.env.PKG_TARGET) {
   }
 }
 
-exec([".", "--target", target, "--output", `./build/prysmalight-${SERVICE}`]);
+exec([".", "--target", target, "--output", `./build/prysmalight`]);

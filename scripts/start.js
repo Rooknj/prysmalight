@@ -3,7 +3,7 @@
 // Do this as the first thing so that any code reading it knows the right env.
 process.env.BABEL_ENV = "development";
 process.env.NODE_ENV = "development";
-process.env.DEBUG = "main,config,server,service";
+process.env.DEBUG = "main,config,server,service,MockLight,db,pubsub,repo";
 
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
@@ -25,11 +25,13 @@ if (argv.indexOf("--mock") >= 0) {
 if (argv.indexOf("--local") >= 0) {
   console.log("Spinning up Local RabbitMQ broker");
   process.env.RABBIT_HOST = "localhost";
+  console.log("Spinning up Local MQTT broker");
+  process.env.MQTT_HOST = "localhost";
 
   // Start docker containers
   // TODO: Figure out a better way for microservices to share the broker
   try {
-    execSync("docker-compose up -d rabbit", {
+    execSync("docker-compose up -d rabbit broker", {
       stdio: [process.stdin, process.stdout] // Ignore stderr so nothing prints to the console if this fails.
     });
   } catch (error) {
@@ -38,11 +40,17 @@ if (argv.indexOf("--local") >= 0) {
       console.log(
         "RabbitMQ server already running locally from another microservice."
       );
+      execSync("docker-compose up -d  broker");
     } else {
       console.log(error);
       process.exit(1);
     }
   }
+}
+
+if (!process.env.MOCK) {
+  console.log("Spinning up Local Redis Server");
+  execSync("docker-compose up -d redis");
 }
 
 // TODO: Figure out how to get rid of that error that pops up.

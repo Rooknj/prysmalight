@@ -4,11 +4,6 @@ const debug = Debug("service");
 const { promisify } = require("util");
 const asyncSetTimeout = promisify(setTimeout);
 
-const ALL_LIGHTS_SUBSCRIPTION_TOPIC = "lightsChanged";
-const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
-const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
-
-const CONTROLLER_TIMEOUT = 5000;
 const UPDATE_TIMEOUT = 120000; // 2 minutes
 const REBOOT_TIMEOUT = 5000;
 
@@ -40,8 +35,7 @@ const createRpcChannel = async conn => {
   return rpcChannel;
 };
 
-const serviceFactory = ({ conn, gqlPubSub }) => {
-  const LIGHT_CHANGED_X = "changedLight";
+const serviceFactory = ({ conn }) => {
   const UPDATE_HUB_Q = "updateHub";
   const REBOOT_HUB_Q = "rebootHub";
 
@@ -52,29 +46,6 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
   const init = async () => {
     // Create an rpcChannel for direct response requests in rabbitMQ
     rpcChannel = await createRpcChannel(conn);
-
-    // Create a subscription channel
-    const subChannel = await conn.createChannel();
-    // Listen for changedLight messages
-    subChannel.assertExchange(LIGHT_CHANGED_X, "fanout", { durable: false });
-    subChannel.assertQueue("", { exclusive: true }).then(q => {
-      subChannel.bindQueue(q.queue, LIGHT_CHANGED_X, "");
-      subChannel.consume(
-        q.queue,
-        msg => {
-          const msgData = JSON.parse(msg.content);
-
-          // Publish to graphql subscriptions that a light has changed
-          gqlPubSub.publish(msgData.lightChanged.id, {
-            lightChanged: msgData.lightChanged
-          });
-          gqlPubSub.publish(ALL_LIGHTS_SUBSCRIPTION_TOPIC, {
-            lightsChanged: msgData.lightChanged
-          });
-        },
-        { noAck: true }
-      );
-    });
   };
 
   const sendRpcMessage = (q, id, message) => {
@@ -89,30 +60,6 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
         })
       );
   };
-
-  /**
-   * Subscribes to the changes of a specific light.
-   * @param {string} lightId
-   */
-  const subscribeToLight = lightId => gqlPubSub.asyncIterator(lightId);
-
-  /**
-   * Subscribes to the changes of all lights.
-   */
-  const subscribeToAllLights = () =>
-    gqlPubSub.asyncIterator(ALL_LIGHTS_SUBSCRIPTION_TOPIC);
-
-  /**
-   * Subscribes to lights being added.
-   */
-  const subscribeToLightsAdded = () =>
-    gqlPubSub.asyncIterator(LIGHT_ADDED_SUBSCRIPTION_TOPIC);
-
-  /**
-   * Subscribes to lights being removed.
-   */
-  const subscribeToLightsRemoved = () =>
-    gqlPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
 
   const updateHub = () =>
     new Promise(resolve => {
@@ -148,10 +95,6 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
 
   self = {
     init,
-    subscribeToLight,
-    subscribeToAllLights,
-    subscribeToLightsAdded,
-    subscribeToLightsRemoved,
     updateHub,
     rebootHub
   };

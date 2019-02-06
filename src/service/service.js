@@ -41,11 +41,6 @@ const createRpcChannel = async conn => {
 };
 
 const serviceFactory = ({ conn, gqlPubSub }) => {
-  const GET_LIGHT_Q = "getLight";
-  const GET_LIGHTS_Q = "getLights";
-  const SET_LIGHT_Q = "setLight";
-  const ADD_LIGHT_Q = "addLight";
-  const REMOVE_LIGHT_Q = "removeLight";
   const LIGHT_CHANGED_X = "changedLight";
   const UPDATE_HUB_Q = "updateHub";
   const REBOOT_HUB_Q = "rebootHub";
@@ -94,103 +89,6 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
         })
       );
   };
-
-  const getLight = lightId =>
-    new Promise(resolve => {
-      const id = generateRandomId();
-
-      //Event listener that will fire when the proper randomid is provided
-      eventEmitter.once(id, msg => {
-        const { error, data } = JSON.parse(msg);
-        resolve(error ? new Error(error) : data.light);
-      });
-
-      const message = { lightId };
-
-      //Checks if the queue exists, and create it if needed.
-      sendRpcMessage(GET_LIGHT_Q, id, message);
-      setTimeout(() => {
-        resolve(new Error("Controller timed out"));
-      }, CONTROLLER_TIMEOUT);
-    });
-
-  const getLights = () =>
-    new Promise(resolve => {
-      const id = generateRandomId();
-
-      //Event listener that will fire when the proper randomid is provided
-      eventEmitter.once(id, msg => {
-        const { error, data } = JSON.parse(msg);
-        resolve(error ? new Error(error) : data.lights);
-      });
-
-      sendRpcMessage(GET_LIGHTS_Q, id, null);
-      setTimeout(() => {
-        resolve(new Error("Controller timed out"));
-      }, CONTROLLER_TIMEOUT);
-    });
-
-  const setLight = (lightId, lightData) =>
-    new Promise(resolve => {
-      const id = generateRandomId();
-
-      //Event listener that will fire when the proper randomid is provided
-      eventEmitter.once(id, msg => {
-        const { error, data } = JSON.parse(msg);
-        resolve(error ? new Error(error) : data.changedLight);
-      });
-      const message = { lightId, lightData };
-
-      //Checks if the queue exists, and create it if needed.
-      sendRpcMessage(SET_LIGHT_Q, id, message);
-      setTimeout(() => {
-        resolve(new Error("Controller timed out"));
-      }, CONTROLLER_TIMEOUT);
-    });
-
-  const addLight = lightId =>
-    new Promise(resolve => {
-      const id = generateRandomId();
-
-      //Event listener that will fire when the proper randomid is provided
-      eventEmitter.once(id, msg => {
-        const { error, data } = JSON.parse(msg);
-        if (!error)
-          gqlPubSub.publish("lightAdded", { lightAdded: data.lightAdded });
-        resolve(error ? new Error(error) : data.lightAdded);
-      });
-
-      const message = { lightId };
-
-      //Checks if the queue exists, and create it if needed.
-      sendRpcMessage(ADD_LIGHT_Q, id, message);
-      setTimeout(() => {
-        resolve(new Error("Controller timed out"));
-      }, CONTROLLER_TIMEOUT);
-    });
-
-  const removeLight = lightId =>
-    new Promise(resolve => {
-      const id = generateRandomId();
-
-      //Event listener that will fire when the proper randomid is provided
-      eventEmitter.once(id, msg => {
-        const { error, data } = JSON.parse(msg);
-        if (!error)
-          gqlPubSub.publish("lightRemoved", {
-            lightRemoved: data.lightRemoved
-          });
-        resolve(error ? new Error(error) : data.lightRemoved);
-      });
-
-      const message = { lightId };
-
-      //Checks if the queue exists, and create it if needed.
-      sendRpcMessage(REMOVE_LIGHT_Q, id, message);
-      setTimeout(() => {
-        resolve(new Error("Controller timed out"));
-      }, CONTROLLER_TIMEOUT);
-    });
 
   /**
    * Subscribes to the changes of a specific light.
@@ -250,11 +148,6 @@ const serviceFactory = ({ conn, gqlPubSub }) => {
 
   self = {
     init,
-    getLight,
-    getLights,
-    setLight,
-    addLight,
-    removeLight,
     subscribeToLight,
     subscribeToAllLights,
     subscribeToLightsAdded,

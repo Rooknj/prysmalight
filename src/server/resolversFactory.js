@@ -1,14 +1,13 @@
 "use strict";
-const resolversFactory = service => ({
+const resolversFactory = (service, repo) => ({
   Query: {
-    light: (_, { lightId }) => service.getLight(lightId),
-    lights: () => service.getLights()
+    light: (_, { lightId }) => repo.getLight(lightId),
+    lights: () => repo.getLights()
   },
   Mutation: {
-    setLight: (_, { lightId, lightData }) =>
-      service.setLight(lightId, lightData),
-    addLight: (_, { lightId }) => service.addLight(lightId),
-    removeLight: (_, { lightId }) => service.removeLight(lightId),
+    setLight: (_, { lightId, lightData }) => repo.setLight(lightId, lightData),
+    addLight: (_, { lightId }) => repo.addLight(lightId),
+    removeLight: (_, { lightId }) => repo.removeLight(lightId),
     updateHub: () => service.updateHub(),
     rebootHub: () => service.rebootHub()
   },

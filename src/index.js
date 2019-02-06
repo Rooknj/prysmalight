@@ -124,7 +124,8 @@ const startServer = async () => {
   console.log("Starting Server");
   const { app, port, gqlPath, subscriptionsPath } = await server.start({
     port: config.serverSettings.port,
-    service
+    service,
+    repo
   });
   console.log(`🚀 Server ready at http://localhost:${port}${gqlPath}`);
   console.log(
@@ -134,5 +135,4 @@ const startServer = async () => {
     console.log("App Closed");
   });
 };
-
 startServer();

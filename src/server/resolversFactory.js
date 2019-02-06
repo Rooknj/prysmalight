@@ -14,22 +14,22 @@ const resolversFactory = (service, repo) => ({
   Subscription: {
     lightChanged: {
       subscribe: (_, { lightId }) => {
-        return service.subscribeToLight(lightId);
+        return repo.subscribeToLight(lightId);
       }
     },
     lightsChanged: {
       subscribe: () => {
-        return service.subscribeToAllLights();
+        return repo.subscribeToAllLights();
       }
     },
     lightAdded: {
       subscribe: () => {
-        return service.subscribeToLightsAdded();
+        return repo.subscribeToLightsAdded();
       }
     },
     lightRemoved: {
       subscribe: () => {
-        return service.subscribeToLightsRemoved();
+        return repo.subscribeToLightsRemoved();
       }
     }
   }

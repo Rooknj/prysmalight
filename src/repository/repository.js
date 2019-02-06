@@ -1,17 +1,23 @@
 const Debug = require("debug").default;
 const debug = Debug("repo");
 
-// TODO: Add this variable to redis
-// TODO: Create a method in dbFactory called getMutationNumber which returns the incremented value
-let mutationNumber = 0;
+// TODO: Pass these as dependencies
+const ALL_LIGHTS_SUBSCRIPTION_TOPIC = "lightsChanged";
+const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
+const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
 
-// TODO: Find a better way to do this
+// TODO: Switch this to getRandomId
+// const generateRandomId = () =>
+//   new Date().getTime().toString() +
+//   Math.random().toString() +
+//   Math.random().toString();
+let mutationNumber = 0;
 
 const { promisify } = require("util");
 const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 
-module.exports = ({ db, pubsub, event }) => {
+module.exports = ({ db, pubsub, event, gqlPubSub }) => {
   let self = {};
 
   const init = () => {
@@ -242,6 +248,9 @@ module.exports = ({ db, pubsub, event }) => {
 
     // Get the newly added light and return it
     const lightAdded = await self.getLight(lightId);
+    gqlPubSub.publish(LIGHT_ADDED_SUBSCRIPTION_TOPIC, {
+      lightAdded
+    });
     return lightAdded;
   };
 
@@ -273,6 +282,8 @@ module.exports = ({ db, pubsub, event }) => {
     if (error) return error;
 
     const lightRemoved = lightId;
+
+    gqlPubSub.publish(LIGHT_REMOVED_SUBSCRIPTION_TOPIC, { lightRemoved });
     // Return the removed light's id
     return lightRemoved;
   };
@@ -304,6 +315,14 @@ module.exports = ({ db, pubsub, event }) => {
           // Remove this mutation's event listener
           event.removeListener("mutationResponse", handleMutationResponse);
 
+          // Publish to graphql subscriptions that a light has changed
+          gqlPubSub.publish(changedLight.id, {
+            lightChanged: changedLight
+          });
+          gqlPubSub.publish(ALL_LIGHTS_SUBSCRIPTION_TOPIC, {
+            lightsChanged: changedLight
+          });
+
           // Resolve with the light's response data
           resolve(changedLight);
         }
@@ -323,6 +342,30 @@ module.exports = ({ db, pubsub, event }) => {
     });
   };
 
+  /**
+   * Subscribes to the changes of a specific light.
+   * @param {string} lightId
+   */
+  const subscribeToLight = lightId => gqlPubSub.asyncIterator(lightId);
+
+  /**
+   * Subscribes to the changes of all lights.
+   */
+  const subscribeToAllLights = () =>
+    gqlPubSub.asyncIterator(ALL_LIGHTS_SUBSCRIPTION_TOPIC);
+
+  /**
+   * Subscribes to lights being added.
+   */
+  const subscribeToLightsAdded = () =>
+    gqlPubSub.asyncIterator(LIGHT_ADDED_SUBSCRIPTION_TOPIC);
+
+  /**
+   * Subscribes to lights being removed.
+   */
+  const subscribeToLightsRemoved = () =>
+    gqlPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
+
   self = {
     connected: false,
     init,
@@ -334,7 +377,11 @@ module.exports = ({ db, pubsub, event }) => {
     getLights,
     setLight,
     addLight,
-    removeLight
+    removeLight,
+    subscribeToLight,
+    subscribeToAllLights,
+    subscribeToLightsAdded,
+    subscribeToLightsRemoved
   };
 
   return Object.create(self);

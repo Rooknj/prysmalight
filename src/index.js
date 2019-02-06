@@ -26,6 +26,10 @@ process.on("uncaughtRejection", err => {
 const events = require("events");
 const event = new events.EventEmitter();
 
+// Create the gqlPubSub
+const { PubSub } = require("graphql-subscriptions");
+const gqlPubSub = new PubSub();
+
 // Get and initialize the repo
 const getRepo = () => {
   if (process.env.MOCK) return require("./mock/mockRepository");
@@ -49,7 +53,7 @@ const getRepo = () => {
   const pubsub = pubsubFactory(pubsubClient);
 
   // Inject Dependencies
-  return repository({ db, pubsub, event });
+  return repository({ db, pubsub, event, gqlPubSub });
 };
 const repo = getRepo();
 repo.init();
@@ -96,18 +100,11 @@ const startServer = async () => {
     // Create the real service
     const amqp = require("amqplib");
 
-    // Create the gqlPubSub
-    // Note: the graphql-rabbitmq-subscriptions library creates channels which it never destroys every time you use a function
-    // like pubsub.asyncIterator() or pubsub.publish(). This is why I stopped using it as rabbitmq would eventually run out of
-    // memory and crash.
-    const { PubSub } = require("graphql-subscriptions");
-    const pubsub = new PubSub();
-
     // Generate the service
     ({ error, service } = await serviceFactory.connect({
       amqp,
       amqpSettings: config.rabbitSettings,
-      gqlPubSub: pubsub
+      gqlPubSub
     }));
 
     // Init the service

@@ -17,7 +17,7 @@ const rabbitSettings = {
 };
 
 const mqttSettings = {
-  host: process.env.REDIS_HOST || "localhost",
+  host: `tcp://${process.env.MQTT_HOST}:1883` || "tcp://localhost:1883",
   reconnectPeriod: 5000, // Amount of time between reconnection attempts
   username: "pi",
   password: "MQTTIsBetterThanUDP",

@@ -67,6 +67,7 @@ module.exports = ({ db, pubsub, event }) => {
 
     if (subscriptionError) return subscriptionError;
     // Set connection status to true if there were no errors
+    debug(`Successfully Connected to Repo`);
     self.connected = true;
     return null;
   };

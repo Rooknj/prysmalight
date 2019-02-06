@@ -44,6 +44,10 @@ const createMockDependencies = () => {
     unsubscribeFromLight: jest.fn(async id => null),
     publishToLight: jest.fn(async (id, topic) => null)
   };
+  let mockGqlPubsub = {
+    publish: jest.fn(),
+    asyncIterator: jest.fn()
+  };
   let mockEvent = {
     emit: jest.fn(),
     removeListener: jest.fn(),
@@ -52,7 +56,8 @@ const createMockDependencies = () => {
   return {
     db: mockDB,
     pubsub: mockPubsub,
-    event: mockEvent
+    event: mockEvent,
+    gqlPubSub: mockGqlPubsub
   };
 };
 

@@ -1,6 +1,6 @@
 ## Build Environment
 # The latest LTS version of node
-FROM resin/raspberrypi3-node:8.11.3-slim as builder
+FROM balenalib/armv7hf-node:8-stretch as builder
 
 # Create app directory
 WORKDIR /usr/app
@@ -13,20 +13,18 @@ COPY . .
 # Start QEMU support for building on all architectures
 RUN [ "cross-build-start" ]
 
-# Install Yarn
-RUN npm install -g yarn
-# Install pkg
-RUN yarn global add pkg
 # Install app dependencies
 RUN yarn install --silent
+
 # Test app
 RUN yarn test --no-watch
 
-# Build app
+# Install pkg and Build App
+RUN yarn global add pkg
 RUN yarn build
 
 ## Prod Environment
-FROM resin/raspberrypi3-debian:jessie
+FROM balenalib/armv7hf:stretch-run
 
 WORKDIR /usr/app
 

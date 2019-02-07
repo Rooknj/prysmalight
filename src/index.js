@@ -11,7 +11,7 @@ const MockLight = require("./mock/MockLight");
 /*eslint no-console:0*/
 
 // Verbose statement of service starting
-console.log("--- API Gateway Microservice ---");
+console.log("--- Prysmalight ---");
 
 // Unhandled error logging
 process.on("uncaughtException", err => {

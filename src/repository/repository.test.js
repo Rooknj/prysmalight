@@ -48,15 +48,16 @@ const createMockDependencies = () => {
     publish: jest.fn(),
     asyncIterator: jest.fn()
   };
-  let mockEvent = {
-    emit: jest.fn(),
-    removeListener: jest.fn(),
-    on: jest.fn()
+  let mockMediator = {
+    publish: jest.fn(),
+    subscribe: jest.fn(),
+    onRpcMessage: jest.fn(),
+    sendRpcMessage: jest.fn()
   };
   return {
     db: mockDB,
     pubsub: mockPubsub,
-    event: mockEvent,
+    mediator: mockMediator,
     gqlPubSub: mockGqlPubsub
   };
 };
@@ -294,7 +295,7 @@ describe("handleConnectMessage", () => {
       connected: Number(MESSAGE.connection)
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
+    expect(mockDeps.mediator.publish).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
     });
   });
@@ -315,7 +316,7 @@ describe("handleConnectMessage", () => {
       connected: Number(MESSAGE.connection)
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
+    expect(mockDeps.mediator.publish).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
     });
   });
@@ -328,7 +329,7 @@ describe("handleConnectMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
   test("ignores the message and returns an error if the connection data is not in the correct format", async () => {
     let mockDeps = createMockDependencies();
@@ -339,7 +340,7 @@ describe("handleConnectMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
   test("returns an error if it fails to change the light", async () => {
     let mockDeps = createMockDependencies();
@@ -351,7 +352,7 @@ describe("handleConnectMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
   test("returns an error if it fails to get the changed light", async () => {
     let mockDeps = createMockDependencies();
@@ -363,7 +364,7 @@ describe("handleConnectMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.getLight).toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
 });
 
@@ -397,14 +398,13 @@ describe("handleStateMessage", () => {
       speed: MESSAGE.speed
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
+    expect(mockDeps.mediator.publish).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
     });
-    expect(mockDeps.event.emit).toBeCalledWith(
-      "mutationResponse",
-      MESSAGE.mutationId,
+    expect(mockDeps.mediator.publish).toBeCalledWith("mutationResponse", {
+      mutationId: MESSAGE.mutationId,
       changedLight
-    );
+    });
   });
   test("handles the state message (Example 2)", async () => {
     let mockDeps = createMockDependencies();
@@ -435,14 +435,13 @@ describe("handleStateMessage", () => {
       speed: MESSAGE.speed
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
+    expect(mockDeps.mediator.publish).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
     });
-    expect(mockDeps.event.emit).toBeCalledWith(
-      "mutationResponse",
-      MESSAGE.mutationId,
+    expect(mockDeps.mediator.publish).toBeCalledWith("mutationResponse", {
+      mutationId: MESSAGE.mutationId,
       changedLight
-    );
+    });
   });
   test("ignores the message and returns an error if no name is supplied", async () => {
     let mockDeps = createMockDependencies();
@@ -460,8 +459,8 @@ describe("handleStateMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
   test("ignores the message and returns an error if no state data is supplied", async () => {
     let mockDeps = createMockDependencies();
@@ -473,8 +472,8 @@ describe("handleStateMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
   test("returns an error if it fails to change the light", async () => {
     let mockDeps = createMockDependencies();
@@ -494,8 +493,8 @@ describe("handleStateMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
   test("returns an error if it fails to get the changed light", async () => {
     let mockDeps = createMockDependencies();
@@ -515,8 +514,8 @@ describe("handleStateMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.getLight).toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
 });
 
@@ -538,7 +537,7 @@ describe("handleEffectListMessage", () => {
       supportedEffects: MESSAGE.effectList
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
+    expect(mockDeps.mediator.publish).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
     });
   });
@@ -559,7 +558,7 @@ describe("handleEffectListMessage", () => {
       supportedEffects: MESSAGE.effectList
     });
     expect(mockDeps.db.getLight).toBeCalledWith(MESSAGE.name);
-    expect(mockDeps.event.emit).toBeCalledWith("lightChanged", {
+    expect(mockDeps.mediator.publish).toBeCalledWith("lightChanged", {
       lightChanged: changedLight
     });
   });
@@ -572,7 +571,7 @@ describe("handleEffectListMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
   test("ignores the message and returns an error if no effect list is supplied", async () => {
     let mockDeps = createMockDependencies();
@@ -584,7 +583,7 @@ describe("handleEffectListMessage", () => {
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
     expect(mockDeps.db.getLight).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
   test("returns an error if it fails to change the light", async () => {
     let mockDeps = createMockDependencies();
@@ -596,8 +595,8 @@ describe("handleEffectListMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
   test("returns an error if it fails to get the changed light", async () => {
     let mockDeps = createMockDependencies();
@@ -609,8 +608,8 @@ describe("handleEffectListMessage", () => {
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.getLight).toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
-    expect(mockDeps.event.emit).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
+    expect(mockDeps.mediator.publish).not.toBeCalled();
   });
 });
 

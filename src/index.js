@@ -1,11 +1,12 @@
 "use strict";
 const config = require("./config/config");
 const server = require("./server/server");
-const serviceFactory = require("./service/service");
+const serverServiceFactory = require("./server/serverService");
 const dbFactory = require("./repository/dbFactory");
 const pubsubFactory = require("./repository/pubsubFactory");
 const repository = require("./repository/repository");
 const MockLight = require("./mock/MockLight");
+const mediatorFactory = require("./mediator/mediator");
 
 // Enable console log statements in this file
 /*eslint no-console:0*/
@@ -25,6 +26,7 @@ process.on("uncaughtRejection", err => {
 // TODO: Figure out where to put this
 const events = require("events");
 const event = new events.EventEmitter();
+const mediator = mediatorFactory(event);
 
 // Create the gqlPubSub
 const { PubSub } = require("graphql-subscriptions");
@@ -88,8 +90,7 @@ if (process.env.MOCKS) {
 
 // Start the GraphQL server
 const startServer = async () => {
-  let service = null,
-    error = null;
+  let service = null;
 
   // Get a service
   if (process.env.MOCK) {
@@ -98,31 +99,14 @@ const startServer = async () => {
     service = mockService;
   } else {
     // Create the real service
-    const amqp = require("amqplib");
-
-    // Generate the service
-    ({ error, service } = await serviceFactory.connect({
-      amqp,
-      amqpSettings: config.rabbitSettings,
-      gqlPubSub
-    }));
-
-    // Init the service
-    await service.init();
-
-    // If there was an error creating the service, log the error and exit
-    if (error) {
-      console.log(error);
-      process.exit(1);
-    }
+    service = serverServiceFactory(mediator, gqlPubSub);
   }
 
   // Start the server
   console.log("Starting Server");
   const { app, port, gqlPath, subscriptionsPath } = await server.start({
     port: config.serverSettings.port,
-    service,
-    repo
+    service
   });
   console.log(`🚀 Server ready at http://localhost:${port}${gqlPath}`);
   console.log(

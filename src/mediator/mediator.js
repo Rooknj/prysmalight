@@ -1,7 +1,4 @@
 "use strict";
-const UPDATE_TIMEOUT = 120000; // 2 minutes
-const REBOOT_TIMEOUT = 5000;
-const REPO_TIMEOUT = 5000;
 
 // Random id generator
 const generateRandomId = () =>

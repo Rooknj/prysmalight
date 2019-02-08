@@ -1,10 +1,17 @@
 const Debug = require("debug").default;
 const debug = Debug("repo");
-
-// TODO: Pass these as dependencies
-const ALL_LIGHTS_SUBSCRIPTION_TOPIC = "lightsChanged";
-const LIGHT_ADDED_SUBSCRIPTION_TOPIC = "lightAdded";
-const LIGHT_REMOVED_SUBSCRIPTION_TOPIC = "lightRemoved";
+const dbFactory = require("./dbFactory");
+const pubsubFactory = require("./pubsubFactory");
+const {
+  GET_LIGHT,
+  GET_LIGHTS,
+  SET_LIGHT,
+  ADD_LIGHT,
+  REMOVE_LIGHT,
+  LIGHT_ADDED,
+  LIGHT_REMOVED,
+  LIGHT_CHANGED
+} = require("../eventConstants");
 
 // TODO: Switch this to getRandomId
 // const generateRandomId = () =>
@@ -17,7 +24,11 @@ const { promisify } = require("util");
 const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 
-module.exports = ({ db, pubsub, event, gqlPubSub }) => {
+module.exports = ({ mediator, dbClient, pubsubClient }) => {
+  // Create our db and pubsub with the provided clients
+  const db = dbFactory(dbClient);
+  const pubsub = pubsubFactory(pubsubClient);
+
   let self = {};
 
   const init = () => {
@@ -31,6 +42,17 @@ module.exports = ({ db, pubsub, event, gqlPubSub }) => {
     pubsub.connections.subscribe(self.connect);
     pubsub.disconnections.subscribe(() => (self.connected = false));
     db.disconnections.subscribe(() => (self.connected = false));
+
+    // Listen for RPC messages
+    mediator.onRpcMessage(GET_LIGHT, ({ lightId }) => self.getLight(lightId));
+    mediator.onRpcMessage(GET_LIGHTS, () => self.getLights());
+    mediator.onRpcMessage(SET_LIGHT, ({ lightId, lightData }) =>
+      self.setLight(lightId, lightData)
+    );
+    mediator.onRpcMessage(ADD_LIGHT, ({ lightId }) => self.addLight(lightId));
+    mediator.onRpcMessage(REMOVE_LIGHT, ({ lightId }) =>
+      self.removeLight(lightId)
+    );
   };
 
   /**
@@ -115,7 +137,7 @@ module.exports = ({ db, pubsub, event, gqlPubSub }) => {
       return error;
     }
 
-    event.emit("lightChanged", { lightChanged: changedLight });
+    mediator.publish("lightChanged", { lightChanged: changedLight });
     return null;
   };
 
@@ -158,8 +180,8 @@ module.exports = ({ db, pubsub, event, gqlPubSub }) => {
     }
 
     // Notify setLight of the light's response
-    event.emit("mutationResponse", mutationId, changedLight);
-    event.emit("lightChanged", { lightChanged: changedLight });
+    mediator.publish("mutationResponse", { mutationId, changedLight });
+    mediator.publish(LIGHT_CHANGED, { lightChanged: changedLight });
     return null;
   };
 
@@ -194,7 +216,7 @@ module.exports = ({ db, pubsub, event, gqlPubSub }) => {
       return error;
     }
 
-    event.emit("lightChanged", { lightChanged: changedLight });
+    mediator.publish(LIGHT_CHANGED, { lightChanged: changedLight });
     return null;
   };
 
@@ -248,7 +270,7 @@ module.exports = ({ db, pubsub, event, gqlPubSub }) => {
 
     // Get the newly added light and return it
     const lightAdded = await self.getLight(lightId);
-    gqlPubSub.publish(LIGHT_ADDED_SUBSCRIPTION_TOPIC, {
+    mediator.publish(LIGHT_ADDED, {
       lightAdded
     });
     return lightAdded;
@@ -283,7 +305,7 @@ module.exports = ({ db, pubsub, event, gqlPubSub }) => {
 
     const lightRemoved = lightId;
 
-    gqlPubSub.publish(LIGHT_REMOVED_SUBSCRIPTION_TOPIC, { lightRemoved });
+    mediator.publish(LIGHT_REMOVED, { lightRemoved });
     // Return the removed light's id
     return lightRemoved;
   };
@@ -310,18 +332,10 @@ module.exports = ({ db, pubsub, event, gqlPubSub }) => {
 
     // Return a promise which resolves when the light responds to this message or rejects if it takes too long
     return new Promise(async (resolve, reject) => {
-      const handleMutationResponse = (mutationId, changedLight) => {
+      const handleMutationResponse = ({ mutationId, changedLight }) => {
         if (mutationId === payload.mutationId) {
           // Remove this mutation's event listener
-          event.removeListener("mutationResponse", handleMutationResponse);
-
-          // Publish to graphql subscriptions that a light has changed
-          gqlPubSub.publish(changedLight.id, {
-            lightChanged: changedLight
-          });
-          gqlPubSub.publish(ALL_LIGHTS_SUBSCRIPTION_TOPIC, {
-            lightsChanged: changedLight
-          });
+          mediator.unsubscribe("mutationResponse", handleMutationResponse);
 
           // Resolve with the light's response data
           resolve(changedLight);
@@ -329,7 +343,7 @@ module.exports = ({ db, pubsub, event, gqlPubSub }) => {
       };
 
       // Every time we get a new message from the light, check to see if it has the same mutationId
-      event.on("mutationResponse", handleMutationResponse);
+      mediator.subscribe("mutationResponse", handleMutationResponse);
 
       // Publish to the light
       const error = await pubsub.publishToLight(id, payload);
@@ -337,34 +351,10 @@ module.exports = ({ db, pubsub, event, gqlPubSub }) => {
 
       // if the response takes too long, error out
       await asyncSetTimeout(TIMEOUT_WAIT);
-      event.removeListener("mutationResponse", handleMutationResponse);
+      mediator.unsubscribe("mutationResponse", handleMutationResponse);
       reject(new Error(`Response from ${id} timed out`));
     });
   };
-
-  /**
-   * Subscribes to the changes of a specific light.
-   * @param {string} lightId
-   */
-  const subscribeToLight = lightId => gqlPubSub.asyncIterator(lightId);
-
-  /**
-   * Subscribes to the changes of all lights.
-   */
-  const subscribeToAllLights = () =>
-    gqlPubSub.asyncIterator(ALL_LIGHTS_SUBSCRIPTION_TOPIC);
-
-  /**
-   * Subscribes to lights being added.
-   */
-  const subscribeToLightsAdded = () =>
-    gqlPubSub.asyncIterator(LIGHT_ADDED_SUBSCRIPTION_TOPIC);
-
-  /**
-   * Subscribes to lights being removed.
-   */
-  const subscribeToLightsRemoved = () =>
-    gqlPubSub.asyncIterator(LIGHT_REMOVED_SUBSCRIPTION_TOPIC);
 
   self = {
     connected: false,
@@ -377,11 +367,7 @@ module.exports = ({ db, pubsub, event, gqlPubSub }) => {
     getLights,
     setLight,
     addLight,
-    removeLight,
-    subscribeToLight,
-    subscribeToAllLights,
-    subscribeToLightsAdded,
-    subscribeToLightsRemoved
+    removeLight
   };
 
   return Object.create(self);

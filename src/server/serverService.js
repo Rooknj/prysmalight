@@ -84,19 +84,23 @@ const serviceFactory = (mediator, gqlPubSub) => {
    */
   const subscribeToLightsRemoved = () => gqlPubSub.asyncIterator(LIGHT_REMOVED);
 
-  const onLightAdded = msg => {
-    console.log("light added", msg);
-    // gqlPubSub.publish(LIGHT_ADDED, {
-    //   lightAdded
-    // });
-  };
+  const onLightAdded = ({ lightAdded }) =>
+    gqlPubSub.publish(LIGHT_ADDED, {
+      lightAdded
+    });
 
-  const onLightRemoved = msg => {
-    console.log("light removed", msg);
-  };
+  const onLightRemoved = ({ lightRemoved }) =>
+    gqlPubSub.publish(LIGHT_REMOVED, {
+      lightRemoved
+    });
 
-  const onLightChanged = msg => {
-    console.log("light changed", msg);
+  const onLightChanged = ({ lightChanged }) => {
+    gqlPubSub.publish(LIGHT_CHANGED, {
+      lightsChanged: lightChanged
+    });
+    gqlPubSub.publish(lightChanged.id, {
+      lightChanged
+    });
   };
 
   mediator.subscribe(LIGHT_ADDED, onLightAdded);

@@ -8,8 +8,8 @@ const mediatorFactory = require("./mediator/mediator");
 const redis = require("redis");
 const mqtt = require("async-mqtt");
 const mockRepo = require("./mock/mockRepository");
-const dbFactory = require("./dbFactory");
-const pubsubFactory = require("./pubsubFactory");
+const dbFactory = require("./repository/dbFactory");
+const pubsubFactory = require("./repository/pubsubFactory");
 
 // Enable console log statements in this file
 /*eslint no-console:0*/
@@ -58,7 +58,7 @@ if (process.env.MOCK) {
   repo.init();
 }
 
-// Create a Default Mock Light
+// Start the Default Mock Light
 const createMockLight = async mockName => {
   console.log(`Starting mock light: ${mockName}`);
   const mockLight = new MockLight(mockName);

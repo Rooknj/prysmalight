@@ -1,11 +1,5 @@
 version: "3"
 services:
-  rabbit:
-    image: rabbitmq:3
-    hostname: "myrabbit"
-    container_name: rabbit
-    ports:
-      - "5672:5672"
   redis:
     image: redis:latest
     container_name: redis
@@ -22,17 +16,3 @@ services:
       - ./mqtt/config:/mqtt/config
       - /mqtt/data
       - /mqtt/log
-  prysmalight:
-    depends_on:
-      - rabbit
-      - redis
-      - broker
-    image: rooknj/prysmalight:test
-    container_name: prysmalight
-    ports:
-      - "4001:4001"
-    environment:
-      - DEBUG="main,config,service,db,pubsub,repo"
-      - MQTT_HOST=broker
-      - RABBIT_HOST=rabbit
-      - REDIS_HOST=redis

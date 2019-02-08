@@ -1,8 +1,19 @@
-export const GET_LIGHT = "getLight";
-export const GET_LIGHTS = "getLights";
-export const SET_LIGHT = "setLight";
-export const ADD_LIGHT = "addLight";
-export const REMOVE_LIGHT = "removeLight";
-export const LIGHT_ADDED = "lightAdded";
-export const LIGHT_REMOVED = "lightRemoved";
-export const LIGHT_CHANGED = "lightChanged";
+const GET_LIGHT = "getLight";
+const GET_LIGHTS = "getLights";
+const SET_LIGHT = "setLight";
+const ADD_LIGHT = "addLight";
+const REMOVE_LIGHT = "removeLight";
+const LIGHT_ADDED = "lightAdded";
+const LIGHT_REMOVED = "lightRemoved";
+const LIGHT_CHANGED = "lightChanged";
+
+module.exports = {
+  GET_LIGHT,
+  GET_LIGHTS,
+  SET_LIGHT,
+  ADD_LIGHT,
+  REMOVE_LIGHT,
+  LIGHT_ADDED,
+  LIGHT_REMOVED,
+  LIGHT_CHANGED
+};

@@ -8,6 +8,8 @@ const mediatorFactory = require("./mediator/mediator");
 const redis = require("redis");
 const mqtt = require("async-mqtt");
 const mockRepo = require("./mock/mockRepository");
+const dbFactory = require("./dbFactory");
+const pubsubFactory = require("./pubsubFactory");
 
 // Enable console log statements in this file
 /*eslint no-console:0*/
@@ -33,7 +35,7 @@ const mediator = mediatorFactory(event);
 const { PubSub } = require("graphql-subscriptions");
 const gqlPubSub = new PubSub();
 
-// Get and initialize the repo
+// Start the Repository
 let repo;
 if (process.env.MOCK) {
   repo = mockRepo;
@@ -42,7 +44,6 @@ if (process.env.MOCK) {
     config.redisSettings.port,
     config.redisSettings.host
   );
-  // TODO: add the MQTT Topics as a part of dependency injection
 
   const pubsubClient = mqtt.connect(config.mqttSettings.host, {
     reconnectPeriod: config.mqttSettings.reconnectPeriod, // Amount of time between reconnection attempts
@@ -50,8 +51,10 @@ if (process.env.MOCK) {
     password: config.mqttSettings.password
   });
 
+  const db = dbFactory(dbClient);
+  const pubsub = pubsubFactory(pubsubClient);
   // Inject Dependencies
-  repo = repository({ mediator, dbClient, pubsubClient });
+  repo = repository({ mediator, db, pubsub });
   repo.init();
 }
 

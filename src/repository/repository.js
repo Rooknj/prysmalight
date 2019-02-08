@@ -1,7 +1,6 @@
 const Debug = require("debug").default;
 const debug = Debug("repo");
-const dbFactory = require("./dbFactory");
-const pubsubFactory = require("./pubsubFactory");
+
 const {
   GET_LIGHT,
   GET_LIGHTS,
@@ -24,11 +23,7 @@ const { promisify } = require("util");
 const TIMEOUT_WAIT = 5000;
 const asyncSetTimeout = promisify(setTimeout);
 
-module.exports = ({ mediator, dbClient, pubsubClient }) => {
-  // Create our db and pubsub with the provided clients
-  const db = dbFactory(dbClient);
-  const pubsub = pubsubFactory(pubsubClient);
-
+module.exports = ({ mediator, db, pubsub }) => {
   let self = {};
 
   const init = () => {

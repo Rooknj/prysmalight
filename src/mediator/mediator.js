@@ -9,7 +9,7 @@ const generateRandomId = () =>
   Math.random().toString() +
   Math.random().toString();
 
-const messangerFactory = eventEmitter => {
+const mediatorFactory = eventEmitter => {
   /**
    * Sends a message to an RPC server and waits for the reply.
    * @param {string} event - the topic to send on
@@ -17,7 +17,7 @@ const messangerFactory = eventEmitter => {
    * @param {string} correlationId - unique id for the message
    * @param {object} options
    */
-  const sendRpcMessage = (event, parameters, correlationId, options = {}) => {
+  const sendRpcMessage = (event, parameters, options = {}) => {
     const TIMEOUT = options.timeout || 5000;
     const TIMEOUT_ERROR_MESSAGE =
       options.timeoutMessage || `Message Timed Out After ${TIMEOUT}ms`;
@@ -31,7 +31,7 @@ const messangerFactory = eventEmitter => {
         resolve(response);
       });
 
-      eventEmitter.emit(event, { correlationId, parameters });
+      eventEmitter.emit(event, { correlationId: id, parameters });
 
       setTimeout(() => {
         resolve(new Error(TIMEOUT_ERROR_MESSAGE));
@@ -83,4 +83,4 @@ const messangerFactory = eventEmitter => {
   );
 };
 
-module.exports = messangerFactory;
+module.exports = mediatorFactory;

@@ -53,14 +53,10 @@ const serviceFactory = (mediator, gqlPubSub) => {
     );
   };
   const updateHub = () => {
-    return new Promise(resolve => {
-      resolve(new Error("Not Implemented Yet"));
-    });
+    return mediator.sendRpcMessage("updateHub", {}, { remote: true });
   };
   const rebootHub = () => {
-    return new Promise(resolve => {
-      resolve(new Error("Not Implemented Yet"));
-    });
+    return mediator.sendRpcMessage("rebootHub", {}, { remote: true });
   };
 
   /**

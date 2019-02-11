@@ -70,12 +70,16 @@ const mediatorFactory = (eventEmitter, redisClient) => {
       sub.subscribe(topic);
     }
 
-    eventEmitter.on(topic, msg => {
+    eventEmitter.on(topic, async msg => {
       const { correlationId, parameters } = msg;
 
-      const response = messageHandler(parameters);
+      const response = await messageHandler(parameters);
 
-      eventEmitter.emit(correlationId, response);
+      if (options.remote) {
+        pub.publish(correlationId, JSON.stringify(response));
+      } else {
+        eventEmitter.emit(correlationId, response);
+      }
     });
   };
 

@@ -1,11 +1,11 @@
 ## Build Environment
 # The latest LTS version of node
-FROM balenalib/armv7hf-node:8-stretch as builder
+FROM balenalib/armv7hf-node:10-stretch as builder
 
 # Create app directory
 WORKDIR /usr/app
 
-ENV PKG_TARGET="node8-linux-armv7"
+ENV PKG_TARGET="node10-linux-armv7"
 
 # Add app
 COPY . .

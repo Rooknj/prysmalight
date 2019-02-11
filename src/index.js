@@ -1,4 +1,7 @@
 "use strict";
+// Enable console log statements in this file
+/*eslint no-console:0*/
+
 const config = require("./config/config");
 const server = require("./server/server");
 const serverServiceFactory = require("./server/serverService");
@@ -7,12 +10,10 @@ const MockLight = require("./mock/MockLight");
 const mediatorFactory = require("./mediator/mediator");
 const redis = require("redis");
 const mqtt = require("async-mqtt");
-const mockRepo = require("./mock/mockRepository");
+const { PubSub } = require("graphql-subscriptions");
 const dbFactory = require("./repository/dbFactory");
 const pubsubFactory = require("./repository/pubsubFactory");
-
-// Enable console log statements in this file
-/*eslint no-console:0*/
+const events = require("events");
 
 // Verbose statement of service starting
 console.log("--- Prysmalight ---");
@@ -25,67 +26,6 @@ process.on("uncaughtRejection", err => {
   console.log("Unhandled Rejection", err);
 });
 
-// Initialize the global event emitter
-// TODO: Figure out where to put this
-const events = require("events");
-const event = new events.EventEmitter();
-const mediator = mediatorFactory(event);
-
-// Create the gqlPubSub
-const { PubSub } = require("graphql-subscriptions");
-const gqlPubSub = new PubSub();
-
-// Start the Repository
-let repo;
-if (process.env.MOCK) {
-  repo = mockRepo;
-} else {
-  const dbClient = redis.createClient(
-    config.redisSettings.port,
-    config.redisSettings.host
-  );
-
-  const pubsubClient = mqtt.connect(config.mqttSettings.host, {
-    reconnectPeriod: config.mqttSettings.reconnectPeriod, // Amount of time between reconnection attempts
-    username: config.mqttSettings.username,
-    password: config.mqttSettings.password
-  });
-
-  const db = dbFactory(dbClient);
-  const pubsub = pubsubFactory(pubsubClient);
-  // Inject Dependencies
-  repo = repository({ mediator, db, pubsub });
-  repo.init();
-}
-
-// Start the Default Mock Light
-const createMockLight = async mockName => {
-  console.log(`Starting mock light: ${mockName}`);
-  const mockLight = new MockLight(mockName);
-  mockLight.subscribeToCommands();
-  mockLight.publishConnected({ name: mockName, connection: 2 });
-  mockLight.publishEffectList({
-    name: mockName,
-    effectList: ["Test 1", "Test 2", "Test 3"]
-  });
-  mockLight.publishState({
-    name: mockName,
-    state: "OFF",
-    color: { r: 255, g: 100, b: 0 },
-    brightness: 100,
-    effect: "None",
-    speed: 4
-  });
-  console.log(`${mockName} Ready`);
-};
-createMockLight("Default Mock");
-
-// Set up any extra mock lights if the environment dictates it
-if (process.env.MOCKS) {
-  const mockArray = process.env.MOCKS.split(",");
-  mockArray.forEach(createMockLight);
-}
-
 // Start the GraphQL server
 const startServer = async () => {
   let service = null;
@@ -97,6 +37,60 @@ const startServer = async () => {
     service = mockService;
   } else {
     // Create the real service
+    // Initialize the global event emitter
+    const eventEmitter = new events.EventEmitter();
+
+    // Create a redis client
+    const redisClient = redis.createClient(
+      config.redisSettings.port,
+      config.redisSettings.host
+    );
+
+    // Create an MQTT client
+    const mqttClient = mqtt.connect(config.mqttSettings.host, {
+      reconnectPeriod: config.mqttSettings.reconnectPeriod, // Amount of time between reconnection attempts
+      username: config.mqttSettings.username,
+      password: config.mqttSettings.password
+    });
+
+    const db = dbFactory(redisClient);
+    const pubsub = pubsubFactory(mqttClient);
+    const mediator = mediatorFactory(eventEmitter, redisClient);
+
+    // Create a gqlPubSub
+    const gqlPubSub = new PubSub();
+
+    // Start the Repository
+    const repo = repository({ mediator, db, pubsub });
+    repo.init();
+
+    // Start the Default Mock Light
+    const createMockLight = async mockName => {
+      console.log(`Starting mock light: ${mockName}`);
+      const mockLight = new MockLight(mockName);
+      mockLight.subscribeToCommands();
+      mockLight.publishConnected({ name: mockName, connection: 2 });
+      mockLight.publishEffectList({
+        name: mockName,
+        effectList: ["Test 1", "Test 2", "Test 3"]
+      });
+      mockLight.publishState({
+        name: mockName,
+        state: "OFF",
+        color: { r: 255, g: 100, b: 0 },
+        brightness: 100,
+        effect: "None",
+        speed: 4
+      });
+      console.log(`${mockName} Ready`);
+    };
+    createMockLight("Default Mock");
+    if (process.env.MOCKS) {
+      // Set up any extra mock lights if the environment dictates it
+      const mockArray = process.env.MOCKS.split(",");
+      mockArray.forEach(createMockLight);
+    }
+
     service = serverServiceFactory(mediator, gqlPubSub);
   }
 

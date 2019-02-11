@@ -10,7 +10,8 @@ cache:
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.9.2
   - export PATH="$HOME/.yarn/bin:$PATH"
-script: travis_wait node scripts/dockerUtil.js build
+  - yarn add minimist cross-spawn
+script: node scripts/dockerUtil.js build
 before_deploy:
 - echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
 deploy:

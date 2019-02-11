@@ -24,7 +24,7 @@ const serviceFactory = (mediator, gqlPubSub) => {
 
   const getLight = async lightId => {
     try {
-      const data = mediator.sendRpcMessage(
+      const data = await mediator.sendRpcMessage(
         GET_LIGHT,
         { lightId },
         { timeout: REPO_TIMEOUT, timeoutMessage: REPO_TIMEOUT_MESSAGE }
@@ -36,7 +36,7 @@ const serviceFactory = (mediator, gqlPubSub) => {
   };
   const getLights = async () => {
     try {
-      const data = mediator.sendRpcMessage(GET_LIGHTS, null, {
+      const data = await mediator.sendRpcMessage(GET_LIGHTS, null, {
         timeout: REPO_TIMEOUT,
         timeoutMessage: "getLight response Timed Out"
       });
@@ -47,7 +47,7 @@ const serviceFactory = (mediator, gqlPubSub) => {
   };
   const setLight = async (lightId, lightData) => {
     try {
-      const data = mediator.sendRpcMessage(
+      const data = await mediator.sendRpcMessage(
         SET_LIGHT,
         { lightId, lightData },
         { timeout: REPO_TIMEOUT, timeoutMessage: REPO_TIMEOUT_MESSAGE }
@@ -59,7 +59,7 @@ const serviceFactory = (mediator, gqlPubSub) => {
   };
   const addLight = async lightId => {
     try {
-      const data = mediator.sendRpcMessage(
+      const data = await mediator.sendRpcMessage(
         ADD_LIGHT,
         { lightId },
         { timeout: REPO_TIMEOUT, timeoutMessage: REPO_TIMEOUT_MESSAGE }
@@ -71,7 +71,7 @@ const serviceFactory = (mediator, gqlPubSub) => {
   };
   const removeLight = async lightId => {
     try {
-      const data = mediator.sendRpcMessage(
+      const data = await mediator.sendRpcMessage(
         REMOVE_LIGHT,
         { lightId },
         { timeout: REPO_TIMEOUT, timeoutMessage: REPO_TIMEOUT_MESSAGE }
@@ -83,11 +83,12 @@ const serviceFactory = (mediator, gqlPubSub) => {
   };
   const updateHub = async () => {
     try {
-      const data = mediator.sendRpcMessage(UPDATE_HUB, null, {
+      const { error, data } = await mediator.sendRpcMessage(UPDATE_HUB, null, {
         timeout: UPDATE_TIMEOUT,
         timeoutMessage: UPDATE_TIMEOUT_MESSAGE,
         remote: true
       });
+      if (error) return new Error(error);
       return data;
     } catch (e) {
       return e;
@@ -95,11 +96,12 @@ const serviceFactory = (mediator, gqlPubSub) => {
   };
   const rebootHub = async () => {
     try {
-      const data = mediator.sendRpcMessage(REBOOT_HUB, null, {
+      const { error, data } = await mediator.sendRpcMessage(REBOOT_HUB, null, {
         timeout: REBOOT_TIMEOUT,
         timeoutMessage: REBOOT_TIMEOUT_MESSAGE,
         remote: true
       });
+      if (error) return new Error(error);
       return data;
     } catch (e) {
       return e;

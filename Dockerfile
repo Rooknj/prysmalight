@@ -14,14 +14,13 @@ COPY . .
 RUN [ "cross-build-start" ]
 
 # Install app dependencies
-RUN yarn install --silent
+RUN npm install --silent
 
 # Test app
-RUN yarn test --no-watch
+RUN npm run test -- --no-watch
 
 # Install pkg and Build App
-RUN yarn global add pkg
-RUN yarn build
+RUN npm run build
 
 ## Prod Environment
 FROM balenalib/armv7hf:stretch-run

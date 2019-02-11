@@ -7,15 +7,21 @@ const generateRandomId = () =>
   Math.random().toString();
 
 const mediatorFactory = (eventEmitter, redisClient) => {
+  let self = {};
+
   const pub = redisClient.duplicate();
   const sub = redisClient.duplicate();
   sub.on("subscribe", channel => {
     console.log(`Subscribed to ${channel}`);
   });
 
+  sub.on("unsubscribe", channel => {
+    console.log(`unSubscribed from ${channel}`);
+  });
+
   sub.on("message", (topic, message) => {
     console.log("sub channel " + topic + ": " + message);
-    eventEmitter.emit(`remote ${topic}`, message);
+    eventEmitter.emit(topic, JSON.parse(message));
   });
 
   /**
@@ -30,23 +36,26 @@ const mediatorFactory = (eventEmitter, redisClient) => {
     const TIMEOUT_ERROR_MESSAGE =
       options.timeoutMessage || `Message Timed Out After ${TIMEOUT}ms`;
 
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       // Generate a unique topic id
       const id = generateRandomId();
 
-      if (options.remote) {
-        console.log("Remote Send RPC");
-      } else {
-        // Resolve once a response to the topic was received
-        eventEmitter.once(id, response => {
-          resolve(response);
-        });
+      // Resolve once a response to the topic was received
+      const handleResponse = response => {
+        resolve(response);
+      };
+      eventEmitter.once(id, handleResponse);
 
+      if (options.remote) {
+        sub.subscribe(id);
+        pub.publish(topic, JSON.stringify({ correlationId: id, parameters }));
+      } else {
         eventEmitter.emit(topic, { correlationId: id, parameters });
       }
 
       setTimeout(() => {
-        resolve(new Error(TIMEOUT_ERROR_MESSAGE));
+        self.removeRpcListener(id, handleResponse, options);
+        reject(new Error(TIMEOUT_ERROR_MESSAGE));
       }, TIMEOUT);
     });
   };
@@ -58,29 +67,28 @@ const mediatorFactory = (eventEmitter, redisClient) => {
    */
   const onRpcMessage = (topic, messageHandler, options = {}) => {
     if (options.remote) {
-      console.log("onRpcMessage remote");
-    } else {
-      eventEmitter.on(topic, msg => {
-        const { correlationId, parameters } = msg;
-
-        const response = messageHandler(parameters);
-
-        eventEmitter.emit(correlationId, response);
-      });
+      sub.subscribe(topic);
     }
+
+    eventEmitter.on(topic, msg => {
+      const { correlationId, parameters } = msg;
+
+      const response = messageHandler(parameters);
+
+      eventEmitter.emit(correlationId, response);
+    });
   };
 
   const removeRpcListener = (topic, messageHandler, options = {}) => {
     if (options.remote) {
-      console.log("removeRPCListener remote");
-    } else {
-      eventEmitter.removeListener(topic, messageHandler);
+      sub.unsubscribe(topic);
     }
+    eventEmitter.removeListener(topic, messageHandler);
   };
 
   const publish = (topic, message, options = {}) => {
     if (options.remote) {
-      console.log("publish remote");
+      pub.publish(topic, JSON.stringify(message));
     } else {
       eventEmitter.emit(topic, message);
     }
@@ -88,45 +96,28 @@ const mediatorFactory = (eventEmitter, redisClient) => {
 
   const subscribe = (topic, messageHandler, options = {}) => {
     if (options.remote) {
-      console.log("subscribe remote");
-    } else {
-      eventEmitter.on(topic, messageHandler);
+      sub.subscribe(topic);
     }
+    eventEmitter.on(topic, messageHandler);
   };
 
   const unsubscribe = (topic, messageHandler, options = {}) => {
     if (options.remote) {
-      console.log("unsubscribe remote");
-    } else {
-      eventEmitter.removeListener(topic, messageHandler);
+      sub.unsubscribe(topic);
     }
+    eventEmitter.removeListener(topic, messageHandler);
   };
 
-  // REMOTE PUBSUB STUFF: MOVE/REFINE THIS LATER
-
-  const publishRemote = (topic, message) => {
-    pub.publish(topic, message);
+  self = {
+    sendRpcMessage,
+    onRpcMessage,
+    removeRpcListener,
+    publish,
+    subscribe,
+    unsubscribe
   };
 
-  const subscribeRemote = (topic, messageHandler) => {
-    //eventEmitter.on(event, messageHandler);
-    eventEmitter.on(`remote ${topic}`, messageHandler);
-    sub.subscribe(topic);
-  };
-
-  return Object.assign(
-    {},
-    {
-      sendRpcMessage,
-      onRpcMessage,
-      removeRpcListener,
-      publish,
-      subscribe,
-      unsubscribe,
-      publishRemote,
-      subscribeRemote
-    }
-  );
+  return Object.assign({}, self);
 };
 
 module.exports = mediatorFactory;

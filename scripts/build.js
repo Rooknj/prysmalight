@@ -21,13 +21,13 @@ if (process.env.PKG_TARGET) {
 } else {
   switch (process.platform) {
     case "darwin": // mac
-      target = "node8-macos-x64";
+      target = "node10-macos-x64";
       break;
     case "win32": // windows
-      target = "node8-win-x64";
+      target = "node10-win-x64";
       break;
     case "linux": // linux
-      target = "node8-linux-x64";
+      target = "node10-linux-x64";
       break;
     default:
       throw new Error("No target specified");

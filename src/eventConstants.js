@@ -6,6 +6,8 @@ const REMOVE_LIGHT = "removeLight";
 const LIGHT_ADDED = "lightAdded";
 const LIGHT_REMOVED = "lightRemoved";
 const LIGHT_CHANGED = "lightChanged";
+const UPDATE_HUB = "updateHub";
+const REBOOT_HUB = "rebootHub";
 
 module.exports = {
   GET_LIGHT,
@@ -15,5 +17,7 @@ module.exports = {
   REMOVE_LIGHT,
   LIGHT_ADDED,
   LIGHT_REMOVED,
-  LIGHT_CHANGED
+  LIGHT_CHANGED,
+  UPDATE_HUB,
+  REBOOT_HUB
 };

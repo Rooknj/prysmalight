@@ -12,7 +12,7 @@ const {
   REBOOT_HUB
 } = require("../eventConstants");
 
-const UPDATE_TIMEOUT = 12000; // 2 minutes
+const UPDATE_TIMEOUT = 120000; // 2 minutes
 const UPDATE_TIMEOUT_MESSAGE = `Update timed out after ${UPDATE_TIMEOUT}ms`;
 const REBOOT_TIMEOUT = 5000;
 const REBOOT_TIMEOUT_MESSAGE = `Reboot timed out after ${REBOOT_TIMEOUT}ms`;

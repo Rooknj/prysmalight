@@ -1,8 +1,9 @@
-const discovery = require("./discovery");
+const { createDiscoveryService } = require("./discovery");
 
 const start = deps => {
-  const { mqttClient } = deps;
-  discovery.start(mqttClient);
+  const { mqttClient, mediator } = deps;
+  const discoveryService = createDiscoveryService(mediator, mqttClient);
+  discoveryService.start();
 };
 
 module.exports = { start };

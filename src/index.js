@@ -95,7 +95,7 @@ const startServer = async () => {
     service = serverServiceFactory(mediator, gqlPubSub);
 
     console.log("Starting Discovery");
-    discovery.start({ mqttClient });
+    discovery.start({ mediator, mqttClient });
   }
 
   // Start the server

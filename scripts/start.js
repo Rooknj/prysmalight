@@ -1,7 +1,7 @@
 "use strict";
 
 process.env.NODE_ENV = "development";
-process.env.DEBUG = "main,config,server,service,db,pubsub,repo";
+process.env.DEBUG = "main,config,server,service,db,pubsub,repo,discovery";
 
 const spawn = require("cross-spawn");
 const spawnArgs = require("spawn-args");

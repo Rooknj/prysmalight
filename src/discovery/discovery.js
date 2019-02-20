@@ -39,8 +39,10 @@ const createDiscoveryService = (mediator, mqttClient) => {
   };
 
   const stop = async () => {
-    console.log("Stop Discovery");
+    // Unsubscribe from mqtt topic
     await mqttClient.unsubscribe(DISCOVERY_TOPIC);
+
+    // Stop listenening for RPC messages
     mediator.removeRpcListener(GET_DISCOVERED_LIGHTS, self.getDiscoveredLights);
   };
 

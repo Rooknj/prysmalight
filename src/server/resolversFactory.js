@@ -2,7 +2,8 @@
 const resolversFactory = service => ({
   Query: {
     light: (_, { lightId }) => service.getLight(lightId),
-    lights: () => service.getLights()
+    lights: () => service.getLights(),
+    discoveredLights: () => service.getDiscoveredLights()
   },
   Mutation: {
     setLight: (_, { lightId, lightData }) =>

@@ -1,6 +1,6 @@
 ## Build Environment
 # The latest LTS version of node
-FROM balenalib/armv7hf-node:10-stretch as builder
+FROM balenalib/armv7hf-node:8-stretch as builder
 
 # Create app directory
 WORKDIR /usr/app
@@ -14,7 +14,7 @@ COPY . .
 RUN [ "cross-build-start" ]
 
 # Install app dependencies
-RUN npm install --silent
+RUN npm install
 
 # Test app
 RUN npm run test -- --no-watch

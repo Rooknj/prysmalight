@@ -22,11 +22,13 @@ const getDockerImage = tag => {
 const buildDockerImage = async tag => {
   const image = getDockerImage(tag);
   console.log("Building", image);
-  spawn("docker", ["build", "-t", image, "."], {
+  const child = spawn("docker", ["build", "-t", image, "."], {
     stdio: ["inherit", "inherit", "inherit"],
     cwd: process.cwd(),
     env: process.env
   });
+  child.on("error", err => console.log("Error:", err))
+  child.on("exit", (code, signal) => console.log("Exit:", code, signal))
 };
 
 const publishDockerImage = async tag => {

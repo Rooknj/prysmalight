@@ -358,9 +358,12 @@ module.exports = ({ mediator, db, pubsub }) => {
 
   const getDiscoveredLights = async () => {
     const lights = [];
-    const onLightDiscovered = msg => {
+    const onLightDiscovered = async msg => {
       const { name, ipAddress, macAddress, numLeds, udpPort } = msg;
-      if (!lights.find(light => light.id === name)) {
+      const { error, hasLight } = await db.hasLight(name);
+      if (error) return error;
+
+      if (!lights.find(light => light.id === name) && !hasLight) {
         lights.push({ id: name, ipAddress, macAddress, numLeds, udpPort });
       }
     };

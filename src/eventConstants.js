@@ -1,5 +1,6 @@
 const GET_LIGHT = "getLight";
 const GET_LIGHTS = "getLights";
+const GET_DISCOVERED_LIGHTS = "getDiscoveredlights";
 const SET_LIGHT = "setLight";
 const ADD_LIGHT = "addLight";
 const REMOVE_LIGHT = "removeLight";
@@ -12,6 +13,7 @@ const REBOOT_HUB = "rebootHub";
 module.exports = {
   GET_LIGHT,
   GET_LIGHTS,
+  GET_DISCOVERED_LIGHTS,
   SET_LIGHT,
   ADD_LIGHT,
   REMOVE_LIGHT,

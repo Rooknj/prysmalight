@@ -53,9 +53,9 @@ const startServer = async () => {
       password: config.mqttSettings.password
     });
 
-    const db = dbFactory(redisClient);
-    const pubsub = pubsubFactory(mqttClient);
     const mediator = mediatorFactory(eventEmitter, redisClient);
+    const db = dbFactory(redisClient);
+    const pubsub = pubsubFactory({ client: mqttClient, mediator });
 
     // Create a gqlPubSub
     const gqlPubSub = new PubSub();

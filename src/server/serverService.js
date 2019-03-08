@@ -2,6 +2,7 @@
 const {
   GET_LIGHT,
   GET_LIGHTS,
+  GET_DISCOVERED_LIGHTS,
   SET_LIGHT,
   ADD_LIGHT,
   REMOVE_LIGHT,
@@ -39,6 +40,17 @@ const serviceFactory = (mediator, gqlPubSub) => {
       const data = await mediator.sendRpcMessage(GET_LIGHTS, null, {
         timeout: REPO_TIMEOUT,
         timeoutMessage: "getLight response Timed Out"
+      });
+      return data;
+    } catch (e) {
+      return e;
+    }
+  };
+  const getDiscoveredLights = async () => {
+    try {
+      const data = await mediator.sendRpcMessage(GET_DISCOVERED_LIGHTS, null, {
+        timeout: REPO_TIMEOUT,
+        timeoutMessage: "getDiscoveredLights response Timed Out"
       });
       return data;
     } catch (e) {
@@ -155,6 +167,7 @@ const serviceFactory = (mediator, gqlPubSub) => {
   self = {
     getLight,
     getLights,
+    getDiscoveredLights,
     setLight,
     addLight,
     removeLight,

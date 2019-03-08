@@ -42,7 +42,8 @@ const createMockDependencies = () => {
     effectMessages: { subscribe: jest.fn() },
     subscribeToLight: jest.fn(async id => null),
     unsubscribeFromLight: jest.fn(async id => null),
-    publishToLight: jest.fn(async (id, topic) => null)
+    publishToLight: jest.fn(async (id, topic) => null),
+    startDiscovery: () => {}
   };
   let mockGqlPubsub = {
     publish: jest.fn(),

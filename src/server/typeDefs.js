@@ -5,6 +5,7 @@ const Query = gql`
   type Query {
     light(lightId: String!): Light
     lights: [Light]
+    discoveredLights: [DiscoveredLight]
   }
 `;
 
@@ -66,6 +67,16 @@ const ColorInput = gql`
   }
 `;
 
+const DiscoveredLight = gql`
+  type DiscoveredLight {
+    id: String!
+    ipAddress: String
+    macAddress: String
+    numLeds: Int
+    udpPort: Int
+  }
+`;
+
 const typeDefs = [
   Query,
   Mutation,
@@ -73,7 +84,8 @@ const typeDefs = [
   Light,
   LightInput,
   Color,
-  ColorInput
+  ColorInput,
+  DiscoveredLight
 ];
 
 module.exports = typeDefs;

@@ -10,6 +10,8 @@ const MQTT_LIGHT_CONNECTED_TOPIC = mqttSettings.MQTT_LIGHT_CONNECTED_TOPIC;
 const MQTT_LIGHT_STATE_TOPIC = mqttSettings.MQTT_LIGHT_STATE_TOPIC;
 const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
 const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
+const MQTT_LIGHT_CONFIG_TOPIC = mqttSettings.MQTT_LIGHT_CONFIG_TOPIC;
+const MQTT_LIGHT_DISCOVERY_TOPIC = mqttSettings.MQTT_LIGHT_DISCOVERY_TOPIC;
 
 // TODO: Move these functions to a testable area
 const getMessageType = msg => msg[0].split("/")[2];
@@ -20,7 +22,11 @@ const toMessageObject = msg => JSON.parse(msg[1].toString());
  * Factory which returns an object with all mqtt methods.
  * @param {object} client - The MQTT client
  */
-const pubsubFactory = client => {
+const pubsubFactory = deps => {
+  const { client, mediator } = deps;
+  if (!client) throw new Error("pubsub needs a client");
+  if (!mediator) throw new Error("pubsub needs a mediator");
+
   // Initializing the self object which enables us to access connected
   let self = {};
 
@@ -227,6 +233,34 @@ const pubsubFactory = client => {
     );
   };
 
+  const startDiscovery = () => {
+    // Handle MQTT Discovery Messages as they come in
+    client.on("message", (topic, payload) => {
+      if (topic.split("/")[2] === MQTT_LIGHT_CONFIG_TOPIC) {
+        const msg = JSON.parse(payload.toString());
+        debug("Discovery Message:", msg);
+        mediator.publish("lightDiscovered", msg);
+      }
+    });
+
+    // Subscribe to discovery topic
+    self.subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/+/${MQTT_LIGHT_CONFIG_TOPIC}`);
+  };
+
+  const stopDiscovery = () => {
+    // Unsubscribe from discovery topic
+    self.unsubscribeFrom(
+      `${MQTT_LIGHT_TOP_LEVEL}/+/${MQTT_LIGHT_CONFIG_TOPIC}`
+    );
+  };
+
+  const publishDiscoveryMessage = () => {
+    self.publishTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/${MQTT_LIGHT_DISCOVERY_TOPIC}`,
+      "Discover"
+    );
+  };
+
   self = {
     connected: false,
     connections,
@@ -237,7 +271,13 @@ const pubsubFactory = client => {
     effectMessages,
     subscribeToLight,
     unsubscribeFromLight,
-    publishToLight
+    publishToLight,
+    publishTo,
+    subscribeTo,
+    unsubscribeFrom,
+    startDiscovery,
+    stopDiscovery,
+    publishDiscoveryMessage
   };
 
   return Object.create(self);

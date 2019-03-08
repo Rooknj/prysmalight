@@ -14,7 +14,7 @@ COPY . .
 RUN [ "cross-build-start" ]
 
 # Install app dependencies
-RUN npm install --silent
+RUN npm install
 
 # Test app
 RUN npm run test -- --no-watch

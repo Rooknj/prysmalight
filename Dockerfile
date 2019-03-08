@@ -1,6 +1,6 @@
 ## Build Environment
 # The latest LTS version of node
-FROM balenalib/armv7hf-node:10-stretch as builder
+FROM balenalib/armv7hf-node:8-stretch as builder
 
 # Create app directory
 WORKDIR /usr/app

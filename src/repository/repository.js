@@ -9,7 +9,8 @@ const {
   REMOVE_LIGHT,
   LIGHT_ADDED,
   LIGHT_REMOVED,
-  LIGHT_CHANGED
+  LIGHT_CHANGED,
+  GET_DISCOVERED_LIGHTS
 } = require("../eventConstants");
 
 // TODO: Switch this to getRandomId
@@ -31,6 +32,7 @@ module.exports = ({ mediator, db, pubsub }) => {
     pubsub.connectMessages.subscribe(self.handleConnectMessage);
     pubsub.stateMessages.subscribe(self.handleStateMessage);
     pubsub.effectMessages.subscribe(self.handleEffectListMessage);
+    pubsub.startDiscovery();
 
     // Subscribe to all lights on startup
     db.connections.subscribe(self.connect);
@@ -47,6 +49,9 @@ module.exports = ({ mediator, db, pubsub }) => {
     mediator.onRpcMessage(ADD_LIGHT, ({ lightId }) => self.addLight(lightId));
     mediator.onRpcMessage(REMOVE_LIGHT, ({ lightId }) =>
       self.removeLight(lightId)
+    );
+    mediator.onRpcMessage(GET_DISCOVERED_LIGHTS, () =>
+      self.getDiscoveredLights()
     );
   };
 
@@ -351,6 +356,22 @@ module.exports = ({ mediator, db, pubsub }) => {
     });
   };
 
+  const getDiscoveredLights = async () => {
+    const lights = [];
+    const onLightDiscovered = msg => {
+      const { name, ipAddress, macAddress, numLeds, udpPort } = msg;
+      if (!lights.find(light => light.id === name)) {
+        lights.push({ id: name, ipAddress, macAddress, numLeds, udpPort });
+      }
+    };
+    mediator.subscribe("lightDiscovered", onLightDiscovered);
+    pubsub.publishDiscoveryMessage();
+
+    await asyncSetTimeout(500);
+
+    return lights;
+  };
+
   self = {
     connected: false,
     init,
@@ -362,7 +383,8 @@ module.exports = ({ mediator, db, pubsub }) => {
     getLights,
     setLight,
     addLight,
-    removeLight
+    removeLight,
+    getDiscoveredLights
   };
 
   return Object.create(self);

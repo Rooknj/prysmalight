@@ -54,9 +54,9 @@ const startServer = async () => {
       password: config.mqttSettings.password
     });
 
-    const db = dbFactory(redisClient);
-    const pubsub = pubsubFactory(mqttClient);
     const mediator = mediatorFactory(eventEmitter, redisClient);
+    const db = dbFactory(redisClient);
+    const pubsub = pubsubFactory({ client: mqttClient, mediator });
 
     // Create a gqlPubSub
     const gqlPubSub = new PubSub();
@@ -93,9 +93,6 @@ const startServer = async () => {
     }
 
     service = serverServiceFactory(mediator, gqlPubSub);
-
-    console.log("Starting Discovery");
-    discovery.start({ mediator, mqttClient });
   }
 
   // Start the server

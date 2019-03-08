@@ -19,16 +19,30 @@ const createMockClient = () => {
   };
 };
 
+const createMockMediator = () => {
+  return {
+    subscribe: jest.fn(async topic => [{ topic, qos: 0 }]),
+    publish: jest.fn(async (topic, payload) => {}),
+    unsubscribe: jest.fn(async topic => {})
+  };
+};
+
 describe("connections", () => {
   test("is defined", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(pubsub.connections).toBeDefined();
   });
 
   test("is an observable", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(isObservable(pubsub.connections)).toBe(true);
   });
 });
@@ -36,13 +50,19 @@ describe("connections", () => {
 describe("disconnections", () => {
   test("is defined", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(pubsub.disconnections).toBeDefined();
   });
 
   test("is an observable", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(isObservable(pubsub.disconnections)).toBe(true);
   });
 });
@@ -50,13 +70,19 @@ describe("disconnections", () => {
 describe("allMessages", () => {
   test("is defined", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(pubsub.allMessages).toBeDefined();
   });
 
   test("is an observable", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(isObservable(pubsub.allMessages)).toBe(true);
   });
 
@@ -66,13 +92,19 @@ describe("allMessages", () => {
 describe("connectMessages", () => {
   test("is defined", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(pubsub.connectMessages).toBeDefined();
   });
 
   test("is an observable", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(isObservable(pubsub.connectMessages)).toBe(true);
   });
 
@@ -82,13 +114,19 @@ describe("connectMessages", () => {
 describe("stateMessages", () => {
   test("is defined", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(pubsub.stateMessages).toBeDefined();
   });
 
   test("is an observable", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(isObservable(pubsub.stateMessages)).toBe(true);
   });
 
@@ -98,13 +136,19 @@ describe("stateMessages", () => {
 describe("effectMessages", () => {
   test("is defined", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(pubsub.effectMessages).toBeDefined();
   });
 
   test("is an observable", () => {
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     expect(isObservable(pubsub.effectMessages)).toBe(true);
   });
 
@@ -115,7 +159,10 @@ describe("subscribeToLight", () => {
   test("Subscribes to all the correct topics (Example 1)", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = "Test A";
 
@@ -138,7 +185,10 @@ describe("subscribeToLight", () => {
   test("Subscribes to all the correct topics (Example 2)", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = "Test 123";
 
@@ -161,7 +211,10 @@ describe("subscribeToLight", () => {
   test("returns an error if the client is not connected", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = false;
     const ID = "Test A";
 
@@ -177,7 +230,10 @@ describe("subscribeToLight", () => {
     mockClient.subscribe = jest.fn(async () => {
       throw new Error();
     });
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = "Test A";
 
@@ -191,7 +247,10 @@ describe("subscribeToLight", () => {
   test("returns an error if no id was provided", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
 
     // Call The Method
@@ -206,7 +265,10 @@ describe("publishToLight", () => {
   test("Publishes the message to the correct topic as a buffer (Example 1)", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = "Test A";
     const MESSAGE = { brightness: 40 };
@@ -225,7 +287,10 @@ describe("publishToLight", () => {
   test("Publishes the message to the correct topic as a buffer (Example 2)", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = "Test A";
     const MESSAGE = { effect: "Cylon" };
@@ -244,7 +309,10 @@ describe("publishToLight", () => {
   test("returns an error if the client is not connected", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = false;
     const ID = "Test A";
     const MESSAGE = { effect: "Cylon" };
@@ -261,7 +329,10 @@ describe("publishToLight", () => {
     mockClient.publish = jest.fn(() => {
       throw new Error();
     });
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = "Test A";
     const MESSAGE = { effect: "Cylon" };
@@ -276,7 +347,10 @@ describe("publishToLight", () => {
   test("returns an error if no id was provided", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = null;
     const MESSAGE = { effect: "Cylon" };
@@ -290,7 +364,10 @@ describe("publishToLight", () => {
   test("returns an error if no message was provided", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = "Test A";
     const MESSAGE = null;
@@ -307,7 +384,10 @@ describe("unsubscribeFromLight", () => {
   test("Unsubscribes from all the correct topics (Example 1)", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = "Test A";
 
@@ -330,7 +410,10 @@ describe("unsubscribeFromLight", () => {
   test("Unsubscribes from all the correct topics (Example 2)", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = "Test 123";
 
@@ -353,7 +436,10 @@ describe("unsubscribeFromLight", () => {
   test("returns an error if the client is not connected", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = false;
     const ID = "Test A";
 
@@ -369,7 +455,10 @@ describe("unsubscribeFromLight", () => {
     mockClient.unsubscribe = jest.fn(async () => {
       throw new Error();
     });
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
     const ID = "Test A";
 
@@ -383,7 +472,10 @@ describe("unsubscribeFromLight", () => {
   test("returns an error if no id was provided", async () => {
     // Create the client and pubsub
     let mockClient = createMockClient();
-    const pubsub = pubsubFactory(mockClient);
+    const pubsub = pubsubFactory({
+      client: mockClient,
+      mediator: createMockMediator()
+    });
     pubsub.__proto__.connected = true;
 
     // Call The Method

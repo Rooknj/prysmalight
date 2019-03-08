@@ -9,7 +9,7 @@
   "license": "MIT",
   "devDependencies": {
     "cross-spawn": "^6.0.5",
-    "eslint": "^5.2.0",
+    "eslint": "^5.15.1",
     "husky": "^0.14.3",
     "jest": "^23.4.2",
     "lint-staged": "^7.0.0",
@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "amqplib": "^0.5.3",
-    "apollo-server": "^2.0.0",
-    "apollo-server-express": "^2.0.0-rc.12",
+    "apollo-server": "^2.4.8",
+    "apollo-server-express": "^2.4.8",
     "async-mqtt": "^1.0.1",
     "compression": "^1.7.3",
     "cors": "^2.8.4",

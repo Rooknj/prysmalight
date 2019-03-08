@@ -27,17 +27,21 @@ const buildDockerImage = async tag => {
     cwd: process.cwd(),
     env: process.env
   });
-  child.on("error", err => console.log("Error:", err))
-  child.on("exit", (code, signal) => console.log("Exit:", code, signal))
+  child.on("exit", code => {
+    if (code !== 0) process.exit(code);
+  });
 };
 
 const publishDockerImage = async tag => {
   const image = getDockerImage(tag);
   console.log("Publishing", image);
-  spawn("docker", ["push", image], {
+  const child = spawn("docker", ["push", image], {
     stdio: ["inherit", "inherit", "inherit"],
     cwd: process.cwd(),
     env: process.env
+  });
+  child.on("exit", code => {
+    if (code !== 0) process.exit(code);
   });
 };
 

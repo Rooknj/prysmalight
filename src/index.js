@@ -14,7 +14,6 @@ const { PubSub } = require("graphql-subscriptions");
 const dbFactory = require("./repository/dbFactory");
 const pubsubFactory = require("./repository/pubsubFactory");
 const events = require("events");
-const discovery = require("./discovery");
 
 // Verbose statement of service starting
 console.log("--- Prysmalight ---");

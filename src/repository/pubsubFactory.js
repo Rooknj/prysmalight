@@ -10,6 +10,8 @@ const MQTT_LIGHT_CONNECTED_TOPIC = mqttSettings.MQTT_LIGHT_CONNECTED_TOPIC;
 const MQTT_LIGHT_STATE_TOPIC = mqttSettings.MQTT_LIGHT_STATE_TOPIC;
 const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
 const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
+const MQTT_LIGHT_CONFIG_TOPIC = mqttSettings.MQTT_LIGHT_CONFIG_TOPIC;
+const MQTT_LIGHT_DISCOVERY_TOPIC = mqttSettings.MQTT_LIGHT_DISCOVERY_TOPIC;
 
 // TODO: Move these functions to a testable area
 const getMessageType = msg => msg[0].split("/")[2];
@@ -237,7 +239,10 @@ const pubsubFactory = client => {
     effectMessages,
     subscribeToLight,
     unsubscribeFromLight,
-    publishToLight
+    publishToLight,
+    publishTo,
+    subscribeTo,
+    unsubscribeFrom
   };
 
   return Object.create(self);

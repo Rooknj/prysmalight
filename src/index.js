@@ -5,14 +5,14 @@
 const config = require("./config/config");
 const server = require("./server/server");
 const serverServiceFactory = require("./server/serverService");
-const repository = require("./repository/repository");
+const createLightService = require("./lightService");
 const MockLight = require("./mock/MockLight");
 const mediatorFactory = require("./mediator/mediator");
 const redis = require("redis");
 const mqtt = require("async-mqtt");
 const { PubSub } = require("graphql-subscriptions");
-const dbFactory = require("./repository/dbFactory");
-const pubsubFactory = require("./repository/pubsubFactory");
+const dbFactory = require("./lightService/dbFactory");
+const pubsubFactory = require("./lightService/pubsubFactory");
 const events = require("events");
 
 // Verbose statement of service starting
@@ -60,9 +60,9 @@ const startServer = async () => {
     // Create a gqlPubSub
     const gqlPubSub = new PubSub();
 
-    // Start the Repository
-    const repo = repository({ mediator, db, pubsub });
-    repo.init();
+    // Start the lightService
+    const lightService = createLightService({ mediator, db, pubsub });
+    lightService.init();
 
     // Start the Default Mock Light
     const createMockLight = async mockName => {

@@ -1,5 +1,5 @@
 const Debug = require("debug").default;
-const debug = Debug("repo");
+const debug = Debug("lightService");
 
 const {
   GET_LIGHT,
@@ -61,11 +61,11 @@ module.exports = ({ mediator, db, pubsub }) => {
    */
   const connect = async () => {
     if (!pubsub.connected) {
-      debug("Cant connect repo, pubsub not connected");
+      debug("Cant connect lightService, pubsub not connected");
       return new Error("pubsub not connected");
     }
     if (!db.connected) {
-      debug("Cant connect repo, db not connected");
+      debug("Cant connect lightService, db not connected");
       return new Error("db not connected");
     }
 
@@ -95,7 +95,7 @@ module.exports = ({ mediator, db, pubsub }) => {
 
     if (subscriptionError) return subscriptionError;
     // Set connection status to true if there were no errors
-    debug(`Successfully Connected to Repo`);
+    debug(`Successfully Connected to lightService`);
     self.connected = true;
     return null;
   };

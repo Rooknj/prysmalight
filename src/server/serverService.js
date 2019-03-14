@@ -17,8 +17,8 @@ const UPDATE_TIMEOUT = 110000; // a little less than 2 minutes
 const UPDATE_TIMEOUT_MESSAGE = `Update timed out after ${UPDATE_TIMEOUT}ms`;
 const REBOOT_TIMEOUT = 5000;
 const REBOOT_TIMEOUT_MESSAGE = `Reboot timed out after ${REBOOT_TIMEOUT}ms`;
-const REPO_TIMEOUT = 5000;
-const REPO_TIMEOUT_MESSAGE = `Repository timed out after ${REPO_TIMEOUT}ms`;
+const LIGHT_SERVICE_TIMEOUT = 5000;
+const LIGHT_SERVICE_TIMEOUT_MESSAGE = `Light Service timed out after ${LIGHT_SERVICE_TIMEOUT}ms`;
 
 const serviceFactory = (mediator, gqlPubSub) => {
   let self = {};
@@ -28,7 +28,10 @@ const serviceFactory = (mediator, gqlPubSub) => {
       const data = await mediator.sendRpcMessage(
         GET_LIGHT,
         { lightId },
-        { timeout: REPO_TIMEOUT, timeoutMessage: REPO_TIMEOUT_MESSAGE }
+        {
+          timeout: LIGHT_SERVICE_TIMEOUT,
+          timeoutMessage: LIGHT_SERVICE_TIMEOUT_MESSAGE
+        }
       );
       return data;
     } catch (e) {
@@ -38,7 +41,7 @@ const serviceFactory = (mediator, gqlPubSub) => {
   const getLights = async () => {
     try {
       const data = await mediator.sendRpcMessage(GET_LIGHTS, null, {
-        timeout: REPO_TIMEOUT,
+        timeout: LIGHT_SERVICE_TIMEOUT,
         timeoutMessage: "getLight response Timed Out"
       });
       return data;
@@ -49,7 +52,7 @@ const serviceFactory = (mediator, gqlPubSub) => {
   const getDiscoveredLights = async () => {
     try {
       const data = await mediator.sendRpcMessage(GET_DISCOVERED_LIGHTS, null, {
-        timeout: REPO_TIMEOUT,
+        timeout: LIGHT_SERVICE_TIMEOUT,
         timeoutMessage: "getDiscoveredLights response Timed Out"
       });
       return data;
@@ -62,7 +65,10 @@ const serviceFactory = (mediator, gqlPubSub) => {
       const data = await mediator.sendRpcMessage(
         SET_LIGHT,
         { lightId, lightData },
-        { timeout: REPO_TIMEOUT, timeoutMessage: REPO_TIMEOUT_MESSAGE }
+        {
+          timeout: LIGHT_SERVICE_TIMEOUT,
+          timeoutMessage: LIGHT_SERVICE_TIMEOUT_MESSAGE
+        }
       );
       return data;
     } catch (e) {
@@ -74,7 +80,10 @@ const serviceFactory = (mediator, gqlPubSub) => {
       const data = await mediator.sendRpcMessage(
         ADD_LIGHT,
         { lightId },
-        { timeout: REPO_TIMEOUT, timeoutMessage: REPO_TIMEOUT_MESSAGE }
+        {
+          timeout: LIGHT_SERVICE_TIMEOUT,
+          timeoutMessage: LIGHT_SERVICE_TIMEOUT_MESSAGE
+        }
       );
       return data;
     } catch (e) {
@@ -86,7 +95,10 @@ const serviceFactory = (mediator, gqlPubSub) => {
       const data = await mediator.sendRpcMessage(
         REMOVE_LIGHT,
         { lightId },
-        { timeout: REPO_TIMEOUT, timeoutMessage: REPO_TIMEOUT_MESSAGE }
+        {
+          timeout: LIGHT_SERVICE_TIMEOUT,
+          timeoutMessage: LIGHT_SERVICE_TIMEOUT_MESSAGE
+        }
       );
       return data;
     } catch (e) {

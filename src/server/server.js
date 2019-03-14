@@ -1,6 +1,6 @@
 "use strict";
 const typeDefs = require("./typeDefs");
-const resolversFactory = require("./resolversFactory");
+const resolvers = require("./resolvers");
 const { ApolloServer } = require("apollo-server-express");
 const http = require("http"); // Library to create an http server
 const express = require("express"); // NodeJS Web Server
@@ -19,8 +19,11 @@ const start = options => {
     }
 
     const app = express();
-    const resolvers = resolversFactory(options.service);
-    const apolloServer = new ApolloServer({ typeDefs, resolvers });
+    const context = async ({ req }) => ({
+      lightService: options.service,
+      request: req
+    });
+    const apolloServer = new ApolloServer({ typeDefs, resolvers, context });
 
     // Apply middleware to Express app
     app.use("*", cors());

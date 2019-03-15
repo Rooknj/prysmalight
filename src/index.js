@@ -4,14 +4,11 @@
 
 const config = require("./config");
 const Server = require("./server/server");
-const serverServiceFactory = require("./server/serverService");
 const createLightService = require("./lightService");
 const MockLight = require("./mock/MockLight");
 const mediator = require("./mediator/mediator");
-const { PubSub } = require("graphql-subscriptions");
 const dbFactory = require("./lightService/dbFactory");
 const pubsubFactory = require("./lightService/pubsubFactory");
-const events = require("events");
 
 // Verbose statement of service starting
 console.log("--- Prysmalight ---");
@@ -26,67 +23,49 @@ process.on("uncaughtRejection", err => {
 
 // Start the GraphQL server
 const startServer = async () => {
-  let service = null;
+  // Create a redis client
+  const redisClient = config.redis.connect(config.redisSettings);
 
-  // Get a service
-  if (process.env.MOCK) {
-    // Use the mock service if the MOCK env variable is set
-    const mockService = require("./mock/mockService");
-    service = mockService;
-  } else {
-    // Create the real service
-    // Initialize the global event emitter
-    const eventEmitter = new events.EventEmitter();
+  // Create an MQTT client
+  const mqttClient = config.mqtt.connect(config.mqttSettings);
 
-    // Create a redis client
-    const redisClient = config.redis.connect(config.redisSettings);
+  const db = dbFactory(redisClient);
+  const pubsub = pubsubFactory({ client: mqttClient, mediator });
 
-    // Create an MQTT client
-    const mqttClient = config.mqtt.connect(config.mqttSettings);
+  // Start the lightService
+  const lightService = createLightService({ mediator, db, pubsub });
+  lightService.init();
 
-    const db = dbFactory(redisClient);
-    const pubsub = pubsubFactory({ client: mqttClient, mediator });
-
-    // Create a gqlPubSub
-    const gqlPubSub = new PubSub();
-
-    // Start the lightService
-    const lightService = createLightService({ mediator, db, pubsub });
-    lightService.init();
-
-    // Start the Default Mock Light
-    const createMockLight = async mockName => {
-      console.log(`Starting mock light: ${mockName}`);
-      const mockLight = new MockLight(mockName);
-      mockLight.subscribeToCommands();
-      mockLight.publishConnected({ name: mockName, connection: 2 });
-      mockLight.publishEffectList({
-        name: mockName,
-        effectList: ["Test 1", "Test 2", "Test 3"]
-      });
-      mockLight.publishState({
-        name: mockName,
-        state: "OFF",
-        color: { r: 255, g: 100, b: 0 },
-        brightness: 100,
-        effect: "None",
-        speed: 4
-      });
-      console.log(`${mockName} Ready`);
-    };
-    createMockLight("Default Mock");
-    if (process.env.MOCKS) {
-      // Set up any extra mock lights if the environment dictates it
-      const mockArray = process.env.MOCKS.split(",");
-      mockArray.forEach(createMockLight);
-    }
-
-    service = serverServiceFactory(mediator, gqlPubSub);
+  // Start the Default Mock Light
+  const createMockLight = async mockName => {
+    console.log(`Starting mock light: ${mockName}`);
+    const mockLight = new MockLight(mockName);
+    mockLight.subscribeToCommands();
+    mockLight.publishConnected({ name: mockName, connection: 2 });
+    mockLight.publishEffectList({
+      name: mockName,
+      effectList: ["Test 1", "Test 2", "Test 3"]
+    });
+    mockLight.publishState({
+      name: mockName,
+      state: "OFF",
+      color: { r: 255, g: 100, b: 0 },
+      brightness: 100,
+      effect: "None",
+      speed: 4
+    });
+    console.log(`${mockName} Ready`);
+  };
+  createMockLight("Default Mock");
+  if (process.env.MOCKS) {
+    // Set up any extra mock lights if the environment dictates it
+    const mockArray = process.env.MOCKS.split(",");
+    mockArray.forEach(createMockLight);
   }
 
   // Start the server
   console.log("Starting Server");
-  const server = new Server(service);
+  const server = new Server();
   await server.start(config.serverSettings.port);
   console.log(
     `🚀 Server ready at http://localhost:${config.serverSettings.port}${

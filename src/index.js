@@ -7,7 +7,7 @@ const Server = require("./server/server");
 const serverServiceFactory = require("./server/serverService");
 const createLightService = require("./lightService");
 const MockLight = require("./mock/MockLight");
-const mediatorFactory = require("./mediator/mediator");
+const mediator = require("./mediator/mediator");
 const { PubSub } = require("graphql-subscriptions");
 const dbFactory = require("./lightService/dbFactory");
 const pubsubFactory = require("./lightService/pubsubFactory");
@@ -44,7 +44,6 @@ const startServer = async () => {
     // Create an MQTT client
     const mqttClient = config.mqtt.connect(config.mqttSettings);
 
-    const mediator = mediatorFactory(eventEmitter, redisClient);
     const db = dbFactory(redisClient);
     const pubsub = pubsubFactory({ client: mqttClient, mediator });
 

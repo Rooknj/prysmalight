@@ -25,7 +25,7 @@ sub.on("message", (topic, message) => {
   eventEmitter.emit(topic, JSON.parse(message));
 });
 
-module.exports = {
+const mediator = {
   /**
    * Sends a message to an RPC server and waits for the reply.
    * @param {string} topic - the topic to send on
@@ -56,7 +56,7 @@ module.exports = {
       }
 
       setTimeout(() => {
-        self.removeRpcListener(id, handleResponse, options);
+        mediator.removeRpcListener(id, handleResponse, options);
         reject(new Error(TIMEOUT_ERROR_MESSAGE));
       }, TIMEOUT);
     });
@@ -114,3 +114,5 @@ module.exports = {
     eventEmitter.removeListener(topic, messageHandler);
   }
 };
+
+module.exports = mediator;

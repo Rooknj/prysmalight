@@ -8,43 +8,45 @@ const cors = require("cors"); // Cross Origin Resource Sharing Middleware
 const helmet = require("helmet"); // Security Middleware
 const compression = require("compression"); // Compression Middleware
 
-const start = options => {
-  return new Promise((resolve, reject) => {
-    if (!options.port) {
-      reject(new Error("The server must be started with an available port"));
-    }
+const createServer = ({ lightService }) => {
+  let self = {};
 
-    if (!options.service) {
-      reject(new Error("The server must be started with a connected service"));
-    }
+  const app = express();
+  const context = async ({ req }) => ({
+    lightService,
+    request: req
+  });
+  const apolloServer = new ApolloServer({ typeDefs, resolvers, context });
 
-    const app = express();
-    const context = async ({ req }) => ({
-      lightService: options.service,
-      request: req
-    });
-    const apolloServer = new ApolloServer({ typeDefs, resolvers, context });
+  // Apply middleware to Express app
+  app.use("*", cors());
+  app.use(helmet());
+  app.use(compression());
+  apolloServer.applyMiddleware({ app });
 
-    // Apply middleware to Express app
-    app.use("*", cors());
-    app.use(helmet());
-    app.use(compression());
-    apolloServer.applyMiddleware({ app });
+  // Create the httpServer and add subscriptions
+  const httpServer = http.createServer(app);
+  apolloServer.installSubscriptionHandlers(httpServer);
 
-    // Create the httpServer and add subscriptions
-    const httpServer = http.createServer(app);
-    apolloServer.installSubscriptionHandlers(httpServer);
-
+  const start = port => {
     // Start the httpServer
-    const apolloApp = httpServer.listen(options.port, () => {
-      resolve({
-        app: apolloApp,
-        port: options.port,
-        gqlPath: apolloServer.graphqlPath,
-        subscriptionsPath: apolloServer.subscriptionsPath
+    return new Promise(resolve => {
+      const apolloApp = httpServer.listen(port, () => {
+        resolve({
+          app: apolloApp,
+          port,
+          gqlPath: apolloServer.graphqlPath,
+          subscriptionsPath: apolloServer.subscriptionsPath
+        });
       });
     });
-  });
+  };
+
+  self = {
+    start
+  };
+
+  return Object.create(self);
 };
 
-module.exports = Object.assign({}, { start });
+module.exports = createServer;

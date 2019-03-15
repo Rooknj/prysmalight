@@ -4,18 +4,6 @@ const serverSettings = {
   port: process.env.PORT || 4001
 };
 
-const rabbitSettings = {
-  protocol: "amqp",
-  hostname: process.env.RABBIT_HOST || "localhost",
-  port: 5672,
-  username: "guest",
-  password: "guest",
-  locale: "en_US",
-  frameMax: 0,
-  heartbeat: 0,
-  vhost: "/"
-};
-
 const mqttSettings = {
   host: `tcp://${process.env.MQTT_HOST}:1883` || "tcp://localhost:1883",
   reconnectPeriod: 5000, // Amount of time between reconnection attempts
@@ -37,5 +25,5 @@ const redisSettings = {
 
 module.exports = Object.assign(
   {},
-  { serverSettings, rabbitSettings, mqttSettings, redisSettings }
+  { serverSettings, mqttSettings, redisSettings }
 );

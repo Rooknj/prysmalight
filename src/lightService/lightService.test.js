@@ -1,4 +1,4 @@
-const repository = require("./repository");
+const createLightService = require("./lightService");
 const rxjs = require("rxjs");
 const events = require("events");
 
@@ -63,12 +63,12 @@ const createMockDependencies = () => {
   };
 };
 
-describe("repository & init", () => {
+describe("createLightService & init", () => {
   test("Subscribes once to all relavent observables upon creation", () => {
     let mockDeps = createMockDependencies();
 
-    let repo = repository(mockDeps);
-    repo.init();
+    let lightService = createLightService(mockDeps);
+    lightService.init();
 
     expect(mockDeps.db.connections.subscribe).toBeCalledTimes(1);
     expect(mockDeps.db.disconnections.subscribe).toBeCalledTimes(1);
@@ -85,13 +85,13 @@ describe("repository & init", () => {
     const eventEmitter = new events.EventEmitter();
     mockDeps.db.connections = rxjs.fromEvent(eventEmitter, "dbConnect");
 
-    let repo = repository(mockDeps);
-    repo.__proto__.connect = jest.fn();
-    repo.init();
+    let lightService = createLightService(mockDeps);
+    lightService.__proto__.connect = jest.fn();
+    lightService.init();
 
     eventEmitter.emit("dbConnect");
 
-    expect(repo.connect).toBeCalledTimes(1);
+    expect(lightService.connect).toBeCalledTimes(1);
   });
   test("attempts to connect when the pubsub connects", () => {
     let mockDeps = createMockDependencies();
@@ -100,13 +100,13 @@ describe("repository & init", () => {
     const eventEmitter = new events.EventEmitter();
     mockDeps.pubsub.connections = rxjs.fromEvent(eventEmitter, "pubsubConnect");
 
-    let repo = repository(mockDeps);
-    repo.__proto__.connect = jest.fn();
-    repo.init();
+    let lightService = createLightService(mockDeps);
+    lightService.__proto__.connect = jest.fn();
+    lightService.init();
 
     eventEmitter.emit("pubsubConnect");
 
-    expect(repo.connect).toBeCalledTimes(1);
+    expect(lightService.connect).toBeCalledTimes(1);
   });
   test("sets connected property to false if the db disconnects", () => {
     let mockDeps = createMockDependencies();
@@ -116,24 +116,24 @@ describe("repository & init", () => {
       "pubsubDisonnect"
     );
 
-    let repo = repository(mockDeps);
-    repo.init();
+    let lightService = createLightService(mockDeps);
+    lightService.init();
 
     eventEmitter.emit("pubsubDisonnect");
 
-    expect(repo.connected).toBe(false);
+    expect(lightService.connected).toBe(false);
   });
   test("sets connected property to false if the pubsub disconnects", () => {
     let mockDeps = createMockDependencies();
     const eventEmitter = new events.EventEmitter();
     mockDeps.db.disconnections = rxjs.fromEvent(eventEmitter, "dbDisonnect");
 
-    let repo = repository(mockDeps);
-    repo.init();
+    let lightService = createLightService(mockDeps);
+    lightService.init();
 
     eventEmitter.emit("dbDisonnect");
 
-    expect(repo.connected).toBe(false);
+    expect(lightService.connected).toBe(false);
   });
   test("handles connected messages when received", () => {
     let mockDeps = createMockDependencies();
@@ -143,15 +143,15 @@ describe("repository & init", () => {
       "connectMessage"
     );
 
-    let repo = repository(mockDeps);
-    repo.__proto__.handleConnectMessage = jest.fn();
-    repo.init();
+    let lightService = createLightService(mockDeps);
+    lightService.__proto__.handleConnectMessage = jest.fn();
+    lightService.init();
 
     const MESSAGE = "message";
     eventEmitter.emit("connectMessage", MESSAGE);
 
-    expect(repo.handleConnectMessage).toBeCalledTimes(1);
-    expect(repo.handleConnectMessage).toBeCalledWith(MESSAGE);
+    expect(lightService.handleConnectMessage).toBeCalledTimes(1);
+    expect(lightService.handleConnectMessage).toBeCalledWith(MESSAGE);
   });
   test("handles state messages when received", () => {
     let mockDeps = createMockDependencies();
@@ -161,15 +161,15 @@ describe("repository & init", () => {
       "connectMessage"
     );
 
-    let repo = repository(mockDeps);
-    repo.__proto__.handleStateMessage = jest.fn();
-    repo.init();
+    let lightService = createLightService(mockDeps);
+    lightService.__proto__.handleStateMessage = jest.fn();
+    lightService.init();
 
     const MESSAGE = "message";
     eventEmitter.emit("connectMessage", MESSAGE);
 
-    expect(repo.handleStateMessage).toBeCalledTimes(1);
-    expect(repo.handleStateMessage).toBeCalledWith(MESSAGE);
+    expect(lightService.handleStateMessage).toBeCalledTimes(1);
+    expect(lightService.handleStateMessage).toBeCalledWith(MESSAGE);
   });
   test("handles effect list messages when received", () => {
     let mockDeps = createMockDependencies();
@@ -179,15 +179,15 @@ describe("repository & init", () => {
       "effectListMessage"
     );
 
-    let repo = repository(mockDeps);
-    repo.__proto__.handleEffectListMessage = jest.fn();
-    repo.init();
+    let lightService = createLightService(mockDeps);
+    lightService.__proto__.handleEffectListMessage = jest.fn();
+    lightService.init();
 
     const MESSAGE = "message";
     eventEmitter.emit("effectListMessage", MESSAGE);
 
-    expect(repo.handleEffectListMessage).toBeCalledTimes(1);
-    expect(repo.handleEffectListMessage).toBeCalledWith(MESSAGE);
+    expect(lightService.handleEffectListMessage).toBeCalledTimes(1);
+    expect(lightService.handleEffectListMessage).toBeCalledWith(MESSAGE);
   });
 });
 
@@ -203,9 +203,9 @@ describe("connect", () => {
       error: null,
       lights: MOCKLIGHTS
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const error = await repo.connect();
+    const error = await lightService.connect();
 
     expect(error).toBeNull();
     expect(mockDeps.db.getAllLights).toBeCalled();
@@ -213,7 +213,7 @@ describe("connect", () => {
     MOCKLIGHTS.forEach(light => {
       expect(mockDeps.pubsub.subscribeToLight).toBeCalledWith(light.id);
     });
-    expect(repo.connected).toBe(true);
+    expect(lightService.connected).toBe(true);
   });
   test("subscribes to all added lights then sets connected to true (Example 2)", async () => {
     let mockDeps = createMockDependencies();
@@ -222,9 +222,9 @@ describe("connect", () => {
       error: null,
       lights: MOCKLIGHTS
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const error = await repo.connect();
+    const error = await lightService.connect();
 
     expect(error).toBeNull();
     expect(mockDeps.db.getAllLights).toBeCalled();
@@ -232,23 +232,23 @@ describe("connect", () => {
     MOCKLIGHTS.forEach(light => {
       expect(mockDeps.pubsub.subscribeToLight).toBeCalledWith(light.id);
     });
-    expect(repo.connected).toBe(true);
+    expect(lightService.connected).toBe(true);
   });
   test("returns an error if the db is not connected", async () => {
     let mockDeps = createMockDependencies();
     mockDeps.db.connected = false;
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const error = await repo.connect();
+    const error = await lightService.connect();
 
     expect(error).toBeInstanceOf(Error);
   });
   test("returns an error if the pubsub is not connected", async () => {
     let mockDeps = createMockDependencies();
     mockDeps.pubsub.connected = false;
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const error = await repo.connect();
+    const error = await lightService.connect();
 
     expect(error).toBeInstanceOf(Error);
   });
@@ -257,24 +257,24 @@ describe("connect", () => {
     mockDeps.db.getAllLights = jest.fn(async () => ({
       error: new Error()
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const error = await repo.connect();
+    const error = await lightService.connect();
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.getAllLights).toBeCalled();
-    expect(repo.connected).toBe(false);
+    expect(lightService.connected).toBe(false);
   });
   test("returns an error and does not set connected to true if an error occurs while subscribing", async () => {
     let mockDeps = createMockDependencies();
     mockDeps.pubsub.subscribeToLight = jest.fn(async () => new Error());
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const error = await repo.connect();
+    const error = await lightService.connect();
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.pubsub.subscribeToLight).toBeCalled();
-    expect(repo.connected).toBe(false);
+    expect(lightService.connected).toBe(false);
   });
 });
 
@@ -288,8 +288,8 @@ describe("handleConnectMessage", () => {
       error: null,
       light: changedLight
     }));
-    const repo = repository(mockDeps);
-    const error = await repo.handleConnectMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleConnectMessage(MESSAGE);
 
     expect(error).toBeNull;
     expect(mockDeps.db.setLight).toBeCalledWith(MESSAGE.name, {
@@ -309,8 +309,8 @@ describe("handleConnectMessage", () => {
       error: null,
       light: changedLight
     }));
-    const repo = repository(mockDeps);
-    const error = await repo.handleConnectMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleConnectMessage(MESSAGE);
 
     expect(error).toBeNull;
     expect(mockDeps.db.setLight).toBeCalledWith(MESSAGE.name, {
@@ -324,8 +324,8 @@ describe("handleConnectMessage", () => {
   test("ignores the message and returns an error if no name is supplied", async () => {
     let mockDeps = createMockDependencies();
     const MESSAGE = { connection: "0" };
-    const repo = repository(mockDeps);
-    const error = await repo.handleConnectMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleConnectMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
@@ -335,8 +335,8 @@ describe("handleConnectMessage", () => {
   test("ignores the message and returns an error if the connection data is not in the correct format", async () => {
     let mockDeps = createMockDependencies();
     const MESSAGE = { dummy: "Q", matching: "Rocks" };
-    const repo = repository(mockDeps);
-    const error = await repo.handleConnectMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleConnectMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
@@ -348,8 +348,8 @@ describe("handleConnectMessage", () => {
     const ID = "Test 1235";
     const MESSAGE = { name: ID, connection: "0" };
     mockDeps.db.setLight = jest.fn(() => new Error());
-    const repo = repository(mockDeps);
-    const error = await repo.handleConnectMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleConnectMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).toBeCalled();
@@ -360,8 +360,8 @@ describe("handleConnectMessage", () => {
     const ID = "Test 1235";
     const MESSAGE = { name: ID, connection: "0" };
     mockDeps.db.getLight = jest.fn(() => ({ error: new Error() }));
-    const repo = repository(mockDeps);
-    const error = await repo.handleConnectMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleConnectMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.getLight).toBeCalled();
@@ -387,8 +387,8 @@ describe("handleStateMessage", () => {
       error: null,
       light: changedLight
     }));
-    const repo = repository(mockDeps);
-    const error = await repo.handleStateMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleStateMessage(MESSAGE);
 
     expect(error).toBeNull;
     expect(mockDeps.db.setLight).toBeCalledWith(MESSAGE.name, {
@@ -424,8 +424,8 @@ describe("handleStateMessage", () => {
       error: null,
       light: changedLight
     }));
-    const repo = repository(mockDeps);
-    const error = await repo.handleStateMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleStateMessage(MESSAGE);
 
     expect(error).toBeNull;
     expect(mockDeps.db.setLight).toBeCalledWith(MESSAGE.name, {
@@ -454,8 +454,8 @@ describe("handleStateMessage", () => {
       effect: "Cylon",
       speed: 1
     };
-    const repo = repository(mockDeps);
-    const error = await repo.handleStateMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleStateMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
@@ -467,8 +467,8 @@ describe("handleStateMessage", () => {
     let mockDeps = createMockDependencies();
     const ID = "TES!!!";
     const MESSAGE = { name: ID, dummy: "Q", matching: "Rocks" };
-    const repo = repository(mockDeps);
-    const error = await repo.handleStateMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleStateMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
@@ -489,8 +489,8 @@ describe("handleStateMessage", () => {
       speed: 1
     };
     mockDeps.db.setLight = jest.fn(() => new Error());
-    const repo = repository(mockDeps);
-    const error = await repo.handleStateMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleStateMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).toBeCalled();
@@ -510,8 +510,8 @@ describe("handleStateMessage", () => {
       speed: 1
     };
     mockDeps.db.getLight = jest.fn(() => ({ error: new Error() }));
-    const repo = repository(mockDeps);
-    const error = await repo.handleStateMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleStateMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.getLight).toBeCalled();
@@ -530,8 +530,8 @@ describe("handleEffectListMessage", () => {
       error: null,
       light: changedLight
     }));
-    const repo = repository(mockDeps);
-    const error = await repo.handleEffectListMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleEffectListMessage(MESSAGE);
 
     expect(error).toBeNull;
     expect(mockDeps.db.setLight).toBeCalledWith(MESSAGE.name, {
@@ -551,8 +551,8 @@ describe("handleEffectListMessage", () => {
       error: null,
       light: changedLight
     }));
-    const repo = repository(mockDeps);
-    const error = await repo.handleEffectListMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleEffectListMessage(MESSAGE);
 
     expect(error).toBeNull;
     expect(mockDeps.db.setLight).toBeCalledWith(MESSAGE.name, {
@@ -566,8 +566,8 @@ describe("handleEffectListMessage", () => {
   test("ignores the message and returns an error if no name is supplied", async () => {
     let mockDeps = createMockDependencies();
     const MESSAGE = { effectList: ["Test 1", "Test 2"] };
-    const repo = repository(mockDeps);
-    const error = await repo.handleEffectListMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleEffectListMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
@@ -578,8 +578,8 @@ describe("handleEffectListMessage", () => {
     let mockDeps = createMockDependencies();
     const ID = "Test Cde";
     const MESSAGE = { name: ID };
-    const repo = repository(mockDeps);
-    const error = await repo.handleEffectListMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleEffectListMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).not.toBeCalled();
@@ -591,8 +591,8 @@ describe("handleEffectListMessage", () => {
     const ID = "TES!!!";
     const MESSAGE = { name: ID, effectList: ["13", "bserbre", "Rockstarr!"] };
     mockDeps.db.setLight = jest.fn(() => new Error());
-    const repo = repository(mockDeps);
-    const error = await repo.handleEffectListMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleEffectListMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.setLight).toBeCalled();
@@ -604,8 +604,8 @@ describe("handleEffectListMessage", () => {
     const ID = "TES123";
     const MESSAGE = { name: ID, effectList: ["13", "bserbre", "Rockstarr!"] };
     mockDeps.db.getLight = jest.fn(() => ({ error: new Error() }));
-    const repo = repository(mockDeps);
-    const error = await repo.handleEffectListMessage(MESSAGE);
+    const lightService = createLightService(mockDeps);
+    const error = await lightService.handleEffectListMessage(MESSAGE);
 
     expect(error).toBeInstanceOf(Error);
     expect(mockDeps.db.getLight).toBeCalled();
@@ -623,9 +623,9 @@ describe("getLight", () => {
       error: null,
       light: MOCKLIGHT
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.getLight(ID);
+    const response = await lightService.getLight(ID);
 
     expect(response).toEqual(MOCKLIGHT);
     expect(mockDeps.db.getLight).toBeCalledWith(ID);
@@ -638,9 +638,9 @@ describe("getLight", () => {
       error: null,
       light: MOCKLIGHT
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.getLight(ID);
+    const response = await lightService.getLight(ID);
 
     expect(response).toEqual(MOCKLIGHT);
     expect(mockDeps.db.getLight).toBeCalledWith(ID);
@@ -652,9 +652,9 @@ describe("getLight", () => {
       error: null,
       hasLight: false
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.getLight(ID);
+    const response = await lightService.getLight(ID);
 
     expect(response).toBeInstanceOf(Error);
   });
@@ -665,9 +665,9 @@ describe("getLight", () => {
       error: new Error(),
       hasLight: null
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.getLight(ID);
+    const response = await lightService.getLight(ID);
 
     expect(response).toBeInstanceOf(Error);
   });
@@ -678,9 +678,9 @@ describe("getLight", () => {
       error: new Error(),
       light: null
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.getLight(ID);
+    const response = await lightService.getLight(ID);
 
     expect(response).toBeInstanceOf(Error);
   });
@@ -694,9 +694,9 @@ describe("getLights", () => {
       error: null,
       lights: MOCKLIGHTS
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.getLights();
+    const response = await lightService.getLights();
 
     expect(response).toEqual(MOCKLIGHTS);
     expect(mockDeps.db.getAllLights).toBeCalled();
@@ -707,9 +707,9 @@ describe("getLights", () => {
       error: new Error(),
       lights: null
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.getLights();
+    const response = await lightService.getLights();
 
     expect(response).toBeInstanceOf(Error);
     expect(mockDeps.db.getAllLights).toBeCalled();
@@ -726,10 +726,10 @@ describe("addLight", () => {
       error: null,
       hasLight: false
     }));
-    const repo = repository(mockDeps);
-    repo.__proto__.getLight = jest.fn(() => MOCKLIGHT);
+    const lightService = createLightService(mockDeps);
+    lightService.__proto__.getLight = jest.fn(() => MOCKLIGHT);
 
-    const response = await repo.addLight(ID);
+    const response = await lightService.addLight(ID);
 
     expect(response).toBe(MOCKLIGHT);
     expect(mockDeps.db.addLight).toBeCalledWith(ID);
@@ -743,10 +743,10 @@ describe("addLight", () => {
       error: null,
       hasLight: true
     }));
-    const repo = repository(mockDeps);
-    repo.__proto__.getLight = jest.fn();
+    const lightService = createLightService(mockDeps);
+    lightService.__proto__.getLight = jest.fn();
 
-    const response = await repo.addLight(ID);
+    const response = await lightService.addLight(ID);
 
     expect(response).toBeInstanceOf(Error);
     expect(mockDeps.db.hasLight).toBeCalledWith(ID);
@@ -759,10 +759,10 @@ describe("addLight", () => {
       error: new Error(),
       hasLight: null
     }));
-    const repo = repository(mockDeps);
-    repo.__proto__.getLight = jest.fn();
+    const lightService = createLightService(mockDeps);
+    lightService.__proto__.getLight = jest.fn();
 
-    const response = await repo.addLight(ID);
+    const response = await lightService.addLight(ID);
 
     expect(response).toBeInstanceOf(Error);
     expect(mockDeps.db.hasLight).toBeCalledWith(ID);
@@ -775,10 +775,10 @@ describe("addLight", () => {
       error: null,
       hasLight: false
     }));
-    const repo = repository(mockDeps);
-    repo.__proto__.getLight = jest.fn();
+    const lightService = createLightService(mockDeps);
+    lightService.__proto__.getLight = jest.fn();
 
-    const response = await repo.addLight(ID);
+    const response = await lightService.addLight(ID);
 
     expect(response).toBeInstanceOf(Error);
     expect(mockDeps.db.addLight).toBeCalledWith(ID);
@@ -794,9 +794,9 @@ describe("removeLight", () => {
       error: null,
       hasLight: true
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.removeLight(ID);
+    const response = await lightService.removeLight(ID);
 
     expect(response).toEqual(ID);
     expect(mockDeps.db.removeLight).toBeCalledWith(ID);
@@ -810,9 +810,9 @@ describe("removeLight", () => {
       error: null,
       hasLight: false
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.removeLight(ID);
+    const response = await lightService.removeLight(ID);
 
     expect(response).toBeInstanceOf(Error);
     expect(mockDeps.db.hasLight).toBeCalledWith(ID);
@@ -825,9 +825,9 @@ describe("removeLight", () => {
       error: new Error(),
       hasLight: true
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.removeLight(ID);
+    const response = await lightService.removeLight(ID);
 
     expect(response).toBeInstanceOf(Error);
     expect(mockDeps.db.hasLight).toBeCalledWith(ID);
@@ -840,9 +840,9 @@ describe("removeLight", () => {
       error: null,
       hasLight: true
     }));
-    const repo = repository(mockDeps);
+    const lightService = createLightService(mockDeps);
 
-    const response = await repo.removeLight(ID);
+    const response = await lightService.removeLight(ID);
 
     expect(response).toBeInstanceOf(Error);
     expect(mockDeps.db.hasLight).toBeCalledWith(ID);

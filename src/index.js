@@ -2,17 +2,15 @@
 // Enable console log statements in this file
 /*eslint no-console:0*/
 
-const config = require("./config/config");
-const server = require("./server/server");
+const config = require("./config");
+const createServer = require("./server/server");
 const serverServiceFactory = require("./server/serverService");
-const repository = require("./repository/repository");
+const createLightService = require("./lightService");
 const MockLight = require("./mock/MockLight");
 const mediatorFactory = require("./mediator/mediator");
-const redis = require("redis");
-const mqtt = require("async-mqtt");
 const { PubSub } = require("graphql-subscriptions");
-const dbFactory = require("./repository/dbFactory");
-const pubsubFactory = require("./repository/pubsubFactory");
+const dbFactory = require("./lightService/dbFactory");
+const pubsubFactory = require("./lightService/pubsubFactory");
 const events = require("events");
 
 // Verbose statement of service starting
@@ -41,17 +39,10 @@ const startServer = async () => {
     const eventEmitter = new events.EventEmitter();
 
     // Create a redis client
-    const redisClient = redis.createClient(
-      config.redisSettings.port,
-      config.redisSettings.host
-    );
+    const redisClient = config.redis.connect(config.redisSettings);
 
     // Create an MQTT client
-    const mqttClient = mqtt.connect(config.mqttSettings.host, {
-      reconnectPeriod: config.mqttSettings.reconnectPeriod, // Amount of time between reconnection attempts
-      username: config.mqttSettings.username,
-      password: config.mqttSettings.password
-    });
+    const mqttClient = config.mqtt.connect(config.mqttSettings);
 
     const mediator = mediatorFactory(eventEmitter, redisClient);
     const db = dbFactory(redisClient);
@@ -60,9 +51,9 @@ const startServer = async () => {
     // Create a gqlPubSub
     const gqlPubSub = new PubSub();
 
-    // Start the Repository
-    const repo = repository({ mediator, db, pubsub });
-    repo.init();
+    // Start the lightService
+    const lightService = createLightService({ mediator, db, pubsub });
+    lightService.init();
 
     // Start the Default Mock Light
     const createMockLight = async mockName => {
@@ -96,10 +87,12 @@ const startServer = async () => {
 
   // Start the server
   console.log("Starting Server");
-  const { app, port, gqlPath, subscriptionsPath } = await server.start({
-    port: config.serverSettings.port,
-    service
+  const server = createServer({
+    lightService: service
   });
+  const { app, port, gqlPath, subscriptionsPath } = await server.start(
+    config.serverSettings.port
+  );
   console.log(`🚀 Server ready at http://localhost:${port}${gqlPath}`);
   console.log(
     `🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`

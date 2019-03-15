@@ -3,7 +3,7 @@
 /*eslint no-console:0*/
 
 const config = require("./config");
-const createServer = require("./server/server");
+const Server = require("./server/server");
 const serverServiceFactory = require("./server/serverService");
 const createLightService = require("./lightService");
 const MockLight = require("./mock/MockLight");
@@ -87,18 +87,17 @@ const startServer = async () => {
 
   // Start the server
   console.log("Starting Server");
-  const server = createServer({
-    lightService: service
-  });
-  const { app, port, gqlPath, subscriptionsPath } = await server.start(
-    config.serverSettings.port
-  );
-  console.log(`🚀 Server ready at http://localhost:${port}${gqlPath}`);
+  const server = new Server(service);
+  await server.start(config.serverSettings.port);
   console.log(
-    `🚀 Subscriptions ready at ws://localhost:${port}${subscriptionsPath}`
+    `🚀 Server ready at http://localhost:${config.serverSettings.port}${
+      server.graphqlPath
+    }`
   );
-  app.on("close", () => {
-    console.log("App Closed");
-  });
+  console.log(
+    `🚀 Subscriptions ready at ws://localhost:${config.serverSettings.port}${
+      server.subscriptionsPath
+    }`
+  );
 };
 startServer();

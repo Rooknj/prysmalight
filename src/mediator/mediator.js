@@ -1,4 +1,10 @@
 "use strict";
+const config = require("../config");
+const events = require("events");
+
+const eventEmitter = new events.EventEmitter();
+const pub = config.redis.connect(config.redisSettings);
+const sub = pub.duplicate();
 
 // Random id generator
 const generateRandomId = () =>
@@ -6,24 +12,20 @@ const generateRandomId = () =>
   Math.random().toString() +
   Math.random().toString();
 
-const mediatorFactory = (eventEmitter, redisClient) => {
-  let self = {};
+sub.on("subscribe", channel => {
+  console.log(`Subscribed to ${channel}`);
+});
 
-  const pub = redisClient.duplicate();
-  const sub = redisClient.duplicate();
-  sub.on("subscribe", channel => {
-    console.log(`Subscribed to ${channel}`);
-  });
+sub.on("unsubscribe", channel => {
+  console.log(`unSubscribed from ${channel}`);
+});
 
-  sub.on("unsubscribe", channel => {
-    console.log(`unSubscribed from ${channel}`);
-  });
+sub.on("message", (topic, message) => {
+  console.log("sub channel " + topic + ": " + message);
+  eventEmitter.emit(topic, JSON.parse(message));
+});
 
-  sub.on("message", (topic, message) => {
-    console.log("sub channel " + topic + ": " + message);
-    eventEmitter.emit(topic, JSON.parse(message));
-  });
-
+const mediator = {
   /**
    * Sends a message to an RPC server and waits for the reply.
    * @param {string} topic - the topic to send on
@@ -31,7 +33,7 @@ const mediatorFactory = (eventEmitter, redisClient) => {
    * @param {string} correlationId - unique id for the message
    * @param {object} options
    */
-  const sendRpcMessage = (topic, parameters, options = {}) => {
+  sendRpcMessage: (topic, parameters, options = {}) => {
     const TIMEOUT = options.timeout || 5000;
     const TIMEOUT_ERROR_MESSAGE =
       options.timeoutMessage || `Message Timed Out After ${TIMEOUT}ms`;
@@ -54,18 +56,18 @@ const mediatorFactory = (eventEmitter, redisClient) => {
       }
 
       setTimeout(() => {
-        self.removeRpcListener(id, handleResponse, options);
+        mediator.removeRpcListener(id, handleResponse, options);
         reject(new Error(TIMEOUT_ERROR_MESSAGE));
       }, TIMEOUT);
     });
-  };
+  },
 
   /**
    * Listens for RPC messages, calls the RPC function with the message contents, then returns the response to the RPC client.
    * @param {string} topic
    * @param {function} messageHandler
    */
-  const onRpcMessage = (topic, messageHandler, options = {}) => {
+  onRpcMessage: (topic, messageHandler, options = {}) => {
     if (options.remote) {
       sub.subscribe(topic);
     }
@@ -81,47 +83,36 @@ const mediatorFactory = (eventEmitter, redisClient) => {
         eventEmitter.emit(correlationId, response);
       }
     });
-  };
+  },
 
-  const removeRpcListener = (topic, messageHandler, options = {}) => {
+  removeRpcListener: (topic, messageHandler, options = {}) => {
     if (options.remote) {
       sub.unsubscribe(topic);
     }
     eventEmitter.removeListener(topic, messageHandler);
-  };
+  },
 
-  const publish = (topic, message, options = {}) => {
+  publish: (topic, message, options = {}) => {
     if (options.remote) {
       pub.publish(topic, JSON.stringify(message));
     } else {
       eventEmitter.emit(topic, message);
     }
-  };
+  },
 
-  const subscribe = (topic, messageHandler, options = {}) => {
+  subscribe: (topic, messageHandler, options = {}) => {
     if (options.remote) {
       sub.subscribe(topic);
     }
     eventEmitter.on(topic, messageHandler);
-  };
+  },
 
-  const unsubscribe = (topic, messageHandler, options = {}) => {
+  unsubscribe: (topic, messageHandler, options = {}) => {
     if (options.remote) {
       sub.unsubscribe(topic);
     }
     eventEmitter.removeListener(topic, messageHandler);
-  };
-
-  self = {
-    sendRpcMessage,
-    onRpcMessage,
-    removeRpcListener,
-    publish,
-    subscribe,
-    unsubscribe
-  };
-
-  return Object.assign({}, self);
+  }
 };
 
-module.exports = mediatorFactory;
+module.exports = mediator;

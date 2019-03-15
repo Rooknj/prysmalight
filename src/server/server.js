@@ -7,46 +7,48 @@ const express = require("express"); // NodeJS Web Server
 const cors = require("cors"); // Cross Origin Resource Sharing Middleware
 const helmet = require("helmet"); // Security Middleware
 const compression = require("compression"); // Compression Middleware
+const serverServiceFactory = require("../server/serverService");
+const mediator = require("../mediator/mediator");
+const { PubSub } = require("graphql-subscriptions");
 
-const createServer = ({ lightService }) => {
-  let self = {};
+class Server {
+  constructor() {
+    // Define and Apply middleware to Express app
+    const app = express();
+    app.use("*", cors());
+    app.use(helmet());
+    app.use(compression());
 
-  const app = express();
-  const context = async ({ req }) => ({
-    lightService,
-    request: req
-  });
-  const apolloServer = new ApolloServer({ typeDefs, resolvers, context });
+    let lightService;
+    if (process.env.MOCK) {
+      // Use the mock service if the MOCK env variable is set
+      const mockService = require("../mock/mockService");
+      lightService = mockService;
+    } else {
+      const gqlPubSub = new PubSub();
+      lightService = serverServiceFactory(mediator, gqlPubSub);
+    }
 
-  // Apply middleware to Express app
-  app.use("*", cors());
-  app.use(helmet());
-  app.use(compression());
-  apolloServer.applyMiddleware({ app });
-
-  // Create the httpServer and add subscriptions
-  const httpServer = http.createServer(app);
-  apolloServer.installSubscriptionHandlers(httpServer);
-
-  const start = port => {
-    // Start the httpServer
-    return new Promise(resolve => {
-      const apolloApp = httpServer.listen(port, () => {
-        resolve({
-          app: apolloApp,
-          port,
-          gqlPath: apolloServer.graphqlPath,
-          subscriptionsPath: apolloServer.subscriptionsPath
-        });
-      });
+    const context = async ({ req }) => ({
+      lightService,
+      request: req
     });
-  };
+    const apolloServer = new ApolloServer({ typeDefs, resolvers, context });
+    apolloServer.applyMiddleware({ app });
 
-  self = {
-    start
-  };
+    // Create the httpServer and add subscriptions
+    this.server = http.createServer(app);
+    apolloServer.installSubscriptionHandlers(this.server);
 
-  return Object.create(self);
-};
+    this.graphqlPath = apolloServer.graphqlPath;
+    this.subscriptionsPath = apolloServer.subscriptionsPath;
+  }
 
-module.exports = createServer;
+  start(port) {
+    return new Promise(resolve => {
+      this.server.listen(port, resolve);
+    });
+  }
+}
+
+module.exports = Server;

@@ -8,7 +8,7 @@ const cors = require("cors"); // Cross Origin Resource Sharing Middleware
 const helmet = require("helmet"); // Security Middleware
 const compression = require("compression"); // Compression Middleware
 const serverServiceFactory = require("../server/serverService");
-const mediator = require("../mediator/mediator");
+const mediator = require("../services/mediator");
 const { PubSub } = require("graphql-subscriptions");
 
 class Server {

@@ -4,7 +4,7 @@
 
 const config = require("./config");
 const Server = require("./server/server");
-const LightService = require("./lightService");
+const LightService = require("./services/lightService");
 const MockLight = require("./mock/MockLight");
 
 // Verbose statement of service starting

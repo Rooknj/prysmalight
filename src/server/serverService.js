@@ -11,7 +11,7 @@ const {
   LIGHT_CHANGED,
   UPDATE_HUB,
   REBOOT_HUB
-} = require("../eventConstants");
+} = require("../services/eventConstants");
 
 const UPDATE_TIMEOUT = 110000; // a little less than 2 minutes
 const UPDATE_TIMEOUT_MESSAGE = `Update timed out after ${UPDATE_TIMEOUT}ms`;

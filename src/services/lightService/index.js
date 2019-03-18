@@ -1,8 +1,8 @@
 const createLightService = require("./lightService");
-const mediator = require("../mediator/mediator");
-const dbFactory = require("../lightService/dbFactory");
-const pubsubFactory = require("../lightService/pubsubFactory");
-const config = require("../config");
+const mediator = require("../mediator");
+const dbFactory = require("./dbFactory");
+const pubsubFactory = require("./pubsubFactory");
+const config = require("../../config");
 
 module.exports = () => {
   // Create a redis client

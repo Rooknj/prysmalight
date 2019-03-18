@@ -4,7 +4,6 @@
 
 const config = require("./config");
 const Server = require("./server/server");
-const LightService = require("./lightService");
 const MockLight = require("./mock/MockLight");
 
 // Verbose statement of service starting
@@ -17,10 +16,6 @@ process.on("uncaughtException", err => {
 process.on("uncaughtRejection", err => {
   console.log("Unhandled Rejection", err);
 });
-
-// Initialize the light service
-const lightService = LightService();
-lightService.init();
 
 // Start the Default Mock Light
 const createMockLight = async mockName => {

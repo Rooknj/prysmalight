@@ -1,6 +1,6 @@
 const pubsubFactory = require("./pubsubFactory");
 const { isObservable } = require("rxjs");
-const { mqttSettings } = require("../config/config");
+const { mqttSettings } = require("../../config");
 
 // MQTT: topics
 const MQTT_LIGHT_TOP_LEVEL = mqttSettings.MQTT_LIGHT_TOP_LEVEL;

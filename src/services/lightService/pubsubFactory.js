@@ -1,6 +1,6 @@
 const Debug = require("debug").default;
 const debug = Debug("pubsub");
-const { mqttSettings } = require("../config/config");
+const { mqttSettings } = require("../../config");
 const { fromEvent } = require("rxjs");
 const { filter, map } = require("rxjs/operators");
 

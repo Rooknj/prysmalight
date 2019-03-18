@@ -7,9 +7,9 @@ const express = require("express"); // NodeJS Web Server
 const cors = require("cors"); // Cross Origin Resource Sharing Middleware
 const helmet = require("helmet"); // Security Middleware
 const compression = require("compression"); // Compression Middleware
-const serverServiceFactory = require("../server/serverService");
-const mediator = require("../mediator/mediator");
-const { PubSub } = require("graphql-subscriptions");
+const LightService = require("../services/lightService");
+const SubscriptionService = require("../services/subscriptionService");
+const HostService = require("../services/hostService");
 
 class Server {
   constructor() {
@@ -19,18 +19,25 @@ class Server {
     app.use(helmet());
     app.use(compression());
 
-    let lightService;
     if (process.env.MOCK) {
-      // Use the mock service if the MOCK env variable is set
-      const mockService = require("../mock/mockService");
-      lightService = mockService;
-    } else {
-      const gqlPubSub = new PubSub();
-      lightService = serverServiceFactory(mediator, gqlPubSub);
+      console.log("TODO: NEED TO IMPLEMENT MOCK");
+      process.exit(1);
     }
+
+    // Initialize the light service
+    const lightService = LightService();
+    lightService.init();
+
+    // Get Subscription Service
+    const subscriptionService = new SubscriptionService();
+
+    // Get Host Service
+    const hostService = new HostService();
 
     const context = async ({ req }) => ({
       lightService,
+      subscriptionService,
+      hostService,
       request: req
     });
     const apolloServer = new ApolloServer({ typeDefs, resolvers, context });

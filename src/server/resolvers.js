@@ -13,8 +13,8 @@ const resolvers = {
       lightService.addLight(lightId),
     removeLight: (_, { lightId }, { lightService }) =>
       lightService.removeLight(lightId),
-    updateHub: (_, args, { lightService }) => lightService.updateHub(),
-    rebootHub: (_, args, { lightService }) => lightService.rebootHub()
+    updateHub: (_, args, { hostService }) => hostService.updateHub(),
+    rebootHub: (_, args, { hostService }) => hostService.rebootHub()
   },
   Subscription: {
     lightChanged: {

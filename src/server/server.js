@@ -9,6 +9,7 @@ const helmet = require("helmet"); // Security Middleware
 const compression = require("compression"); // Compression Middleware
 const LightService = require("../services/lightService");
 const SubscriptionService = require("../services/subscriptionService");
+const HostService = require("../services/hostService");
 
 class Server {
   constructor() {
@@ -30,9 +31,13 @@ class Server {
     // Get Subscription Service
     const subscriptionService = new SubscriptionService();
 
+    // Get Host Service
+    const hostService = new HostService();
+
     const context = async ({ req }) => ({
       lightService,
       subscriptionService,
+      hostService,
       request: req
     });
     const apolloServer = new ApolloServer({ typeDefs, resolvers, context });

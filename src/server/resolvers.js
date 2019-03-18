@@ -18,23 +18,23 @@ const resolvers = {
   },
   Subscription: {
     lightChanged: {
-      subscribe: (_, { lightId }, { lightService }) => {
-        return lightService.subscribeToLight(lightId);
+      subscribe: (_, { lightId }, { subscriptionService }) => {
+        return subscriptionService.subscribeToLight(lightId);
       }
     },
     lightsChanged: {
-      subscribe: (_, args, { lightService }) => {
-        return lightService.subscribeToAllLights();
+      subscribe: (_, args, { subscriptionService }) => {
+        return subscriptionService.subscribeToAllLights();
       }
     },
     lightAdded: {
-      subscribe: (_, args, { lightService }) => {
-        return lightService.subscribeToLightsAdded();
+      subscribe: (_, args, { subscriptionService }) => {
+        return subscriptionService.subscribeToLightsAdded();
       }
     },
     lightRemoved: {
-      subscribe: (_, args, { lightService }) => {
-        return lightService.subscribeToLightsRemoved();
+      subscribe: (_, args, { subscriptionService }) => {
+        return subscriptionService.subscribeToLightsRemoved();
       }
     }
   }

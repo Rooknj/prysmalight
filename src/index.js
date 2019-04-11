@@ -5,9 +5,12 @@
 const config = require("./config");
 const Server = require("./server/server");
 const MockLight = require("./mock/MockLight");
+const packageJson = require("../package.json");
+
+const { version } = packageJson;
 
 // Verbose statement of service starting
-console.log("--- Prysmalight ---");
+console.log(`--- Prysmalight ${version} ---`);
 
 // Unhandled error logging
 process.on("uncaughtException", err => {

@@ -1,7 +1,9 @@
 const parseArgs = require("minimist");
 const spawn = require("cross-spawn");
+const packageJson = require("../package.json");
 
 const IMAGE_NAME = "rooknj/prysmalight";
+const VERSION = packageJson.version;
 
 const getDockerImage = tag => {
   let dockerTag = tag;
@@ -10,7 +12,7 @@ const getDockerImage = tag => {
     const branchName = process.env.TRAVIS_BRANCH;
     if (branchName) {
       if (branchName === "master") {
-        dockerTag = "latest";
+        dockerTag = VERSION;
       } else {
         dockerTag = "test";
       }

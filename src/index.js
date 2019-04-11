@@ -7,9 +7,8 @@ const Server = require("./server/server");
 const MockLight = require("./mock/MockLight");
 const packageJson = require("../package.json");
 
-const { version } = packageJson;
-
 // Verbose statement of service starting
+const { version } = packageJson;
 console.log(`--- Prysmalight ${version} ---`);
 
 // Unhandled error logging

@@ -12,6 +12,8 @@ const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
 const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
 const MQTT_LIGHT_CONFIG_TOPIC = mqttSettings.MQTT_LIGHT_CONFIG_TOPIC;
 const MQTT_LIGHT_DISCOVERY_TOPIC = mqttSettings.MQTT_LIGHT_DISCOVERY_TOPIC;
+const MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC =
+  mqttSettings.MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC;
 
 // TODO: Move these functions to a testable area
 const getMessageType = msg => msg[0].split("/")[2];
@@ -79,6 +81,19 @@ const pubsubFactory = deps => {
     filter(msg => getMessageType(msg) === MQTT_EFFECT_LIST_TOPIC),
     map(toMessageObject)
   );
+
+  /**
+   * An observable of all light effect list messages received by the client
+   */
+  const configMessages = allMessages.pipe(
+    filter(msg => getMessageType(msg) === MQTT_LIGHT_CONFIG_TOPIC),
+    map(toMessageObject)
+  );
+
+  /**
+   * TODO: Get rid of RxJs and instead make pubsub extend eventListener
+   * That way you can call it like pubsub.on("stateMessage", handleStateMessage)
+   * */
 
   /**
    * Subscribes to an MQTT topic.
@@ -154,11 +169,15 @@ const pubsubFactory = deps => {
     const subscribedToEffectList = subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
     );
+    const subscribedToConfig = subscribeTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONFIG_TOPIC}`
+    );
 
     const subscriptionResponses = await Promise.all([
       subscribedToConnected,
       subscribedToState,
-      subscribedToEffectList
+      subscribedToEffectList,
+      subscribedToConfig
     ]);
 
     let returnError = null;
@@ -195,11 +214,15 @@ const pubsubFactory = deps => {
     const unsubscribedFromEffectList = unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
     );
+    const unsubscribedFromConfig = unsubscribeFrom(
+      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONFIG_TOPIC}`
+    );
 
     const unsubscriptionResponses = await Promise.all([
       unsubscribedFromConnected,
       unsubscribedFromState,
-      unsubscribedFromEffectList
+      unsubscribedFromEffectList,
+      unsubscribedFromConfig
     ]);
 
     let returnError = null;
@@ -236,7 +259,7 @@ const pubsubFactory = deps => {
   const startDiscovery = () => {
     // Handle MQTT Discovery Messages as they come in
     client.on("message", (topic, payload) => {
-      if (topic.split("/")[2] === MQTT_LIGHT_CONFIG_TOPIC) {
+      if (topic.split("/")[2] === MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC) {
         const msg = JSON.parse(payload.toString());
         debug("Discovery Message:", msg);
         mediator.publish("lightDiscovered", msg);
@@ -244,13 +267,15 @@ const pubsubFactory = deps => {
     });
 
     // Subscribe to discovery topic
-    self.subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/+/${MQTT_LIGHT_CONFIG_TOPIC}`);
+    self.subscribeTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/+/${MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC}`
+    );
   };
 
   const stopDiscovery = () => {
     // Unsubscribe from discovery topic
     self.unsubscribeFrom(
-      `${MQTT_LIGHT_TOP_LEVEL}/+/${MQTT_LIGHT_CONFIG_TOPIC}`
+      `${MQTT_LIGHT_TOP_LEVEL}/+/${MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC}`
     );
   };
 
@@ -269,6 +294,7 @@ const pubsubFactory = deps => {
     connectMessages,
     stateMessages,
     effectMessages,
+    configMessages,
     subscribeToLight,
     unsubscribeFromLight,
     publishToLight,

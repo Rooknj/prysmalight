@@ -32,6 +32,7 @@ module.exports = ({ mediator, db, pubsub }) => {
     pubsub.connectMessages.subscribe(self.handleConnectMessage);
     pubsub.stateMessages.subscribe(self.handleStateMessage);
     pubsub.effectMessages.subscribe(self.handleEffectListMessage);
+    pubsub.configMessages.subscribe(self.handleConfigMessage);
     pubsub.startDiscovery();
 
     // Subscribe to all lights on startup
@@ -220,6 +221,40 @@ module.exports = ({ mediator, db, pubsub }) => {
     return null;
   };
 
+  const handleConfigMessage = async message => {
+    if (!message.id) {
+      debug("No id in the effect list message. Ignoring");
+      return new Error("No is supplied from the message");
+    }
+
+    let error, changedLight;
+
+    // Update the light's effect list in the db
+    error = await db.setLight(message.id, {
+      ipAddress: message.ipAddress,
+      macAddress: message.macAddress,
+      numLeds: message.numLeds,
+      udpPort: message.udpPort,
+      version: message.version,
+      hardware: message.hardware,
+      colorOrder: message.colorOrder,
+      stripType: message.stripType
+    });
+    if (error) {
+      debug(error);
+      return error;
+    }
+
+    ({ error, light: changedLight } = await db.getLight(message.name));
+    if (error) {
+      debug(error);
+      return error;
+    }
+
+    mediator.publish(LIGHT_CHANGED, { lightChanged: changedLight });
+    return null;
+  };
+
   /**
    * Get the light with the specified id from the db.
    * Will return an error of the light was not added.
@@ -359,19 +394,38 @@ module.exports = ({ mediator, db, pubsub }) => {
   const getDiscoveredLights = async () => {
     const lights = [];
     const onLightDiscovered = async msg => {
+      // set v0 variables
       const { name, ipAddress, macAddress, numLeds, udpPort } = msg;
-      const { error, hasLight } = await db.hasLight(name);
+
+      // Set variables that change from v0 to v1
+      const id = msg.id || msg.name;
+      const version = msg.version || "0.1.0";
+      const hardware = msg.hardware || "8266";
+      const colorOrder = msg.colorOrder || "GRB";
+      const stripType = msg.stripType || "WS2812B";
+
+      const { error, hasLight } = await db.hasLight(id);
       if (error) return error;
 
       if (!lights.find(light => light.id === name) && !hasLight) {
-        lights.push({ id: name, ipAddress, macAddress, numLeds, udpPort });
+        lights.push({
+          id,
+          ipAddress,
+          macAddress,
+          numLeds,
+          udpPort,
+          version,
+          hardware,
+          colorOrder,
+          stripType
+        });
       }
     };
     mediator.subscribe("lightDiscovered", onLightDiscovered);
     pubsub.publishDiscoveryMessage();
 
     await asyncSetTimeout(500);
-
+    mediator.unsubscribe("lightDiscovered", onLightDiscovered);
     return lights;
   };
 
@@ -382,6 +436,7 @@ module.exports = ({ mediator, db, pubsub }) => {
     handleConnectMessage,
     handleStateMessage,
     handleEffectListMessage,
+    handleConfigMessage,
     getLight,
     getLights,
     setLight,

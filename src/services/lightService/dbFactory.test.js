@@ -52,6 +52,7 @@ describe("disconnections", () => {
   });
 });
 
+// TODO: Add config info to getLight expect statements
 describe("getLight", () => {
   // Solid Tests
   test("returns a javascript object in the correct format (Example 1)", async () => {
@@ -767,7 +768,23 @@ describe("addLight", () => {
         "speed",
         4,
         "effectsKey",
-        `${ID}:effects`
+        `${ID}:effects`,
+        "ipAddress",
+        null,
+        "macAddress",
+        null,
+        "numLeds",
+        0,
+        "udpPort",
+        0,
+        "version",
+        "0.0.0",
+        "hardware",
+        null,
+        "colorOrder",
+        null,
+        "stripType",
+        null
       ],
       expect.anything()
     );
@@ -819,7 +836,23 @@ describe("addLight", () => {
         "speed",
         4,
         "effectsKey",
-        `${ID}:effects`
+        `${ID}:effects`,
+        "ipAddress",
+        null,
+        "macAddress",
+        null,
+        "numLeds",
+        0,
+        "udpPort",
+        0,
+        "version",
+        "0.0.0",
+        "hardware",
+        null,
+        "colorOrder",
+        null,
+        "stripType",
+        null
       ],
       expect.anything()
     );
@@ -954,7 +987,23 @@ describe("addLight", () => {
         "speed",
         4,
         "effectsKey",
-        `${ID}:effects`
+        `${ID}:effects`,
+        "ipAddress",
+        null,
+        "macAddress",
+        null,
+        "numLeds",
+        0,
+        "udpPort",
+        0,
+        "version",
+        "0.0.0",
+        "hardware",
+        null,
+        "colorOrder",
+        null,
+        "stripType",
+        null
       ],
       expect.anything()
     );

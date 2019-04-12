@@ -103,7 +103,17 @@ const dbFactory = client => {
       },
       effect: lightData.effect,
       speed: parseInt(lightData.speed),
-      supportedEffects: lightEffect
+      supportedEffects: lightEffect,
+      configuration: {
+        ipAddress: lightData.ipAddress,
+        macAddress: lightData.macAddress,
+        numLeds: parseInt(lightData.numLeds),
+        udpPort: parseInt(lightData.udpPort),
+        version: lightData.version,
+        hardware: lightData.hardware,
+        colorOrder: lightData.colorOrder,
+        stripType: lightData.stripType
+      }
     };
     return { error: null, light: lightObject };
   };
@@ -199,6 +209,31 @@ const dbFactory = client => {
       redisObject.push("color:green", lightData.color.g);
       redisObject.push("color:blue", lightData.color.b);
     }
+    // Add the ipAddress data
+    if (lightData.hasOwnProperty("ipAddress"))
+      redisObject.push("ipAddress", lightData.ipAddress);
+    // Add the macAddress data
+    if (lightData.hasOwnProperty("macAddress"))
+      redisObject.push("macAddress", lightData.macAddress);
+    // Add the numLeds data
+    if (lightData.hasOwnProperty("numLeds"))
+      redisObject.push("numLeds", lightData.numLeds);
+    // Add the udpPort data
+    if (lightData.hasOwnProperty("udpPort"))
+      redisObject.push("udpPort", lightData.udpPort);
+    // Add the version data
+    if (lightData.hasOwnProperty("version"))
+      redisObject.push("version", lightData.version);
+    // Add the hardware data
+    if (lightData.hasOwnProperty("hardware"))
+      redisObject.push("hardware", lightData.hardware);
+    // Add the colorOrder data
+    if (lightData.hasOwnProperty("colorOrder"))
+      redisObject.push("colorOrder", lightData.colorOrder);
+    // Add the stripType data
+    if (lightData.hasOwnProperty("stripType"))
+      redisObject.push("stripType", lightData.stripType);
+
     // Add the effect list data
     let addEffectsPromise = Promise.resolve();
     if (lightData.hasOwnProperty("supportedEffects")) {
@@ -276,7 +311,23 @@ const dbFactory = client => {
         "speed",
         4,
         "effectsKey",
-        `${id}:effects`
+        `${id}:effects`,
+        "ipAddress",
+        null,
+        "macAddress",
+        null,
+        "numLeds",
+        0,
+        "udpPort",
+        0,
+        "version",
+        "0.0.0",
+        "hardware",
+        null,
+        "colorOrder",
+        null,
+        "stripType",
+        null
       ]);
     } catch (error) {
       return error;

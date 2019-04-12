@@ -12,6 +12,8 @@ const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
 const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
 const MQTT_LIGHT_CONFIG_TOPIC = mqttSettings.MQTT_LIGHT_CONFIG_TOPIC;
 const MQTT_LIGHT_DISCOVERY_TOPIC = mqttSettings.MQTT_LIGHT_DISCOVERY_TOPIC;
+const MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC =
+  mqttSettings.MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC;
 
 // TODO: Move these functions to a testable area
 const getMessageType = msg => msg[0].split("/")[2];
@@ -236,7 +238,7 @@ const pubsubFactory = deps => {
   const startDiscovery = () => {
     // Handle MQTT Discovery Messages as they come in
     client.on("message", (topic, payload) => {
-      if (topic.split("/")[2] === MQTT_LIGHT_CONFIG_TOPIC) {
+      if (topic.split("/")[2] === MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC) {
         const msg = JSON.parse(payload.toString());
         debug("Discovery Message:", msg);
         mediator.publish("lightDiscovered", msg);
@@ -244,13 +246,15 @@ const pubsubFactory = deps => {
     });
 
     // Subscribe to discovery topic
-    self.subscribeTo(`${MQTT_LIGHT_TOP_LEVEL}/+/${MQTT_LIGHT_CONFIG_TOPIC}`);
+    self.subscribeTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/+/${MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC}`
+    );
   };
 
   const stopDiscovery = () => {
     // Unsubscribe from discovery topic
     self.unsubscribeFrom(
-      `${MQTT_LIGHT_TOP_LEVEL}/+/${MQTT_LIGHT_CONFIG_TOPIC}`
+      `${MQTT_LIGHT_TOP_LEVEL}/+/${MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC}`
     );
   };
 

@@ -313,9 +313,9 @@ const dbFactory = client => {
         "effectsKey",
         `${id}:effects`,
         "ipAddress",
-        null,
+        "",
         "macAddress",
-        null,
+        "",
         "numLeds",
         0,
         "udpPort",
@@ -323,11 +323,11 @@ const dbFactory = client => {
         "version",
         "0.0.0",
         "hardware",
-        null,
+        "",
         "colorOrder",
-        null,
+        "",
         "stripType",
-        null
+        ""
       ]);
     } catch (error) {
       return error;

@@ -386,7 +386,7 @@ module.exports = ({ mediator, db, pubsub }) => {
         });
       }
     };
-    mediator.subscribe("lightDiscovered", onLightDiscovered); //TODO Memory leak, need to only subscribe to this once, or unsubscribe shortly after
+    mediator.subscribe("lightDiscovered", onLightDiscovered);
     pubsub.publishDiscoveryMessage();
 
     await asyncSetTimeout(500);

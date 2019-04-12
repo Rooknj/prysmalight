@@ -8,6 +8,7 @@ const MQTT_LIGHT_CONNECTED_TOPIC = mqttSettings.MQTT_LIGHT_CONNECTED_TOPIC;
 const MQTT_LIGHT_STATE_TOPIC = mqttSettings.MQTT_LIGHT_STATE_TOPIC;
 const MQTT_LIGHT_COMMAND_TOPIC = mqttSettings.MQTT_LIGHT_COMMAND_TOPIC;
 const MQTT_EFFECT_LIST_TOPIC = mqttSettings.MQTT_EFFECT_LIST_TOPIC;
+const MQTT_LIGHT_CONFIG_TOPIC = mqttSettings.MQTT_LIGHT_CONFIG_TOPIC;
 
 // Creates a mock client which will return successful responses but no data
 const createMockClient = () => {
@@ -171,7 +172,7 @@ describe("subscribeToLight", () => {
 
     // Test
     expect(error).toBeNull();
-    expect(mockClient.subscribe).toBeCalledTimes(3);
+    expect(mockClient.subscribe).toBeCalledTimes(4);
     expect(mockClient.subscribe).toBeCalledWith(
       `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -180,6 +181,9 @@ describe("subscribeToLight", () => {
     );
     expect(mockClient.subscribe).toBeCalledWith(
       `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_EFFECT_LIST_TOPIC}`
+    );
+    expect(mockClient.subscribe).toBeCalledWith(
+      `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_LIGHT_CONFIG_TOPIC}`
     );
   });
   test("Subscribes to all the correct topics (Example 2)", async () => {
@@ -197,7 +201,7 @@ describe("subscribeToLight", () => {
 
     // Test
     expect(error).toBeNull();
-    expect(mockClient.subscribe).toBeCalledTimes(3);
+    expect(mockClient.subscribe).toBeCalledTimes(4);
     expect(mockClient.subscribe).toBeCalledWith(
       `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -206,6 +210,9 @@ describe("subscribeToLight", () => {
     );
     expect(mockClient.subscribe).toBeCalledWith(
       `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_EFFECT_LIST_TOPIC}`
+    );
+    expect(mockClient.subscribe).toBeCalledWith(
+      `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_LIGHT_CONFIG_TOPIC}`
     );
   });
   test("returns an error if the client is not connected", async () => {
@@ -396,7 +403,7 @@ describe("unsubscribeFromLight", () => {
 
     // Test
     expect(error).toBeNull();
-    expect(mockClient.unsubscribe).toBeCalledTimes(3);
+    expect(mockClient.unsubscribe).toBeCalledTimes(4);
     expect(mockClient.unsubscribe).toBeCalledWith(
       `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -405,6 +412,9 @@ describe("unsubscribeFromLight", () => {
     );
     expect(mockClient.unsubscribe).toBeCalledWith(
       `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_EFFECT_LIST_TOPIC}`
+    );
+    expect(mockClient.unsubscribe).toBeCalledWith(
+      `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_LIGHT_CONFIG_TOPIC}`
     );
   });
   test("Unsubscribes from all the correct topics (Example 2)", async () => {
@@ -422,7 +432,7 @@ describe("unsubscribeFromLight", () => {
 
     // Test
     expect(error).toBeNull();
-    expect(mockClient.unsubscribe).toBeCalledTimes(3);
+    expect(mockClient.unsubscribe).toBeCalledTimes(4);
     expect(mockClient.unsubscribe).toBeCalledWith(
       `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_LIGHT_CONNECTED_TOPIC}`
     );
@@ -431,6 +441,9 @@ describe("unsubscribeFromLight", () => {
     );
     expect(mockClient.unsubscribe).toBeCalledWith(
       `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_EFFECT_LIST_TOPIC}`
+    );
+    expect(mockClient.unsubscribe).toBeCalledWith(
+      `${MQTT_LIGHT_TOP_LEVEL}/${ID}/${MQTT_LIGHT_CONFIG_TOPIC}`
     );
   });
   test("returns an error if the client is not connected", async () => {

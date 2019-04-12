@@ -40,6 +40,7 @@ const createMockDependencies = () => {
     connectMessages: { subscribe: jest.fn() },
     stateMessages: { subscribe: jest.fn() },
     effectMessages: { subscribe: jest.fn() },
+    configMessages: { subscribe: jest.fn() },
     subscribeToLight: jest.fn(async id => null),
     unsubscribeFromLight: jest.fn(async id => null),
     publishToLight: jest.fn(async (id, topic) => null),
@@ -77,6 +78,7 @@ describe("createLightService & init", () => {
     expect(mockDeps.pubsub.connectMessages.subscribe).toBeCalledTimes(1);
     expect(mockDeps.pubsub.stateMessages.subscribe).toBeCalledTimes(1);
     expect(mockDeps.pubsub.effectMessages.subscribe).toBeCalledTimes(1);
+    expect(mockDeps.pubsub.configMessages.subscribe).toBeCalledTimes(1);
   });
   test("attempts to connect when the db connects", () => {
     let mockDeps = createMockDependencies();

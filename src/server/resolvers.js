@@ -9,8 +9,8 @@ const resolvers = {
   Mutation: {
     setLight: (_, { lightId, lightData }, { lightService }) =>
       lightService.setLight(lightId, lightData),
-    addLight: (_, { lightId }, { lightService }) =>
-      lightService.addLight(lightId),
+    addLight: (_, { lightId, lightName }, { lightService }) =>
+      lightService.addLight(lightId, lightName),
     removeLight: (_, { lightId }, { lightService }) =>
       lightService.removeLight(lightId),
     updateHub: (_, args, { hostService }) => hostService.updateHub(),

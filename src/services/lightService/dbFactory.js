@@ -93,6 +93,7 @@ const dbFactory = client => {
     // Convert that info into a javascript object
     const lightObject = {
       id,
+      name: lightData.name || id, // returns the name of the light or the id if there is no name
       connected: lightData.connected,
       state: lightData.state,
       brightness: parseInt(lightData.brightness),
@@ -268,12 +269,13 @@ const dbFactory = client => {
    * May return an error
    * @param {string} id
    */
-  const addLight = async id => {
+  const addLight = async (id, name) => {
     if (!client.connected) {
       return new Error(`Can not add "${id}". Not connected to Redis`);
     }
 
     if (!id) return new Error("You must provide an Id to addLight");
+    const NAME = name || id;
 
     // Increment the light score so that each light has a higher score than the previous
     let lightScore;
@@ -294,6 +296,8 @@ const dbFactory = client => {
     try {
       await asyncHMSET([
         id,
+        "name",
+        NAME,
         "connected",
         0,
         "state",

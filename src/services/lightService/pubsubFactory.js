@@ -83,6 +83,19 @@ const pubsubFactory = deps => {
   );
 
   /**
+   * An observable of all light effect list messages received by the client
+   */
+  const configMessages = allMessages.pipe(
+    filter(msg => getMessageType(msg) === MQTT_LIGHT_CONFIG_TOPIC),
+    map(toMessageObject)
+  );
+
+  /**
+   * TODO: Get rid of RxJs and instead make pubsub extend eventListener
+   * That way you can call it like pubsub.on("stateMessage", handleStateMessage)
+   * */
+
+  /**
    * Subscribes to an MQTT topic.
    * Returns an error if unsuccessful.
    * @param {string} topic
@@ -156,11 +169,15 @@ const pubsubFactory = deps => {
     const subscribedToEffectList = subscribeTo(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
     );
+    const subscribedToConfig = subscribeTo(
+      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONFIG_TOPIC}`
+    );
 
     const subscriptionResponses = await Promise.all([
       subscribedToConnected,
       subscribedToState,
-      subscribedToEffectList
+      subscribedToEffectList,
+      subscribedToConfig
     ]);
 
     let returnError = null;
@@ -197,11 +214,15 @@ const pubsubFactory = deps => {
     const unsubscribedFromEffectList = unsubscribeFrom(
       `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_EFFECT_LIST_TOPIC}`
     );
+    const unsubscribedFromConfig = unsubscribeFrom(
+      `${MQTT_LIGHT_TOP_LEVEL}/${id}/${MQTT_LIGHT_CONFIG_TOPIC}`
+    );
 
     const unsubscriptionResponses = await Promise.all([
       unsubscribedFromConnected,
       unsubscribedFromState,
-      unsubscribedFromEffectList
+      unsubscribedFromEffectList,
+      unsubscribedFromConfig
     ]);
 
     let returnError = null;
@@ -273,6 +294,7 @@ const pubsubFactory = deps => {
     connectMessages,
     stateMessages,
     effectMessages,
+    configMessages,
     subscribeToLight,
     unsubscribeFromLight,
     publishToLight,

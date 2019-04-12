@@ -32,6 +32,7 @@ module.exports = ({ mediator, db, pubsub }) => {
     pubsub.connectMessages.subscribe(self.handleConnectMessage);
     pubsub.stateMessages.subscribe(self.handleStateMessage);
     pubsub.effectMessages.subscribe(self.handleEffectListMessage);
+    pubsub.configMessages.subscribe(self.handleConfigMessage);
     pubsub.startDiscovery();
 
     // Subscribe to all lights on startup
@@ -220,6 +221,14 @@ module.exports = ({ mediator, db, pubsub }) => {
     return null;
   };
 
+  const handleConfigMessage = async message => {
+    if (!message.id) {
+      debug("No id in the effect list message. Ignoring");
+      return new Error("No is supplied from the message");
+    }
+    console.log(message);
+  };
+
   /**
    * Get the light with the specified id from the db.
    * Will return an error of the light was not added.
@@ -401,6 +410,7 @@ module.exports = ({ mediator, db, pubsub }) => {
     handleConnectMessage,
     handleStateMessage,
     handleEffectListMessage,
+    handleConfigMessage,
     getLight,
     getLights,
     setLight,

@@ -226,7 +226,33 @@ module.exports = ({ mediator, db, pubsub }) => {
       debug("No id in the effect list message. Ignoring");
       return new Error("No is supplied from the message");
     }
-    console.log(message);
+
+    let error, changedLight;
+
+    // Update the light's effect list in the db
+    error = await db.setLight(message.id, {
+      ipAddress: message.ipAddress,
+      macAddress: message.macAddress,
+      numLeds: message.numLeds,
+      udpPort: message.udpPort,
+      version: message.version,
+      hardware: message.hardware,
+      colorOrder: message.colorOrder,
+      stripType: message.stripType
+    });
+    if (error) {
+      debug(error);
+      return error;
+    }
+
+    ({ error, light: changedLight } = await db.getLight(message.name));
+    if (error) {
+      debug(error);
+      return error;
+    }
+
+    mediator.publish(LIGHT_CHANGED, { lightChanged: changedLight });
+    return null;
   };
 
   /**

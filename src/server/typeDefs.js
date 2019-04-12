@@ -38,6 +38,7 @@ const Light = gql`
     effect: String # current effect
     speed: Int # effect speed
     supportedEffects: [String] # List of supported effects
+    configuration: LightConfig
   }
 `;
 
@@ -81,6 +82,19 @@ const DiscoveredLight = gql`
   }
 `;
 
+const LightConfig = gql`
+  type LightConfig {
+    ipAddress: String
+    macAddress: String
+    numLeds: Int
+    udpPort: Int
+    version: String
+    hardware: String
+    colorOrder: String
+    stripType: String
+  }
+`;
+
 const typeDefs = [
   Query,
   Mutation,
@@ -89,7 +103,8 @@ const typeDefs = [
   LightInput,
   Color,
   ColorInput,
-  DiscoveredLight
+  DiscoveredLight,
+  LightConfig
 ];
 
 module.exports = typeDefs;

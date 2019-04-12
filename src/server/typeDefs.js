@@ -74,6 +74,10 @@ const DiscoveredLight = gql`
     macAddress: String
     numLeds: Int
     udpPort: Int
+    version: String
+    hardware: String
+    colorOrder: String
+    stripType: String
   }
 `;
 

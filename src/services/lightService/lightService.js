@@ -359,12 +359,31 @@ module.exports = ({ mediator, db, pubsub }) => {
   const getDiscoveredLights = async () => {
     const lights = [];
     const onLightDiscovered = async msg => {
+      // set v0 variables
       const { name, ipAddress, macAddress, numLeds, udpPort } = msg;
-      const { error, hasLight } = await db.hasLight(name);
+
+      // Set variables that change from v0 to v1
+      const id = msg.id || msg.name;
+      const version = msg.version || "0.1.0";
+      const hardware = msg.hardware || "8266";
+      const colorOrder = msg.colorOrder || "GRB";
+      const stripType = msg.stripType || "WS2812B";
+
+      const { error, hasLight } = await db.hasLight(id);
       if (error) return error;
 
       if (!lights.find(light => light.id === name) && !hasLight) {
-        lights.push({ id: name, ipAddress, macAddress, numLeds, udpPort });
+        lights.push({
+          id,
+          ipAddress,
+          macAddress,
+          numLeds,
+          udpPort,
+          version,
+          hardware,
+          colorOrder,
+          stripType
+        });
       }
     };
     mediator.subscribe("lightDiscovered", onLightDiscovered);

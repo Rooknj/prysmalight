@@ -12,7 +12,7 @@ const Query = gql`
 const Mutation = gql`
   type Mutation {
     setLight(lightId: String!, lightData: LightInput!): Light
-    addLight(lightId: String!): Light
+    addLight(lightId: String!, lightName: String): Light
     removeLight(lightId: String!): String
     updateHub: String
     rebootHub: String
@@ -30,7 +30,8 @@ const Subscription = gql`
 
 const Light = gql`
   type Light {
-    id: String # uique name of accessory
+    id: String # uique id of accessory
+    name: String # user given name of accessory
     connected: Int
     state: String # curent power status
     brightness: Int # current brightness
@@ -44,6 +45,7 @@ const Light = gql`
 
 const LightInput = gql`
   input LightInput {
+    name: String
     state: String
     brightness: Int
     color: ColorInput

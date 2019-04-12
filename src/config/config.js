@@ -15,7 +15,8 @@ const mqttSettings = {
   MQTT_LIGHT_COMMAND_TOPIC: "command",
   MQTT_EFFECT_LIST_TOPIC: "effects",
   MQTT_LIGHT_CONFIG_TOPIC: "config",
-  MQTT_LIGHT_DISCOVERY_TOPIC: "discovery"
+  MQTT_LIGHT_DISCOVERY_TOPIC: "discovery",
+  MQTT_LIGHT_DISCOVERY_RESPONSE_TOPIC: "hello"
 };
 
 const redisSettings = {

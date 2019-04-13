@@ -397,6 +397,8 @@ module.exports = ({ mediator, db, pubsub }) => {
         mediator.publish(LIGHT_CHANGED, { lightChanged: light });
         return null;
       }
+
+      // If we need to send data directly to the light, continue here
       // Every time we get a new message from the light, check to see if it has the same mutationId
       mediator.subscribe("mutationResponse", handleMutationResponse);
       // Publish to the light

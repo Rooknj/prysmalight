@@ -189,6 +189,9 @@ const dbFactory = client => {
 
     // Populate the redis object with the id of the light as a key
     let redisObject = [id];
+    // Add the name data
+    if (lightData.hasOwnProperty("name"))
+      redisObject.push("name", lightData.name);
     // Add the connected data
     if (lightData.hasOwnProperty("connected"))
       redisObject.push("connected", lightData.connected);

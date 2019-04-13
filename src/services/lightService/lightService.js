@@ -377,9 +377,28 @@ module.exports = ({ mediator, db, pubsub }) => {
         }
       };
 
+      // Set the light's name if provided
+      if (lightData.name) {
+        const error = await db.setLight(id, { name: lightData.name });
+        if (error) {
+          reject(error);
+          return error;
+        }
+      }
+
+      // If only the name was changed or nothing was sent, just return the current state of the light
+      if (Object.keys(payload).length <= 2) {
+        const { error, light } = await db.getLight(id);
+        if (error) {
+          reject(error);
+          return error;
+        }
+        resolve(light);
+        mediator.publish(LIGHT_CHANGED, { lightChanged: light });
+        return null;
+      }
       // Every time we get a new message from the light, check to see if it has the same mutationId
       mediator.subscribe("mutationResponse", handleMutationResponse);
-
       // Publish to the light
       const error = await pubsub.publishToLight(id, payload);
       if (error) reject(error);

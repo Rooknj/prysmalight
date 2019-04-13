@@ -286,7 +286,7 @@ module.exports = ({ mediator, db, pubsub }) => {
    * Will return an error if the light was already added.
    * @param {string} lightId
    */
-  const addLight = async (lightId, lightName) => {
+  const addLight = async (lightId, lightName = null) => {
     let error, hasLight;
 
     // If the light was already added, return an error

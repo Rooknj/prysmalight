@@ -751,6 +751,8 @@ describe("addLight", () => {
     expect(mockClient.HMSET).toHaveBeenCalledWith(
       [
         ID,
+        "name",
+        ID,
         "connected",
         0,
         "state",
@@ -770,9 +772,9 @@ describe("addLight", () => {
         "effectsKey",
         `${ID}:effects`,
         "ipAddress",
-        null,
+        "",
         "macAddress",
-        null,
+        "",
         "numLeds",
         0,
         "udpPort",
@@ -780,11 +782,11 @@ describe("addLight", () => {
         "version",
         "0.0.0",
         "hardware",
-        null,
+        "",
         "colorOrder",
-        null,
+        "",
         "stripType",
-        null
+        ""
       ],
       expect.anything()
     );
@@ -819,6 +821,8 @@ describe("addLight", () => {
     expect(mockClient.HMSET).toHaveBeenCalledWith(
       [
         ID,
+        "name",
+        ID,
         "connected",
         0,
         "state",
@@ -838,9 +842,9 @@ describe("addLight", () => {
         "effectsKey",
         `${ID}:effects`,
         "ipAddress",
-        null,
+        "",
         "macAddress",
-        null,
+        "",
         "numLeds",
         0,
         "udpPort",
@@ -848,11 +852,11 @@ describe("addLight", () => {
         "version",
         "0.0.0",
         "hardware",
-        null,
+        "",
         "colorOrder",
-        null,
+        "",
         "stripType",
-        null
+        ""
       ],
       expect.anything()
     );
@@ -970,6 +974,8 @@ describe("addLight", () => {
     expect(mockClient.HMSET).toHaveBeenCalledWith(
       [
         ID,
+        "name",
+        ID,
         "connected",
         0,
         "state",
@@ -989,9 +995,9 @@ describe("addLight", () => {
         "effectsKey",
         `${ID}:effects`,
         "ipAddress",
-        null,
+        "",
         "macAddress",
-        null,
+        "",
         "numLeds",
         0,
         "udpPort",
@@ -999,11 +1005,11 @@ describe("addLight", () => {
         "version",
         "0.0.0",
         "hardware",
-        null,
+        "",
         "colorOrder",
-        null,
+        "",
         "stripType",
-        null
+        ""
       ],
       expect.anything()
     );

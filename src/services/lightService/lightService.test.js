@@ -734,7 +734,7 @@ describe("addLight", () => {
     const response = await lightService.addLight(ID);
 
     expect(response).toBe(MOCKLIGHT);
-    expect(mockDeps.db.addLight).toBeCalledWith(ID);
+    expect(mockDeps.db.addLight).toBeCalledWith(ID, null);
     expect(mockDeps.pubsub.subscribeToLight).toBeCalledWith(ID);
   });
   test("returns an error if the light was already added", async () => {
@@ -783,7 +783,7 @@ describe("addLight", () => {
     const response = await lightService.addLight(ID);
 
     expect(response).toBeInstanceOf(Error);
-    expect(mockDeps.db.addLight).toBeCalledWith(ID);
+    expect(mockDeps.db.addLight).toBeCalledWith(ID, null);
   });
 });
 

@@ -286,7 +286,7 @@ module.exports = ({ mediator, db, pubsub }) => {
    * Will return an error if the light was already added.
    * @param {string} lightId
    */
-  const addLight = async lightId => {
+  const addLight = async (lightId, lightName = null) => {
     let error, hasLight;
 
     // If the light was already added, return an error
@@ -296,7 +296,7 @@ module.exports = ({ mediator, db, pubsub }) => {
       return new Error(`The light with id (${lightId}) was already added`);
 
     // Add new light to light database
-    error = await db.addLight(lightId);
+    error = await db.addLight(lightId, lightName);
     if (error) return error;
 
     // Subscribe to new messages from the new light
@@ -377,9 +377,30 @@ module.exports = ({ mediator, db, pubsub }) => {
         }
       };
 
+      // Set the light's name if provided
+      if (lightData.name) {
+        const error = await db.setLight(id, { name: lightData.name });
+        if (error) {
+          reject(error);
+          return error;
+        }
+      }
+
+      // If only the name was changed or nothing was sent, just return the current state of the light
+      if (Object.keys(payload).length <= 2) {
+        const { error, light } = await db.getLight(id);
+        if (error) {
+          reject(error);
+          return error;
+        }
+        resolve(light);
+        mediator.publish(LIGHT_CHANGED, { lightChanged: light });
+        return null;
+      }
+
+      // If we need to send data directly to the light, continue here
       // Every time we get a new message from the light, check to see if it has the same mutationId
       mediator.subscribe("mutationResponse", handleMutationResponse);
-
       // Publish to the light
       const error = await pubsub.publishToLight(id, payload);
       if (error) reject(error);

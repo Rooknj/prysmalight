@@ -13,10 +13,10 @@
     "husky": "^0.14.3",
     "jest": "^24.3.1",
     "lint-staged": "^7.0.0",
-    "minimist": "^1.2.0",
     "nodemon": "^1.18.3",
     "pkg": "^4.3.3",
     "prettier": "^1.11.1",
+    "prysma-docker": "0.1.0-alpha",
     "rimraf": "^2.6.2",
     "spawn-args": "^0.2.0"
   },
